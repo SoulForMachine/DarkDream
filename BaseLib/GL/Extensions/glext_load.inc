@@ -1,0 +1,40 @@
+
+void glextLoadAll()
+{
+	glextLoad_GL_VERSION_2_0();
+	glextLoad_GL_VERSION_2_1();
+	glextLoad_GL_ARB_multitexture();
+	glextLoad_GL_ARB_multisample();
+	glextLoad_GL_ARB_texture_compression();
+	glextLoad_GL_ARB_vertex_program();
+	glextLoad_GL_ARB_vertex_buffer_object();
+	glextLoad_GL_ARB_occlusion_query();
+	glextLoad_GL_ARB_draw_buffers();
+	glextLoad_GL_ARB_color_buffer_float();
+	glextLoad_GL_ARB_draw_instanced();
+	glextLoad_GL_ARB_geometry_shader4();
+	glextLoad_GL_ARB_instanced_arrays();
+	glextLoad_GL_ARB_map_buffer_range();
+	glextLoad_GL_ARB_texture_buffer_object();
+	glextLoad_GL_ARB_uniform_buffer_object();
+	glextLoad_GL_ARB_copy_buffer();
+	glextLoad_GL_EXT_blend_color();
+	glextLoad_GL_EXT_texture3D();
+	glextLoad_GL_EXT_blend_minmax();
+	glextLoad_GL_EXT_draw_range_elements();
+	glextLoad_GL_EXT_multi_draw_arrays();
+	glextLoad_GL_EXT_blend_func_separate();
+	glextLoad_GL_NV_primitive_restart();
+	glextLoad_GL_EXT_blend_equation_separate();
+	glextLoad_GL_EXT_framebuffer_object();
+	glextLoad_GL_EXT_framebuffer_blit();
+	glextLoad_GL_EXT_framebuffer_multisample();
+	glextLoad_GL_EXT_gpu_program_parameters();
+	glextLoad_GL_NV_gpu_program4();
+	glextLoad_GL_NV_geometry_program4();
+	glextLoad_GL_NV_vertex_program4();
+	glextLoad_GL_EXT_gpu_shader4();
+	glextLoad_GL_EXT_draw_buffers2();
+	glextLoad_GL_NV_conditional_render();
+	glextLoad_GL_EXT_transform_feedback();
+}
