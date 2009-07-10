@@ -15,8 +15,8 @@ namespace Engine
 	{
 		// initialize graphics resource managers
 		engineAPI.shaderManager = new(mainPool) ShaderManager;
+		engineAPI.asmProgManager = new(mainPool) ASMProgManager;
 		engineAPI.textureManager = new(mainPool) TextureManager;
-		engineAPI.materialManager = new(mainPool) MaterialManager;
 		engineAPI.modelManager = new(mainPool) ModelManager;
 		engineAPI.modelEntityManager = new(mainPool) ModelEntityManager;
 		engineAPI.animationManager = new(mainPool) AnimationManager;
@@ -45,10 +45,10 @@ namespace Engine
 
 		delete engineAPI.shaderManager;
 		engineAPI.shaderManager = 0;
+		delete engineAPI.asmProgManager;
+		engineAPI.asmProgManager = 0;
 		delete engineAPI.textureManager;
 		engineAPI.textureManager = 0;
-		delete engineAPI.materialManager;
-		engineAPI.materialManager = 0;
 		delete engineAPI.modelManager;
 		engineAPI.modelManager = 0;
 		delete engineAPI.modelEntityManager;

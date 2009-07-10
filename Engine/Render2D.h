@@ -7,8 +7,7 @@
 #include "BaseLib/FreeStackPool.h"
 #include "Engine/Common.h"
 #include "Engine/FileResource.h"
-#include "Engine/Renderer/Font.h"
-#include "Engine/Renderer/GPUProgram.h"
+#include "Engine/Font.h"
 
 #undef DrawText
 
@@ -76,9 +75,8 @@ namespace Engine
 
 		RenderSystem* _renderSystem;
 		GL::Renderer* _renderer;
-		const ShaderRes* _vsText;
-		const ShaderRes* _fsText;
-		GPUProgram _progText;
+		const ASMProgRes* _vpText;
+		const ASMProgRes* _fpText;
 		GL::Buffer* _textVertBuffer;
 		GL::VertexFormat* _textVertFmt;
 		GL::SamplerState* _textSamplerState;
@@ -86,9 +84,8 @@ namespace Engine
 		FreeStackPool<TextData> _textDataPool;
 		TextBatch* _textBatchList;
 
-		const ShaderRes* _vsRect2D;
-		const ShaderRes* _fsRect2D;
-		GPUProgram _progRect2D;
+		const ASMProgRes* _vpRect2D;
+		const ASMProgRes* _fpRect2D;
 		GL::Buffer* _rectVertBuffer;
 		GL::VertexFormat* _rectVertFmt;
 		Font _consoleFont;

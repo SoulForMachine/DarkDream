@@ -7,11 +7,9 @@
 #include "Engine/EngineInternal.h"
 #include "FileResource.h"
 #include "BaseLib/Memory.h"
-#include "Renderer/Model.h"
-#include "Renderer/Material.h"
-#include "Renderer/Animation.h"
-#include "Renderer/ParticleSystem.h"
-#include "Renderer/RenderSystem.h"
+#include "Model.h"
+#include "Animation.h"
+#include "ParticleSystem.h"
 #include "ModelEntity.h"
 
 
@@ -501,11 +499,11 @@ namespace Engine
 	bool ShaderRes::LoadDefault()
 	{
 		ObjectType shader_type = GetShaderType(_fileName);
-		const char* shader;
+		const char* source = "";
 
 		if(shader_type == OBJ_GLSL_VERTEX_SHADER)
 		{
-			shader = 
+			source = 
 				"#version 130\n"
 				"in vec4 vertPos;\n"
 				"void main(){\n"
@@ -517,7 +515,7 @@ namespace Engine
 		}
 		else if(shader_type == OBJ_GLSL_FRAGMENT_SHADER)
 		{
-			shader = 
+			source = 
 				"#version 130\n"
 				"out vec4 fragColor;\n"
 				"void main(){\n"
@@ -526,7 +524,7 @@ namespace Engine
 
 		// create the shader
 		const char* err_str;
-		_shader = _renderer->CreateShader(shader_type, 1, (const char**)&shader, err_str);
+		_shader = _renderer->CreateShader(shader_type, 1, (const char**)&source, err_str);
 		if(err_str)
 			delete[] err_str;
 		return (_shader != 0);
@@ -558,6 +556,131 @@ namespace Engine
 		}
 
 		return OBJ_GLSL_VERTEX_SHADER; // assume it's a vertex shader
+	}
+
+	// ============ ASMProgRes =================
+
+
+	ASMProgRes::ASMProgRes(const tchar* file_name, GL::Renderer* renderer):
+		FileResource(file_name)
+	{
+		_program = 0;
+		_renderer = renderer;
+	}
+
+	ASMProgRes::~ASMProgRes()
+	{
+		_renderer->DestroyASMProgram(_program);
+	}
+
+	bool ASMProgRes::Load()
+	{
+		if(!_renderer)
+			return false;
+		if(_program)
+			return false;
+		if(!_fileName || !*_fileName)
+			return false;
+
+		GL::ObjectType prog_type = GetProgramType(_fileName);
+
+		// load the shader from file
+		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
+		if(!file)
+		{
+			Console::PrintError("Failed to open program file: %ls", _fileName);
+			return false;
+		}
+
+		long size = file->GetSize();
+		char* source = new(tempPool) char[size + 1];
+		file->Read(source, size);
+		source[size] = '\0';
+
+		file->Close();
+
+		const char* err_str = 0;
+		_program = _renderer->CreateASMProgram(prog_type, source, err_str);
+		bool result = (_program != 0);
+		delete[] source;
+
+		if(err_str)
+		{
+			if(result)
+				Console::Print(ESC_YELLOW "ASM program compile warnings" ESC_DEFAULT ":\nIn file: %ls\n%s", _fileName, err_str);
+			else
+				Console::Print(ESC_RED "ASM program compile errors" ESC_DEFAULT ":\nIn file: %ls\n%s", _fileName, err_str);
+
+			delete[] err_str;
+		}
+
+		if(!result)
+		{
+			_renderer->DestroyASMProgram(_program);
+			_program = 0;
+			return false;
+		}
+
+		return true;
+	}
+
+	bool ASMProgRes::LoadDefault()
+	{
+		ObjectType prog_type = GetProgramType(_fileName);
+		const char* source = "";
+
+		if(prog_type == OBJ_ASM_VERTEX_PROGRAM)
+		{
+			source = 
+				"!!ARBvp1.0\n"
+				"ATTRIB vertPos = vertex.attrib[0];\n"
+				"MOV	result.position, vertPos;\n"
+				"END\n";
+		}
+		else if(prog_type == OBJ_ASM_GEOMETRY_PROGRAM)
+		{
+			return false;
+		}
+		else if(prog_type == OBJ_ASM_FRAGMENT_PROGRAM)
+		{
+			source = 
+				"!!ARBfp1.0\n"
+				"PARAM	color = { 1.0, 0.0, 1.0, 1.0 };\n"
+				"MOV	result.color, color;\n"
+				"END\n";
+		}
+
+		// create the program
+		const char* err_str;
+		_program = _renderer->CreateASMProgram(prog_type, source, err_str);
+		if(err_str)
+			delete[] err_str;
+		return (_program != 0);
+	}
+
+	void ASMProgRes::Unload()
+	{
+		_renderer->DestroyASMProgram(_program);
+		_program = 0;
+	}
+
+	GL::ObjectType ASMProgRes::GetProgramType(const tchar* file_name)
+	{
+		if(file_name && *file_name)
+		{
+			const tchar* dot = tstrrchr(file_name, _t('.'));
+			if(dot)
+			{
+				if(!tstrcmp(dot + 1, _t("vp")))
+					return OBJ_ASM_VERTEX_PROGRAM;
+				else if(!tstrcmp(dot + 1, _t("gp")))
+					return OBJ_ASM_GEOMETRY_PROGRAM;
+				else if(!tstrcmp(dot + 1, _t("fp")))
+					return OBJ_ASM_FRAGMENT_PROGRAM;
+			}
+		}
+
+		return OBJ_ASM_VERTEX_PROGRAM; // assume it's a vertex program
 	}
 
 
@@ -611,64 +734,6 @@ namespace Engine
 			_model->Unload();
 			delete _model;
 			_model = 0;
-		}
-	}
-
-
-	// ============ MaterialRes =================
-
-	MaterialRes::MaterialRes(const tchar* file_name):
-		FileResource(file_name)
-	{
-		_material = 0;
-	}
-
-	MaterialRes::~MaterialRes()
-	{
-		if(_material)
-		{
-			_material->Unload();
-			delete _material;
-		}
-	}
-
-	bool MaterialRes::Load()
-	{
-		if(!_material && _fileName && *_fileName)
-		{
-			Console::PrintLn("Loading material: %ls", _fileName);
-			_material = new(mapPool) Material;
-			bool result = _material->Load(_fileName);
-			if(!result)
-			{
-				delete _material;
-				_material = 0;
-				Console::PrintError("Failed to load material: %ls", _fileName);
-			}
-			return result;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	bool MaterialRes::LoadDefault()
-	{
-		if(_material)
-			return false;
-
-		_material = new(mainPool) Material;
-		return (_material != 0);
-	}
-
-	void MaterialRes::Unload()
-	{
-		if(_material)
-		{
-			_material->Unload();
-			delete _material;
-			_material = 0;
 		}
 	}
 

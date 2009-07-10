@@ -83,7 +83,7 @@ namespace GL
 		}
 	}
 
-	void ASMProgram::EnvParameter(uint index, const float* param)
+	void ASMProgram::EnvParameter(uint index, const float* param) const
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -91,7 +91,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void ASMProgram::EnvParameter(uint index, const int* param)
+	void ASMProgram::EnvParameter(uint index, const int* param) const
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -99,7 +99,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void ASMProgram::EnvParameter(uint index, const uint* param)
+	void ASMProgram::EnvParameter(uint index, const uint* param) const
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -107,7 +107,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void ASMProgram::EnvParameterArray(uint index, uint count, const float* params)
+	void ASMProgram::EnvParameterArray(uint index, uint count, const float* params) const
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -115,7 +115,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void ASMProgram::EnvParameterArray(uint index, uint count, const int* params)
+	void ASMProgram::EnvParameterArray(uint index, uint count, const int* params) const
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -123,7 +123,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void ASMProgram::EnvParameterArray(uint index, uint count, const uint* params)
+	void ASMProgram::EnvParameterArray(uint index, uint count, const uint* params) const
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -132,7 +132,7 @@ namespace GL
 	}
 
 
-	void ASMProgram::LocalParameter(uint index, const float* param)
+	void ASMProgram::LocalParameter(uint index, const float* param) const
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -140,7 +140,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void ASMProgram::LocalParameter(uint index, const int* param)
+	void ASMProgram::LocalParameter(uint index, const int* param) const
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -148,7 +148,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void ASMProgram::LocalParameter(uint index, const uint* param)
+	void ASMProgram::LocalParameter(uint index, const uint* param) const
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -156,7 +156,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void ASMProgram::LocalParameterArray(uint index, uint count, const float* params)
+	void ASMProgram::LocalParameterArray(uint index, uint count, const float* params) const
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -164,7 +164,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void ASMProgram::LocalParameterArray(uint index, uint count, const int* params)
+	void ASMProgram::LocalParameterArray(uint index, uint count, const int* params) const
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -172,7 +172,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void ASMProgram::LocalParameterArray(uint index, uint count, const uint* params)
+	void ASMProgram::LocalParameterArray(uint index, uint count, const uint* params) const
 	{
 		assert(_id);
 		STATE_MACHINE_HACK

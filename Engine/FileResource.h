@@ -16,6 +16,7 @@ namespace GL
 	class Texture3D;
 	class TextureCube;
 	class GLSLShader;
+	class ASMProgram;
 	enum ObjectType;
 	enum PixelFormat;
 	enum ImageFormat;
@@ -28,7 +29,6 @@ namespace Engine
 
 	class ModelEntity;
 	class Model;
-	class Material;
 	class Animation;
 	class ParticleSystem;
 
@@ -114,6 +114,28 @@ namespace Engine
 	};
 
 
+	class ENGINE_API ASMProgRes: public FileResource
+	{
+	public:
+		ASMProgRes(const tchar* file_name, GL::Renderer* renderer);
+		~ASMProgRes();
+
+		bool Load();
+		bool LoadDefault();
+		void Unload();
+		bool IsLoaded() const
+			{ return (_program != 0); }
+		const GL::ASMProgram* GetASMProgram() const
+			{ return _program; }
+
+	private:
+		GL::ObjectType GetProgramType(const tchar* file_name);
+
+		GL::Renderer* _renderer;
+		GL::ASMProgram* _program;
+	};
+
+
 	class ENGINE_API ModelRes: public FileResource
 	{
 	public:
@@ -130,25 +152,6 @@ namespace Engine
 
 	private:
 		Model* _model;
-	};
-
-
-	class ENGINE_API MaterialRes: public FileResource
-	{
-	public:
-		MaterialRes(const tchar* file_name);
-		~MaterialRes();
-
-		bool Load();
-		bool LoadDefault();
-		void Unload();
-		bool IsLoaded() const
-			{ return (_material != 0); }
-		const Material* GetMaterial() const
-			{ return _material; }
-
-	private:
-		Material* _material;
 	};
 
 

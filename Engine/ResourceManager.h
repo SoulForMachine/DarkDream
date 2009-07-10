@@ -12,7 +12,6 @@ namespace Engine
 
 	class ShaderManager;
 	class TextureManager;
-	class MaterialManager;
 	class ModelManager;
 	class AnimationManager;
 	class ModelEntityManager;
@@ -82,18 +81,17 @@ namespace Engine
 
 	// ================================================================================================
 
-	class ENGINE_API MaterialManager: public ResourceManager
+	class ENGINE_API ASMProgManager: public ResourceManager
 	{
 	public:
-		const MaterialRes* CreateMaterial(const tchar* file_name, bool immediate = false)
-			{ return (const MaterialRes*)CreateRes(file_name, immediate); }
-		bool ReleaseMaterial(const MaterialRes* material)
-			{ return ReleaseRes(material); }
-		const MaterialRes* FindMaterial(const tchar* file_name)
-			{ return (const MaterialRes*)FindRes(file_name); }
+		ASMProgManager() {}
+
+		const ASMProgRes* CreateASMProgram(const tchar* file_name, bool immediate = false);
+		bool ReleaseASMProgram(const ASMProgRes* program);
+		const ASMProgRes* FindASMProgram(const tchar* file_name);
 
 	protected:
-		virtual MaterialRes* CreateResObj(const tchar* file_name);
+		virtual ASMProgRes* CreateResObj(const tchar* file_name);
 	};
 
 	// ================================================================================================
@@ -105,8 +103,8 @@ namespace Engine
 			{ return (const ModelRes*)CreateRes(file_name, immediate); }
 		bool ReleaseModel(const ModelRes* model)
 			{ return ReleaseRes(model); }
-		const MaterialRes* FindModel(const tchar* file_name)
-			{ return (const MaterialRes*)FindRes(file_name); }
+		const ModelRes* FindModel(const tchar* file_name)
+			{ return (const ModelRes*)FindRes(file_name); }
 
 	protected:
 		virtual ModelRes* CreateResObj(const tchar* file_name);

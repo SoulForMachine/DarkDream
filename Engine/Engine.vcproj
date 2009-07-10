@@ -171,6 +171,10 @@
 	<References>
 	</References>
 	<Files>
+		<Filter
+			Name="Shaders"
+			>
+		</Filter>
 		<File
 			RelativePath=".\Animation.cpp"
 			>
@@ -204,6 +208,22 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Entity.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Entity.h"
+			>
+		</File>
+		<File
+			RelativePath=".\EntityRenderer.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\EntityRenderer.h"
+			>
+		</File>
+		<File
 			RelativePath=".\FileResource.cpp"
 			>
 		</File>
@@ -228,27 +248,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\GPUProgram.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\GPUProgram.h"
-			>
-		</File>
-		<File
 			RelativePath=".\InputSystem.cpp"
 			>
 		</File>
 		<File
 			RelativePath=".\InputSystem.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Light.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Light.h"
 			>
 		</File>
 		<File
@@ -260,11 +264,31 @@
 			>
 		</File>
 		<File
+			RelativePath=".\ModelEntity.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ModelEntity.h"
+			>
+		</File>
+		<File
+			RelativePath=".\ParticleSystem.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ParticleSystem.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Render2D.cpp"
 			>
 		</File>
 		<File
 			RelativePath=".\Render2D.h"
+			>
+		</File>
+		<File
+			RelativePath=".\RenderableEntity.h"
 			>
 		</File>
 		<File
@@ -281,6 +305,14 @@
 		</File>
 		<File
 			RelativePath=".\ResourceManager.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Terrain.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Terrain.h"
 			>
 		</File>
 		<File

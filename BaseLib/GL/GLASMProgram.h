@@ -11,19 +11,19 @@ namespace GL
 	class BASELIB_API ASMProgram: public Object
 	{
 	public:
-		void EnvParameter(uint index, const float* param);
-		void EnvParameter(uint index, const int* param);
-		void EnvParameter(uint index, const uint* param);
-		void EnvParameterArray(uint index, uint count, const float* params);
-		void EnvParameterArray(uint index, uint count, const int* params);
-		void EnvParameterArray(uint index, uint count, const uint* params);
+		void EnvParameter(uint index, const float* param) const;
+		void EnvParameter(uint index, const int* param) const;
+		void EnvParameter(uint index, const uint* param) const;
+		void EnvParameterArray(uint index, uint count, const float* params) const;
+		void EnvParameterArray(uint index, uint count, const int* params) const;
+		void EnvParameterArray(uint index, uint count, const uint* params) const;
 
-		void LocalParameter(uint index, const float* param);
-		void LocalParameter(uint index, const int* param);
-		void LocalParameter(uint index, const uint* param);
-		void LocalParameterArray(uint index, uint count, const float* params);
-		void LocalParameterArray(uint index, uint count, const int* params);
-		void LocalParameterArray(uint index, uint count, const uint* params);
+		void LocalParameter(uint index, const float* param) const;
+		void LocalParameter(uint index, const int* param) const;
+		void LocalParameter(uint index, const uint* param) const;
+		void LocalParameterArray(uint index, uint count, const float* params) const;
+		void LocalParameterArray(uint index, uint count, const int* params) const;
+		void LocalParameterArray(uint index, uint count, const uint* params) const;
 	private:
 		friend class Renderer;
 

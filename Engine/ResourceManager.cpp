@@ -2,7 +2,7 @@
 #include "BaseLib/Console.h"
 #include "Engine/Common.h"
 #include "EngineInternal.h"
-#include "Engine/Renderer/RenderSystem.h"
+#include "Engine/RenderSystem.h"
 #include "ResourceManager.h"
 
 using namespace Memory;
@@ -264,9 +264,96 @@ namespace Engine
 		return 0;
 	}
 
-	MaterialRes* MaterialManager::CreateResObj(const tchar* file_name)
+	const ASMProgRes* ASMProgManager::CreateASMProgram(const tchar* file_name, bool immediate)
 	{
-		return new(mapPool) MaterialRes(file_name);
+		if(!file_name)
+			return 0;
+
+		// see if this resource is already created
+		FileResource* res = (FileResource*)FindRes(file_name);
+		if(res)
+		{
+			res->IncRefCount();
+			if(immediate && !res->IsLoaded())
+			{
+				if(!res->Load())
+					res->LoadDefault();
+			}
+			return (const ASMProgRes*)res;
+		}
+
+		// create new object
+		res = new(mapPool) ASMProgRes(file_name, engineAPI.renderSystem->GetRenderer());
+
+		if(res)
+		{
+			if(*file_name != '\0')
+			{
+				if(immediate)
+				{
+					if(!res->Load())
+						res->LoadDefault();
+				}
+				_resources[file_name] = res;
+			}
+			else
+			{
+				res->LoadDefault();
+			}
+		}
+		else
+		{
+			Console::PrintError("Failed to create asm program object, file: %ls", file_name);
+		}
+
+		return (const ASMProgRes*)res;
+	}
+
+	bool ASMProgManager::ReleaseASMProgram(const ASMProgRes* program)
+	{
+		if(!program)
+			return false;
+
+		const tchar* file_name = program->GetFileName();
+
+		// if file name is empty string, just release the resource
+		if(!file_name || *file_name == '\0')
+		{
+			delete program;
+			return true;
+		}
+
+		ResHashMap::Iterator it = _resources.Find(file_name);
+
+		if(it != _resources.End())
+		{
+			assert(*it == program);
+			(*it)->DecRefCount();
+			if(!(*it)->IsReferenced())
+			{
+				(*it)->Unload();
+				delete *it;
+				_resources.Remove(it);
+			}
+			return true;
+		}
+		else
+		{
+			Console::PrintWarning("Releasing asm program: %ls not found in manager.", file_name);
+			return false;
+		}
+	}
+
+	const ASMProgRes* ASMProgManager::FindASMProgram(const tchar* file_name)
+	{
+		const ASMProgRes* program = (const ASMProgRes*)ResourceManager::FindRes(file_name);
+		return program;
+	}
+
+	ASMProgRes* ASMProgManager::CreateResObj(const tchar* file_name)
+	{
+		assert(false);
+		return 0;
 	}
 
 	ModelRes* ModelManager::CreateResObj(const tchar* file_name)

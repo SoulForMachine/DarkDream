@@ -1,6 +1,6 @@
 
-#ifndef _RENDER_SYSTEM_H_
-#define _RENDER_SYSTEM_H_
+#ifndef _ENGINE_RENDER_SYSTEM_H_
+#define _ENGINE_RENDER_SYSTEM_H_
 
 #include "BaseLib/GL/GLRenderer.h"
 #include "Engine/Common.h"
@@ -26,7 +26,6 @@ namespace Engine
 
 		void RenderFrame(int frame_time);
 		void RenderEntities(int frame_time);
-		void InvalidateCache();
 		void ReloadShaders();
 
 		GL::Renderer* GetRenderer()
@@ -37,8 +36,6 @@ namespace Engine
 			{ return _frameTime; }
 		float GetFrameTimeSec() const
 			{ return _frameTime * 0.001f; }
-		GL::Texture2D* GetShadowMap()
-			{ return _shadowDepthTex; }
 
 	private:
 		static const int MAX_NUM_ENTITIES = 4 * 1024;
@@ -57,11 +54,8 @@ namespace Engine
 
 		int _smapWidth;
 		int _smapHeight;
-		GL::Framebuffer* _shadowFbuf;
-		GL::Texture2D* _shadowClrTex;
-		GL::Texture2D* _shadowDepthTex;
 	};
 
 }
 
-#endif // _RENDER_SYSTEM_H_
+#endif // _ENGINE_RENDER_SYSTEM_H_

@@ -25,6 +25,7 @@ namespace Engine
 	class RenderSystem;
 	class World;
 	class ShaderManager;
+	class ASMProgManager;
 	class TextureManager;
 	class MaterialManager;
 	class ModelManager;
@@ -43,6 +44,7 @@ namespace Engine
 		World* world;
 
 		ShaderManager* shaderManager;
+		ASMProgManager* asmProgManager;
 		TextureManager* textureManager;
 		MaterialManager* materialManager;
 		ModelManager* modelManager;

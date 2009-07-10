@@ -58,9 +58,9 @@ namespace Engine
 		// create vertex formats
 		VertexAttribDesc text_vert_desc[] =
 		{
-			{ 0, _progText.GetAttribLocation(ATTRIB_POSITION), 2, TYPE_FLOAT, false, false, 0 },
-			{ 0, _progText.GetAttribLocation(ATTRIB_TEXCOORD), 2, TYPE_FLOAT, false, false, 8 },
-			{ 0, _progText.GetAttribLocation(ATTRIB_COLOR), 4, TYPE_FLOAT, false, false, 16 },
+			{ 0, 0, 2, TYPE_FLOAT, false, false, 0 },
+			{ 0, 1, 2, TYPE_FLOAT, false, false, 8 },
+			{ 0, 2, 4, TYPE_FLOAT, false, false, 16 },
 		};
 		_textVertFmt = _renderer->CreateVertexFormat(text_vert_desc, COUNTOF(text_vert_desc));
 		if(!_textVertFmt)
@@ -71,7 +71,7 @@ namespace Engine
 
 		VertexAttribDesc rect_vert_desc[] =
 		{
-			{ 0, _progRect2D.GetAttribLocation(ATTRIB_POSITION), 2, TYPE_FLOAT, false, false, 0 },
+			{ 0, 0, 2, TYPE_FLOAT, false, false, 0 },
 		};
 		_rectVertFmt = _renderer->CreateVertexFormat(rect_vert_desc, COUNTOF(rect_vert_desc));
 		if(!_rectVertFmt)
@@ -99,32 +99,18 @@ namespace Engine
 
 	void Render2D::CreateShaders()
 	{
-		_vsText = engineAPI.shaderManager->CreateShader(_t("Programs/Text.vs"), "", true);
-		_fsText = engineAPI.shaderManager->CreateShader(_t("Programs/Text.fs"), "", true);
-		_vsRect2D = engineAPI.shaderManager->CreateShader(_t("Programs/Simple2D.vs"), "", true);
-		_fsRect2D = engineAPI.shaderManager->CreateShader(_t("Programs/ConstColor.fs"), "", true);
-
-		const GLSLShader* text_shaders[] = { _vsText->GetShader(), _fsText->GetShader() };
-		_progText.Create("Text", _renderer, COUNTOF(text_shaders), text_shaders);
-		_progText.BindFragDataLocation(0, "fragColor");
-		_progText.Link();
-		_progText.Validate();
-
-		const GLSLShader* rect_shaders[] = { _vsRect2D->GetShader(), _fsRect2D->GetShader() };
-		_progRect2D.Create("Rect2D", _renderer, COUNTOF(rect_shaders), rect_shaders);
-		_progRect2D.BindFragDataLocation(0, "fragColor");
-		_progRect2D.Link();
-		_progRect2D.Validate();
+		_vpText = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Text.vp"), true);
+		_fpText = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Text.fp"), true);
+		_vpRect2D = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Simple2D.vp"), true);
+		_fpRect2D = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
 	}
 
 	void Render2D::DestroyShaders()
 	{
-		_progText.Destroy();
-		_progRect2D.Destroy();
-		engineAPI.shaderManager->ReleaseShader(_vsText);
-		engineAPI.shaderManager->ReleaseShader(_fsText);
-		engineAPI.shaderManager->ReleaseShader(_vsRect2D);
-		engineAPI.shaderManager->ReleaseShader(_fsRect2D);
+		engineAPI.asmProgManager->ReleaseASMProgram(_vpText);
+		engineAPI.asmProgManager->ReleaseASMProgram(_fpText);
+		engineAPI.asmProgManager->ReleaseASMProgram(_vpRect2D);
+		engineAPI.asmProgManager->ReleaseASMProgram(_fpRect2D);
 	}
 
 	void Render2D::Deinit()
@@ -146,12 +132,12 @@ namespace Engine
 		TextBatch* start_batch = _textBatchList;
 		TextBatch* end_batch;
 
-		float x, y, width, height;
-		_renderer->GetViewport(x, y, width, height);
-		_progText.UniformF(UNIFORM_VIEWPORT, x, y, width, height);
-		_progText.UniformI(UNIFORM_SAMPLER_DIFFUSE, 0);
+		float viewport[4];
+		_renderer->GetViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+		_vpText->GetASMProgram()->LocalParameter(0, viewport);
 
-		_renderer->ActiveGLSLProgram(_progText);
+		_renderer->ActiveVertexASMProgram(_vpText->GetASMProgram());
+		_renderer->ActiveFragmentASMProgram(_fpText->GetASMProgram());
 
 		_renderer->ActiveVertexFormat(_textVertFmt);
 		_renderer->VertexSource(0, _textVertBuffer, sizeof(TextVertex), 0);
@@ -375,11 +361,12 @@ namespace Engine
 
 	void Render2D::DrawColoredRect(int x1, int y1, int x2, int y2, const math3d::vec4f& color)
 	{
-		_renderer->ActiveGLSLProgram(_progRect2D.GetProgram());
-		float x, y, width, height;
-		_renderer->GetViewport(x, y, width, height);
-		_progRect2D.UniformF(UNIFORM_VIEWPORT, x, y, width, height);
-		_progRect2D.UniformF(UNIFORM_DIFFUSE_COLOR, color.r, color.g, color.b, color.a);
+		_renderer->ActiveVertexASMProgram(_vpRect2D->GetASMProgram());
+		_renderer->ActiveFragmentASMProgram(_fpRect2D->GetASMProgram());
+		float viewport[4];
+		_renderer->GetViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+		_vpRect2D->GetASMProgram()->LocalParameter(0, viewport);
+		_fpRect2D->GetASMProgram()->LocalParameter(0, color);
 
 		RectVertex* buffer = (RectVertex*)_rectVertBuffer->MapBuffer(ACCESS_WRITE_ONLY, false);
 
@@ -505,11 +492,11 @@ namespace Engine
 	{
 		_renderSystem = 0;
 		_renderer = 0;
-		_vsText = 0;
-		_fsText = 0;
+		_vpText = 0;
+		_fpText = 0;
 		_textBatchList = 0;
-		_vsRect2D = 0;
-		_fsRect2D = 0;
+		_vpRect2D = 0;
+		_fpRect2D = 0;
 		_textVertBuffer = 0;
 		_rectVertBuffer = 0;
 		_textVertFmt = 0;
