@@ -1,0 +1,17 @@
+!!ARBvp1.0
+
+ATTRIB	vertPos = vertex.attrib[0];
+PARAM	viewport = program.local[0];
+PARAM	scale = { 2.0, 2.0, 0.0, 0.0 };
+PARAM	add = { -1.0, -1.0, 0.0, 1.0 };
+
+TEMP	r0, r1;
+
+
+RCP		r0.x, viewport.z;
+RCP		r0.y, viewport.w;
+SUB		r1, vertPos, viewport;
+MUL		r1, r1, r0;
+MAD		result.position, r1, scale, add;
+
+END
