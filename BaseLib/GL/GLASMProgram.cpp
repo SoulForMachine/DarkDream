@@ -44,7 +44,7 @@ namespace GL
 		_target = type;
 
 		glProgramStringARB(type, GL_PROGRAM_FORMAT_ASCII_ARB, strlen(source), source);
-		bool result = (glGetError() != GL_NO_ERROR);
+		bool result = (glGetError() == GL_NO_ERROR);
 		GLint error_pos;
 		glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &error_pos);
 		result = result && (error_pos == -1);
@@ -131,6 +131,26 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
+	void ASMProgram::EnvMatrix4x4(uint index, const float* matrix) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+		glProgramEnvParameter4fARB(_target, index, matrix[0], matrix[4], matrix[8], matrix[12]);
+		glProgramEnvParameter4fARB(_target, index + 1, matrix[1], matrix[5], matrix[9], matrix[13]);
+		glProgramEnvParameter4fARB(_target, index + 2, matrix[2], matrix[6], matrix[10], matrix[14]);
+		glProgramEnvParameter4fARB(_target, index + 3, matrix[3], matrix[7], matrix[11], matrix[15]);
+		OPENGL_ERROR_CHECK
+	}
+
+	void ASMProgram::EnvMatrix3x4(uint index, const float* matrix) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+		glProgramEnvParameter4fARB(_target, index, matrix[0], matrix[4], matrix[8], matrix[12]);
+		glProgramEnvParameter4fARB(_target, index + 1, matrix[1], matrix[5], matrix[9], matrix[13]);
+		glProgramEnvParameter4fARB(_target, index + 2, matrix[2], matrix[6], matrix[10], matrix[14]);
+		OPENGL_ERROR_CHECK
+	}
 
 	void ASMProgram::LocalParameter(uint index, const float* param) const
 	{
@@ -177,6 +197,27 @@ namespace GL
 		assert(_id);
 		STATE_MACHINE_HACK
 		glProgramLocalParametersI4uivNV(_target, index, count, params);
+		OPENGL_ERROR_CHECK
+	}
+
+	void ASMProgram::LocalMatrix4x4(uint index, const float* matrix) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+		glProgramLocalParameter4fARB(_target, index, matrix[0], matrix[4], matrix[8], matrix[12]);
+		glProgramLocalParameter4fARB(_target, index + 1, matrix[1], matrix[5], matrix[9], matrix[13]);
+		glProgramLocalParameter4fARB(_target, index + 2, matrix[2], matrix[6], matrix[10], matrix[14]);
+		glProgramLocalParameter4fARB(_target, index + 3, matrix[3], matrix[7], matrix[11], matrix[15]);
+		OPENGL_ERROR_CHECK
+	}
+
+	void ASMProgram::LocalMatrix3x4(uint index, const float* matrix) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+		glProgramLocalParameter4fARB(_target, index, matrix[0], matrix[4], matrix[8], matrix[12]);
+		glProgramLocalParameter4fARB(_target, index + 1, matrix[1], matrix[5], matrix[9], matrix[13]);
+		glProgramLocalParameter4fARB(_target, index + 2, matrix[2], matrix[6], matrix[10], matrix[14]);
 		OPENGL_ERROR_CHECK
 	}
 

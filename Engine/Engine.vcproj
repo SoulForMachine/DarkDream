@@ -179,6 +179,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Base\Programs\Simple.vp"
+				>
+			</File>
+			<File
 				RelativePath="..\Base\Programs\Simple2D.vp"
 				>
 			</File>

@@ -4,10 +4,26 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BaseLib", "BaseLib\BaseLib.vcproj", "{D7E6C94E-9411-4ADA-9BD5-18CA86910803}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcproj", "{F58C7E90-D832-4A9E-9FA7-020FBB802F33}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7E6C94E-9411-4ADA-9BD5-18CA86910803} = {D7E6C94E-9411-4ADA-9BD5-18CA86910803}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EditorCommon", "EditorCommon\EditorCommon.vcproj", "{269CECE1-C8C3-4655-8C21-64DEAC906742}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7E6C94E-9411-4ADA-9BD5-18CA86910803} = {D7E6C94E-9411-4ADA-9BD5-18CA86910803}
+		{F58C7E90-D832-4A9E-9FA7-020FBB802F33} = {F58C7E90-D832-4A9E-9FA7-020FBB802F33}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EntityEditor", "EntityEditor\EntityEditor.vcproj", "{CDD79CDB-B471-4211-BFBA-D72E0980D47C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7E6C94E-9411-4ADA-9BD5-18CA86910803} = {D7E6C94E-9411-4ADA-9BD5-18CA86910803}
+		{F58C7E90-D832-4A9E-9FA7-020FBB802F33} = {F58C7E90-D832-4A9E-9FA7-020FBB802F33}
+		{269CECE1-C8C3-4655-8C21-64DEAC906742} = {269CECE1-C8C3-4655-8C21-64DEAC906742}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SourceCodeControl) = preSolution
-		SccNumberOfProjects = 3
+		SccNumberOfProjects = 5
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = BaseLib\\BaseLib.vcproj
 		SccLocalPath1 = .
@@ -15,6 +31,12 @@ Global
 		SccProjectUniqueName2 = Engine\\Engine.vcproj
 		SccLocalPath2 = .
 		SccProjectFilePathRelativizedFromConnection2 = Engine\\
+		SccProjectUniqueName3 = EntityEditor\\EntityEditor.vcproj
+		SccLocalPath3 = .
+		SccProjectFilePathRelativizedFromConnection3 = EntityEditor\\
+		SccProjectUniqueName4 = EditorCommon\\EditorCommon.vcproj
+		SccLocalPath4 = .
+		SccProjectFilePathRelativizedFromConnection4 = EditorCommon\\
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -29,6 +51,14 @@ Global
 		{F58C7E90-D832-4A9E-9FA7-020FBB802F33}.Debug|Win32.Build.0 = Debug|Win32
 		{F58C7E90-D832-4A9E-9FA7-020FBB802F33}.Release|Win32.ActiveCfg = Release|Win32
 		{F58C7E90-D832-4A9E-9FA7-020FBB802F33}.Release|Win32.Build.0 = Release|Win32
+		{269CECE1-C8C3-4655-8C21-64DEAC906742}.Debug|Win32.ActiveCfg = Debug|Win32
+		{269CECE1-C8C3-4655-8C21-64DEAC906742}.Debug|Win32.Build.0 = Debug|Win32
+		{269CECE1-C8C3-4655-8C21-64DEAC906742}.Release|Win32.ActiveCfg = Release|Win32
+		{269CECE1-C8C3-4655-8C21-64DEAC906742}.Release|Win32.Build.0 = Release|Win32
+		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Debug|Win32.Build.0 = Debug|Win32
+		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Release|Win32.ActiveCfg = Release|Win32
+		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

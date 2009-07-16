@@ -17,6 +17,8 @@ namespace GL
 		void EnvParameterArray(uint index, uint count, const float* params) const;
 		void EnvParameterArray(uint index, uint count, const int* params) const;
 		void EnvParameterArray(uint index, uint count, const uint* params) const;
+		void EnvMatrix4x4(uint index, const float* matrix) const;
+		void EnvMatrix3x4(uint index, const float* matrix) const;
 
 		void LocalParameter(uint index, const float* param) const;
 		void LocalParameter(uint index, const int* param) const;
@@ -24,6 +26,8 @@ namespace GL
 		void LocalParameterArray(uint index, uint count, const float* params) const;
 		void LocalParameterArray(uint index, uint count, const int* params) const;
 		void LocalParameterArray(uint index, uint count, const uint* params) const;
+		void LocalMatrix4x4(uint index, const float* matrix) const;
+		void LocalMatrix3x4(uint index, const float* matrix) const;
 	private:
 		friend class Renderer;
 
