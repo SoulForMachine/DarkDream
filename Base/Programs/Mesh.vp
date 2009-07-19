@@ -1,0 +1,29 @@
+!!ARBvp1.0
+
+ATTRIB		vertPos = vertex.attrib[0];
+ATTRIB		vertNormal = vertex.attrib[1];
+
+PARAM		worldMat[] = { program.local[0..3] };
+PARAM		viewProjMat[] = { program.local[4..7] };
+
+OUTPUT		varPos = result.position;
+OUTPUT		varNormal = result.texcoord[0];
+
+TEMP		r0;
+
+
+DP4			r0.x, worldMat[0], vertPos;
+DP4			r0.y, worldMat[1], vertPos;
+DP4			r0.z, worldMat[2], vertPos;
+DP4			r0.w, worldMat[3], vertPos;
+
+DP4			varPos.x, viewProjMat[0], r0;
+DP4			varPos.y, viewProjMat[1], r0;
+DP4			varPos.z, viewProjMat[2], r0;
+DP4			varPos.w, viewProjMat[3], r0;
+
+DP3			varNormal.x, worldMat[0], vertNormal;
+DP3			varNormal.y, worldMat[1], vertNormal;
+DP3			varNormal.z, worldMat[2], vertNormal;
+
+END

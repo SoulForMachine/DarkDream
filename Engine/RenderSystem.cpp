@@ -252,7 +252,8 @@ namespace Engine
 		_renderer->ActiveDrawFramebuffer(0);
 		_renderer->EnableColorWrite(true, true, true, true);
 		_renderer->CullFace(GL::FACE_BACK);
-		_entityRenderer->Render(engineAPI.world->GetCamera());
+		_entityRenderer->Render(engineAPI.world->GetCamera(), _meshBuf, mesh_count);
+		_entityRenderer->Render(engineAPI.world->GetCamera(), _transpMeshBuf, transp_mesh_count);
 	}
 
 	void RenderSystem::ReloadShaders()

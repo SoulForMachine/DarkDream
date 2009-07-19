@@ -1,0 +1,60 @@
+!!ARBvp1.0
+
+ATTRIB		vertPos = vertex.attrib[0];
+ATTRIB		vertNormal = vertex.attrib[1];
+ATTRIB		vertSkin = vertex.attrib[2]; # x, y - weights; z, w - indices
+
+PARAM		worldMat[] = { program.local[0..3] };
+PARAM		viewProjMat[] = { program.local[4..7] };
+PARAM		skinMatPalette[] = { program.local[8..94] }; # 29 matrices max
+
+ADDRESS		index;
+
+OUTPUT		varPos = result.position;
+OUTPUT		varNormal = result.texcoord[0];
+
+TEMP		r0, r1;
+
+
+MUL			r0.xy, vertSkin.zw, 3.0;
+ARL			index.x, r0.x;
+ARL			index.y, r0.y;
+
+DP4			r0.x, skinMatPalette[index.x], vertPos;
+DP4			r0.y, skinMatPalette[index.x + 1], vertPos;
+DP4			r0.z, skinMatPalette[index.x + 2], vertPos;
+MUL			r0, r0, vertSkin.x;
+
+DP4			r1.x, skinMatPalette[index.y], vertPos;
+DP4			r1.y, skinMatPalette[index.y + 1], vertPos;
+DP4			r1.z, skinMatPalette[index.y + 2], vertPos;
+MAD			r1, r1, vertSkin.y, r0;
+MOV			r1.w, 1.0;
+
+DP4			r0.x, worldMat[0], r1;
+DP4			r0.y, worldMat[1], r1;
+DP4			r0.z, worldMat[2], r1;
+DP4			r0.w, worldMat[3], r1;
+
+DP4			varPos.x, viewProjMat[0], r0;
+DP4			varPos.y, viewProjMat[1], r0;
+DP4			varPos.z, viewProjMat[2], r0;
+DP4			varPos.w, viewProjMat[3], r0;
+
+# transform normal
+
+DP3			r0.x, skinMatPalette[index.x], vertNormal;
+DP3			r0.y, skinMatPalette[index.x + 1], vertNormal;
+DP3			r0.z, skinMatPalette[index.x + 2], vertNormal;
+MUL			r0, r0, vertSkin.x;
+
+DP3			r1.x, skinMatPalette[index.y], vertNormal;
+DP3			r1.y, skinMatPalette[index.y + 1], vertNormal;
+DP3			r1.z, skinMatPalette[index.y + 2], vertNormal;
+MAD			r1, r1, vertSkin.y, r0;
+
+DP3			varNormal.x, worldMat[0], r1;
+DP3			varNormal.y, worldMat[1], r1;
+DP3			varNormal.z, worldMat[2], r1;
+
+END

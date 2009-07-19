@@ -25,10 +25,6 @@ namespace Engine
 
 		enum VertexLayout
 		{
-			VERT_LAYOUT_POS_NRM_UV_TAN_SKIN,
-			VERT_LAYOUT_POS_NRM_UV_TAN,
-			VERT_LAYOUT_POS_NRM_UV_SKIN,
-			VERT_LAYOUT_POS_NRM_UV,
 			VERT_LAYOUT_POS_NRM_SKIN,
 			VERT_LAYOUT_POS_NRM,
 		};
@@ -36,8 +32,8 @@ namespace Engine
 		size_t numVertices;
 		size_t numIndices;
 		size_t vertexSize; // size of one vertex in bytes
-		void* vertBuf;
-		void* indexBuf;
+		GL::Buffer* vertBuf;
+		GL::Buffer* indexBuf;
 		const char* material;
 		uint flags;
 		VertexLayout vertLayout;
@@ -61,46 +57,11 @@ namespace Engine
 	class ENGINE_API Model
 	{
 	public:
-		struct MeshVert_UV_Tan_Skin
-		{
-			math3d::vec4f position;
-			math3d::vec3f normal;
-			math3d::vec4f tangent;
-			math3d::vec2f texCoord;
-			math3d::vec2f weights;
-			math3d::vec2ub jointInds;
-		};
-
-		struct MeshVert_UV_Tan
-		{
-			math3d::vec4f position;
-			math3d::vec3f normal;
-			math3d::vec4f tangent;
-			math3d::vec2f texCoord;
-		};
-
-		struct MeshVert_UV_Skin
-		{
-			math3d::vec4f position;
-			math3d::vec3f normal;
-			math3d::vec2f texCoord;
-			math3d::vec2f weights;
-			math3d::vec2ub jointInds;
-		};
-
-		struct MeshVert_UV
-		{
-			math3d::vec4f position;
-			math3d::vec3f normal;
-			math3d::vec2f texCoord;
-		};
-
 		struct MeshVert_Skin
 		{
 			math3d::vec4f position;
 			math3d::vec3f normal;
-			math3d::vec2f weights;
-			math3d::vec2ub jointInds;
+			math3d::vec4f skinData;
 		};
 
 		struct MeshVert

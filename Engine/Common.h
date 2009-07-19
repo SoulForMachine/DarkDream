@@ -27,7 +27,6 @@ namespace Engine
 	class ShaderManager;
 	class ASMProgManager;
 	class TextureManager;
-	class MaterialManager;
 	class ModelManager;
 	class AnimationManager;
 	class ModelEntityManager;
@@ -46,7 +45,6 @@ namespace Engine
 		ShaderManager* shaderManager;
 		ASMProgManager* asmProgManager;
 		TextureManager* textureManager;
-		MaterialManager* materialManager;
 		ModelManager* modelManager;
 		AnimationManager* animationManager;
 		ModelEntityManager* modelEntityManager;

@@ -6,7 +6,6 @@ namespace EditorCommon
 	public enum class NotifyMessage
 	{
 		ModelChanged,
-		MaterialChanged,
 		AttachmentChanged,
 	};
 

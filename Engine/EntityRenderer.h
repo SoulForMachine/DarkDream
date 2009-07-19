@@ -28,12 +28,19 @@ namespace Engine
 		EntityRenderer();
 		bool Init();
 		void Deinit();
-		void Render(const Camera& camera);
+		void Render(const Camera& camera, const MeshRenderData* meshes, int count);
 		void ReloadShaders();
 
 	private:
-		RenderSystem* _renderSystem;
 		GL::Renderer* _renderer;
+		ASMProgRes* _vpMesh;
+		ASMProgRes* _vpMeshSkin;
+		ASMProgRes* _fpMesh;
+		GL::VertexFormat* _vertFmtMesh;
+		GL::VertexFormat* _vertFmtSkinnedMesh;
+
+		void RenderMesh(const Camera& camera, const MeshRenderData* mesh);
+		void Clear();
 	};
 
 }

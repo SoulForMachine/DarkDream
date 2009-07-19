@@ -3,6 +3,7 @@
 #include "BaseLib/Console.h"
 #include "BaseLib/GL/GLCommon.h"
 #include "Engine/FileSystem.h"
+#include "Engine/RenderSystem.h"
 #include "Engine/EngineInternal.h"
 #include "Model.h"
 #include "BaseLib/Memory.h"
@@ -118,10 +119,12 @@ namespace Engine
 
 	void Model::Unload()
 	{
+		GL::Renderer* renderer = engineAPI.renderSystem->GetRenderer();
+
 		for(size_t i = 0; i < _meshes.GetCount(); ++i)
 		{
-			delete[] _meshes[i].vertBuf;
-			delete[] _meshes[i].indexBuf;
+			renderer->DestroyBuffer(_meshes[i].vertBuf);
+			renderer->DestroyBuffer(_meshes[i].indexBuf);
 			delete[] _meshes[i].material;
 		}
 		_meshes.Clear();
@@ -156,9 +159,6 @@ namespace Engine
 
 		vec3f* positions = 0;
 		vec3f* normals = 0;
-		vec3f* tangents = 0;
-		vec3f* binormals = 0;
-		vec2f* uvs = 0;
 		vec2f* weights = 0;
 		vec2ub* joint_inds = 0;
 
@@ -170,17 +170,14 @@ namespace Engine
 
 		if(mesh.flags & Mesh::FLAG_TANGENTS)
 		{
-			tangents = new(tempPool) vec3f[mesh.numVertices];
-			file->Read(tangents, sizeof(vec3f) * mesh.numVertices);
-
-			binormals = new(tempPool) vec3f[mesh.numVertices];
-			file->Read(binormals, sizeof(vec3f) * mesh.numVertices);
+			// skip tangents and binormals
+			file->Seek(sizeof(vec3f) * mesh.numVertices * 2, SEEK_CUR);
 		}
 
 		if(mesh.flags & Mesh::FLAG_UVS)
 		{
-			uvs = new(tempPool) vec2f[mesh.numVertices];
-			file->Read(uvs, sizeof(vec2f) * mesh.numVertices);
+			// skip uvs
+			file->Seek(sizeof(vec2f) * mesh.numVertices, SEEK_CUR);
 		}
 
 		if(mesh.flags & Mesh::FLAG_SKIN_DATA)
@@ -192,117 +189,73 @@ namespace Engine
 			file->Read(joint_inds, sizeof(vec2ub) * mesh.numVertices);
 		}
 
-		if(	(mesh.flags & Mesh::FLAG_UVS) &&
-			(mesh.flags & Mesh::FLAG_TANGENTS) &&
-			(mesh.flags & Mesh::FLAG_SKIN_DATA)	)
-		{
-			mesh.vertexSize = sizeof(MeshVert_UV_Tan_Skin);
-			mesh.vertLayout = Mesh::VERT_LAYOUT_POS_NRM_UV_TAN_SKIN;
-			MeshVert_UV_Tan_Skin* buf = new(mapPool) MeshVert_UV_Tan_Skin[mesh.numVertices];
-			for(size_t vert_i = 0; vert_i < mesh.numVertices; ++vert_i)
-			{
-				buf[vert_i].position = vec4f(positions[vert_i], 1.0f);
-				buf[vert_i].normal = normals[vert_i];
+		GL::Renderer* renderer = engineAPI.renderSystem->GetRenderer();
 
-				buf[vert_i].tangent.rvec3 = tangents[vert_i];
-				vec3f b;
-				cross(b, normals[vert_i], tangents[vert_i]);
-				buf[vert_i].tangent.w = (dot(b, binormals[vert_i]) > 0.0)? 1.0f: -1.0f;
-
-				buf[vert_i].texCoord = uvs[vert_i];
-				buf[vert_i].weights = weights[vert_i];
-				buf[vert_i].jointInds = joint_inds[vert_i];
-			}
-			mesh.vertBuf = buf;
-		}
-		else if((mesh.flags & Mesh::FLAG_UVS) &&
-				(mesh.flags & Mesh::FLAG_TANGENTS) )
-		{
-			mesh.vertexSize = sizeof(MeshVert_UV_Tan);
-			mesh.vertLayout = Mesh::VERT_LAYOUT_POS_NRM_UV_TAN;
-			MeshVert_UV_Tan* buf = new(mapPool) MeshVert_UV_Tan[mesh.numVertices];
-			for(size_t vert_i = 0; vert_i < mesh.numVertices; ++vert_i)
-			{
-				buf[vert_i].position = vec4f(positions[vert_i], 1.0f);
-				buf[vert_i].normal = normals[vert_i];
-
-				buf[vert_i].tangent.rvec3 = tangents[vert_i];
-				vec3f b;
-				cross(b, normals[vert_i], tangents[vert_i]);
-				buf[vert_i].tangent.w = (dot(b, binormals[vert_i]) > 0.0)? 1.0f: -1.0f;
-
-				buf[vert_i].texCoord = uvs[vert_i];
-			}
-			mesh.vertBuf = buf;
-		}
-		else if((mesh.flags & Mesh::FLAG_UVS) &&
-				(mesh.flags & Mesh::FLAG_SKIN_DATA) )
-		{
-			mesh.vertexSize = sizeof(MeshVert_UV_Skin);
-			mesh.vertLayout = Mesh::VERT_LAYOUT_POS_NRM_UV_SKIN;
-			MeshVert_UV_Skin* buf = new(mapPool) MeshVert_UV_Skin[mesh.numVertices];
-			for(size_t vert_i = 0; vert_i < mesh.numVertices; ++vert_i)
-			{
-				buf[vert_i].position = vec4f(positions[vert_i], 1.0f);
-				buf[vert_i].normal = normals[vert_i];
-				buf[vert_i].texCoord = uvs[vert_i];
-				buf[vert_i].weights = weights[vert_i];
-				buf[vert_i].jointInds = joint_inds[vert_i];
-			}
-			mesh.vertBuf = buf;
-		}
-		else if(mesh.flags & Mesh::FLAG_UVS)
-		{
-			mesh.vertexSize = sizeof(MeshVert_UV);
-			mesh.vertLayout = Mesh::VERT_LAYOUT_POS_NRM_UV;
-			MeshVert_UV* buf = new(mapPool) MeshVert_UV[mesh.numVertices];
-			for(size_t vert_i = 0; vert_i < mesh.numVertices; ++vert_i)
-			{
-				buf[vert_i].position = vec4f(positions[vert_i], 1.0f);
-				buf[vert_i].normal = normals[vert_i];
-				buf[vert_i].texCoord = uvs[vert_i];
-			}
-			mesh.vertBuf = buf;
-		}
-		else if(mesh.flags & Mesh::FLAG_SKIN_DATA)
+		if(mesh.flags & Mesh::FLAG_SKIN_DATA)
 		{
 			mesh.vertexSize = sizeof(MeshVert_Skin);
 			mesh.vertLayout = Mesh::VERT_LAYOUT_POS_NRM_SKIN;
-			MeshVert_Skin* buf = new(mapPool) MeshVert_Skin[mesh.numVertices];
+
+			mesh.vertBuf = renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, mesh.numVertices * sizeof(MeshVert_Skin), 0, GL::USAGE_STATIC_DRAW);
+			if(!mesh.vertBuf)
+				return false;
+			MeshVert_Skin* buf = (MeshVert_Skin*)mesh.vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+			if(!buf)
+			{
+				renderer->DestroyBuffer(mesh.vertBuf);
+				return false;
+			}
+
 			for(size_t vert_i = 0; vert_i < mesh.numVertices; ++vert_i)
 			{
 				buf[vert_i].position = vec4f(positions[vert_i], 1.0f);
 				buf[vert_i].normal = normals[vert_i];
-				buf[vert_i].weights = weights[vert_i];
-				buf[vert_i].jointInds = joint_inds[vert_i];
+				buf[vert_i].skinData = vec4f(weights[vert_i].x, weights[vert_i].y, (float)joint_inds[vert_i].x, (float)joint_inds[vert_i].y);
 			}
-			mesh.vertBuf = buf;
+
+			if(!mesh.vertBuf->UnmapBuffer())
+				return false;
 		}
 		else
 		{
 			mesh.vertexSize = sizeof(MeshVert);
 			mesh.vertLayout = Mesh::VERT_LAYOUT_POS_NRM;
-			MeshVert* buf = new(mapPool) MeshVert[mesh.numVertices];
+
+			mesh.vertBuf = renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, mesh.numVertices * sizeof(MeshVert), 0, GL::USAGE_STATIC_DRAW);
+			if(!mesh.vertBuf)
+				return false;
+			MeshVert* buf = (MeshVert*)mesh.vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+			if(!buf)
+			{
+				renderer->DestroyBuffer(mesh.vertBuf);
+				return false;
+			}
+
 			for(size_t vert_i = 0; vert_i < mesh.numVertices; ++vert_i)
 			{
 				buf[vert_i].position = vec4f(positions[vert_i], 1.0f);
 				buf[vert_i].normal = normals[vert_i];
 			}
-			mesh.vertBuf = buf;
+
+			if(!mesh.vertBuf->UnmapBuffer())
+				return false;
 		}
 
 		delete[] positions;
 		delete[] normals;
-		delete[] tangents;
-		delete[] binormals;
-		delete[] uvs;
 		delete[] weights;
 		delete[] joint_inds;
 
 		// read indices
-		ushort* indices = new(mapPool) ushort[mesh.numIndices];
+		ushort* indices = new(tempPool) ushort[mesh.numIndices];
 		file->Read(indices, sizeof(ushort) * mesh.numIndices);
-		mesh.indexBuf = indices;
+		mesh.indexBuf = renderer->CreateBuffer(GL::OBJ_INDEX_BUFFER, sizeof(ushort) * mesh.numIndices, indices, GL::USAGE_STATIC_DRAW);
+		delete[] indices;
+		if(!mesh.indexBuf)
+		{
+			renderer->DestroyBuffer(mesh.vertBuf);
+			return false;
+		}
 
 		return true;
 	}
