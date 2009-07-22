@@ -22,18 +22,18 @@ namespace Engine
 	{
 		_renderer = engineAPI.renderSystem->GetRenderer();
 
-		_vpMesh = engineAPI.asmProgManager->CreateASMProgram("Programs/Mesh.vp", true);
-		_vpMeshSkin = engineAPI.asmProgManager->CreateASMProgram("Programs/Mesh_Skin.vp", true);
-		_fpMesh = engineAPI.asmProgManager->CreateASMProgram("Programs/Mesh.fp", true);
+		_vpMesh = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh.vp"), true);
+		_vpMeshSkin = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh_Skin.vp"), true);
+		_fpMesh = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh.fp"), true);
 
-		GL::VertexAttribDesc* vfmt[] =
+		GL::VertexAttribDesc vfmt[] =
 		{
 			{ 0, 0, 4, GL::TYPE_FLOAT, false, false, 0 },
 			{ 0, 1, 3, GL::TYPE_FLOAT, false, false, 16 },
 		};
 		_vertFmtMesh = _renderer->CreateVertexFormat(vfmt, COUNTOF(vfmt));
 
-		GL::VertexAttribDesc* skin_vfmt[] =
+		GL::VertexAttribDesc skin_vfmt[] =
 		{
 			{ 0, 0, 4, GL::TYPE_FLOAT, false, false, 0 },
 			{ 0, 1, 3, GL::TYPE_FLOAT, false, false, 16 },
@@ -68,9 +68,31 @@ namespace Engine
 	{
 	}
 
-	void EntityRenderer::RenderMesh(const Camera& camera, const MeshRenderData* mesh)
+	void EntityRenderer::RenderMesh(const Camera& camera, const MeshRenderData* mesh_data)
 	{
+		_renderer->VertexSource(0, mesh_data->mesh->vertBuf, mesh_data->mesh->vertexSize, 0);
+		_renderer->IndexSource(mesh_data->mesh->indexBuf, GL::TYPE_UNSIGNED_SHORT);
 
+		bool animated = (mesh_data->mesh->flags & Mesh::FLAG_SKIN_DATA) != 0;
+		const GL::ASMProgram* vert_prog = animated? _vpMeshSkin->GetASMProgram(): _vpMesh->GetASMProgram();
+		_renderer->ActiveVertexASMProgram(vert_prog);
+		vert_prog->LocalMatrix4x4(0, *mesh_data->worldMat);
+		vert_prog->LocalMatrix4x4(4, camera.GetViewProjectionTransform());
+		if(animated)
+		{
+			for(size_t i = 0; i < mesh_data->jointCount; ++i)
+				vert_prog->LocalMatrix4x4(8 + i * 3, mesh_data->jointMatPalette[i]);
+
+			_renderer->ActiveVertexFormat(_vertFmtMesh);
+		}
+		else
+		{
+			_renderer->ActiveVertexFormat(_vertFmtSkinnedMesh);
+		}
+
+		_renderer->ActiveFragmentASMProgram(_fpMesh->GetASMProgram());
+
+		_renderer->DrawIndexed(GL::PRIM_TRIANGLES, 0, mesh_data->mesh->numIndices);
 	}
 
 	void EntityRenderer::Clear()

@@ -8,7 +8,7 @@ PARAM		worldMat[] = { program.local[0..3] };
 PARAM		viewProjMat[] = { program.local[4..7] };
 PARAM		skinMatPalette[] = { program.local[8..94] }; # 29 matrices max
 
-ADDRESS		index;
+ADDRESS		index1, index2;
 
 OUTPUT		varPos = result.position;
 OUTPUT		varNormal = result.texcoord[0];
@@ -16,18 +16,18 @@ OUTPUT		varNormal = result.texcoord[0];
 TEMP		r0, r1;
 
 
-MUL			r0.xy, vertSkin.zw, 3.0;
-ARL			index.x, r0.x;
-ARL			index.y, r0.y;
+MUL			r0, vertSkin.zwxx, 3.0;
+ARL			index1.x, r0.x;
+ARL			index2.x, r0.y;
 
-DP4			r0.x, skinMatPalette[index.x], vertPos;
-DP4			r0.y, skinMatPalette[index.x + 1], vertPos;
-DP4			r0.z, skinMatPalette[index.x + 2], vertPos;
+DP4			r0.x, skinMatPalette[index1.x], vertPos;
+DP4			r0.y, skinMatPalette[index1.x + 1], vertPos;
+DP4			r0.z, skinMatPalette[index1.x + 2], vertPos;
 MUL			r0, r0, vertSkin.x;
 
-DP4			r1.x, skinMatPalette[index.y], vertPos;
-DP4			r1.y, skinMatPalette[index.y + 1], vertPos;
-DP4			r1.z, skinMatPalette[index.y + 2], vertPos;
+DP4			r1.x, skinMatPalette[index2.x], vertPos;
+DP4			r1.y, skinMatPalette[index2.x + 1], vertPos;
+DP4			r1.z, skinMatPalette[index2.x + 2], vertPos;
 MAD			r1, r1, vertSkin.y, r0;
 MOV			r1.w, 1.0;
 
@@ -43,14 +43,14 @@ DP4			varPos.w, viewProjMat[3], r0;
 
 # transform normal
 
-DP3			r0.x, skinMatPalette[index.x], vertNormal;
-DP3			r0.y, skinMatPalette[index.x + 1], vertNormal;
-DP3			r0.z, skinMatPalette[index.x + 2], vertNormal;
+DP3			r0.x, skinMatPalette[index1.x], vertNormal;
+DP3			r0.y, skinMatPalette[index1.x + 1], vertNormal;
+DP3			r0.z, skinMatPalette[index1.x + 2], vertNormal;
 MUL			r0, r0, vertSkin.x;
 
-DP3			r1.x, skinMatPalette[index.y], vertNormal;
-DP3			r1.y, skinMatPalette[index.y + 1], vertNormal;
-DP3			r1.z, skinMatPalette[index.y + 2], vertNormal;
+DP3			r1.x, skinMatPalette[index2.x], vertNormal;
+DP3			r1.y, skinMatPalette[index2.x + 1], vertNormal;
+DP3			r1.z, skinMatPalette[index2.x + 2], vertNormal;
 MAD			r1, r1, vertSkin.y, r0;
 
 DP3			varNormal.x, worldMat[0], r1;

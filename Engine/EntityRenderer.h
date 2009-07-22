@@ -33,13 +33,13 @@ namespace Engine
 
 	private:
 		GL::Renderer* _renderer;
-		ASMProgRes* _vpMesh;
-		ASMProgRes* _vpMeshSkin;
-		ASMProgRes* _fpMesh;
+		const ASMProgRes* _vpMesh;
+		const ASMProgRes* _vpMeshSkin;
+		const ASMProgRes* _fpMesh;
 		GL::VertexFormat* _vertFmtMesh;
 		GL::VertexFormat* _vertFmtSkinnedMesh;
 
-		void RenderMesh(const Camera& camera, const MeshRenderData* mesh);
+		void RenderMesh(const Camera& camera, const MeshRenderData* mesh_data);
 		void Clear();
 	};
 
