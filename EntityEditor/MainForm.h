@@ -399,7 +399,7 @@ namespace EntityEditor {
 			this->Controls->Add(this->_mainMenu);
 			this->MainMenuStrip = this->_mainMenu;
 			this->Name = L"MainForm";
-			this->Text = L"Daemonium Entity Editor";
+			this->Text = L"Dark Dream Entity Editor";
 			this->WindowState = System::Windows::Forms::FormWindowState::Maximized;
 			this->Load += gcnew System::EventHandler(this, &MainForm::MainForm_Load);
 			this->FormClosing += gcnew System::Windows::Forms::FormClosingEventHandler(this, &MainForm::MainForm_FormClosing);

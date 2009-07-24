@@ -21,9 +21,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EntityEditor", "EntityEdito
 		{269CECE1-C8C3-4655-8C21-64DEAC906742} = {269CECE1-C8C3-4655-8C21-64DEAC906742}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MapEditor", "MapEditor\MapEditor.vcproj", "{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}"
+EndProject
 Global
 	GlobalSection(SourceCodeControl) = preSolution
-		SccNumberOfProjects = 5
+		SccNumberOfProjects = 6
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = BaseLib\\BaseLib.vcproj
 		SccLocalPath1 = .
@@ -37,6 +39,9 @@ Global
 		SccProjectUniqueName4 = EditorCommon\\EditorCommon.vcproj
 		SccLocalPath4 = .
 		SccProjectFilePathRelativizedFromConnection4 = EditorCommon\\
+		SccProjectUniqueName5 = MapEditor\\MapEditor.vcproj
+		SccLocalPath5 = .
+		SccProjectFilePathRelativizedFromConnection5 = MapEditor\\
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -59,6 +64,10 @@ Global
 		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Debug|Win32.Build.0 = Debug|Win32
 		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Release|Win32.ActiveCfg = Release|Win32
 		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Release|Win32.Build.0 = Release|Win32
+		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Debug|Win32.Build.0 = Debug|Win32
+		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Release|Win32.ActiveCfg = Release|Win32
+		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

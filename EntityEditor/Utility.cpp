@@ -2,7 +2,7 @@
 #include "StdAfx.h"
 #include "Utility.h"
 
-#define APP_NAME	"Daemonium Entity Editor"
+#define APP_NAME	"Dark Dream Entity Editor"
 
 using namespace System;
 
