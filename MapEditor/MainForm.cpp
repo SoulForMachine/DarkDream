@@ -40,7 +40,9 @@ namespace MapEditor
 		if(!_toolPanel->IsHandleCreated)
 			_toolPanel->Show(_dockPanel);
 
+		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
 		_mapForm->Show();
+		UpdateToolbarButtons();
 
 		_dockPanel->ResumeLayout(true, true);
 	}
@@ -125,4 +127,54 @@ namespace MapEditor
 
 	}
 
+	System::Void MainForm::_toolBtnViewMode_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
+		UpdateToolbarButtons();
+	}
+
+	System::Void MainForm::_toolBtnTerrainEdit_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::TERRAIN_EDIT);
+		UpdateToolbarButtons();
+	}
+
+	System::Void MainForm::_toolBtnObjectPlacement_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+
+		UpdateToolbarButtons();
+	}
+
+	System::Void MainForm::_toolBtnTriggers_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+
+		UpdateToolbarButtons();
+	}
+
+	System::Void MainForm::_toolBtnParticleSystems_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+
+	}
+
+	void MainForm::UpdateToolbarButtons()
+	{
+		// reset toolbar button states
+		_toolBtnViewMode->Checked = false;
+		_toolBtnTerrainEdit->Checked = false;
+		_toolBtnObjectPlacement->Checked = false;
+		_toolBtnTriggers->Checked = false;
+		_toolBtnParticleSystems->Checked = false;
+
+		switch(_mapForm->GetCurrentEditMode())
+		{
+		case EditMode::EditModeEnum::VIEW:
+			_toolBtnViewMode->Checked = true;
+			break;
+		case EditMode::EditModeEnum::TERRAIN_EDIT:
+			_toolBtnTerrainEdit->Checked = true;
+			break;
+		default:
+			assert(0);
+		}
+	}
 }

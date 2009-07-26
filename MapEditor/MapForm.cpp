@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "EM_View.h"
 #include "EM_TerrainEdit.h"
-#include "EM_TerrainPaint.h"
 #include "ToolPanel.h"
 #include "UndoManager.h"
 #include "MapForm.h"
@@ -16,7 +15,6 @@ namespace MapEditor
 		_director = director;
 		_toolPanel = tool_panel;
 		_undoManager = gcnew UndoManager;
-		SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
 	}
 
 	void MapForm::RedrawAsync()
@@ -42,7 +40,7 @@ namespace MapEditor
 		if(_renderWindow)
 		{
 			HWND hwnd = (HWND)_renderWindow->Handle.ToPointer();
-			MoveWindow(hwnd, 0, _mainToolbar->Height, ClientRectangle.Width, ClientRectangle.Height, TRUE);
+			MoveWindow(hwnd, 0, 0, ClientRectangle.Width, ClientRectangle.Height, TRUE);
 		}
 		else
 		{
@@ -76,33 +74,14 @@ namespace MapEditor
 		if(_currentEditMode != nullptr && _currentEditMode->GetModeEnum() == mode)
 			return;
 
-		// reset toolbar button states
-		_toolBtnViewMode->Checked = false;
-		_toolBtnTerrainEdit->Checked = false;
-		_toolBtnTerrainPaint->Checked = false;
-		_toolBtnObjectPlacement->Checked = false;
-		_toolBtnWaterPatch->Checked = false;
-		_toolBtnRoads->Checked = false;
-		_toolBtnRivers->Checked = false;
-		_toolBtnFogLayers->Checked = false;
-		_toolBtnTriggers->Checked = false;
-		_toolBtnLights->Checked = false;
-		_toolBtnParticleSystems->Checked = false;
-
 		delete _currentEditMode;
 		switch(mode)
 		{
 		case EditMode::EditModeEnum::VIEW:
 			_currentEditMode = gcnew EM_View;
-			_toolBtnViewMode->Checked = true;
 			break;
 		case EditMode::EditModeEnum::TERRAIN_EDIT:
 			_currentEditMode = gcnew EM_TerrainEdit(_undoManager);
-			_toolBtnTerrainEdit->Checked = true;
-			break;
-		case EditMode::EditModeEnum::TERRAIN_PAINT:
-			_currentEditMode = gcnew EM_TerrainPaint(_undoManager);
-			_toolBtnTerrainPaint->Checked = true;
 			break;
 		default:
 			assert(0);
@@ -111,56 +90,6 @@ namespace MapEditor
 		_toolPanel->SetPanel(_currentEditMode->GetPanel());
 		if(_renderWindow != nullptr)
 			_renderWindow->SetEditMode(_currentEditMode);
-	}
-
-	System::Void MapForm::_toolBtnViewMode_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-		SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
-	}
-
-	System::Void MapForm::_toolBtnTerrainEdit_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-		SetCurrentEditMode(EditMode::EditModeEnum::TERRAIN_EDIT);
-	}
-
-	System::Void MapForm::_toolBtnTerrainPaint_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-		SetCurrentEditMode(EditMode::EditModeEnum::TERRAIN_PAINT);
-	}
-
-	System::Void MapForm::_toolBtnEditGrid_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-
-	}
-
-	System::Void MapForm::_toolBtnObjectPlacement_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-
-	}
-
-	System::Void MapForm::_toolBtnWaterPatch_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-
-	}
-
-	System::Void MapForm::_toolBtnRoads_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-
-	}
-
-	System::Void MapForm::_toolBtnRivers_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-
-	}
-
-	System::Void MapForm::_toolBtnFogLayers_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-
-	}
-
-	System::Void MapForm::_toolBtnTriggers_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-
 	}
 
 }

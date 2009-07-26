@@ -268,16 +268,6 @@
 					</File>
 				</File>
 				<File
-					RelativePath=".\TerrainPaintPanel.h"
-					FileType="4"
-					>
-					<File
-						RelativePath=".\TerrainPaintPanel.resx"
-						SubType="Designer"
-						>
-					</File>
-				</File>
-				<File
 					RelativePath=".\ToolPanel.h"
 					FileType="3"
 					>
@@ -311,10 +301,6 @@
 				</File>
 				<File
 					RelativePath=".\TerrainEditPanel.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\TerrainPaintPanel.cpp"
 					>
 				</File>
 				<File
@@ -366,14 +352,6 @@
 			</File>
 			<File
 				RelativePath=".\EM_TerrainEdit.h"
-				>
-			</File>
-			<File
-				RelativePath=".\EM_TerrainPaint.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\EM_TerrainPaint.h"
 				>
 			</File>
 			<File

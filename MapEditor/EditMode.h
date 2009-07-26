@@ -12,7 +12,6 @@ namespace MapEditor
 		{
 			VIEW,
 			TERRAIN_EDIT,
-			TERRAIN_PAINT,
 		};
 
 		EditMode()

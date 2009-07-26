@@ -45,6 +45,7 @@ namespace MapEditor {
 
 	private:
 		WeifenLuo::WinFormsUI::Docking::IDockContent^ GetContentFromPersistString(String^ persistString);
+		void UpdateToolbarButtons();
 
 		WeifenLuo::WinFormsUI::Docking::DeserializeDockContent^ _deserializeDockContent;
 		EditorCommon::ConsoleForm^ _consoleForm;
@@ -89,6 +90,12 @@ namespace MapEditor {
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuToolsOptions;
 	private: System::Windows::Forms::OpenFileDialog^  _openFileDialog;
 	private: System::Windows::Forms::SaveFileDialog^  _saveFileDialog;
+	private: System::Windows::Forms::ToolStrip^  _mainToolbar;
+	private: System::Windows::Forms::ToolStripButton^  _toolBtnViewMode;
+	private: System::Windows::Forms::ToolStripButton^  _toolBtnTerrainEdit;
+	private: System::Windows::Forms::ToolStripButton^  _toolBtnObjectPlacement;
+	private: System::Windows::Forms::ToolStripButton^  _toolBtnTriggers;
+	private: System::Windows::Forms::ToolStripButton^  _toolBtnParticleSystems;
 
 
 
@@ -118,6 +125,7 @@ namespace MapEditor {
 		/// </summary>
 		void InitializeComponent(void)
 		{
+			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(MainForm::typeid));
 			this->_mainMenu = (gcnew System::Windows::Forms::MenuStrip());
 			this->fileToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuFileNewMap = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -138,7 +146,14 @@ namespace MapEditor {
 			this->_dockPanel = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanel());
 			this->_openFileDialog = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->_saveFileDialog = (gcnew System::Windows::Forms::SaveFileDialog());
+			this->_mainToolbar = (gcnew System::Windows::Forms::ToolStrip());
+			this->_toolBtnViewMode = (gcnew System::Windows::Forms::ToolStripButton());
+			this->_toolBtnTerrainEdit = (gcnew System::Windows::Forms::ToolStripButton());
+			this->_toolBtnObjectPlacement = (gcnew System::Windows::Forms::ToolStripButton());
+			this->_toolBtnTriggers = (gcnew System::Windows::Forms::ToolStripButton());
+			this->_toolBtnParticleSystems = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_mainMenu->SuspendLayout();
+			this->_mainToolbar->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// _mainMenu
@@ -253,7 +268,7 @@ namespace MapEditor {
 			// _menuToolsOptions
 			// 
 			this->_menuToolsOptions->Name = L"_menuToolsOptions";
-			this->_menuToolsOptions->Size = System::Drawing::Size(152, 22);
+			this->_menuToolsOptions->Size = System::Drawing::Size(122, 22);
 			this->_menuToolsOptions->Text = L"&Options";
 			this->_menuToolsOptions->Click += gcnew System::EventHandler(this, &MainForm::_menuToolsOptions_Click);
 			// 
@@ -279,11 +294,74 @@ namespace MapEditor {
 			// 
 			this->_openFileDialog->FileName = L"openFileDialog1";
 			// 
+			// _mainToolbar
+			// 
+			this->_mainToolbar->AutoSize = false;
+			this->_mainToolbar->ImageScalingSize = System::Drawing::Size(32, 32);
+			this->_mainToolbar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) {this->_toolBtnViewMode, 
+				this->_toolBtnTerrainEdit, this->_toolBtnObjectPlacement, this->_toolBtnTriggers, this->_toolBtnParticleSystems});
+			this->_mainToolbar->Location = System::Drawing::Point(0, 24);
+			this->_mainToolbar->Name = L"_mainToolbar";
+			this->_mainToolbar->Size = System::Drawing::Size(860, 38);
+			this->_mainToolbar->TabIndex = 4;
+			this->_mainToolbar->Text = L"toolStrip1";
+			// 
+			// _toolBtnViewMode
+			// 
+			this->_toolBtnViewMode->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnViewMode->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnViewMode.Image")));
+			this->_toolBtnViewMode->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnViewMode->Name = L"_toolBtnViewMode";
+			this->_toolBtnViewMode->Size = System::Drawing::Size(36, 35);
+			this->_toolBtnViewMode->Text = L"View Mode";
+			this->_toolBtnViewMode->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnViewMode_Click);
+			// 
+			// _toolBtnTerrainEdit
+			// 
+			this->_toolBtnTerrainEdit->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnTerrainEdit->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnTerrainEdit.Image")));
+			this->_toolBtnTerrainEdit->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnTerrainEdit->Name = L"_toolBtnTerrainEdit";
+			this->_toolBtnTerrainEdit->Size = System::Drawing::Size(36, 35);
+			this->_toolBtnTerrainEdit->Text = L"Edit Terrain";
+			this->_toolBtnTerrainEdit->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnTerrainEdit_Click);
+			// 
+			// _toolBtnObjectPlacement
+			// 
+			this->_toolBtnObjectPlacement->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnObjectPlacement->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnObjectPlacement.Image")));
+			this->_toolBtnObjectPlacement->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnObjectPlacement->Name = L"_toolBtnObjectPlacement";
+			this->_toolBtnObjectPlacement->Size = System::Drawing::Size(36, 35);
+			this->_toolBtnObjectPlacement->Text = L"Place Objects";
+			this->_toolBtnObjectPlacement->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnObjectPlacement_Click);
+			// 
+			// _toolBtnTriggers
+			// 
+			this->_toolBtnTriggers->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnTriggers->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnTriggers.Image")));
+			this->_toolBtnTriggers->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnTriggers->Name = L"_toolBtnTriggers";
+			this->_toolBtnTriggers->Size = System::Drawing::Size(36, 35);
+			this->_toolBtnTriggers->Text = L"Triggers";
+			this->_toolBtnTriggers->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnTriggers_Click);
+			// 
+			// _toolBtnParticleSystems
+			// 
+			this->_toolBtnParticleSystems->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnParticleSystems->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnParticleSystems.Image")));
+			this->_toolBtnParticleSystems->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnParticleSystems->Name = L"_toolBtnParticleSystems";
+			this->_toolBtnParticleSystems->Size = System::Drawing::Size(36, 35);
+			this->_toolBtnParticleSystems->Text = L"Particle Systems";
+			this->_toolBtnParticleSystems->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnParticleSystems_Click);
+			// 
 			// MainForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(860, 622);
+			this->Controls->Add(this->_mainToolbar);
 			this->Controls->Add(this->_dockPanel);
 			this->Controls->Add(this->_statusBar);
 			this->Controls->Add(this->_mainMenu);
@@ -294,6 +372,8 @@ namespace MapEditor {
 			this->FormClosing += gcnew System::Windows::Forms::FormClosingEventHandler(this, &MainForm::MainForm_FormClosing);
 			this->_mainMenu->ResumeLayout(false);
 			this->_mainMenu->PerformLayout();
+			this->_mainToolbar->ResumeLayout(false);
+			this->_mainToolbar->PerformLayout();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -310,6 +390,12 @@ namespace MapEditor {
 	private: System::Void _menuRegionNewTerrain_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuRegionNewGrid_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuToolsOptions_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _toolBtnViewMode_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _toolBtnTerrainEdit_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _toolBtnObjectPlacement_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _toolBtnTriggers_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _toolBtnParticleSystems_Click(System::Object^  sender, System::EventArgs^  e);
 };
+
 }
 
