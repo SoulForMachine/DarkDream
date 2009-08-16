@@ -620,7 +620,6 @@ namespace GL
 
 		// other
 		CHECK_EXTENSION_REQ(GL_EXT_texture_filter_anisotropic, extTextureFilterAnisotropic)
-		LOAD_EXTENSION(GL_ARB_instanced_arrays, extInstancedArrays)
 		LOAD_EXTENSION_REQ(GL_ARB_geometry_shader4, extGeometryShader4)
 
 		// wgl
@@ -693,15 +692,6 @@ namespace GL
 	void Renderer::ActiveVertexFormat(const VertexFormat* format)
 	{
 		_vertexFormat = format;
-	}
-
-	/*
-		attrib must not be 0
-	*/
-	void Renderer::VertexAttribDivisor(uint attrib, uint divisor)
-	{
-		glVertexAttribDivisor(attrib, divisor);
-		OPENGL_ERROR_CHECK
 	}
 
 	void Renderer::EnablePrimitiveRestart(bool enable)

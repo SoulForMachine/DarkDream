@@ -22,6 +22,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EntityEditor", "EntityEdito
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MapEditor", "MapEditor\MapEditor.vcproj", "{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7E6C94E-9411-4ADA-9BD5-18CA86910803} = {D7E6C94E-9411-4ADA-9BD5-18CA86910803}
+		{F58C7E90-D832-4A9E-9FA7-020FBB802F33} = {F58C7E90-D832-4A9E-9FA7-020FBB802F33}
+		{269CECE1-C8C3-4655-8C21-64DEAC906742} = {269CECE1-C8C3-4655-8C21-64DEAC906742}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SourceCodeControl) = preSolution

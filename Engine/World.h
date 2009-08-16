@@ -9,12 +9,12 @@
 #include "Engine/Entity.h"
 #include "Engine/ModelEntity.h"
 #include "Engine/Camera.h"
+#include "Engine/Terrain.h"
 
 
 namespace Engine
 {
 
-	class Terrain;
 
 
 	class ENGINE_API World
@@ -37,15 +37,17 @@ namespace Engine
 			{ _entities.Reset(); }
 		int GetVisibleEntities(ModelEntity** entities, int max_entities);
 		int GetVisibleShadowcasters(ModelEntity** entities, int max_entities);
+		int GetVisibleTerrainPatches(Terrain::TerrainPatch** patches, int max_patches);
+		Terrain& GetTerrain()
+			{ return _terrain; }
 
 	private:
 		static const int MAX_NUM_ENTITIES = 16 * 1024;
 
-		void PositionTerrain(Terrain* terrain);
-
 		Camera _camera;
 		FreePool<FreeListNode<const Entity*> > _entityPool;
 		EntityList _entities;
+		Terrain _terrain;
 	};
 
 }

@@ -13,7 +13,6 @@ void glextLoadAll()
 	glextLoad_GL_ARB_color_buffer_float();
 	glextLoad_GL_ARB_draw_instanced();
 	glextLoad_GL_ARB_geometry_shader4();
-	glextLoad_GL_ARB_instanced_arrays();
 	glextLoad_GL_ARB_map_buffer_range();
 	glextLoad_GL_ARB_texture_buffer_object();
 	glextLoad_GL_ARB_uniform_buffer_object();

@@ -14,6 +14,7 @@ namespace Engine
 
 	class World;
 	class ModelEntity;
+	class TerrainRenderer;
 
 
 	class ENGINE_API RenderSystem
@@ -26,6 +27,7 @@ namespace Engine
 
 		void RenderFrame(int frame_time);
 		void RenderEntities(int frame_time);
+		void RenderTerrain(int frame_time);
 		void ReloadShaders();
 
 		GL::Renderer* GetRenderer()
@@ -50,6 +52,7 @@ namespace Engine
 		ModelEntity** _entityBuf;
 		EntityRenderer::MeshRenderData* _meshBuf;
 		EntityRenderer::MeshRenderData* _transpMeshBuf;
+		TerrainRenderer* _terrainRenderer;
 		int _frameTime;
 
 		int _smapWidth;

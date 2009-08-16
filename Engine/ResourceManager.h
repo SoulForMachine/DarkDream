@@ -11,6 +11,7 @@ namespace Engine
 {
 
 	class ShaderManager;
+	class ASMProgManager;
 	class TextureManager;
 	class ModelManager;
 	class AnimationManager;

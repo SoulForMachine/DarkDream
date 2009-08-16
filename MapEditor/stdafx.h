@@ -19,3 +19,11 @@
 #pragma comment(lib, "gdi32.lib")
 
 extern Engine::EngineAPI* engineAPI;
+
+#define APP_NAME	"Dark Dream Map Editor"
+
+inline
+System::String^ GetAppName()
+{
+	return APP_NAME;
+}

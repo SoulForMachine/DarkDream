@@ -289,12 +289,6 @@ EXTPTR PFNGLFRAMEBUFFERTEXTUREARBPROC glFramebufferTextureARB;
 EXTPTR PFNGLFRAMEBUFFERTEXTURELAYERARBPROC glFramebufferTextureLayerARB;
 EXTPTR PFNGLFRAMEBUFFERTEXTUREFACEARBPROC glFramebufferTextureFaceARB;
 
-// GL_ARB_instanced_arrays
-
-EXTPTR bool glextLoad_GL_ARB_instanced_arrays();
-
-EXTPTR PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor;
-
 // GL_ARB_map_buffer_range
 
 EXTPTR bool glextLoad_GL_ARB_map_buffer_range();

@@ -325,15 +325,6 @@ bool glextLoad_GL_ARB_geometry_shader4()
 	return true;
 }
 
-// GL_ARB_instanced_arrays
-
-bool glextLoad_GL_ARB_instanced_arrays()
-{
-	INIT_FUNC_PTR(glVertexAttribDivisor);
-
-	return true;
-}
-
 // GL_ARB_map_buffer_range
 
 bool glextLoad_GL_ARB_map_buffer_range()

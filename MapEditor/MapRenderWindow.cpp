@@ -22,8 +22,6 @@ namespace MapEditor
 	};
 
 
-	static math3d::mat4f s_worldMat;
-
 
 	MapRenderWindow::MapRenderWindow(Form^ parent)
 	{
@@ -36,9 +34,9 @@ namespace MapEditor
 
 		_rotX = 45.0f;
 		_rotY = 45.0f;
-		_panX = 0.0f;
+		_panX = (float)Terrain::PATCH_WIDTH / 2;
 		_panY = 0.0f;
-		_zoom = 15.0f;
+		_zoom = 150.0f;
 
 		_leftBtnDown = false;
 		_middleBtnDown = false;
@@ -51,7 +49,7 @@ namespace MapEditor
 		_fps = 0;
 		_animate = false;
 		_wireframe = false;
-		_modelStats = false;
+		_stats = true;
 
 		System::Windows::Forms::CreateParams^ cp = gcnew System::Windows::Forms::CreateParams;
 		cp->Caption = "";
@@ -218,24 +216,38 @@ namespace MapEditor
 		if(!_renderer->SetCurrentContext())
 			return;
 
-		s_worldMat.set_rotation_y(_rotY);
-		s_worldMat.rotate_x(_rotX);
-
-		engineAPI->world->GetCamera().LookAt(
+		mat4f rot, look_at, cam;
+		rot.set_translation(-_panX, 0.0f, -Terrain::PATCH_HEIGHT / 2);
+		rot.rotate_y(_rotY);
+		rot.rotate_x(_rotX);
+		rot.translate(_panX, 0.0f, Terrain::PATCH_HEIGHT / 2);
+		look_at.look_at(
 			vec3f(_panX, _panY, _zoom),
 			vec3f(_panX, _panY, 0.0f),
 			vec3f::y_axis);
+		mul(cam, rot, look_at);
+
+		engineAPI->world->GetCamera().SetViewingTransform(cam);
 
 		_renderer->SwapInterval(0);
 		_renderer->ClearColorBuffer(0.5f, 0.5f, 0.5f, 1.0f);
 		_renderer->ClearDepthStencilBuffer(DEPTH_BUFFER_BIT | STENCIL_BUFFER_BIT, 1.0f, 0);
 		_renderer->EnableDepthTest(true);
+		_renderer->EnableFaceCulling(false);
 
-		if(_modelStats)
-			RenderStats();
+		if(_wireframe)
+			_renderer->RasterizationMode(GL::RASTER_LINE);
+
+		engineAPI->renderSystem->RenderTerrain(_frameTime);
+
+		if(_wireframe)
+			_renderer->RasterizationMode(GL::RASTER_FILL);
 
 		if(_editMode)
 			_editMode->Render();
+
+		if(_stats)
+			RenderStats();
 
 		_renderer->Finish();
 		_renderer->SwapBuffers();
@@ -288,8 +300,8 @@ namespace MapEditor
 		{
 			if(_leftBtnDown && (modifiers & MK_LBUTTON))
 			{
-				_rotX += (y - _prevY);
-				_rotY += (x - _prevX);
+				_rotX += (y - _prevY) * 0.5f;
+				_rotY += (x - _prevX) * 0.5f;
 
 				if(_rotX > 360.0f)
 					_rotX -= 360.0f;
@@ -301,17 +313,13 @@ namespace MapEditor
 			}
 			else if(_middleBtnDown && (modifiers & MK_MBUTTON))
 			{
-				_panX -= (x - _prevX) * 0.001f * _zoom;
 				_panY += (y - _prevY) * 0.001f * _zoom;
 
 				OnPaint();
 			}
 			else if(_rightBtnDown && (modifiers & MK_RBUTTON))
 			{
-				_zoom += (x - _prevX) * 0.2f;
-				float z = _zoom;
-				clamp(z, 5.0f, 100.0f);
-				_zoom = z;
+				_panX -= (x - _prevX) * 0.001f * _zoom;
 
 				OnPaint();
 			}
@@ -415,6 +423,7 @@ namespace MapEditor
 
 		_renderSystem->GetRender2D()->FlushText();
 		_renderer->EnableDepthTest(true);
+		_renderer->FrontFace(GL::ORIENT_CCW);
 	}
 
 	void MapRenderWindow::OnTimerTick(System::Object^  sender, System::EventArgs^  e)

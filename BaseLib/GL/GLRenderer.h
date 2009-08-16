@@ -120,7 +120,6 @@ namespace GL
 
 		// other
 		bool extTextureFilterAnisotropic;
-		bool extInstancedArrays;
 		bool extGeometryShader4;
 
 		// wgl
@@ -174,7 +173,6 @@ namespace GL
 		void VertexSource(int stream, const Buffer* buffer, size_t stride, size_t offset);
 		void IndexSource(const Buffer* buffer, DataType index_type);
 		void ActiveVertexFormat(const VertexFormat* format);
-		void VertexAttribDivisor(uint attrib, uint divisor);
 		void EnablePrimitiveRestart(bool enable);
 		void PrimitiveRestartIndex(uint index);
 

@@ -208,7 +208,7 @@
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\EditorCommon.dll"
-			AssemblyName="EditorCommon, Version=1.0.3484.30792, processorArchitecture=x86"
+			AssemblyName="EditorCommon, Version=1.0.3515.34926, processorArchitecture=x86"
 			MinFrameworkVersion="131072"
 		/>
 	</References>
@@ -275,6 +275,10 @@
 					RelativePath=".\resource.h"
 					>
 				</File>
+				<File
+					RelativePath=".\Utility.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Resource Files"
@@ -313,6 +317,10 @@
 				</File>
 				<File
 					RelativePath=".\PropertyForm.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Utility.cpp"
 					>
 				</File>
 			</Filter>
@@ -371,14 +379,6 @@
 		</File>
 		<File
 			RelativePath=".\stdafx.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Utility.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Utility.h"
 			>
 		</File>
 	</Files>

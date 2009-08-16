@@ -46,11 +46,14 @@ namespace MapEditor {
 	private:
 		WeifenLuo::WinFormsUI::Docking::IDockContent^ GetContentFromPersistString(String^ persistString);
 		void UpdateToolbarButtons();
+		void AddTerrainPatch();
 
 		WeifenLuo::WinFormsUI::Docking::DeserializeDockContent^ _deserializeDockContent;
 		EditorCommon::ConsoleForm^ _consoleForm;
 		MapForm^ _mapForm;
 		ToolPanel^ _toolPanel;
+		bool _wireframe;
+		bool _viewStats;
 
 	private: System::Windows::Forms::MenuStrip^  _mainMenu;
 	protected: 
@@ -84,7 +87,7 @@ namespace MapEditor {
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuEditRedo;
 	private: System::Windows::Forms::ToolStripMenuItem^  regionToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuRegionNewTerrain;
-	private: System::Windows::Forms::ToolStripMenuItem^  _menuRegionNewGrid;
+
 
 	private: System::Windows::Forms::ToolStripMenuItem^  toolsToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuToolsOptions;
@@ -96,18 +99,9 @@ namespace MapEditor {
 	private: System::Windows::Forms::ToolStripButton^  _toolBtnObjectPlacement;
 	private: System::Windows::Forms::ToolStripButton^  _toolBtnTriggers;
 	private: System::Windows::Forms::ToolStripButton^  _toolBtnParticleSystems;
-
-
-
-
-
-
-
-
-
-
-
-
+	private: System::Windows::Forms::ToolStripMenuItem^  toolStripMenuItem2;
+	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewWireframe;
+	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewStats;
 
 
 
@@ -137,9 +131,11 @@ namespace MapEditor {
 			this->editToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuEditUndo = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuEditRedo = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->toolStripMenuItem2 = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->_menuViewWireframe = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->_menuViewStats = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->regionToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuRegionNewTerrain = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->_menuRegionNewGrid = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->toolsToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuToolsOptions = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_statusBar = (gcnew System::Windows::Forms::StatusStrip());
@@ -158,8 +154,8 @@ namespace MapEditor {
 			// 
 			// _mainMenu
 			// 
-			this->_mainMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(4) {this->fileToolStripMenuItem, 
-				this->editToolStripMenuItem, this->regionToolStripMenuItem, this->toolsToolStripMenuItem});
+			this->_mainMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) {this->fileToolStripMenuItem, 
+				this->editToolStripMenuItem, this->toolStripMenuItem2, this->regionToolStripMenuItem, this->toolsToolStripMenuItem});
 			this->_mainMenu->Location = System::Drawing::Point(0, 0);
 			this->_mainMenu->Name = L"_mainMenu";
 			this->_mainMenu->Size = System::Drawing::Size(860, 24);
@@ -236,10 +232,33 @@ namespace MapEditor {
 			this->_menuEditRedo->Text = L"&Redo";
 			this->_menuEditRedo->Click += gcnew System::EventHandler(this, &MainForm::_menuEditRedo_Click);
 			// 
+			// toolStripMenuItem2
+			// 
+			this->toolStripMenuItem2->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {this->_menuViewWireframe, 
+				this->_menuViewStats});
+			this->toolStripMenuItem2->Name = L"toolStripMenuItem2";
+			this->toolStripMenuItem2->Size = System::Drawing::Size(41, 20);
+			this->toolStripMenuItem2->Text = L"&View";
+			// 
+			// _menuViewWireframe
+			// 
+			this->_menuViewWireframe->Name = L"_menuViewWireframe";
+			this->_menuViewWireframe->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::W));
+			this->_menuViewWireframe->Size = System::Drawing::Size(177, 22);
+			this->_menuViewWireframe->Text = L"&Wireframe";
+			this->_menuViewWireframe->Click += gcnew System::EventHandler(this, &MainForm::_menuViewWireframe_Click);
+			// 
+			// _menuViewStats
+			// 
+			this->_menuViewStats->Name = L"_menuViewStats";
+			this->_menuViewStats->ShortcutKeys = System::Windows::Forms::Keys::F2;
+			this->_menuViewStats->Size = System::Drawing::Size(177, 22);
+			this->_menuViewStats->Text = L"&Statistics";
+			this->_menuViewStats->Click += gcnew System::EventHandler(this, &MainForm::_menuViewStats_Click);
+			// 
 			// regionToolStripMenuItem
 			// 
-			this->regionToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {this->_menuRegionNewTerrain, 
-				this->_menuRegionNewGrid});
+			this->regionToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) {this->_menuRegionNewTerrain});
 			this->regionToolStripMenuItem->Name = L"regionToolStripMenuItem";
 			this->regionToolStripMenuItem->Size = System::Drawing::Size(52, 20);
 			this->regionToolStripMenuItem->Text = L"&Region";
@@ -247,16 +266,9 @@ namespace MapEditor {
 			// _menuRegionNewTerrain
 			// 
 			this->_menuRegionNewTerrain->Name = L"_menuRegionNewTerrain";
-			this->_menuRegionNewTerrain->Size = System::Drawing::Size(143, 22);
-			this->_menuRegionNewTerrain->Text = L"New &Terrain";
-			this->_menuRegionNewTerrain->Click += gcnew System::EventHandler(this, &MainForm::_menuRegionNewTerrain_Click);
-			// 
-			// _menuRegionNewGrid
-			// 
-			this->_menuRegionNewGrid->Name = L"_menuRegionNewGrid";
-			this->_menuRegionNewGrid->Size = System::Drawing::Size(143, 22);
-			this->_menuRegionNewGrid->Text = L"New &Grid";
-			this->_menuRegionNewGrid->Click += gcnew System::EventHandler(this, &MainForm::_menuRegionNewGrid_Click);
+			this->_menuRegionNewTerrain->Size = System::Drawing::Size(173, 22);
+			this->_menuRegionNewTerrain->Text = L"New Terrain &Patch";
+			this->_menuRegionNewTerrain->Click += gcnew System::EventHandler(this, &MainForm::_menuRegionNewTerrainPatch_Click);
 			// 
 			// toolsToolStripMenuItem
 			// 
@@ -285,9 +297,9 @@ namespace MapEditor {
 			this->_dockPanel->ActiveAutoHideContent = nullptr;
 			this->_dockPanel->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->_dockPanel->DocumentStyle = WeifenLuo::WinFormsUI::Docking::DocumentStyle::DockingWindow;
-			this->_dockPanel->Location = System::Drawing::Point(0, 24);
+			this->_dockPanel->Location = System::Drawing::Point(0, 62);
 			this->_dockPanel->Name = L"_dockPanel";
-			this->_dockPanel->Size = System::Drawing::Size(860, 576);
+			this->_dockPanel->Size = System::Drawing::Size(860, 538);
 			this->_dockPanel->TabIndex = 3;
 			// 
 			// _openFileDialog
@@ -361,8 +373,8 @@ namespace MapEditor {
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(860, 622);
-			this->Controls->Add(this->_mainToolbar);
 			this->Controls->Add(this->_dockPanel);
+			this->Controls->Add(this->_mainToolbar);
 			this->Controls->Add(this->_statusBar);
 			this->Controls->Add(this->_mainMenu);
 			this->MainMenuStrip = this->_mainMenu;
@@ -387,14 +399,16 @@ namespace MapEditor {
 	private: System::Void _menuFileExit_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuEditUndo_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuEditRedo_Click(System::Object^  sender, System::EventArgs^  e);
-	private: System::Void _menuRegionNewTerrain_Click(System::Object^  sender, System::EventArgs^  e);
-	private: System::Void _menuRegionNewGrid_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuToolsOptions_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _toolBtnViewMode_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _toolBtnTerrainEdit_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _toolBtnObjectPlacement_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _toolBtnTriggers_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _toolBtnParticleSystems_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _menuRegionNewTerrainPatch_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _menuViewWireframe_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void OnIdle(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _menuViewStats_Click(System::Object^  sender, System::EventArgs^  e);
 };
 
 }

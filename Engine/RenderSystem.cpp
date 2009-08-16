@@ -3,6 +3,7 @@
 #include "BaseLib/Console.h"
 #include "Engine/World.h"
 #include "Engine/EngineInternal.h"
+#include "Engine/TerrainRenderer.h"
 #include "Model.h"
 #include "RenderSystem.h"
 
@@ -86,6 +87,16 @@ namespace Engine
 		_meshBuf = new(mainPool) EntityRenderer::MeshRenderData[MAX_NUM_MESHES];
 		_transpMeshBuf = new(mainPool) EntityRenderer::MeshRenderData[MAX_NUM_TRANSP_MESHES];
 
+		// init terrain rendering
+		_terrainRenderer = new(mainPool) TerrainRenderer;
+		result = _terrainRenderer->Init();
+		if(!result)
+		{
+			Console::PrintError("Failed to initialize terrain rendering.");
+			Deinit();
+			return false;
+		}
+
 		return true;
 	}
 
@@ -103,6 +114,12 @@ namespace Engine
 		{
 			_entityRenderer->Deinit();
 			delete _entityRenderer;
+		}
+
+		if(_terrainRenderer)
+		{
+			_terrainRenderer->Deinit();
+			delete _terrainRenderer;
 		}
 
 		GL::DestroyRenderer(_renderer);
@@ -256,6 +273,16 @@ namespace Engine
 		_entityRenderer->Render(engineAPI.world->GetCamera(), _transpMeshBuf, transp_mesh_count);
 	}
 
+	void RenderSystem::RenderTerrain(int frame_time)
+	{
+		Terrain::TerrainPatch* patches[Terrain::MAX_PATCHES];
+		int count = engineAPI.world->GetVisibleTerrainPatches(patches, Terrain::MAX_PATCHES);
+		_renderer->ActiveDrawFramebuffer(0);
+		_renderer->EnableColorWrite(true, true, true, true);
+		_renderer->CullFace(GL::FACE_BACK);
+		_terrainRenderer->RenderTerrainPatch(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);
+	}
+
 	void RenderSystem::ReloadShaders()
 	{
 		_render2D->ReloadShaders();
@@ -270,6 +297,7 @@ namespace Engine
 		_entityBuf = 0;
 		_meshBuf = 0;
 		_transpMeshBuf = 0;
+		_terrainRenderer = 0;
 	}
 
 }

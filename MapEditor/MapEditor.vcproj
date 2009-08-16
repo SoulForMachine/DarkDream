@@ -206,7 +206,7 @@
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\EditorCommon.dll"
-			AssemblyName="EditorCommon, Version=1.0.3487.37076, processorArchitecture=x86"
+			AssemblyName="EditorCommon, Version=1.0.3515.34926, processorArchitecture=x86"
 			MinFrameworkVersion="131072"
 		/>
 	</References>
@@ -397,6 +397,14 @@
 		</File>
 		<File
 			RelativePath=".\UndoManager.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Utility.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Utility.h"
 			>
 		</File>
 	</Files>

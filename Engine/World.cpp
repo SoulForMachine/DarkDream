@@ -21,11 +21,15 @@ namespace Engine
 
 	bool World::Init()
 	{
+		if(!_terrain.Init())
+			return false;
+
 		return true;
 	}
 
 	void World::Deinit()
 	{
+		_terrain.Deinit();
 	}
 
 	int World::GetVisibleEntities(ModelEntity** entities, int max_entities)
@@ -54,6 +58,26 @@ namespace Engine
 	int World::GetVisibleShadowcasters(ModelEntity** entities, int max_entities)
 	{
 		return 0;
+	}
+
+	int World::GetVisibleTerrainPatches(Terrain::TerrainPatch** patches, int max_patches)
+	{
+		if(!patches || max_patches <= 0)
+			return 0;
+
+		int count = 0;
+		Terrain::TerrainPatchList& patch_list = _terrain.GetPatches();
+		for(Terrain::TerrainPatchList::Iterator it = patch_list.Begin(); it != patch_list.End(); ++it)
+		{
+			if(_camera.IsInsideFrustum(it->boundBox) != Camera::CLIP_OUTSIDE)
+			{
+				patches[count++] = &(*it);
+				if(count == max_patches)
+					break;
+			}
+		}
+
+		return count;
 	}
 
 }

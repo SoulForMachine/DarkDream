@@ -23,7 +23,7 @@ namespace MapEditor
 		void Wireframe(bool wireframe)
 			{ _wireframe = wireframe; }
 		void ShowStats(bool stats)
-			{ _modelStats = stats; }
+			{ _stats = stats; }
 		void Draw()
 			{ OnPaint(); }
 
@@ -77,7 +77,7 @@ namespace MapEditor
 		float _fps;
 		bool _animate;
 		bool _wireframe;
-		bool _modelStats;
+		bool _stats;
 	};
 
 }

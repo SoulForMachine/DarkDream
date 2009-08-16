@@ -3,6 +3,7 @@
 #include "MapForm.h"
 #include "ToolPanel.h"
 #include "TerrainEditPanel.h"
+#include "Utility.h"
 #include "MainForm.h"
 
 #define DOCK_PANEL_XML_FILE		"MapEditorDocking.xml"
@@ -45,6 +46,13 @@ namespace MapEditor
 		UpdateToolbarButtons();
 
 		_dockPanel->ResumeLayout(true, true);
+
+		_wireframe = false;
+		_viewStats = true;
+
+		Application::Idle += gcnew EventHandler(this, &MainForm::OnIdle);
+
+		AddTerrainPatch();
 	}
 
 	void MainForm::FormNotify(Form^ form, EditorCommon::NotifyMessage msg)
@@ -112,14 +120,9 @@ namespace MapEditor
 
 	}
 
-	System::Void MainForm::_menuRegionNewTerrain_Click(System::Object^  sender, System::EventArgs^  e)
+	System::Void MainForm::_menuRegionNewTerrainPatch_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		
-	}
-
-	System::Void MainForm::_menuRegionNewGrid_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-
+		AddTerrainPatch();
 	}
 
 	System::Void MainForm::_menuToolsOptions_Click(System::Object^  sender, System::EventArgs^  e)
@@ -156,6 +159,13 @@ namespace MapEditor
 
 	}
 
+	System::Void MainForm::_menuViewWireframe_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		_wireframe = !_wireframe;
+		_mapForm->Wireframe(_wireframe);
+		_mapForm->Redraw();
+	}
+
 	void MainForm::UpdateToolbarButtons()
 	{
 		// reset toolbar button states
@@ -177,4 +187,38 @@ namespace MapEditor
 			assert(0);
 		}
 	}
+
+	System::Void MainForm::OnIdle(System::Object^  sender, System::EventArgs^  e)
+	{
+		_menuViewWireframe->Checked = _wireframe;
+		_menuViewStats->Checked = _viewStats;
+		_mapForm->RedrawAsync();
+	}
+
+	System::Void MainForm::_menuViewStats_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		_viewStats = !_viewStats;
+		_mapForm->ShowStats(_viewStats);
+	}
+
+	void MainForm::AddTerrainPatch()
+	{
+		if(!engineAPI->world->GetTerrain().AddPatch())
+		{
+			if(engineAPI->world->GetTerrain().GetPatches().GetCount() == Engine::Terrain::MAX_PATCHES)
+			{
+				Windows::Forms::MessageBox::Show(
+					this, "Failed to add terrain patch - maximum of 32 patches reached.", GetAppName(),
+					MessageBoxButtons::OK, MessageBoxIcon::Error);
+			}
+			else
+			{
+				Windows::Forms::MessageBox::Show(
+					this, "Failed to add terrain patch.", GetAppName(),
+					MessageBoxButtons::OK, MessageBoxIcon::Error);
+			}
+		}
+		_mapForm->Redraw();
+	}
+
 }

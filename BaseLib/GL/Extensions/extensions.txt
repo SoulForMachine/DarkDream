@@ -77,5 +77,4 @@ GL_EXT_gpu_program_parameters
 
 # other
 GL_EXT_texture_filter_anisotropic
-GL_ARB_instanced_arrays
 GL_ARB_geometry_shader4

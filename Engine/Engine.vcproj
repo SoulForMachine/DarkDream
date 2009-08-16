@@ -199,6 +199,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Base\Programs\Terrain.vp"
+				>
+			</File>
+			<File
 				RelativePath="..\Base\Programs\Text.fp"
 				>
 			</File>
@@ -345,6 +349,14 @@
 		</File>
 		<File
 			RelativePath=".\Terrain.h"
+			>
+		</File>
+		<File
+			RelativePath=".\TerrainRenderer.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\TerrainRenderer.h"
 			>
 		</File>
 		<File

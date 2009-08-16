@@ -1,0 +1,24 @@
+!!ARBvp1.0
+
+ATTRIB		vertPos = vertex.attrib[0];
+ATTRIB		vertNormal = vertex.attrib[1];
+
+PARAM		transl = program.local[0];
+PARAM		viewProjMat[] = { program.local[1..4] };
+
+OUTPUT		varPos = result.position;
+OUTPUT		varNormal = result.texcoord[0];
+
+TEMP		r0;
+
+
+ADD			r0, vertPos, transl;
+
+DP4			varPos.x, viewProjMat[0], r0;
+DP4			varPos.y, viewProjMat[1], r0;
+DP4			varPos.z, viewProjMat[2], r0;
+DP4			varPos.w, viewProjMat[3], r0;
+
+MOV			varNormal, vertNormal;
+
+END
