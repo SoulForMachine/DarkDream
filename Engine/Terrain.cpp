@@ -73,6 +73,7 @@ namespace Engine
 		for(TerrainPatchList::Iterator it = _patches.Begin(); it != _patches.End(); ++it)
 		{
 			_renderer->DestroyBuffer(it->vertBuf);
+			delete[] it->elevation;
 		}
 		_patches.Clear();
 
@@ -85,7 +86,8 @@ namespace Engine
 			return false;
 
 		TerrainPatch patch;
-		patch.vertBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, (PATCH_WIDTH + 1) * (PATCH_HEIGHT + 1) * sizeof(PatchVertex), 0, GL::USAGE_STATIC_DRAW);
+		int vert_count = (PATCH_WIDTH + 1) * (PATCH_HEIGHT + 1);
+		patch.vertBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, vert_count * sizeof(PatchVertex), 0, GL::USAGE_STATIC_DRAW);
 		if(!patch.vertBuf)
 			return false;
 
@@ -96,18 +98,25 @@ namespace Engine
 			return false;
 		}
 
+		patch.elevation = new(mapPool) float[vert_count];
+
+		int i = 0;
 		for(int h = 0; h < PATCH_HEIGHT + 1; ++h)
 		{
 			for(int w = 0; w < PATCH_WIDTH + 1; ++w)
 			{
+				float elev = heights? heights[h * (PATCH_WIDTH + 1) + w]: 0.0f;
+
 				vertices->position.x = (float)w;
-				vertices->position.y = heights? heights[h * (PATCH_WIDTH + 1) + w]: 0.0f;
+				vertices->position.y = elev;
 				vertices->position.z = (float)h;
 				vertices->position.w = 1.0f;
 
 				vertices->normal = vec3f::y_axis;
 
 				++vertices;
+
+				patch.elevation[i++] = elev;
 			}
 		}
 
@@ -121,6 +130,15 @@ namespace Engine
 		_patches.PushBack(patch);
 
 		return true;
+	}
+
+	void Terrain::RemovePatch(size_t index)
+	{
+		assert(index >= 0 && index < _patches.GetCount());
+		TerrainPatch& patch = _patches.GetByIndex(index);
+		_renderer->DestroyBuffer(patch.vertBuf);
+		delete[] patch.elevation;
+		_patches.Remove(index);
 	}
 
 }

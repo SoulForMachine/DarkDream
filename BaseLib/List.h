@@ -42,7 +42,7 @@ public:
 	void PopFront();
 	void Insert(Iterator where, const _Type& val);
 	void Remove(Iterator it);
-	void Remove(int index);
+	void Remove(size_t index);
 	void Clear();
 
 	// access
@@ -52,7 +52,7 @@ public:
 	ConstIterator End() const { return ConstIterator(_end); }
 	_Type& GetHead() { return _end->next->data; }
 	_Type& GetTail() { return _end->prev->data; }
-	_Type& GetByIndex(int index);
+	_Type& GetByIndex(size_t index);
 	size_t GetCount() const { return _count; }
 	bool IsEmpty() const { return _count == 0; }
 
@@ -248,7 +248,7 @@ void List<_Type>::Remove(Iterator it)
 }
 
 template <class _Type>
-void List<_Type>::Remove(int index)
+void List<_Type>::Remove(size_t index)
 {
 	for(Iterator it = Begin(); it != End(); ++it)
 	{
@@ -272,13 +272,13 @@ void List<_Type>::Clear()
 }
 
 template <class _Type>
-_Type& List<_Type>::GetByIndex(int index)
+_Type& List<_Type>::GetByIndex(size_t index)
 {
 	assert(index < _count);
 
 	NodeType* node = _end->next;
 
-	for(int i = 0; i < index; ++i)
+	for(size_t i = 0; i < index; ++i)
 		node = node->next;
 
 	return node->data;

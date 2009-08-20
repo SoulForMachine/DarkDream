@@ -21,7 +21,7 @@ namespace MapEditor
 		_deserializeDockContent = gcnew WeifenLuo::WinFormsUI::Docking::DeserializeDockContent(this, &MainForm::GetContentFromPersistString);
 		_consoleForm = gcnew ConsoleForm(this);
 		_toolPanel = gcnew ToolPanel(this);
-		_mapForm = gcnew MapForm(this, _toolPanel);
+		_mapForm = gcnew MapForm(this);
 
 		// load layout for dock panels from an xml
 		_dockPanel->SuspendLayout(true);
@@ -139,6 +139,7 @@ namespace MapEditor
 	System::Void MainForm::_toolBtnTerrainEdit_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::TERRAIN_EDIT);
+		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
 		UpdateToolbarButtons();
 	}
 
@@ -175,7 +176,7 @@ namespace MapEditor
 		_toolBtnTriggers->Checked = false;
 		_toolBtnParticleSystems->Checked = false;
 
-		switch(_mapForm->GetCurrentEditMode())
+		switch(_mapForm->GetCurrentEditMode()->GetModeEnum())
 		{
 		case EditMode::EditModeEnum::VIEW:
 			_toolBtnViewMode->Checked = true;

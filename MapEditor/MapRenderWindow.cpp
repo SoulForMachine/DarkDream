@@ -300,6 +300,10 @@ namespace MapEditor
 		{
 			if(_leftBtnDown && (modifiers & MK_LBUTTON))
 			{
+				
+			}
+			else if(_middleBtnDown && (modifiers & MK_MBUTTON))
+			{
 				_rotX += (y - _prevY) * 0.5f;
 				_rotY += (x - _prevX) * 0.5f;
 
@@ -311,15 +315,10 @@ namespace MapEditor
 
 				OnPaint();
 			}
-			else if(_middleBtnDown && (modifiers & MK_MBUTTON))
-			{
-				_panY += (y - _prevY) * 0.001f * _zoom;
-
-				OnPaint();
-			}
 			else if(_rightBtnDown && (modifiers & MK_RBUTTON))
 			{
 				_panX -= (x - _prevX) * 0.001f * _zoom;
+				_panY += (y - _prevY) * 0.001f * _zoom;
 
 				OnPaint();
 			}

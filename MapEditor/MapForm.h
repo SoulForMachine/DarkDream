@@ -30,7 +30,7 @@ namespace MapEditor {
 	public ref class MapForm : public WeifenLuo::WinFormsUI::Docking::DockContent
 	{
 	public:
-		MapForm(EditorCommon::FormDirector^ director, ToolPanel^ tool_panel);
+		MapForm(EditorCommon::FormDirector^ director);
 
 		void Redraw()
 			{ _renderWindow->Draw(); }
@@ -42,8 +42,8 @@ namespace MapEditor {
 		void ShowStats(bool stats)
 			{ _renderWindow->ShowStats(stats); }
 		void SetCurrentEditMode(EditMode::EditModeEnum mode);
-		EditMode::EditModeEnum GetCurrentEditMode()
-			{ return _currentEditMode->GetModeEnum(); }
+		EditMode^ GetCurrentEditMode()
+			{ return _currentEditMode; }
 
 	protected:
 		/// <summary>
@@ -60,25 +60,8 @@ namespace MapEditor {
 	private:
 		EditorCommon::FormDirector^ _director;
 		MapRenderWindow^ _renderWindow;
-		ToolPanel^ _toolPanel;
 		EditMode^ _currentEditMode;
 		UndoManager^ _undoManager;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	private:
 		/// <summary>

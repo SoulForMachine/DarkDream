@@ -24,6 +24,7 @@ namespace Engine
 		struct TerrainPatch
 		{
 			GL::Buffer* vertBuf;
+			float* elevation;
 			float xPos;
 			AABBox boundBox;
 		};
@@ -45,6 +46,7 @@ namespace Engine
 		bool Init();
 		void Deinit();
 		bool AddPatch(float* heights = 0);
+		void RemovePatch(size_t index);
 		const GL::Buffer* GetPatchIndexBuffer() const
 			{ return _patchIndexBuf; }
 		int GetPatchIndexCount() const

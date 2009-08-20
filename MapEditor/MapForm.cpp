@@ -9,11 +9,10 @@
 namespace MapEditor
 {
 
-	MapForm::MapForm(EditorCommon::FormDirector^ director, ToolPanel^ tool_panel)
+	MapForm::MapForm(EditorCommon::FormDirector^ director)
 	{
 		InitializeComponent();
 		_director = director;
-		_toolPanel = tool_panel;
 		_undoManager = gcnew UndoManager;
 	}
 
@@ -87,7 +86,6 @@ namespace MapEditor
 			assert(0);
 		}
 
-		_toolPanel->SetPanel(_currentEditMode->GetPanel());
 		if(_renderWindow != nullptr)
 			_renderWindow->SetEditMode(_currentEditMode);
 	}
