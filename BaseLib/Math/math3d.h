@@ -19,6 +19,7 @@
 #include "mat4.h"
 #include "quat.h"
 #include "transform.h"
+#include "geometry.h"
 
 
 #endif // _MATH3D_H_

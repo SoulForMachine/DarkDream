@@ -304,6 +304,10 @@
 			Name="Math"
 			>
 			<File
+				RelativePath=".\Math\geometry.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Math\mat3.h"
 				>
 			</File>

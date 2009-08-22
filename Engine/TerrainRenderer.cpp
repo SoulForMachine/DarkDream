@@ -52,7 +52,7 @@ namespace Engine
 		{
 			_renderer->VertexSource(0, patches[i]->vertBuf, sizeof(Terrain::PatchVertex), 0);
 
-			float transl[] = { patches[i]->xPos, 0.0f, 0.0f, 0.0f };
+			float transl[] = { patches[i]->boundBox.minPt.x, 0.0f, 0.0f, 0.0f };
 			_vpTerrain->GetASMProgram()->LocalParameter(0, transl);
 
 			_renderer->DrawIndexed(GL::PRIM_TRIANGLES, 0, terrain->GetPatchIndexCount());

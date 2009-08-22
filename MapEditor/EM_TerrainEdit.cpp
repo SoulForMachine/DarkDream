@@ -3,7 +3,10 @@
 #include "TerrainEditPanel.h"
 #include "UndoManager.h"
 #include "ActionTerrainEdit.h"
+#include "TerrainBrush.h"
 #include "EM_TerrainEdit.h"
+
+using namespace math3d;
 
 
 namespace MapEditor
@@ -15,6 +18,7 @@ namespace MapEditor
 		_panel = gcnew TerrainEditPanel(_parameters);
 		_action = nullptr;
 		_undoManager = undo_manager;
+		_brush = gcnew TerrainBrush(_parameters);
 	}
 
 	System::Windows::Forms::UserControl^ EM_TerrainEdit::GetPanel()
@@ -29,8 +33,18 @@ namespace MapEditor
 
 	void EM_TerrainEdit::MouseMove(int modifiers, int x, int y)
 	{
-		if(_isExecuting && _action != nullptr)
+		vec3f point;
+		if(engineAPI->world->GetTerrain().PickTerrainPoint(x, y, point))
 		{
+			_parameters->posX = point.x;
+			_parameters->posY = point.y;
+			_parameters->posZ = point.z;
+
+			if(_isExecuting && _action != nullptr)
+			{
+			}
+
+			_brush->Draw();
 		}
 	}
 

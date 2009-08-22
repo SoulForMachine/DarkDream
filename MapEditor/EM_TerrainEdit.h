@@ -10,6 +10,7 @@ namespace MapEditor
 	ref class UndoManager;
 	ref class TerrainEditPanel;
 	ref class ActionTerrainEdit;
+	ref class TerrainBrush;
 
 
 	public ref class EM_TerrainEdit: public EditMode
@@ -30,8 +31,12 @@ namespace MapEditor
 			EditType editType;
 			float radius;
 			float hardness;
-			float strength;
+			float strength; // strength with which brush pulls vertices
 			float height;
+			// world-space position of brush center
+			float posX;
+			float posY;
+			float posZ;
 		};
 
 		EM_TerrainEdit(UndoManager^ undo_manager);
@@ -51,6 +56,7 @@ namespace MapEditor
 		ActionTerrainEdit^ _action;
 		Parameters^ _parameters;
 		UndoManager^ _undoManager;
+		TerrainBrush^ _brush;
 	};
 
 }

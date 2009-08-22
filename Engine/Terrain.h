@@ -25,7 +25,6 @@ namespace Engine
 		{
 			GL::Buffer* vertBuf;
 			float* elevation;
-			float xPos;
 			AABBox boundBox;
 		};
 
@@ -53,8 +52,12 @@ namespace Engine
 			{ return _patchIndexCount; }
 		TerrainPatchList& GetPatches()
 			{ return _patches; }
+		bool PickTerrainPoint(int screen_x, int screen_y, math3d::vec3f& point);
 
 	private:
+		bool IntersectPatch(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, math3d::vec3f& point);
+		bool IntersectPatchCell(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, int cell_x, int cell_y, math3d::vec3f& point);
+
 		GL::Renderer* _renderer;
 		GL::Buffer* _patchIndexBuf;
 		TerrainPatchList _patches;
