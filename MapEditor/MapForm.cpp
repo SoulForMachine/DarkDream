@@ -60,6 +60,13 @@ namespace MapEditor
 		}
 	}
 
+	System::Void MapForm::MapForm_HandleDestroyed(System::Object^  sender, System::EventArgs^  e)
+	{
+		delete _currentEditMode;
+		_renderWindow->DestroyHandle();
+		delete _renderWindow;
+	}
+
 	System::Void MapForm::MapForm_MouseWheel(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e)
 	{
 		if(_renderWindow)

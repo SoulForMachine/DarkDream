@@ -498,18 +498,19 @@ namespace Engine
 		assert(cell_y >= 0 && cell_y < PATCH_HEIGHT);
 
 		int i = cell_y * PATCH_WIDTH + cell_x;
+		float x = (float)cell_x + patch.boundBox.minPt.x;
 
 		vec3f triangle[3];
-		triangle[0].set((float)cell_x, patch.elevation[i], (float)cell_y);
-		triangle[1].set((float)cell_x + 1, patch.elevation[i + 1], (float)cell_y);
-		triangle[2].set((float)cell_x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
+		triangle[0].set(x, patch.elevation[i], (float)cell_y);
+		triangle[1].set(x + 1, patch.elevation[i + 1], (float)cell_y);
+		triangle[2].set(x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
 
 		if(intersect_ray_triangle(point, ray_pt, ray_dir, triangle))
 			return true;
 
-		triangle[0].set((float)cell_x + 1, patch.elevation[i + 1], (float)cell_y);
-		triangle[1].set((float)cell_x + 1, patch.elevation[i + PATCH_WIDTH + 2], (float)cell_y + 1);
-		triangle[2].set((float)cell_x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
+		triangle[0].set(x + 1, patch.elevation[i + 1], (float)cell_y);
+		triangle[1].set(x + 1, patch.elevation[i + PATCH_WIDTH + 2], (float)cell_y + 1);
+		triangle[2].set(x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
 
 		if(intersect_ray_triangle(point, ray_pt, ray_dir, triangle))
 			return true;
