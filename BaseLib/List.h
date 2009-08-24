@@ -263,8 +263,14 @@ void List<_Type>::Remove(size_t index)
 template <class _Type>
 void List<_Type>::Clear()
 {
-	for(Iterator it = Begin(); it != End(); ++it)
+	Iterator it = Begin();
+	while(it != End())
+	{
+		Iterator next = it;
+		++next;
 		delete it._node;
+		it = next;
+	}
 
 	_end->next = _end;
 	_end->prev = _end;

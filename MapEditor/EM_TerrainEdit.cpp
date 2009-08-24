@@ -19,6 +19,13 @@ namespace MapEditor
 		_action = nullptr;
 		_undoManager = undo_manager;
 		_brush = gcnew TerrainBrush(_parameters);
+		_brush->Init();
+		_intersection = false;
+	}
+
+	EM_TerrainEdit::~EM_TerrainEdit()
+	{
+		_brush->Deinit();
 	}
 
 	System::Windows::Forms::UserControl^ EM_TerrainEdit::GetPanel()
@@ -33,8 +40,11 @@ namespace MapEditor
 
 	void EM_TerrainEdit::MouseMove(int modifiers, int x, int y)
 	{
+		int vp_x, vp_y, vp_width, vp_height;
+		engineAPI->renderSystem->GetRenderer()->GetViewport(vp_x, vp_y, vp_width, vp_height);
 		vec3f point;
-		if(engineAPI->world->GetTerrain().PickTerrainPoint(x, y, point))
+		_intersection = engineAPI->world->GetTerrain().PickTerrainPoint(x, vp_height - y, point);
+		if(_intersection)
 		{
 			_parameters->posX = point.x;
 			_parameters->posY = point.y;
@@ -43,8 +53,6 @@ namespace MapEditor
 			if(_isExecuting && _action != nullptr)
 			{
 			}
-
-			_brush->Draw();
 		}
 	}
 
@@ -80,6 +88,8 @@ namespace MapEditor
 
 	void EM_TerrainEdit::Render()
 	{
+		if(_intersection)
+			_brush->Draw();
 	}
 
 	void EM_TerrainEdit::Update()

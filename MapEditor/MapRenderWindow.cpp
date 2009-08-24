@@ -190,12 +190,14 @@ namespace MapEditor
 	void MapRenderWindow::OnPaint()
 	{
 		// prevent OnPaint re-entry
-		static int in_during = 0;
+	/*	static int in_during = 0;
 		if(++in_during > 1)
 		{
 			in_during = 1;
 			return;
-		}
+		}*/
+		if(!System::Threading::Monitor::TryEnter(this))
+			return;
 		//------------------------
 
 		uint cur_time = ::Timer::GetTime();
@@ -252,7 +254,8 @@ namespace MapEditor
 		_renderer->Finish();
 		_renderer->SwapBuffers();
 
-		in_during = 0;
+	//	in_during = 0;
+		System::Threading::Monitor::Exit(this);
 	}
 
 	void MapRenderWindow::OnSize(int width, int height)
@@ -283,8 +286,8 @@ namespace MapEditor
 
 			::Timer::Deinit();
 
-			_renderSystem->Deinit();
 			engineAPI->world->Deinit();
+			_renderSystem->Deinit();
 		}
 	}
 
@@ -292,11 +295,9 @@ namespace MapEditor
 	{
 		SetCursor(LoadCursor(0, IDC_ARROW));
 
-		if(_editMode->IsExecuting())
-		{
-			_editMode->MouseMove(modifiers, x, y);
-		}
-		else
+		_editMode->MouseMove(modifiers, x, y);
+
+		if(!_editMode->IsExecuting())
 		{
 			if(_leftBtnDown && (modifiers & MK_LBUTTON))
 			{
@@ -384,11 +385,9 @@ namespace MapEditor
 
 	void MapRenderWindow::OnMouseWheel(int delta, int x, int y)
 	{
-		if(_editMode->IsExecuting())
-		{
-			_editMode->MouseWheel(delta, x, y);
-		}
-		else
+		_editMode->MouseWheel(delta, x, y);
+
+		if(!_editMode->IsExecuting())
 		{
 			for(int i = 0; i < 6; ++i)
 			{

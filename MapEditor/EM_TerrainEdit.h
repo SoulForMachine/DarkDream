@@ -40,6 +40,7 @@ namespace MapEditor
 		};
 
 		EM_TerrainEdit(UndoManager^ undo_manager);
+		~EM_TerrainEdit();
 
 		virtual System::Windows::Forms::UserControl^ GetPanel() override;
 		virtual EditModeEnum GetModeEnum() override;
@@ -57,6 +58,7 @@ namespace MapEditor
 		Parameters^ _parameters;
 		UndoManager^ _undoManager;
 		TerrainBrush^ _brush;
+		bool _intersection;
 	};
 
 }

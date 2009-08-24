@@ -24,6 +24,9 @@ namespace MapEditor
 	public:
 		TerrainBrush(EM_TerrainEdit::Parameters^ params)
 			{ _parameters = params; }
+
+		bool Init();
+		void Deinit();
 		void Draw();
 		void SetParameters(EM_TerrainEdit::Parameters^ params)
 			{ _parameters = params; }

@@ -362,8 +362,8 @@ namespace EntityEditor
 
 			::Timer::Deinit();
 
-			_renderSystem->Deinit();
 			engineAPI->world->Deinit();
+			_renderSystem->Deinit();
 		}
 	}
 

@@ -133,6 +133,7 @@ namespace MapEditor
 	System::Void MainForm::_toolBtnViewMode_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
+		_toolPanel->SetPanel(nullptr);
 		UpdateToolbarButtons();
 	}
 

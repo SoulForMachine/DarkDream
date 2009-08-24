@@ -54,6 +54,10 @@ namespace Engine
 			{ return _patches; }
 		bool PickTerrainPoint(int screen_x, int screen_y, math3d::vec3f& point);
 
+		math3d::vec2i _dbgCells[4096];
+		int _dbgCellCount;
+		math3d::vec3f _dbgLinePoints[2];
+
 	private:
 		bool IntersectPatch(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, math3d::vec3f& point);
 		bool IntersectPatchCell(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, int cell_x, int cell_y, math3d::vec3f& point);

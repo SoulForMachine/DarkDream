@@ -22,7 +22,7 @@ namespace math3d
 		float b = dot(plane.rvec3, line_dir);
 		if(fcmp_eq(b, _ST(0)))
 			return false; // line paralel to plane
-		float a = - dot(plane.rvec3, line_pt) + plane.w;
+		float a = - (dot(plane.rvec3, line_pt) + plane.w);
 		result = line_pt + (a / b) * line_dir;
 		return true;
 	}
@@ -33,7 +33,7 @@ namespace math3d
 		float b = dot(plane.rvec3, ray_dir);
 		if(fcmp_eq(b, _ST(0)))
 			return false; // ray paralel to plane
-		float a = - dot(plane.rvec3, ray_pt) + plane.w;
+		float a = - (dot(plane.rvec3, ray_pt) + plane.w);
 		float t = a / b;
 		if(t < _ST(0))
 			return false; // plane behind ray

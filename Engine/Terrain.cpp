@@ -16,6 +16,7 @@ namespace Engine
 	Terrain::Terrain()
 		: _patches(mapPool)
 	{
+		_dbgCellCount = 0;
 	}
 
 	bool Terrain::Init()
@@ -161,14 +162,16 @@ namespace Engine
 
 		float vp_x, vp_y, vp_width, vp_height;
 		_renderer->GetViewport(vp_x, vp_y, vp_width, vp_height);
-		vec3f ndc(
+		vec4f ndc(
 			(2.0f * ((float)screen_x - vp_x) - vp_width) / vp_width,
 			(2.0f * ((float)screen_y - vp_y) - vp_height) / vp_height,
-			-1.0);
+			-1.0f, 1.0f);
 		mat4f view_proj = engineAPI.world->GetCamera().GetViewProjectionTransform();
 		view_proj.inverse();
 		vec3f ray_pt;
-		transform(ray_pt, ndc, view_proj);
+		vec4f temp;
+		transform(temp, ndc, view_proj);
+		ray_pt = temp.rvec3 / temp.w;
 		vec3f ray_dir = ray_pt - engineAPI.world->GetCamera().GetPosition();
 		ray_dir.normalize();
 
@@ -219,8 +222,8 @@ namespace Engine
 			return false;
 		}
 
-		start_i = min(max(start_i, 0), (int)_patches.GetCount() - 1);
-		end_i = min(max(end_i, 0), (int)_patches.GetCount() - 1);
+		start_i = Min(Max(start_i, 0), (int)_patches.GetCount() - 1);
+		end_i = Min(Max(end_i, 0), (int)_patches.GetCount() - 1);
 
 		if(start_i > end_i)
 		{
@@ -258,6 +261,7 @@ namespace Engine
 		vec2f pts[2];
 		vec2f ray_pt_2d(ray_pt.x, ray_pt.z);
 		vec2f ray_dir_2d(ray_dir.x, ray_dir.z);
+		ray_dir_2d.normalize();
 
 		// check if ray starting point is inside patch in 2D
 
@@ -325,8 +329,8 @@ namespace Engine
 		}
 		else if(inters_count == 1)
 		{
-			int i = int((pts[0].x - patch.boundBox.minPt.x) / PATCH_WIDTH) + 1;
-			int j = int(pts[0].y / PATCH_HEIGHT) + 1;
+			int i = int(pts[0].x - patch.boundBox.minPt.x);
+			int j = int(pts[0].y);
 			assert(i >= 0 && i <= PATCH_WIDTH);
 			assert(j >= 0 && j <= PATCH_HEIGHT);
 
@@ -359,49 +363,127 @@ namespace Engine
 			}
 
 			// indices of start and end cell of the patch
-			int i1, j1, i2, j2;
-			i1 = int((pts[0].x - patch.boundBox.minPt.x) / PATCH_WIDTH);
-			j1 = int(pts[0].y / PATCH_HEIGHT);
-			i2 = int((pts[1].x - patch.boundBox.minPt.x) / PATCH_WIDTH);
-			j2 = int(pts[1].y / PATCH_HEIGHT);
-			assert(i1 >= 0 && i1 < PATCH_WIDTH);
-			assert(j1 >= 0 && j1 < PATCH_HEIGHT);
-			assert(i2 >= 0 && i2 < PATCH_WIDTH);
-			assert(j2 >= 0 && j2 < PATCH_HEIGHT);
+			float x1, y1, x2, y2;
+			x1 = pts[0].x - patch.boundBox.minPt.x;
+			y1 = pts[0].y;
+			x2 = pts[1].x - patch.boundBox.minPt.x;
+			y2 = pts[1].y;
 
-			// test for intersection all cells on the line connecting the start and end cell
-			int dy = j2 - j1;
-			int dx = i2 - i1;
-			float t = 0.5f;                      // offset for rounding
+			// test all cells for intersection along the projected line
+			float dx = x2 - x1;
+			float dy = y2 - y1;
+			/*x1 = Min(x1, (float)PATCH_WIDTH - 0.0001f);
+			y1 = Min(y1, (float)PATCH_HEIGHT - 0.0001f);
+			x2 = Min(x2, (float)PATCH_WIDTH - 0.0001f);
+			y2 = Min(y2, (float)PATCH_HEIGHT - 0.0001f);*/
 
-			if(IntersectPatchCell(ray_pt, ray_dir, patch, i1, j1, point))
+			_dbgCellCount = 0;
+			_dbgLinePoints[0].set(pts[0].x, 0.0f, pts[0].y);
+			_dbgLinePoints[1].set(pts[1].x, 0.0f, pts[1].y);
+
+			int cell_x = Min((int)x1, PATCH_WIDTH - 1);
+			int cell_y = Min((int)y1, PATCH_HEIGHT - 1);
+			_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
+			if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
 				return true;
-
-			if(abs(dx) > abs(dy))						// slope < 1
+			
+			if(fabs(dx) > fabs(dy))
 			{
-				float m = (float) dy / (float) dx;      // compute slope
-				t += j1;
-				dx = (dx < 0) ? -1 : 1;
-				m *= dx;
-				while(i1 != i2)
+				float ystep = dy / dx;
+				int xstep = (dx < 0)? -1: 1;
+				ystep *= xstep;
+
+				int ix1 = (int)x1, ix2 = (int)x2;
+				if(ix1 == ix2)
+					return false;
+				ix1 += xstep;
+				ix2 += xstep;
+
+				float y = y1;
+				if(dx > 0.0f)
+					y += ystep * (1.0f - frac(x1));
+				else
+					y += ystep * frac(x1);
+				float yprev = y1;
+
+				while(ix1 != ix2)
 				{
-					i1 += dx;                           // step to next x value
-					t += m;                             // add slope to y value
-					if(IntersectPatchCell(ray_pt, ray_dir, patch, i1, (int)t, point))
+					if(Min(int(y), PATCH_HEIGHT - 1) != Min(int(yprev), PATCH_HEIGHT - 1))
+					{
+						cell_x = Min(ix1 - xstep, PATCH_WIDTH - 1);
+						cell_y = Min(int(y), PATCH_HEIGHT - 1);
+						_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
+						if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
+							return true;
+					}
+
+					cell_x = Min(ix1, PATCH_WIDTH - 1);
+					cell_y = Min(int(y), PATCH_HEIGHT - 1);
+					_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
+					if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
+						return true;
+
+					ix1 += xstep;
+					yprev = y;
+					y += ystep;
+				}
+
+				if(Min(int(y), PATCH_HEIGHT - 1) != Min(int(yprev), PATCH_HEIGHT - 1))
+				{
+					cell_x = Min(ix1 - xstep, PATCH_WIDTH - 1);
+					cell_y = Min(int(y), PATCH_HEIGHT - 1);
+					_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
+					if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
 						return true;
 				}
 			}
-			else										// slope >= 1
+			else
 			{
-				float m = (float) dx / (float) dy;      // compute slope
-				t += i1;
-				dy = (dy < 0) ? -1 : 1;
-				m *= dy;
-				while(j1 != j2)
+				float xstep = dx / dy;
+				int ystep = (dy < 0)? -1: 1;
+				xstep *= ystep;
+
+				int iy1 = (int)y1, iy2 = (int)y2;
+				if(iy1 == iy2)
+					return false;
+				iy1 += ystep;
+				iy2 += ystep;
+
+				float x = x1;
+				if(dy > 0.0f)
+					x += xstep * (1.0f - frac(y1));
+				else
+					x += xstep * frac(y1);
+				float xprev = x1;
+
+				while(iy1 != iy2)
 				{
-					j1 += dy;                           // step to next y value
-					t += m;                             // add slope to x value
-					if(IntersectPatchCell(ray_pt, ray_dir, patch, (int)t, j1, point))
+					if(Min(int(x), PATCH_WIDTH - 1) != Min(int(xprev), PATCH_WIDTH - 1))
+					{
+						cell_x = Min(int(x), PATCH_WIDTH - 1);
+						cell_y = Min(iy1 - ystep, PATCH_HEIGHT - 1);
+						_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
+						if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
+							return true;
+					}
+
+					cell_x = Min(int(x), PATCH_WIDTH - 1);
+					cell_y = Min(iy1, PATCH_HEIGHT - 1);
+					_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
+					if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
+						return true;
+
+					iy1 += ystep;
+					xprev = x;
+					x += xstep;
+				}
+
+				if(Min(int(x), PATCH_WIDTH - 1) != Min(int(xprev), PATCH_WIDTH - 1))
+				{
+					cell_x = Min(int(x), PATCH_WIDTH - 1);
+					cell_y = Min(iy1 - ystep, PATCH_HEIGHT - 1);
+					_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
+					if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
 						return true;
 				}
 			}
@@ -412,6 +494,9 @@ namespace Engine
 
 	bool Terrain::IntersectPatchCell(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, int cell_x, int cell_y, math3d::vec3f& point)
 	{
+		assert(cell_x >= 0 && cell_x < PATCH_WIDTH);
+		assert(cell_y >= 0 && cell_y < PATCH_HEIGHT);
+
 		int i = cell_y * PATCH_WIDTH + cell_x;
 
 		vec3f triangle[3];

@@ -268,8 +268,14 @@ void FreeList<_Type>::Remove(size_t index)
 template <class _Type>
 void FreeList<_Type>::Clear()
 {
-	for(Iterator it = Begin(); it != End(); ++it)
+	Iterator it = Begin();
+	while(it != End())
+	{
+		Iterator next = it;
+		++next;
 		_pool.Delete(it._node);
+		it = next;
+	}
 
 	_end->next = _end;
 	_end->prev = _end;

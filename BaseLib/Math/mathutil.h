@@ -155,7 +155,17 @@ template <class _ST>
 inline
 _ST round(_ST val)
 {
-	return floor(val + _ST(0.5));
+	return (float)(int)(val + _ST(0.5));
+}
+
+/*
+	Return fractional part of val
+*/
+template <class _ST>
+inline
+_ST frac(_ST val)
+{
+	return val - (float)(int)val;
 }
 
 
