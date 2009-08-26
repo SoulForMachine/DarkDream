@@ -26,7 +26,7 @@ namespace Engine
 
 		bool Init();
 		void Deinit();
-		void RenderTerrainPatch(const Camera& camera, const Terrain* terrain, Terrain::TerrainPatch** patches, int count);
+		void RenderTerrainPatch(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count);
 
 	private:
 		GL::Renderer* _renderer;

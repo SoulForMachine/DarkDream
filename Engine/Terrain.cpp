@@ -14,9 +14,9 @@ namespace Engine
 {
 
 	Terrain::Terrain()
-		: _patches(mapPool)
 	{
 		_dbgCellCount = 0;
+		_patchCount = 0;
 	}
 
 	bool Terrain::Init()
@@ -68,6 +68,8 @@ namespace Engine
 			return false;
 		}
 
+		_patchCount = 0;
+
 		return true;
 	}
 
@@ -79,22 +81,21 @@ namespace Engine
 			_patchIndexBuf = 0;
 		}
 
-		for(TerrainPatchList::Iterator it = _patches.Begin(); it != _patches.End(); ++it)
+		for(int i = 0; i < _patchCount; ++i)
 		{
-			_renderer->DestroyBuffer(it->vertBuf);
-			delete[] it->elevation;
+			_renderer->DestroyBuffer(_patches[i].vertBuf);
+			delete[] _patches[i].elevation;
 		}
-		_patches.Clear();
 
 		_renderer = 0;
 	}
 
 	bool Terrain::AddPatch(float* heights)
 	{
-		if(_patches.GetCount() == MAX_PATCHES)
+		if(_patchCount == MAX_PATCHES)
 			return false;
 
-		TerrainPatch patch;
+		TerrainPatch& patch = _patches[_patchCount];
 		int vert_count = (PATCH_WIDTH + 1) * (PATCH_HEIGHT + 1);
 		patch.vertBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, vert_count * sizeof(PatchVertex), 0, GL::USAGE_STATIC_DRAW);
 		if(!patch.vertBuf)
@@ -104,11 +105,12 @@ namespace Engine
 		if(!vertices)
 		{
 			_renderer->DestroyBuffer(patch.vertBuf);
+			delete[] patch.elevation;
 			return false;
 		}
 
 		patch.elevation = new(mapPool) float[vert_count];
-		float x_pos = (float)_patches.GetCount() * PATCH_WIDTH;
+		float x_pos = (float)_patchCount * PATCH_WIDTH;
 		patch.boundBox.minPt.set(x_pos, heights? heights[0]: 0.0f, 0.0f);
 		patch.boundBox.maxPt.set(x_pos + PATCH_WIDTH, heights? heights[0]: 0.0f, (float)PATCH_HEIGHT);
 
@@ -139,21 +141,21 @@ namespace Engine
 		if(!patch.vertBuf->UnmapBuffer())
 		{
 			_renderer->DestroyBuffer(patch.vertBuf);
+			delete[] patch.elevation;
 			return false;
 		}
 
-		_patches.PushBack(patch);
+		_patchCount++;
 
 		return true;
 	}
 
-	void Terrain::RemovePatch(size_t index)
+	void Terrain::RemovePatch(int index)
 	{
-		assert(index >= 0 && index < _patches.GetCount());
-		TerrainPatch& patch = _patches.GetByIndex(index);
-		_renderer->DestroyBuffer(patch.vertBuf);
-		delete[] patch.elevation;
-		_patches.Remove(index);
+		assert(index >= 0 && index < _patchCount);
+		_renderer->DestroyBuffer(_patches[index].vertBuf);
+		delete[] _patches[index].elevation;
+		_patchCount--;
 	}
 
 	bool Terrain::PickTerrainPoint(int screen_x, int screen_y, math3d::vec3f& point)
@@ -191,7 +193,7 @@ namespace Engine
 			}
 			else
 			{
-				end_i = (ray_dir.x > 0.0f)? _patches.GetCount() - 1: 0;
+				end_i = (ray_dir.x > 0.0f)? _patchCount - 1: 0;
 			}
 		}
 		else
@@ -216,14 +218,14 @@ namespace Engine
 			}
 		}
 
-		if(	(start_i >= (int)_patches.GetCount() && end_i >= (int)_patches.GetCount()) ||
+		if(	(start_i >= _patchCount && end_i >= _patchCount) ||
 			(start_i < 0 && end_i < 0) )
 		{
 			return false;
 		}
 
-		start_i = Min(Max(start_i, 0), (int)_patches.GetCount() - 1);
-		end_i = Min(Max(end_i, 0), (int)_patches.GetCount() - 1);
+		start_i = Min(Max(start_i, 0), _patchCount - 1);
+		end_i = Min(Max(end_i, 0), _patchCount - 1);
 
 		if(start_i > end_i)
 		{
@@ -234,24 +236,13 @@ namespace Engine
 
 		// go through potential terrain patches and find intersection
 
-		int i = 0;
-		bool has_inters = false;
-		for(TerrainPatchList::ConstIterator it = _patches.Begin(); it != _patches.End(); ++it)
+		for(int i = start_i; i <= end_i; ++i)
 		{
-			if(i >= start_i)
-			{
-				if(IntersectPatch(ray_pt, ray_dir, *it, point))
-				{
-					has_inters = true;
-					break;
-				}
-			}
-
-			if(++i > end_i)
-				break;
+			if(IntersectPatch(ray_pt, ray_dir, _patches[i], point))
+				return true;
 		}
 
-		return has_inters;
+		return false;
 	}
 
 	bool Terrain::IntersectPatch(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, math3d::vec3f& point)
@@ -516,6 +507,50 @@ namespace Engine
 			return true;
 
 		return false;
+	}
+
+	bool Terrain::ElevationFromPoint(const vec2f& point, float& elevation)
+	{
+		if(	point.x < 0.0f || point.x > _patchCount * PATCH_WIDTH ||
+			point.y < 0.0f || point.y > PATCH_HEIGHT )
+		{
+			return false;
+		}
+
+		TerrainPatch& patch = _patches[int(point.x) / PATCH_WIDTH];
+		int cell_x = int(point.x - patch.boundBox.minPt.x);
+		int cell_y = int(point.y);
+		int i = cell_y * PATCH_HEIGHT + cell_x;
+		float x = point.x;
+
+		vec3f triangle[3];
+		triangle[0].set(x, patch.elevation[i], (float)cell_y);
+		triangle[1].set(x + 1, patch.elevation[i + 1], (float)cell_y);
+		triangle[2].set(x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
+
+		vec2f triangle2d[3];
+		triangle2d[0].set(triangle[0].x, triangle[0].z);
+		triangle2d[1].set(triangle[1].x, triangle[1].z);
+		triangle2d[2].set(triangle[2].x, triangle[2].z);
+
+		if(point_in_triangle_2d(point, triangle2d))
+		{
+			vec4f plane;
+			plane_from_triangle(plane, triangle);
+			elevation = -(plane.x * point.x + plane.z * point.y + plane.w) / plane.y;
+		}
+		else
+		{
+			triangle[0].set(x + 1, patch.elevation[i + 1], (float)cell_y);
+			triangle[1].set(x + 1, patch.elevation[i + PATCH_WIDTH + 2], (float)cell_y + 1);
+			triangle[2].set(x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
+
+			vec4f plane;
+			plane_from_triangle(plane, triangle);
+			elevation = -(plane.x * point.x + plane.z * point.y + plane.w) / plane.y;
+		}
+
+		return true;
 	}
 
 }

@@ -32,6 +32,8 @@ namespace MapEditor
 			{ _parameters = params; }
 
 	private:
+		bool UpdateVertices();
+
 		EM_TerrainEdit::Parameters^ _parameters;
 
 		GL::Renderer* _renderer;

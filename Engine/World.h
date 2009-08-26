@@ -37,7 +37,7 @@ namespace Engine
 			{ _entities.Reset(); }
 		int GetVisibleEntities(ModelEntity** entities, int max_entities);
 		int GetVisibleShadowcasters(ModelEntity** entities, int max_entities);
-		int GetVisibleTerrainPatches(Terrain::TerrainPatch** patches, int max_patches);
+		int GetVisibleTerrainPatches(const Terrain::TerrainPatch** patches, int max_patches);
 		Terrain& GetTerrain()
 			{ return _terrain; }
 

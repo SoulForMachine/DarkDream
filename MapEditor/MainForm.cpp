@@ -207,7 +207,7 @@ namespace MapEditor
 	{
 		if(!engineAPI->world->GetTerrain().AddPatch())
 		{
-			if(engineAPI->world->GetTerrain().GetPatches().GetCount() == Engine::Terrain::MAX_PATCHES)
+			if(engineAPI->world->GetTerrain().GetPatchCount() == Engine::Terrain::MAX_PATCHES)
 			{
 				Windows::Forms::MessageBox::Show(
 					this, "Failed to add terrain patch - maximum of 32 patches reached.", GetAppName(),

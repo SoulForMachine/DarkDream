@@ -275,7 +275,7 @@ namespace Engine
 
 	void RenderSystem::RenderTerrain(int frame_time)
 	{
-		Terrain::TerrainPatch* patches[Terrain::MAX_PATCHES];
+		const Terrain::TerrainPatch* patches[Terrain::MAX_PATCHES];
 		int count = engineAPI.world->GetVisibleTerrainPatches(patches, Terrain::MAX_PATCHES);
 		_renderer->ActiveDrawFramebuffer(0);
 		_renderer->EnableColorWrite(true, true, true, true);

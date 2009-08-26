@@ -60,18 +60,18 @@ namespace Engine
 		return 0;
 	}
 
-	int World::GetVisibleTerrainPatches(Terrain::TerrainPatch** patches, int max_patches)
+	int World::GetVisibleTerrainPatches(const Terrain::TerrainPatch** patches, int max_patches)
 	{
 		if(!patches || max_patches <= 0)
 			return 0;
 
 		int count = 0;
-		Terrain::TerrainPatchList& patch_list = _terrain.GetPatches();
-		for(Terrain::TerrainPatchList::Iterator it = patch_list.Begin(); it != patch_list.End(); ++it)
+		const Terrain::TerrainPatch* patch_array = _terrain.GetPatches();
+		for(int i = 0; i < _terrain.GetPatchCount(); ++i)
 		{
-			if(_camera.IsInsideFrustum(it->boundBox) != Camera::CLIP_OUTSIDE)
+			if(_camera.IsInsideFrustum(patch_array[i].boundBox) != Camera::CLIP_OUTSIDE)
 			{
-				patches[count++] = &(*it);
+				patches[count++] = &patch_array[i];
 				if(count == max_patches)
 					break;
 			}

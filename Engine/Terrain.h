@@ -34,8 +34,6 @@ namespace Engine
 			math3d::vec3f normal;
 		};
 
-		typedef List<TerrainPatch> TerrainPatchList;
-
 		static const int PATCH_WIDTH = 128;
 		static const int PATCH_HEIGHT = 32;
 		static const int MAX_PATCHES = 32;
@@ -45,14 +43,17 @@ namespace Engine
 		bool Init();
 		void Deinit();
 		bool AddPatch(float* heights = 0);
-		void RemovePatch(size_t index);
+		void RemovePatch(int index);
 		const GL::Buffer* GetPatchIndexBuffer() const
 			{ return _patchIndexBuf; }
 		int GetPatchIndexCount() const
 			{ return _patchIndexCount; }
-		TerrainPatchList& GetPatches()
+		const TerrainPatch* GetPatches()
 			{ return _patches; }
+		int GetPatchCount() const
+			{ return _patchCount; }
 		bool PickTerrainPoint(int screen_x, int screen_y, math3d::vec3f& point);
+		bool ElevationFromPoint(const math3d::vec2f& point, float& elevation);
 
 		math3d::vec2i _dbgCells[4096];
 		int _dbgCellCount;
@@ -64,7 +65,8 @@ namespace Engine
 
 		GL::Renderer* _renderer;
 		GL::Buffer* _patchIndexBuf;
-		TerrainPatchList _patches;
+		TerrainPatch _patches[MAX_PATCHES];
+		int _patchCount;
 		int _patchIndexCount;
 	};
 

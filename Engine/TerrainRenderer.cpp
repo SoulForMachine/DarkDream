@@ -40,7 +40,7 @@ namespace Engine
 		Clear();
 	}
 
-	void TerrainRenderer::RenderTerrainPatch(const Camera& camera, const Terrain* terrain, Terrain::TerrainPatch** patches, int count)
+	void TerrainRenderer::RenderTerrainPatch(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count)
 	{
 		_renderer->IndexSource(terrain->GetPatchIndexBuffer(), GL::TYPE_UNSIGNED_SHORT);
 		_renderer->ActiveVertexASMProgram(_vpTerrain->GetASMProgram());

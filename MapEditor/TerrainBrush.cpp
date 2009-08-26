@@ -3,6 +3,9 @@
 #include "TerrainBrush.h"
 
 using namespace math3d;
+using namespace Engine;
+
+#define CIRCLE_VERTEX_COUNT		64
 
 
 namespace MapEditor
@@ -18,16 +21,8 @@ namespace MapEditor
 	{
 		_renderer = engineAPI->renderSystem->GetRenderer();
 
-		BrushVertex vertices[] =
-		{
-			{ vec3f(-1.0f, 0.0f, 0.0f) },
-			{ vec3f(1.0f, 0.0f, 0.0f) },
-			{ vec3f(0.0f, 0.0f, -1.0f) },
-			{ vec3f(0.0f, 0.0f, 1.0f) },
-			{ vec3f(0.0f, 0.0f, 0.0f) },
-			{ vec3f(0.0f, 0.0f, 0.0f) },
-		};
-		_vertBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, sizeof(BrushVertex) * 6, vertices, GL::USAGE_DYNAMIC_DRAW);
+		// allocate vertex memory for 2 lines that represent brush center, plus for two circles with 64 vertices each
+		_vertBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, sizeof(BrushVertex) * (4 + CIRCLE_VERTEX_COUNT * 2), 0, GL::USAGE_DYNAMIC_DRAW);
 		if(!_vertBuf)
 			return false;
 
@@ -53,34 +48,65 @@ namespace MapEditor
 
 	void TerrainBrush::Draw()
 	{
-		BrushVertex vertices[] =
+		// check if brush center is on the terrain
+		const Terrain::TerrainPatch* patches = engineAPI->world->GetTerrain().GetPatches();
+		int patch_count = engineAPI->world->GetTerrain().GetPatchCount();
+		if(	_parameters->posX < 0.0f || _parameters->posX > patch_count * Terrain::PATCH_WIDTH ||
+			_parameters->posZ < 0.0f || _parameters->posZ > Terrain::PATCH_HEIGHT)
 		{
-			engineAPI->world->GetTerrain()._dbgLinePoints[0],
-			engineAPI->world->GetTerrain()._dbgLinePoints[1],
-		};
-		_vertBuf->BufferSubData(4 * sizeof(BrushVertex), 2 * sizeof(BrushVertex), vertices);
+			return;
+		}
 
-		_renderer->ActiveVertexFormat(_vertFmt);
-		_renderer->IndexSource(0, GL::TYPE_VOID);
-		_renderer->VertexSource(0, _vertBuf, sizeof(BrushVertex), 0);
-		_renderer->ActiveVertexASMProgram(_vertpBrush->GetASMProgram());
-		_renderer->ActiveFragmentASMProgram(_fragpBrush->GetASMProgram());
+		if(UpdateVertices())
+		{
+			_renderer->ActiveVertexFormat(_vertFmt);
+			_renderer->IndexSource(0, GL::TYPE_VOID);
+			_renderer->VertexSource(0, _vertBuf, sizeof(BrushVertex), 0);
+			_renderer->ActiveVertexASMProgram(_vertpBrush->GetASMProgram());
+			_renderer->ActiveFragmentASMProgram(_fragpBrush->GetASMProgram());
 
-		mat4f world, wvp;
-		world.set_translation(_parameters->posX, _parameters->posY, _parameters->posZ);
-		mul(wvp, world, engineAPI->world->GetCamera().GetViewProjectionTransform());
-		_vertpBrush->GetASMProgram()->LocalMatrix4x4(0, wvp);
+			_vertpBrush->GetASMProgram()->LocalMatrix4x4(0, engineAPI->world->GetCamera().GetViewProjectionTransform());
 
-		vec4f red(1.0f, 0.0f, 0.0f, 1.0f);
-		_fragpBrush->GetASMProgram()->LocalParameter(0, red);
+			vec4f red(1.0f, 0.0f, 0.0f, 1.0f);
+			_fragpBrush->GetASMProgram()->LocalParameter(0, red);
 
-		_renderer->EnableDepthTest(false);
+			_renderer->Draw(GL::PRIM_LINES, 0, 4);
+			_renderer->Draw(GL::PRIM_LINE_LOOP, 4, CIRCLE_VERTEX_COUNT);
+		}
+	}
 
-		_renderer->Draw(GL::PRIM_LINES, 0, 4);
-		_vertpBrush->GetASMProgram()->LocalMatrix4x4(0, engineAPI->world->GetCamera().GetViewProjectionTransform());
-		_renderer->Draw(GL::PRIM_LINES, 4, 2);
+	bool TerrainBrush::UpdateVertices()
+	{
+		vec3f center(_parameters->posX, _parameters->posY, _parameters->posZ); // brush center
 
-		_renderer->EnableDepthTest(true);
+		BrushVertex* vertices = (BrushVertex*)_vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, true);
+		if(!vertices)
+			return false;
+
+		const float VERT_OFFSET = 0.1f;
+
+		// center cross
+		vertices[0].position.set(center.x - 1.0f, center.y + VERT_OFFSET, center.z);
+		vertices[1].position.set(center.x + 1.0f, center.y + VERT_OFFSET, center.z);
+		vertices[2].position.set(center.x, center.y + VERT_OFFSET, center.z - 1.0f);
+		vertices[3].position.set(center.x, center.y + VERT_OFFSET, center.z + 1.0f);
+		vertices += 4;
+
+		float d = TWO_PI / CIRCLE_VERTEX_COUNT;
+		float angle = 0.0f;
+
+		for(int i = 0; i < CIRCLE_VERTEX_COUNT; ++i)
+		{
+			float elev;
+			vec2f pt(cos(angle) * 6.0f + center.x, sin(angle) * 6.0f + center.z);
+			if(!engineAPI->world->GetTerrain().ElevationFromPoint(pt, elev))
+				elev = 0.0f;
+			vertices->position.set(pt.x, elev + VERT_OFFSET, pt.y);
+			vertices++;
+			angle += d;
+		}
+
+		return _vertBuf->UnmapBuffer();
 	}
 
 }
