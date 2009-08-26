@@ -261,7 +261,8 @@ namespace Engine
 		vec2f pts[2];
 		vec2f ray_pt_2d(ray_pt.x, ray_pt.z);
 		vec2f ray_dir_2d(ray_dir.x, ray_dir.z);
-		ray_dir_2d.normalize();
+		if(ray_dir_2d.length_sq() > 0.0f)
+			ray_dir_2d.normalize();
 
 		// check if ray starting point is inside patch in 2D
 
@@ -279,21 +280,27 @@ namespace Engine
 		if(fcmp_ne(ray_dir_2d.x, 0.0f))
 		{
 			t = (patch.boundBox.minPt.x - ray_pt_2d.x) / ray_dir_2d.x;
-			pts[inters_count] = ray_pt_2d + ray_dir_2d * t;
-			if(	pts[inters_count].y >= patch.boundBox.minPt.z &&
-				pts[inters_count].y <= patch.boundBox.maxPt.z )
+			if(t >= 0.0f)
 			{
-				inters_count++;
-			}
-
-			if(inters_count < 2)
-			{
-				t = (patch.boundBox.maxPt.x - ray_pt_2d.x) / ray_dir_2d.x;
 				pts[inters_count] = ray_pt_2d + ray_dir_2d * t;
 				if(	pts[inters_count].y >= patch.boundBox.minPt.z &&
 					pts[inters_count].y <= patch.boundBox.maxPt.z )
 				{
 					inters_count++;
+				}
+			}
+
+			if(inters_count < 2)
+			{
+				t = (patch.boundBox.maxPt.x - ray_pt_2d.x) / ray_dir_2d.x;
+				if(t >= 0.0f)
+				{
+					pts[inters_count] = ray_pt_2d + ray_dir_2d * t;
+					if(	pts[inters_count].y >= patch.boundBox.minPt.z &&
+						pts[inters_count].y <= patch.boundBox.maxPt.z )
+					{
+						inters_count++;
+					}
 				}
 			}
 		}
@@ -303,21 +310,27 @@ namespace Engine
 			if(inters_count < 2)
 			{
 				t = (patch.boundBox.minPt.z - ray_pt_2d.y) / ray_dir_2d.y;
-				pts[inters_count] = ray_pt_2d + ray_dir_2d * t;
-				if(	pts[inters_count].x >= patch.boundBox.minPt.x &&
-					pts[inters_count].x <= patch.boundBox.maxPt.x )
+				if(t >= 0.0f)
 				{
-					inters_count++;
-				}
-
-				if(inters_count < 2)
-				{
-					t = (patch.boundBox.maxPt.z - ray_pt_2d.y) / ray_dir_2d.y;
 					pts[inters_count] = ray_pt_2d + ray_dir_2d * t;
 					if(	pts[inters_count].x >= patch.boundBox.minPt.x &&
 						pts[inters_count].x <= patch.boundBox.maxPt.x )
 					{
 						inters_count++;
+					}
+				}
+
+				if(inters_count < 2)
+				{
+					t = (patch.boundBox.maxPt.z - ray_pt_2d.y) / ray_dir_2d.y;
+					if(t >= 0.0f)
+					{
+						pts[inters_count] = ray_pt_2d + ray_dir_2d * t;
+						if(	pts[inters_count].x >= patch.boundBox.minPt.x &&
+							pts[inters_count].x <= patch.boundBox.maxPt.x )
+						{
+							inters_count++;
+						}
 					}
 				}
 			}
@@ -334,20 +347,7 @@ namespace Engine
 			assert(i >= 0 && i <= PATCH_WIDTH);
 			assert(j >= 0 && j <= PATCH_HEIGHT);
 
-			vec3f pt(
-				pts[0].x,
-				patch.elevation[j * (PATCH_WIDTH + 1) + i],
-				pts[0].y);
-
-			if(fcmp_eq(dot(pt - ray_pt, ray_dir), 1.0f))
-			{
-				point = pt;
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return IntersectPatchCell(ray_pt, ray_dir, patch, i, j, point);
 		}
 		else
 		{
