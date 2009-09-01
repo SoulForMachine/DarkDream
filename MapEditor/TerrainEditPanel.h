@@ -33,31 +33,37 @@ namespace MapEditor {
 		}
 
 	private:
+		void UpdateControls();
+
 		EM_TerrainEdit::Parameters^ _parameters;
 
 	private: System::Windows::Forms::Label^  label1;
-	private: System::Windows::Forms::Button^  _btnRaiseLower;
+	private: System::Windows::Forms::RadioButton^  _btnRaiseLower;
+	private: System::Windows::Forms::RadioButton^  _btnPlateau;
 
-	private: System::Windows::Forms::Button^  button2;
-	private: System::Windows::Forms::Button^  button3;
-	private: System::Windows::Forms::Button^  button1;
-	private: System::Windows::Forms::Button^  button4;
-	private: System::Windows::Forms::Button^  button5;
+
+	private: System::Windows::Forms::RadioButton^  _btnSmooth;
+	private: System::Windows::Forms::RadioButton^  _btnNoise;
+	private: System::Windows::Forms::RadioButton^  _btnRelativePlateau;
+	private: System::Windows::Forms::RadioButton^  _btnRamp;
+
+
+
+
 	private: System::Windows::Forms::GroupBox^  groupBox1;
 	private: System::Windows::Forms::Label^  label5;
 	private: System::Windows::Forms::Label^  label4;
 	private: System::Windows::Forms::Label^  label3;
 	private: System::Windows::Forms::Label^  label2;
 	private: System::Windows::Forms::TableLayoutPanel^  _tableLayoutBrushProperties;
-
-	private: System::Windows::Forms::TrackBar^  trackBar1;
-	private: System::Windows::Forms::TrackBar^  trackBar2;
-	private: System::Windows::Forms::TrackBar^  trackBar3;
-	private: System::Windows::Forms::TrackBar^  trackBar4;
-	private: System::Windows::Forms::NumericUpDown^  numericUpDown1;
-	private: System::Windows::Forms::NumericUpDown^  numericUpDown2;
-	private: System::Windows::Forms::NumericUpDown^  numericUpDown3;
-	private: System::Windows::Forms::NumericUpDown^  numericUpDown4;
+	private: System::Windows::Forms::TrackBar^  _trackRadius;
+	private: System::Windows::Forms::TrackBar^  _trackHardness;
+	private: System::Windows::Forms::TrackBar^  _trackStrength;
+	private: System::Windows::Forms::TrackBar^  _trackHeight;
+	private: System::Windows::Forms::NumericUpDown^  _numRadius;
+	private: System::Windows::Forms::NumericUpDown^  _numHardness;
+	private: System::Windows::Forms::NumericUpDown^  _numStrength;
+	private: System::Windows::Forms::NumericUpDown^  _numHeight;
 
 	protected: 
 
@@ -75,36 +81,36 @@ namespace MapEditor {
 		void InitializeComponent(void)
 		{
 			this->label1 = (gcnew System::Windows::Forms::Label());
-			this->_btnRaiseLower = (gcnew System::Windows::Forms::Button());
-			this->button2 = (gcnew System::Windows::Forms::Button());
-			this->button3 = (gcnew System::Windows::Forms::Button());
-			this->button1 = (gcnew System::Windows::Forms::Button());
-			this->button4 = (gcnew System::Windows::Forms::Button());
-			this->button5 = (gcnew System::Windows::Forms::Button());
+			this->_btnRaiseLower = (gcnew System::Windows::Forms::RadioButton());
+			this->_btnPlateau = (gcnew System::Windows::Forms::RadioButton());
+			this->_btnSmooth = (gcnew System::Windows::Forms::RadioButton());
+			this->_btnNoise = (gcnew System::Windows::Forms::RadioButton());
+			this->_btnRelativePlateau = (gcnew System::Windows::Forms::RadioButton());
+			this->_btnRamp = (gcnew System::Windows::Forms::RadioButton());
 			this->groupBox1 = (gcnew System::Windows::Forms::GroupBox());
 			this->_tableLayoutBrushProperties = (gcnew System::Windows::Forms::TableLayoutPanel());
-			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->_numRadius = (gcnew System::Windows::Forms::NumericUpDown());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->label4 = (gcnew System::Windows::Forms::Label());
-			this->trackBar1 = (gcnew System::Windows::Forms::TrackBar());
-			this->trackBar2 = (gcnew System::Windows::Forms::TrackBar());
-			this->trackBar3 = (gcnew System::Windows::Forms::TrackBar());
+			this->_trackRadius = (gcnew System::Windows::Forms::TrackBar());
+			this->_trackHardness = (gcnew System::Windows::Forms::TrackBar());
+			this->_trackStrength = (gcnew System::Windows::Forms::TrackBar());
 			this->label5 = (gcnew System::Windows::Forms::Label());
-			this->trackBar4 = (gcnew System::Windows::Forms::TrackBar());
-			this->numericUpDown2 = (gcnew System::Windows::Forms::NumericUpDown());
-			this->numericUpDown3 = (gcnew System::Windows::Forms::NumericUpDown());
-			this->numericUpDown4 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->_trackHeight = (gcnew System::Windows::Forms::TrackBar());
+			this->_numHardness = (gcnew System::Windows::Forms::NumericUpDown());
+			this->_numStrength = (gcnew System::Windows::Forms::NumericUpDown());
+			this->_numHeight = (gcnew System::Windows::Forms::NumericUpDown());
 			this->groupBox1->SuspendLayout();
 			this->_tableLayoutBrushProperties->SuspendLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBar1))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBar2))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBar3))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBar4))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown2))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown3))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown4))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numRadius))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackRadius))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackHardness))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackStrength))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackHeight))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numHardness))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numStrength))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numHeight))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// label1
@@ -120,57 +126,70 @@ namespace MapEditor {
 			// 
 			// _btnRaiseLower
 			// 
+			this->_btnRaiseLower->Appearance = System::Windows::Forms::Appearance::Button;
 			this->_btnRaiseLower->Location = System::Drawing::Point(20, 55);
 			this->_btnRaiseLower->Name = L"_btnRaiseLower";
 			this->_btnRaiseLower->Size = System::Drawing::Size(112, 33);
 			this->_btnRaiseLower->TabIndex = 1;
 			this->_btnRaiseLower->Text = L"Raise/Lower";
+			this->_btnRaiseLower->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
 			this->_btnRaiseLower->UseVisualStyleBackColor = true;
+			this->_btnRaiseLower->Click += gcnew System::EventHandler(this, &TerrainEditPanel::_btnRaiseLower_Click);
 			// 
-			// button2
+			// _btnPlateau
 			// 
-			this->button2->Location = System::Drawing::Point(20, 94);
-			this->button2->Name = L"button2";
-			this->button2->Size = System::Drawing::Size(112, 33);
-			this->button2->TabIndex = 2;
-			this->button2->Text = L"Plateau";
-			this->button2->UseVisualStyleBackColor = true;
+			this->_btnPlateau->Appearance = System::Windows::Forms::Appearance::Button;
+			this->_btnPlateau->Location = System::Drawing::Point(20, 94);
+			this->_btnPlateau->Name = L"_btnPlateau";
+			this->_btnPlateau->Size = System::Drawing::Size(112, 33);
+			this->_btnPlateau->TabIndex = 2;
+			this->_btnPlateau->Text = L"Plateau";
+			this->_btnPlateau->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+			this->_btnPlateau->UseVisualStyleBackColor = true;
 			// 
-			// button3
+			// _btnSmooth
 			// 
-			this->button3->Location = System::Drawing::Point(138, 55);
-			this->button3->Name = L"button3";
-			this->button3->Size = System::Drawing::Size(112, 33);
-			this->button3->TabIndex = 3;
-			this->button3->Text = L"Smooth";
-			this->button3->UseVisualStyleBackColor = true;
+			this->_btnSmooth->Appearance = System::Windows::Forms::Appearance::Button;
+			this->_btnSmooth->Location = System::Drawing::Point(138, 55);
+			this->_btnSmooth->Name = L"_btnSmooth";
+			this->_btnSmooth->Size = System::Drawing::Size(112, 33);
+			this->_btnSmooth->TabIndex = 3;
+			this->_btnSmooth->Text = L"Smooth";
+			this->_btnSmooth->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+			this->_btnSmooth->UseVisualStyleBackColor = true;
 			// 
-			// button1
+			// _btnNoise
 			// 
-			this->button1->Location = System::Drawing::Point(256, 55);
-			this->button1->Name = L"button1";
-			this->button1->Size = System::Drawing::Size(112, 33);
-			this->button1->TabIndex = 4;
-			this->button1->Text = L"Noise";
-			this->button1->UseVisualStyleBackColor = true;
+			this->_btnNoise->Appearance = System::Windows::Forms::Appearance::Button;
+			this->_btnNoise->Location = System::Drawing::Point(256, 55);
+			this->_btnNoise->Name = L"_btnNoise";
+			this->_btnNoise->Size = System::Drawing::Size(112, 33);
+			this->_btnNoise->TabIndex = 4;
+			this->_btnNoise->Text = L"Noise";
+			this->_btnNoise->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+			this->_btnNoise->UseVisualStyleBackColor = true;
 			// 
-			// button4
+			// _btnRelativePlateau
 			// 
-			this->button4->Location = System::Drawing::Point(138, 94);
-			this->button4->Name = L"button4";
-			this->button4->Size = System::Drawing::Size(112, 33);
-			this->button4->TabIndex = 5;
-			this->button4->Text = L"Relative Plateau";
-			this->button4->UseVisualStyleBackColor = true;
+			this->_btnRelativePlateau->Appearance = System::Windows::Forms::Appearance::Button;
+			this->_btnRelativePlateau->Location = System::Drawing::Point(138, 94);
+			this->_btnRelativePlateau->Name = L"_btnRelativePlateau";
+			this->_btnRelativePlateau->Size = System::Drawing::Size(112, 33);
+			this->_btnRelativePlateau->TabIndex = 5;
+			this->_btnRelativePlateau->Text = L"Relative Plateau";
+			this->_btnRelativePlateau->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+			this->_btnRelativePlateau->UseVisualStyleBackColor = true;
 			// 
-			// button5
+			// _btnRamp
 			// 
-			this->button5->Location = System::Drawing::Point(256, 94);
-			this->button5->Name = L"button5";
-			this->button5->Size = System::Drawing::Size(112, 33);
-			this->button5->TabIndex = 6;
-			this->button5->Text = L"Ramp";
-			this->button5->UseVisualStyleBackColor = true;
+			this->_btnRamp->Appearance = System::Windows::Forms::Appearance::Button;
+			this->_btnRamp->Location = System::Drawing::Point(256, 94);
+			this->_btnRamp->Name = L"_btnRamp";
+			this->_btnRamp->Size = System::Drawing::Size(112, 33);
+			this->_btnRamp->TabIndex = 6;
+			this->_btnRamp->Text = L"Ramp";
+			this->_btnRamp->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+			this->_btnRamp->UseVisualStyleBackColor = true;
 			// 
 			// groupBox1
 			// 
@@ -186,23 +205,23 @@ namespace MapEditor {
 			// 
 			this->_tableLayoutBrushProperties->ColumnCount = 3;
 			this->_tableLayoutBrushProperties->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent, 
-				25.15924F)));
+				21.18056F)));
 			this->_tableLayoutBrushProperties->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent, 
-				74.84076F)));
+				78.81944F)));
 			this->_tableLayoutBrushProperties->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Absolute, 
-				45)));
-			this->_tableLayoutBrushProperties->Controls->Add(this->numericUpDown1, 2, 0);
+				62)));
+			this->_tableLayoutBrushProperties->Controls->Add(this->_numRadius, 2, 0);
 			this->_tableLayoutBrushProperties->Controls->Add(this->label2, 0, 0);
 			this->_tableLayoutBrushProperties->Controls->Add(this->label3, 0, 1);
 			this->_tableLayoutBrushProperties->Controls->Add(this->label4, 0, 2);
-			this->_tableLayoutBrushProperties->Controls->Add(this->trackBar1, 1, 0);
-			this->_tableLayoutBrushProperties->Controls->Add(this->trackBar2, 1, 1);
-			this->_tableLayoutBrushProperties->Controls->Add(this->trackBar3, 1, 2);
+			this->_tableLayoutBrushProperties->Controls->Add(this->_trackRadius, 1, 0);
+			this->_tableLayoutBrushProperties->Controls->Add(this->_trackHardness, 1, 1);
+			this->_tableLayoutBrushProperties->Controls->Add(this->_trackStrength, 1, 2);
 			this->_tableLayoutBrushProperties->Controls->Add(this->label5, 0, 3);
-			this->_tableLayoutBrushProperties->Controls->Add(this->trackBar4, 1, 3);
-			this->_tableLayoutBrushProperties->Controls->Add(this->numericUpDown2, 2, 1);
-			this->_tableLayoutBrushProperties->Controls->Add(this->numericUpDown3, 2, 2);
-			this->_tableLayoutBrushProperties->Controls->Add(this->numericUpDown4, 2, 3);
+			this->_tableLayoutBrushProperties->Controls->Add(this->_trackHeight, 1, 3);
+			this->_tableLayoutBrushProperties->Controls->Add(this->_numHardness, 2, 1);
+			this->_tableLayoutBrushProperties->Controls->Add(this->_numStrength, 2, 2);
+			this->_tableLayoutBrushProperties->Controls->Add(this->_numHeight, 2, 3);
 			this->_tableLayoutBrushProperties->Location = System::Drawing::Point(6, 32);
 			this->_tableLayoutBrushProperties->Name = L"_tableLayoutBrushProperties";
 			this->_tableLayoutBrushProperties->RowCount = 4;
@@ -217,12 +236,18 @@ namespace MapEditor {
 			this->_tableLayoutBrushProperties->Size = System::Drawing::Size(336, 100);
 			this->_tableLayoutBrushProperties->TabIndex = 4;
 			// 
-			// numericUpDown1
+			// _numRadius
 			// 
-			this->numericUpDown1->Location = System::Drawing::Point(293, 3);
-			this->numericUpDown1->Name = L"numericUpDown1";
-			this->numericUpDown1->Size = System::Drawing::Size(37, 20);
-			this->numericUpDown1->TabIndex = 5;
+			this->_numRadius->DecimalPlaces = 1;
+			this->_numRadius->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {5, 0, 0, 65536});
+			this->_numRadius->Location = System::Drawing::Point(276, 3);
+			this->_numRadius->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {16, 0, 0, 0});
+			this->_numRadius->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+			this->_numRadius->Name = L"_numRadius";
+			this->_numRadius->Size = System::Drawing::Size(52, 20);
+			this->_numRadius->TabIndex = 5;
+			this->_numRadius->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+			this->_numRadius->ValueChanged += gcnew System::EventHandler(this, &TerrainEditPanel::_numRadius_ValueChanged);
 			// 
 			// label2
 			// 
@@ -241,7 +266,7 @@ namespace MapEditor {
 			this->label3->Dock = System::Windows::Forms::DockStyle::Left;
 			this->label3->Location = System::Drawing::Point(3, 25);
 			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(55, 25);
+			this->label3->Size = System::Drawing::Size(52, 25);
 			this->label3->TabIndex = 1;
 			this->label3->Text = L"Hardness:";
 			this->label3->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
@@ -257,26 +282,36 @@ namespace MapEditor {
 			this->label4->Text = L"Strength:";
 			this->label4->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
 			// 
-			// trackBar1
+			// _trackRadius
 			// 
-			this->trackBar1->Location = System::Drawing::Point(76, 3);
-			this->trackBar1->Name = L"trackBar1";
-			this->trackBar1->Size = System::Drawing::Size(211, 19);
-			this->trackBar1->TabIndex = 4;
+			this->_trackRadius->Location = System::Drawing::Point(61, 3);
+			this->_trackRadius->Maximum = 32;
+			this->_trackRadius->Minimum = 2;
+			this->_trackRadius->Name = L"_trackRadius";
+			this->_trackRadius->Size = System::Drawing::Size(209, 19);
+			this->_trackRadius->TabIndex = 4;
+			this->_trackRadius->Value = 2;
+			this->_trackRadius->Scroll += gcnew System::EventHandler(this, &TerrainEditPanel::_trackRadius_Scroll);
 			// 
-			// trackBar2
+			// _trackHardness
 			// 
-			this->trackBar2->Location = System::Drawing::Point(76, 28);
-			this->trackBar2->Name = L"trackBar2";
-			this->trackBar2->Size = System::Drawing::Size(211, 19);
-			this->trackBar2->TabIndex = 5;
+			this->_trackHardness->Location = System::Drawing::Point(61, 28);
+			this->_trackHardness->Maximum = 100;
+			this->_trackHardness->Name = L"_trackHardness";
+			this->_trackHardness->Size = System::Drawing::Size(209, 19);
+			this->_trackHardness->TabIndex = 5;
+			this->_trackHardness->TickFrequency = 5;
+			this->_trackHardness->Scroll += gcnew System::EventHandler(this, &TerrainEditPanel::_trackHardness_Scroll);
 			// 
-			// trackBar3
+			// _trackStrength
 			// 
-			this->trackBar3->Location = System::Drawing::Point(76, 53);
-			this->trackBar3->Name = L"trackBar3";
-			this->trackBar3->Size = System::Drawing::Size(211, 19);
-			this->trackBar3->TabIndex = 6;
+			this->_trackStrength->Location = System::Drawing::Point(61, 53);
+			this->_trackStrength->Minimum = 1;
+			this->_trackStrength->Name = L"_trackStrength";
+			this->_trackStrength->Size = System::Drawing::Size(209, 19);
+			this->_trackStrength->TabIndex = 6;
+			this->_trackStrength->Value = 1;
+			this->_trackStrength->Scroll += gcnew System::EventHandler(this, &TerrainEditPanel::_trackStrength_Scroll);
 			// 
 			// label5
 			// 
@@ -289,63 +324,87 @@ namespace MapEditor {
 			this->label5->Text = L"Height:";
 			this->label5->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
 			// 
-			// trackBar4
+			// _trackHeight
 			// 
-			this->trackBar4->Location = System::Drawing::Point(76, 78);
-			this->trackBar4->Name = L"trackBar4";
-			this->trackBar4->Size = System::Drawing::Size(211, 19);
-			this->trackBar4->TabIndex = 7;
+			this->_trackHeight->Location = System::Drawing::Point(61, 78);
+			this->_trackHeight->Maximum = 15;
+			this->_trackHeight->Minimum = -15;
+			this->_trackHeight->Name = L"_trackHeight";
+			this->_trackHeight->Size = System::Drawing::Size(209, 19);
+			this->_trackHeight->TabIndex = 7;
+			this->_trackHeight->Value = -15;
+			this->_trackHeight->Scroll += gcnew System::EventHandler(this, &TerrainEditPanel::_trackHeight_Scroll);
 			// 
-			// numericUpDown2
+			// _numHardness
 			// 
-			this->numericUpDown2->Location = System::Drawing::Point(293, 28);
-			this->numericUpDown2->Name = L"numericUpDown2";
-			this->numericUpDown2->Size = System::Drawing::Size(37, 20);
-			this->numericUpDown2->TabIndex = 8;
+			this->_numHardness->Location = System::Drawing::Point(276, 28);
+			this->_numHardness->Name = L"_numHardness";
+			this->_numHardness->Size = System::Drawing::Size(52, 20);
+			this->_numHardness->TabIndex = 8;
+			this->_numHardness->ValueChanged += gcnew System::EventHandler(this, &TerrainEditPanel::_numHardness_ValueChanged);
 			// 
-			// numericUpDown3
+			// _numStrength
 			// 
-			this->numericUpDown3->Location = System::Drawing::Point(293, 53);
-			this->numericUpDown3->Name = L"numericUpDown3";
-			this->numericUpDown3->Size = System::Drawing::Size(37, 20);
-			this->numericUpDown3->TabIndex = 9;
+			this->_numStrength->Location = System::Drawing::Point(276, 53);
+			this->_numStrength->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {10, 0, 0, 0});
+			this->_numStrength->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+			this->_numStrength->Name = L"_numStrength";
+			this->_numStrength->Size = System::Drawing::Size(52, 20);
+			this->_numStrength->TabIndex = 9;
+			this->_numStrength->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+			this->_numStrength->ValueChanged += gcnew System::EventHandler(this, &TerrainEditPanel::_numStrength_ValueChanged);
 			// 
-			// numericUpDown4
+			// _numHeight
 			// 
-			this->numericUpDown4->Location = System::Drawing::Point(293, 78);
-			this->numericUpDown4->Name = L"numericUpDown4";
-			this->numericUpDown4->Size = System::Drawing::Size(37, 20);
-			this->numericUpDown4->TabIndex = 10;
+			this->_numHeight->DecimalPlaces = 1;
+			this->_numHeight->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 65536});
+			this->_numHeight->Location = System::Drawing::Point(276, 78);
+			this->_numHeight->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {15, 0, 0, 0});
+			this->_numHeight->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {15, 0, 0, System::Int32::MinValue});
+			this->_numHeight->Name = L"_numHeight";
+			this->_numHeight->Size = System::Drawing::Size(52, 20);
+			this->_numHeight->TabIndex = 10;
+			this->_numHeight->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {5, 0, 0, 0});
+			this->_numHeight->ValueChanged += gcnew System::EventHandler(this, &TerrainEditPanel::_numHeight_ValueChanged);
 			// 
 			// TerrainEditPanel
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->Controls->Add(this->groupBox1);
-			this->Controls->Add(this->button5);
-			this->Controls->Add(this->button4);
-			this->Controls->Add(this->button1);
-			this->Controls->Add(this->button3);
-			this->Controls->Add(this->button2);
+			this->Controls->Add(this->_btnRamp);
+			this->Controls->Add(this->_btnRelativePlateau);
+			this->Controls->Add(this->_btnNoise);
+			this->Controls->Add(this->_btnSmooth);
+			this->Controls->Add(this->_btnPlateau);
 			this->Controls->Add(this->_btnRaiseLower);
 			this->Controls->Add(this->label1);
 			this->Name = L"TerrainEditPanel";
-			this->Size = System::Drawing::Size(393, 522);
+			this->Size = System::Drawing::Size(392, 522);
 			this->groupBox1->ResumeLayout(false);
 			this->_tableLayoutBrushProperties->ResumeLayout(false);
 			this->_tableLayoutBrushProperties->PerformLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBar1))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBar2))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBar3))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBar4))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown2))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown3))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown4))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numRadius))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackRadius))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackHardness))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackStrength))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackHeight))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numHardness))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numStrength))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numHeight))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
 #pragma endregion
-	};
+	private: System::Void _btnRaiseLower_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _trackRadius_Scroll(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _numRadius_ValueChanged(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _trackHardness_Scroll(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _numHardness_ValueChanged(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _trackStrength_Scroll(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _numStrength_ValueChanged(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _trackHeight_Scroll(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _numHeight_ValueChanged(System::Object^  sender, System::EventArgs^  e);
+};
 }

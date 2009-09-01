@@ -92,11 +92,6 @@ namespace MapEditor
 		CreateResources();
 
 		_editMode = nullptr;
-
-		_timer = gcnew System::Windows::Forms::Timer;
-		_timer->Interval = 20;
-		_timer->Tick += gcnew System::EventHandler(this, &MapRenderWindow::OnTimerTick);
-		_timer->Start();
 	}
 
 	bool MapRenderWindow::CreateResources()
@@ -199,18 +194,6 @@ namespace MapEditor
 		if(!System::Threading::Monitor::TryEnter(this))
 			return;
 		//------------------------
-
-		uint cur_time = ::Timer::GetTime();
-		_frameTime = cur_time - _prevTime;
-		_prevTime = cur_time;
-		_fpsTime += _frameTime;
-		_frameCount++;
-		if(_fpsTime > 200)
-		{
-			_fps = _frameCount / (_fpsTime * 0.001f);
-			_fpsTime = 0;
-			_frameCount = 0;
-		}
 
 		if(!_renderer)
 			return;
@@ -424,10 +407,22 @@ namespace MapEditor
 		_renderer->FrontFace(GL::ORIENT_CCW);
 	}
 
-	void MapRenderWindow::OnTimerTick(System::Object^  sender, System::EventArgs^  e)
+	void MapRenderWindow::UpdateFrame()
 	{
+		uint cur_time = ::Timer::GetTime();
+		_frameTime = cur_time - _prevTime;
+		_prevTime = cur_time;
+		_fpsTime += _frameTime;
+		_frameCount++;
+		if(_fpsTime > 200)
+		{
+			_fps = _frameCount / (_fpsTime * 0.001f);
+			_fpsTime = 0;
+			_frameCount = 0;
+		}
+
 		if(_editMode->IsExecuting())
-			_editMode->Update();
+			_editMode->Update(_frameTime * 0.001f);
 	}
 
 }

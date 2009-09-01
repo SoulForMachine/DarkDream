@@ -15,6 +15,15 @@ namespace MapEditor
 	EM_TerrainEdit::EM_TerrainEdit(UndoManager^ undo_manager)
 	{
 		_parameters = gcnew Parameters;
+		_parameters->editType = EditType::RAISE_LOWER;
+		_parameters->radius = 4.0f;
+		_parameters->hardness = 0.6f;
+		_parameters->strength = 5.0f;
+		_parameters->height = 5.0f;
+		_parameters->posX = 0.0f;
+		_parameters->posY = 0.0f;
+		_parameters->posZ = 0.0f;
+
 		_panel = gcnew TerrainEditPanel(_parameters);
 		_action = nullptr;
 		_undoManager = undo_manager;
@@ -92,8 +101,12 @@ namespace MapEditor
 			_brush->Draw();
 	}
 
-	void EM_TerrainEdit::Update()
+	void EM_TerrainEdit::Update(float dt)
 	{
+		if(_isExecuting && _action != nullptr)
+		{
+			_action->Update(dt);
+		}
 	}
 
 }

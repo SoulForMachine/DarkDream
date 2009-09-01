@@ -12,6 +12,8 @@ namespace MapEditor
 		{
 			VIEW,
 			TERRAIN_EDIT,
+
+			EDIT_MODE_COUNT
 		};
 
 		EditMode()
@@ -30,7 +32,7 @@ namespace MapEditor
 		virtual void MouseWheel(int delta, int x, int y) {}
 		virtual void KeyDown(int key) {}
 		virtual void KeyUp(int key) {}
-		virtual void Update() {}
+		virtual void Update(float dt) {}
 		virtual void Render() {}
 		
 		bool IsExecuting()

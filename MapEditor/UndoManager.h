@@ -1,6 +1,8 @@
 
 #pragma once
 
+using namespace System::Collections::Generic;
+
 
 namespace MapEditor
 {
@@ -11,13 +13,19 @@ namespace MapEditor
 	ref class UndoManager
 	{
 	public:
+		UndoManager();
+		~UndoManager();
+
 		void Add(Action^ action);
 		void Undo();
 		void Redo();
+		void Clear();
 
 	private:
-		System::Collections::Generic::LinkedList<Action^>^ _undoList;
-		System::Collections::Generic::LinkedList<Action^>^ _redoList;
+		void ClearList(LinkedList<Action^>^ list);
+
+		LinkedList<Action^>^ _undoList;
+		LinkedList<Action^>^ _redoList;
 	};
 
 }

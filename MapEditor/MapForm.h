@@ -35,6 +35,8 @@ namespace MapEditor {
 		void Redraw()
 			{ _renderWindow->Draw(); }
 		void RedrawAsync();
+		void UpdateFrame()
+			{ _renderWindow->UpdateFrame(); }
 		void Animate(bool anim)
 			{ _renderWindow->Animate(anim); }
 		void Wireframe(bool wireframe)
@@ -60,6 +62,7 @@ namespace MapEditor {
 	private:
 		EditorCommon::FormDirector^ _director;
 		MapRenderWindow^ _renderWindow;
+		array<EditMode^>^ _editModes;
 		EditMode^ _currentEditMode;
 		UndoManager^ _undoManager;
 

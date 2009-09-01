@@ -41,7 +41,6 @@ namespace MapEditor
 		if(!_toolPanel->IsHandleCreated)
 			_toolPanel->Show(_dockPanel);
 
-		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
 		_mapForm->Show();
 		UpdateToolbarButtons();
 
@@ -190,11 +189,23 @@ namespace MapEditor
 		}
 	}
 
+	bool AppIsIdle()
+	{
+		MSG msg;
+		return !PeekMessage(&msg, 0, 0, 0, 0);
+	}
+
+
 	System::Void MainForm::OnIdle(System::Object^  sender, System::EventArgs^  e)
 	{
 		_menuViewWireframe->Checked = _wireframe;
 		_menuViewStats->Checked = _viewStats;
-		_mapForm->RedrawAsync();
+
+		while(AppIsIdle())
+		{
+			_mapForm->UpdateFrame();
+			_mapForm->Redraw();
+		}
 	}
 
 	System::Void MainForm::_menuViewStats_Click(System::Object^  sender, System::EventArgs^  e)

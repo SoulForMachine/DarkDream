@@ -49,7 +49,7 @@ namespace MapEditor
 		virtual void LeftButtonDown(int x, int y) override;
 		virtual void LeftButtonUp(int x, int y) override;
 		virtual void KeyDown(int key) override;
-		virtual void Update() override;
+		virtual void Update(float dt) override;
 		virtual void Render() override;
 
 	private:

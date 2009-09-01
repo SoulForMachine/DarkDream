@@ -26,6 +26,7 @@ namespace MapEditor
 			{ _stats = stats; }
 		void Draw()
 			{ OnPaint(); }
+		void UpdateFrame();
 
 	protected:
 		virtual void WndProc(Message% msg) override;
@@ -45,12 +46,10 @@ namespace MapEditor
 		void RenderStats();
 		bool CreateResources();
 		void DestroyResources();
-		void OnTimerTick(System::Object^  sender, System::EventArgs^  e);
 
 		Engine::RenderSystem* _renderSystem;
 		GL::Renderer* _renderer;
 		EditMode^ _editMode;
-		System::Windows::Forms::Timer^ _timer;
 
 		// drawing stuff
 		Engine::Font* _font;

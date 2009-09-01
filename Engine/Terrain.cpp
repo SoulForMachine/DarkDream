@@ -115,9 +115,9 @@ namespace Engine
 		patch.boundBox.maxPt.set(x_pos + PATCH_WIDTH, heights? heights[0]: 0.0f, (float)PATCH_HEIGHT);
 
 		int i = 0;
-		for(int h = 0; h < PATCH_HEIGHT + 1; ++h)
+		for(int h = 0; h <= PATCH_HEIGHT; ++h)
 		{
-			for(int w = 0; w < PATCH_WIDTH + 1; ++w)
+			for(int w = 0; w <= PATCH_WIDTH; ++w)
 			{
 				float elev = heights? heights[h * (PATCH_WIDTH + 1) + w]: 0.0f;
 
@@ -137,6 +137,10 @@ namespace Engine
 					patch.boundBox.maxPt.y = elev;
 			}
 		}
+
+		// if grid elevation is supplied, calculate the normals
+		if(heights)
+			UpdateNormals(vertices, 0, 0, PATCH_WIDTH, PATCH_HEIGHT);
 
 		if(!patch.vertBuf->UnmapBuffer())
 		{
@@ -520,8 +524,8 @@ namespace Engine
 		TerrainPatch& patch = _patches[int(point.x) / PATCH_WIDTH];
 		int cell_x = int(point.x - patch.boundBox.minPt.x);
 		int cell_y = int(point.y);
-		int i = cell_y * PATCH_HEIGHT + cell_x;
-		float x = point.x;
+		int i = cell_y * PATCH_WIDTH + cell_x;
+		float x = (float)cell_x + patch.boundBox.minPt.x;
 
 		vec3f triangle[3];
 		triangle[0].set(x, patch.elevation[i], (float)cell_y);
@@ -551,6 +555,131 @@ namespace Engine
 		}
 
 		return true;
+	}
+
+	void Terrain::SetElevation(int start_x, int start_y, int end_x, int end_y, const float* elevation)
+	{
+		const int X_COUNT = PATCH_WIDTH + 1;
+		const int PART_X_COUNT = end_x - start_x + 1;
+		int i1 = Max(start_x - 1, 0) / PATCH_WIDTH; // index of first patch
+		int i2 = Min(end_x / PATCH_WIDTH, _patchCount - 1); // index of last patch
+		int start_src_x = 0;
+
+		for(int i = i1; i <= i2; ++i)
+		{
+			TerrainPatch& patch = _patches[i];
+
+			int x1 = Max(start_x, i * PATCH_WIDTH) - i * PATCH_WIDTH;
+			int x2 = Min(end_x, (i + 1) * PATCH_WIDTH) - i * PATCH_WIDTH;
+			int y1 = start_y;
+			int y2 = end_y;
+
+			for(int y = y1, src_y = 0; y <= y2; ++y, ++src_y)
+			{
+				for(int x = x1, src_x = start_src_x; x <= x2; ++x, ++src_x)
+				{
+					patch.elevation[y * X_COUNT + x] = elevation[src_y * PART_X_COUNT + src_x];
+				}
+			}
+
+			start_src_x += x2 - x1;
+
+			PatchVertex* vertices = (PatchVertex*)patch.vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, true);
+			if(vertices)
+			{
+				for(int y = y1; y <= y2; ++y)
+				{
+					for(int x = x1; x <= x2; ++x)
+					{
+						vertices[y * X_COUNT + x].position.y = patch.elevation[y * X_COUNT + x];
+					}
+				}
+
+				UpdateNormals(vertices, Max(x1 - 1, 0), Max(y1 - 1, 0), Min(x2 + 1, PATCH_WIDTH), Min(y2 + 1, PATCH_HEIGHT));
+
+				patch.vertBuf->UnmapBuffer();
+			}
+		}
+	}
+
+	void Terrain::OffsetElevation(int start_x, int start_y, int end_x, int end_y, const float* offsets)
+	{
+		const int X_COUNT = PATCH_WIDTH + 1;
+		const int PART_X_COUNT = end_x - start_x + 1;
+		int i1 = Max(start_x - 1, 0) / PATCH_WIDTH; // index of first patch
+		int i2 = Min(end_x / PATCH_WIDTH, _patchCount - 1); // index of last patch
+		int start_src_x = 0;
+
+		for(int i = i1; i <= i2; ++i)
+		{
+			TerrainPatch& patch = _patches[i];
+
+			int x1 = Max(start_x, i * PATCH_WIDTH) - i * PATCH_WIDTH;
+			int x2 = Min(end_x, (i + 1) * PATCH_WIDTH) - i * PATCH_WIDTH;
+			int y1 = start_y;
+			int y2 = end_y;
+
+			for(int y = y1, src_y = 0; y <= y2; ++y, ++src_y)
+			{
+				for(int x = x1, src_x = start_src_x; x <= x2; ++x, ++src_x)
+				{
+					patch.elevation[y * X_COUNT + x] += offsets[src_y * PART_X_COUNT + src_x];
+				}
+			}
+
+			start_src_x += x2 - x1;
+
+			PatchVertex* vertices = (PatchVertex*)patch.vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, true);
+			if(vertices)
+			{
+				for(int y = y1; y <= y2; ++y)
+				{
+					for(int x = x1; x <= x2; ++x)
+					{
+						vertices[y * X_COUNT + x].position.y = patch.elevation[y * X_COUNT + x];
+					}
+				}
+
+				UpdateNormals(vertices, Max(x1 - 1, 0), Max(y1 - 1, 0), Min(x2 + 1, PATCH_WIDTH), Min(y2 + 1, PATCH_HEIGHT));
+
+				patch.vertBuf->UnmapBuffer();
+			}
+		}
+	}
+
+	void Terrain::GetElevation(int start_x, int start_y, int end_x, int end_y, float* elevation)
+	{
+		const int X_COUNT = PATCH_WIDTH + 1;
+		const int DEST_X_COUNT = end_x - start_x + 1;
+		int i1 = Min(start_x / PATCH_WIDTH, _patchCount - 1); // index of first patch
+		int i2 = Max(end_x / PATCH_WIDTH - 1, 0); // index of last patch
+		int start_dest_x = 0;
+
+		for(int i = i1; i <= i2; ++i)
+		{
+			TerrainPatch& patch = _patches[i];
+
+			int x1 = Max(start_x, i * PATCH_WIDTH) - i * PATCH_WIDTH;
+			if(x1 == 0 && i > i1) // skip first column because it's the same as the last on previous patch
+				++x1;
+			int x2 = Min(end_x, (i + 1) * PATCH_WIDTH) - i * PATCH_WIDTH;
+			int y1 = start_y;
+			int y2 = end_y;
+
+			for(int y = y1, dest_y = 0; y <= y2; ++y, ++dest_y)
+			{
+				for(int x = x1, dest_x = start_dest_x; x <= x2; ++x, ++dest_x)
+				{
+					elevation[dest_y * DEST_X_COUNT + dest_x] = patch.elevation[y * X_COUNT + x];
+				}
+			}
+
+			start_dest_x += x2 - x1 + 1;
+		}
+	}
+
+	void Terrain::UpdateNormals(PatchVertex* vertices, int start_x, int start_y, int end_x, int end_y)
+	{
 	}
 
 }

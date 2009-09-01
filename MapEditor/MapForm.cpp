@@ -52,6 +52,12 @@ namespace MapEditor
 		try
 		{
 			_renderWindow = gcnew MapRenderWindow(this);
+
+			_editModes = gcnew array<EditMode^>((int)EditMode::EditModeEnum::EDIT_MODE_COUNT);
+			_editModes[(int)EditMode::EditModeEnum::VIEW] = gcnew EM_View;
+			_editModes[(int)EditMode::EditModeEnum::TERRAIN_EDIT] = gcnew EM_TerrainEdit(_undoManager);
+
+			_currentEditMode = _editModes[(int)EditMode::EditModeEnum::VIEW];
 			_renderWindow->SetEditMode(_currentEditMode);
 		}
 		catch(...)
@@ -62,7 +68,11 @@ namespace MapEditor
 
 	System::Void MapForm::MapForm_HandleDestroyed(System::Object^  sender, System::EventArgs^  e)
 	{
-		delete _currentEditMode;
+		delete _undoManager;
+		for each(EditMode^ em in _editModes)
+			delete em;
+		delete _editModes;
+		_currentEditMode = nullptr;
 		_renderWindow->DestroyHandle();
 		delete _renderWindow;
 	}
@@ -80,18 +90,7 @@ namespace MapEditor
 		if(_currentEditMode != nullptr && _currentEditMode->GetModeEnum() == mode)
 			return;
 
-		delete _currentEditMode;
-		switch(mode)
-		{
-		case EditMode::EditModeEnum::VIEW:
-			_currentEditMode = gcnew EM_View;
-			break;
-		case EditMode::EditModeEnum::TERRAIN_EDIT:
-			_currentEditMode = gcnew EM_TerrainEdit(_undoManager);
-			break;
-		default:
-			assert(0);
-		}
+		_currentEditMode = _editModes[(int)mode];
 
 		if(_renderWindow != nullptr)
 			_renderWindow->SetEditMode(_currentEditMode);

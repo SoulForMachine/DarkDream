@@ -72,6 +72,7 @@ namespace MapEditor
 
 			_renderer->Draw(GL::PRIM_LINES, 0, 4);
 			_renderer->Draw(GL::PRIM_LINE_LOOP, 4, CIRCLE_VERTEX_COUNT);
+			_renderer->Draw(GL::PRIM_LINE_LOOP, 4 + CIRCLE_VERTEX_COUNT, CIRCLE_VERTEX_COUNT);
 		}
 	}
 
@@ -93,17 +94,21 @@ namespace MapEditor
 		vertices += 4;
 
 		float d = TWO_PI / CIRCLE_VERTEX_COUNT;
-		float angle = 0.0f;
+		float radius[] = { _parameters->radius, _parameters->radius * _parameters->hardness };
 
-		for(int i = 0; i < CIRCLE_VERTEX_COUNT; ++i)
+		for(int i = 0; i < 2; ++i)
 		{
-			float elev;
-			vec2f pt(cos(angle) * 6.0f + center.x, sin(angle) * 6.0f + center.z);
-			if(!engineAPI->world->GetTerrain().ElevationFromPoint(pt, elev))
-				elev = 0.0f;
-			vertices->position.set(pt.x, elev + VERT_OFFSET, pt.y);
-			vertices++;
-			angle += d;
+			float angle = 0.0f;
+			for(int j = 0; j < CIRCLE_VERTEX_COUNT; ++j)
+			{
+				float elev;
+				vec2f pt(cos(angle) * radius[i] + center.x, sin(angle) * radius[i] + center.z);
+				if(!engineAPI->world->GetTerrain().ElevationFromPoint(pt, elev))
+					elev = 0.0f;
+				vertices->position.set(pt.x, elev + VERT_OFFSET, pt.y);
+				vertices++;
+				angle += d;
+			}
 		}
 
 		return _vertBuf->UnmapBuffer();
