@@ -58,7 +58,7 @@ namespace MapEditor
 		Parameters^ _parameters;
 		UndoManager^ _undoManager;
 		TerrainBrush^ _brush;
-		bool _intersection;
+		bool _overTerrain;
 	};
 
 }

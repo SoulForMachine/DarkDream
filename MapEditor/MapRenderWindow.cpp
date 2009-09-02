@@ -276,8 +276,6 @@ namespace MapEditor
 
 	void MapRenderWindow::OnMouseMove(int modifiers, int x, int y)
 	{
-		SetCursor(LoadCursor(0, IDC_ARROW));
-
 		_editMode->MouseMove(modifiers, x, y);
 
 		if(!_editMode->IsExecuting())

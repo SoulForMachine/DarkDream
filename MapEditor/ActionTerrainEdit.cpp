@@ -37,8 +37,7 @@ namespace MapEditor
 
 		BuildStrengthMatrix(_undoRect);
 
-		_oldRadius = _parameters->radius;
-		_oldHardness = _parameters->hardness;
+		_oldRect = _undoRect;
 	}
 
 	void ActionTerrainEdit::EndAction()
@@ -74,11 +73,9 @@ namespace MapEditor
 		System::Drawing::Rectangle rect;
 		GetBrushRect(rect);
 
-		if(	_parameters->radius != _oldRadius ||
-			_parameters->hardness != _oldHardness )
+		if(rect != _oldRect)
 		{
-			_oldRadius = _parameters->radius;
-			_oldHardness = _parameters->hardness;
+			_oldRect = rect;
 			BuildStrengthMatrix(rect);
 		}
 
@@ -130,9 +127,6 @@ namespace MapEditor
 
 	void ActionTerrainEdit::GetBrushRect(System::Drawing::Rectangle% rect)
 	{
-		// brush rect is always the same size for given radius no matter where the center point is;
-		// points lying on right and bottom lines are not included
-
 		rect.X = Max((int)ceil(_parameters->posX - _parameters->radius), 0);
 		rect.Y = Max((int)ceil(_parameters->posZ - _parameters->radius), 0);
 

@@ -492,7 +492,7 @@ namespace Engine
 		assert(cell_x >= 0 && cell_x < PATCH_WIDTH);
 		assert(cell_y >= 0 && cell_y < PATCH_HEIGHT);
 
-		int i = cell_y * PATCH_WIDTH + cell_x;
+		int i = cell_y * (PATCH_WIDTH + 1) + cell_x;
 		float x = (float)cell_x + patch.boundBox.minPt.x;
 
 		vec3f triangle[3];
@@ -524,7 +524,7 @@ namespace Engine
 		TerrainPatch& patch = _patches[int(point.x) / PATCH_WIDTH];
 		int cell_x = int(point.x - patch.boundBox.minPt.x);
 		int cell_y = int(point.y);
-		int i = cell_y * PATCH_WIDTH + cell_x;
+		int i = cell_y * (PATCH_WIDTH + 1) + cell_x;
 		float x = (float)cell_x + patch.boundBox.minPt.x;
 
 		vec3f triangle[3];

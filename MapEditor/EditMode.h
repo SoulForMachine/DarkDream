@@ -22,7 +22,7 @@ namespace MapEditor
 		virtual System::Windows::Forms::UserControl^ GetPanel() = 0;
 		virtual EditModeEnum GetModeEnum() = 0;
 
-		virtual void MouseMove(int modifiers, int x, int y) {}
+		virtual void MouseMove(int modifiers, int x, int y) { SetCursor(LoadCursor(0, IDC_ARROW)); }
 		virtual void LeftButtonDown(int x, int y) {}
 		virtual void RightButtonDown(int x, int y) {}
 		virtual void MiddleButtonDown(int x, int y) {}

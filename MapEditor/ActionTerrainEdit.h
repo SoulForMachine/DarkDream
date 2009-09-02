@@ -29,8 +29,7 @@ namespace MapEditor
 		float* _undoElevation;
 		System::Drawing::Rectangle _undoRect;
 		float* _strengthMatrix;
-		float _oldRadius;
-		float _oldHardness;
+		System::Drawing::Rectangle _oldRect;
 	};
 
 }

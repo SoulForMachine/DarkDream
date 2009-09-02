@@ -29,7 +29,7 @@ namespace MapEditor
 		_undoManager = undo_manager;
 		_brush = gcnew TerrainBrush(_parameters);
 		_brush->Init();
-		_intersection = false;
+		_overTerrain = false;
 	}
 
 	EM_TerrainEdit::~EM_TerrainEdit()
@@ -52,24 +52,29 @@ namespace MapEditor
 		int vp_x, vp_y, vp_width, vp_height;
 		engineAPI->renderSystem->GetRenderer()->GetViewport(vp_x, vp_y, vp_width, vp_height);
 		vec3f point;
-		_intersection = engineAPI->world->GetTerrain().PickTerrainPoint(x, vp_height - y, point);
-		if(_intersection)
+		_overTerrain = engineAPI->world->GetTerrain().PickTerrainPoint(x, vp_height - y, point);
+		if(_overTerrain)
 		{
 			_parameters->posX = point.x;
 			_parameters->posY = point.y;
 			_parameters->posZ = point.z;
 
-			if(_isExecuting && _action != nullptr)
-			{
-			}
+			SetCursor(0);
+		}
+		else
+		{
+			SetCursor(LoadCursor(0, IDC_ARROW));
 		}
 	}
 
 	void EM_TerrainEdit::LeftButtonDown(int x, int y)
 	{
-		_isExecuting = true;
-		_action = gcnew ActionTerrainEdit(_parameters);
-		_action->BeginAction();
+		if(_overTerrain)
+		{
+			_isExecuting = true;
+			_action = gcnew ActionTerrainEdit(_parameters);
+			_action->BeginAction();
+		}
 	}
 
 	void EM_TerrainEdit::LeftButtonUp(int x, int y)
@@ -97,13 +102,13 @@ namespace MapEditor
 
 	void EM_TerrainEdit::Render()
 	{
-		if(_intersection)
+		if(_overTerrain)
 			_brush->Draw();
 	}
 
 	void EM_TerrainEdit::Update(float dt)
 	{
-		if(_isExecuting && _action != nullptr)
+		if(_isExecuting && _action != nullptr && _overTerrain)
 		{
 			_action->Update(dt);
 		}

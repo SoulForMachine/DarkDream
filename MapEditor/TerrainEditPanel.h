@@ -209,7 +209,7 @@ namespace MapEditor {
 			this->_tableLayoutBrushProperties->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent, 
 				78.81944F)));
 			this->_tableLayoutBrushProperties->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Absolute, 
-				62)));
+				63)));
 			this->_tableLayoutBrushProperties->Controls->Add(this->_numRadius, 2, 0);
 			this->_tableLayoutBrushProperties->Controls->Add(this->label2, 0, 0);
 			this->_tableLayoutBrushProperties->Controls->Add(this->label3, 0, 1);
@@ -240,7 +240,7 @@ namespace MapEditor {
 			// 
 			this->_numRadius->DecimalPlaces = 1;
 			this->_numRadius->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {5, 0, 0, 65536});
-			this->_numRadius->Location = System::Drawing::Point(276, 3);
+			this->_numRadius->Location = System::Drawing::Point(275, 3);
 			this->_numRadius->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {16, 0, 0, 0});
 			this->_numRadius->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
 			this->_numRadius->Name = L"_numRadius";
@@ -266,7 +266,7 @@ namespace MapEditor {
 			this->label3->Dock = System::Windows::Forms::DockStyle::Left;
 			this->label3->Location = System::Drawing::Point(3, 25);
 			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(52, 25);
+			this->label3->Size = System::Drawing::Size(47, 25);
 			this->label3->TabIndex = 1;
 			this->label3->Text = L"Hardness:";
 			this->label3->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
@@ -284,7 +284,7 @@ namespace MapEditor {
 			// 
 			// _trackRadius
 			// 
-			this->_trackRadius->Location = System::Drawing::Point(61, 3);
+			this->_trackRadius->Location = System::Drawing::Point(60, 3);
 			this->_trackRadius->Maximum = 32;
 			this->_trackRadius->Minimum = 2;
 			this->_trackRadius->Name = L"_trackRadius";
@@ -295,7 +295,7 @@ namespace MapEditor {
 			// 
 			// _trackHardness
 			// 
-			this->_trackHardness->Location = System::Drawing::Point(61, 28);
+			this->_trackHardness->Location = System::Drawing::Point(60, 28);
 			this->_trackHardness->Maximum = 100;
 			this->_trackHardness->Name = L"_trackHardness";
 			this->_trackHardness->Size = System::Drawing::Size(209, 19);
@@ -305,7 +305,7 @@ namespace MapEditor {
 			// 
 			// _trackStrength
 			// 
-			this->_trackStrength->Location = System::Drawing::Point(61, 53);
+			this->_trackStrength->Location = System::Drawing::Point(60, 53);
 			this->_trackStrength->Minimum = 1;
 			this->_trackStrength->Name = L"_trackStrength";
 			this->_trackStrength->Size = System::Drawing::Size(209, 19);
@@ -326,7 +326,7 @@ namespace MapEditor {
 			// 
 			// _trackHeight
 			// 
-			this->_trackHeight->Location = System::Drawing::Point(61, 78);
+			this->_trackHeight->Location = System::Drawing::Point(60, 78);
 			this->_trackHeight->Maximum = 15;
 			this->_trackHeight->Minimum = -15;
 			this->_trackHeight->Name = L"_trackHeight";
@@ -337,7 +337,7 @@ namespace MapEditor {
 			// 
 			// _numHardness
 			// 
-			this->_numHardness->Location = System::Drawing::Point(276, 28);
+			this->_numHardness->Location = System::Drawing::Point(275, 28);
 			this->_numHardness->Name = L"_numHardness";
 			this->_numHardness->Size = System::Drawing::Size(52, 20);
 			this->_numHardness->TabIndex = 8;
@@ -345,7 +345,7 @@ namespace MapEditor {
 			// 
 			// _numStrength
 			// 
-			this->_numStrength->Location = System::Drawing::Point(276, 53);
+			this->_numStrength->Location = System::Drawing::Point(275, 53);
 			this->_numStrength->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {10, 0, 0, 0});
 			this->_numStrength->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
 			this->_numStrength->Name = L"_numStrength";
@@ -358,7 +358,7 @@ namespace MapEditor {
 			// 
 			this->_numHeight->DecimalPlaces = 1;
 			this->_numHeight->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 65536});
-			this->_numHeight->Location = System::Drawing::Point(276, 78);
+			this->_numHeight->Location = System::Drawing::Point(275, 78);
 			this->_numHeight->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {15, 0, 0, 0});
 			this->_numHeight->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {15, 0, 0, System::Int32::MinValue});
 			this->_numHeight->Name = L"_numHeight";

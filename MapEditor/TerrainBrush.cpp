@@ -68,10 +68,14 @@ namespace MapEditor
 			_vertpBrush->GetASMProgram()->LocalMatrix4x4(0, engineAPI->world->GetCamera().GetViewProjectionTransform());
 
 			vec4f red(1.0f, 0.0f, 0.0f, 1.0f);
+			vec4f orange(1.0f, 0.5f, 0.0f, 1.0f);
 			_fragpBrush->GetASMProgram()->LocalParameter(0, red);
 
+			_renderer->EnableDepthTest(false);
 			_renderer->Draw(GL::PRIM_LINES, 0, 4);
+			_renderer->EnableDepthTest(true);
 			_renderer->Draw(GL::PRIM_LINE_LOOP, 4, CIRCLE_VERTEX_COUNT);
+			_fragpBrush->GetASMProgram()->LocalParameter(0, orange);
 			_renderer->Draw(GL::PRIM_LINE_LOOP, 4 + CIRCLE_VERTEX_COUNT, CIRCLE_VERTEX_COUNT);
 		}
 	}
