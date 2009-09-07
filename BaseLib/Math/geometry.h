@@ -17,6 +17,13 @@ namespace math3d
 	}
 
 	template<class _ST>
+	void triangle_normal(vec3<_ST>& normal, const vec3<_ST> triangle[3])
+	{
+		cross(normal, triangle[1] - triangle[0], triangle[2] - triangle[0]);
+		normal.normalize();
+	}
+
+	template<class _ST>
 	bool point_in_triangle(const vec3<_ST>& point, const vec3<_ST> triangle[3])
 	{
 		vec3<_ST> u = triangle[1] - triangle[0];

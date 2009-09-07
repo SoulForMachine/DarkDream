@@ -97,9 +97,10 @@ namespace MapEditor {
 			this->Text = L"Map";
 			this->WindowState = System::Windows::Forms::FormWindowState::Maximized;
 			this->HandleCreated += gcnew System::EventHandler(this, &MapForm::MapForm_HandleCreated);
-			this->HandleDestroyed += gcnew System::EventHandler(this, &MapForm::MapForm_HandleDestroyed);
 			this->MouseWheel += gcnew System::Windows::Forms::MouseEventHandler(this, &MapForm::MapForm_MouseWheel);
 			this->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &MapForm::MapForm_Paint);
+			this->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &MapForm::MapForm_KeyDown);
+			this->HandleDestroyed += gcnew System::EventHandler(this, &MapForm::MapForm_HandleDestroyed);
 			this->Resize += gcnew System::EventHandler(this, &MapForm::MapForm_Resize);
 			this->ResumeLayout(false);
 
@@ -110,5 +111,6 @@ namespace MapEditor {
 		private: System::Void MapForm_HandleCreated(System::Object^  sender, System::EventArgs^  e);
 		private: System::Void MapForm_HandleDestroyed(System::Object^  sender, System::EventArgs^  e);
 		private: System::Void MapForm_MouseWheel(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+		private: System::Void MapForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e);
 	};
 }

@@ -94,6 +94,7 @@ namespace MapEditor
 		{
 			if(_isExecuting && _action != nullptr)
 			{
+				_isExecuting = false;
 				_action->CancelAction();
 				delete _action;
 			}

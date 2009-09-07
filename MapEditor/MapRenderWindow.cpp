@@ -171,6 +171,9 @@ namespace MapEditor
 			OnMouseWheel(GET_WHEEL_DELTA_WPARAM(wparam), GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
 			msg.Result = IntPtr(0);
 			return;
+		case WM_KEYDOWN:
+			OnKeyDown((int)wparam);
+			break;
 		case WM_SIZE:
 			OnSize(LOWORD(lparam), HIWORD(lparam));
 			break;
@@ -382,6 +385,11 @@ namespace MapEditor
 		}
 	}
 
+	void MapRenderWindow::OnKeyDown(int key)
+	{
+		_editMode->KeyDown(key);
+	}
+
 	void MapRenderWindow::RenderStats()
 	{
 		_renderer->EnableDepthTest(false);
@@ -419,8 +427,7 @@ namespace MapEditor
 			_frameCount = 0;
 		}
 
-		if(_editMode->IsExecuting())
-			_editMode->Update(_frameTime * 0.001f);
+		_editMode->Update(_frameTime * 0.001f);
 	}
 
 }

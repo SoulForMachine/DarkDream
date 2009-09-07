@@ -31,7 +31,7 @@ namespace MapEditor
 		const Terrain::TerrainPatch* patches = terrain.GetPatches();
 		int patch_count = terrain.GetPatchCount();
 		_oldElevation = new(tempPool) float[(patch_count * Terrain::PATCH_WIDTH + 1) * (Terrain::PATCH_HEIGHT + 1)];
-		terrain.GetElevation(0, 0, Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _oldElevation);
+		terrain.GetElevation(0, 0, patch_count * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _oldElevation);
 
 		GetBrushRect(_undoRect);
 
@@ -61,7 +61,9 @@ namespace MapEditor
 
 	void ActionTerrainEdit::CancelAction()
 	{
-		engineAPI->world->GetTerrain().SetElevation(0, 0, Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _oldElevation);
+		Terrain& terrain = engineAPI->world->GetTerrain();
+		int patch_count = terrain.GetPatchCount();
+		terrain.SetElevation(0, 0, patch_count * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _oldElevation);
 		delete[] _oldElevation;
 		_oldElevation = 0;
 		delete[] _strengthMatrix;
@@ -80,6 +82,9 @@ namespace MapEditor
 		}
 
 		_undoRect = System::Drawing::Rectangle::Union(_undoRect, rect);
+
+		if(GetAsyncKeyState(VK_SHIFT) & 0x8000)
+			dt = -dt;
 
 		int size = (rect.Width + 1) * (rect.Height + 1);
 		float* elevation = new(tempPool) float[size];

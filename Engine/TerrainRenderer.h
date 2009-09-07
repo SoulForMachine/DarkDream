@@ -33,6 +33,9 @@ namespace Engine
 		const ASMProgRes* _vpTerrain;
 		const ASMProgRes* _fpTerrain;
 		GL::VertexFormat* _vertFmtTerrain;
+		const ASMProgRes* _vpDbgLine;
+		const ASMProgRes* _fpDbgLine;
+		GL::VertexFormat* _vertFmtDbgLine;
 
 		void Clear();
 	};

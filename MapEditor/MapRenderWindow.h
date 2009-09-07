@@ -43,6 +43,7 @@ namespace MapEditor
 		void OnMButtonUp(int x, int y);
 		void OnRButtonUp(int x, int y);
 		void OnMouseWheel(int delta, int x, int y);
+		void OnKeyDown(int key);
 		void RenderStats();
 		bool CreateResources();
 		void DestroyResources();

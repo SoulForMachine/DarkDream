@@ -36,11 +36,14 @@ namespace Engine
 		}
 
 		/*
+			triangles are counter-clockwise
+
 			+---+
-			|\ 2|
-			| \ |
-			|1 \|
-			+---+
+		 Z^	|\ 2|
+		  |	| \ |
+		  |	|1 \|
+		  |	+---+
+		  +--------> X
 		*/
 		int i = 0;
 		for(int h = 0; h < PATCH_HEIGHT; ++h)
@@ -48,12 +51,12 @@ namespace Engine
 			for(int w = 0; w < PATCH_WIDTH; ++w)
 			{
 				indices[0] = i + 0;
-				indices[1] = i + 1;
-				indices[2] = i + PATCH_WIDTH + 1;
+				indices[1] = i + PATCH_WIDTH + 1;
+				indices[2] = i + 1;
 
 				indices[3] = i + 1;
-				indices[4] = i + PATCH_WIDTH + 2;
-				indices[5] = i + PATCH_WIDTH + 1;
+				indices[4] = i + PATCH_WIDTH + 1;
+				indices[5] = i + PATCH_WIDTH + 2;
 
 				indices += 6;
 				i++;
@@ -84,6 +87,7 @@ namespace Engine
 		for(int i = 0; i < _patchCount; ++i)
 		{
 			_renderer->DestroyBuffer(_patches[i].vertBuf);
+			_renderer->DestroyBuffer(_patches[i].normalBuf);
 			delete[] _patches[i].elevation;
 		}
 
@@ -101,6 +105,8 @@ namespace Engine
 		if(!patch.vertBuf)
 			return false;
 
+		patch.normalBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, vert_count * sizeof(vec3f) * 2, 0, GL::USAGE_STATIC_DRAW);
+
 		PatchVertex* vertices = (PatchVertex*)patch.vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
 		if(!vertices)
 		{
@@ -108,6 +114,8 @@ namespace Engine
 			delete[] patch.elevation;
 			return false;
 		}
+
+		PatchVertex* vertz = vertices;
 
 		patch.elevation = new(mapPool) float[vert_count];
 		float x_pos = (float)_patchCount * PATCH_WIDTH;
@@ -119,7 +127,11 @@ namespace Engine
 		{
 			for(int w = 0; w <= PATCH_WIDTH; ++w)
 			{
-				float elev = heights? heights[h * (PATCH_WIDTH + 1) + w]: 0.0f;
+				float elev;
+				if(w == 0 && _patchCount > 0) // use hight from previous patches' edge
+					elev = _patches[_patchCount - 1].elevation[h * (PATCH_WIDTH + 1) + PATCH_WIDTH];
+				else
+					elev = heights? heights[h * (PATCH_WIDTH + 1) + w]: 0.0f;
 
 				vertices->position.x = (float)w;
 				vertices->position.y = elev;
@@ -138,18 +150,31 @@ namespace Engine
 			}
 		}
 
+		_patchCount++;
+
 		// if grid elevation is supplied, calculate the normals
 		if(heights)
-			UpdateNormals(vertices, 0, 0, PATCH_WIDTH, PATCH_HEIGHT);
+			UpdatePatchNormals(_patchCount, vertices, 0, 0, PATCH_WIDTH, PATCH_HEIGHT);
+
+		vec3f* normals = (vec3f*)patch.normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+		for(int h = 0; h <= PATCH_HEIGHT; ++h)
+		{
+			for(int w = 0; w <= PATCH_WIDTH; ++w)
+			{
+				normals[0] = vertz[h * (PATCH_WIDTH + 1) + w].position.rvec3;
+				normals[1] = vertz[h * (PATCH_WIDTH + 1) + w].position.rvec3 + vertz[h * (PATCH_WIDTH + 1) + w].normal;
+				normals += 2;
+			}
+		}
+		patch.normalBuf->UnmapBuffer();
 
 		if(!patch.vertBuf->UnmapBuffer())
 		{
 			_renderer->DestroyBuffer(patch.vertBuf);
 			delete[] patch.elevation;
+			_patchCount--;
 			return false;
 		}
-
-		_patchCount++;
 
 		return true;
 	}
@@ -497,15 +522,15 @@ namespace Engine
 
 		vec3f triangle[3];
 		triangle[0].set(x, patch.elevation[i], (float)cell_y);
-		triangle[1].set(x + 1, patch.elevation[i + 1], (float)cell_y);
-		triangle[2].set(x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
+		triangle[1].set(x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
+		triangle[2].set(x + 1, patch.elevation[i + 1], (float)cell_y);
 
 		if(intersect_ray_triangle(point, ray_pt, ray_dir, triangle))
 			return true;
 
 		triangle[0].set(x + 1, patch.elevation[i + 1], (float)cell_y);
-		triangle[1].set(x + 1, patch.elevation[i + PATCH_WIDTH + 2], (float)cell_y + 1);
-		triangle[2].set(x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
+		triangle[1].set(x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
+		triangle[2].set(x + 1, patch.elevation[i + PATCH_WIDTH + 2], (float)cell_y + 1);
 
 		if(intersect_ray_triangle(point, ray_pt, ray_dir, triangle))
 			return true;
@@ -529,8 +554,8 @@ namespace Engine
 
 		vec3f triangle[3];
 		triangle[0].set(x, patch.elevation[i], (float)cell_y);
-		triangle[1].set(x + 1, patch.elevation[i + 1], (float)cell_y);
-		triangle[2].set(x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
+		triangle[1].set(x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
+		triangle[2].set(x + 1, patch.elevation[i + 1], (float)cell_y);
 
 		vec2f triangle2d[3];
 		triangle2d[0].set(triangle[0].x, triangle[0].z);
@@ -546,8 +571,8 @@ namespace Engine
 		else
 		{
 			triangle[0].set(x + 1, patch.elevation[i + 1], (float)cell_y);
-			triangle[1].set(x + 1, patch.elevation[i + PATCH_WIDTH + 2], (float)cell_y + 1);
-			triangle[2].set(x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
+			triangle[1].set(x, patch.elevation[i + PATCH_WIDTH + 1], (float)cell_y + 1);
+			triangle[2].set(x + 1, patch.elevation[i + PATCH_WIDTH + 2], (float)cell_y + 1);
 
 			vec4f plane;
 			plane_from_triangle(plane, triangle);
@@ -595,7 +620,18 @@ namespace Engine
 					}
 				}
 
-				UpdateNormals(vertices, Max(x1 - 1, 0), Max(y1 - 1, 0), Min(x2 + 1, PATCH_WIDTH), Min(y2 + 1, PATCH_HEIGHT));
+				UpdatePatchNormals(i, vertices, Max(x1 - 1, 0), Max(y1 - 1, 0), Min(x2 + 1, PATCH_WIDTH), Min(y2 + 1, PATCH_HEIGHT));
+
+				vec3f* normals = (vec3f*)patch.normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+				for(int y = Max(y1 - 1, 0); y <= Min(y2 + 1, PATCH_HEIGHT); ++y)
+				{
+					for(int x = Max(x1 - 1, 0); x <= Min(x2 + 1, PATCH_WIDTH); ++x)
+					{
+						normals[(y * X_COUNT + x) * 2 + 0] = vertices[y * X_COUNT + x].position.rvec3;
+						normals[(y * X_COUNT + x) * 2 + 1] = vertices[y * X_COUNT + x].position.rvec3 + vertices[y * X_COUNT + x].normal;
+					}
+				}
+				patch.normalBuf->UnmapBuffer();
 
 				patch.vertBuf->UnmapBuffer();
 			}
@@ -640,7 +676,18 @@ namespace Engine
 					}
 				}
 
-				UpdateNormals(vertices, Max(x1 - 1, 0), Max(y1 - 1, 0), Min(x2 + 1, PATCH_WIDTH), Min(y2 + 1, PATCH_HEIGHT));
+				UpdatePatchNormals(i, vertices, Max(x1 - 1, 0), Max(y1 - 1, 0), Min(x2 + 1, PATCH_WIDTH), Min(y2 + 1, PATCH_HEIGHT));
+
+				vec3f* normals = (vec3f*)patch.normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+				for(int y = Max(y1 - 1, 0); y <= Min(y2 + 1, PATCH_HEIGHT); ++y)
+				{
+					for(int x = Max(x1 - 1, 0); x <= Min(x2 + 1, PATCH_WIDTH); ++x)
+					{
+						normals[(y * X_COUNT + x) * 2 + 0] = vertices[y * X_COUNT + x].position.rvec3;
+						normals[(y * X_COUNT + x) * 2 + 1] = vertices[y * X_COUNT + x].position.rvec3 + vertices[y * X_COUNT + x].normal;
+					}
+				}
+				patch.normalBuf->UnmapBuffer();
 
 				patch.vertBuf->UnmapBuffer();
 			}
@@ -678,8 +725,203 @@ namespace Engine
 		}
 	}
 
-	void Terrain::UpdateNormals(PatchVertex* vertices, int start_x, int start_y, int end_x, int end_y)
+	void Terrain::UpdatePatchNormals(int patch_index, PatchVertex* vertices, int start_x, int start_y, int end_x, int end_y)
 	{
+		// calculate triangle normals
+
+		bool left_ext, right_ext, up_ext, down_ext;
+
+		int x1 = start_x - 1;
+		if(x1 < 0)
+		{
+			if(patch_index > 0)
+			{
+				left_ext = true;
+			}
+			else
+			{
+				left_ext = false;
+				x1 = 0;
+			}
+		}
+		else
+		{
+			left_ext = true;
+		}
+
+		int x2 = end_x;
+		if(x2 >= PATCH_WIDTH)
+		{
+			if(patch_index < _patchCount - 1)
+			{
+				right_ext = true;
+			}
+			else
+			{
+				right_ext = false;
+				x2 = PATCH_WIDTH - 1;
+			}
+		}
+		else
+		{
+			right_ext = true;
+		}
+
+		int y1 = start_y - 1;
+		if(y1 < 0)
+		{
+			down_ext = false;
+			y1 = 0;
+		}
+		else
+		{
+			down_ext = true;
+		}
+
+		int y2 = end_y;
+		if(y2 >= PATCH_HEIGHT)
+		{
+			up_ext = false;
+			y2 = PATCH_HEIGHT - 1;
+		}
+		else
+		{
+			up_ext = true;
+		}
+
+		int width = x2 - x1 + 1;
+		int height = y2 - y1 + 1;
+		vec3f* tri_normals = new(tempPool) vec3f[width * height * 2];
+		vec3f triangle[3];
+		int n = 0;
+
+		for(int y = y1; y <= y2; ++y)
+		{
+			for(int x = x1; x <= x2; ++x)
+			{
+				int i;
+				TerrainPatch* patch;
+
+				if(x < 0)
+				{
+					patch = &_patches[patch_index - 1];
+					i = y * (PATCH_WIDTH + 1) + PATCH_WIDTH - 1;
+				}
+				else if(x >= PATCH_WIDTH)
+				{
+					patch = &_patches[patch_index + 1];
+					i = y * (PATCH_WIDTH + 1);
+				}
+				else
+				{
+					patch = &_patches[patch_index];
+					i = y * (PATCH_WIDTH + 1) + x;
+				}
+
+				triangle[0].set((float)x, patch->elevation[i], (float)y);
+				triangle[1].set((float)x, patch->elevation[i + PATCH_WIDTH + 1], (float)y + 1);
+				triangle[2].set((float)x + 1, patch->elevation[i + 1], (float)y);
+				triangle_normal(tri_normals[n++], triangle);
+
+				triangle[0].set((float)x + 1, patch->elevation[i + 1], (float)y);
+				triangle[1].set((float)x, patch->elevation[i + PATCH_WIDTH + 1], (float)y + 1);
+				triangle[2].set((float)x + 1, patch->elevation[i + PATCH_WIDTH + 2], (float)y + 1);
+				triangle_normal(tri_normals[n++], triangle);
+			}
+		}
+
+		// calculate vertex normals
+		int xext = left_ext? 1: 0;
+		int yext = down_ext? 1: 0;
+
+		for(int y = start_y; y <= end_y; ++y)
+		{
+			int qy = y - start_y + yext; // quad y index
+
+			for(int x = start_x; x <= end_x; ++x)
+			{
+				int qx = x - start_x + xext; // quad x index
+
+				if(x == start_x && !left_ext)
+				{
+					if(y == start_y && !down_ext)
+					{
+						vertices[y * (PATCH_WIDTH + 1) + x].normal = tri_normals[0];
+					}
+					else if(y == end_y && !up_ext)
+					{
+						vec3f normal = 
+							tri_normals[(height - 1) * width * 2] +
+							tri_normals[(height - 1) * width * 2 + 1];
+						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 2.0f;
+					}
+					else
+					{
+						vec3f normal = 
+							tri_normals[(qy - 1) * width * 2] +
+							tri_normals[(qy - 1) * width * 2 + 1] +
+							tri_normals[qy * width * 2];
+						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 3.0f;
+					}
+				}
+				else if(x == end_x && !right_ext)
+				{
+					if(y == start_y && !down_ext)
+					{
+						vec3f normal = 
+							tri_normals[(width - 1) * 2] +
+							tri_normals[(width - 1) * 2 + 1];
+						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 2.0f;
+					}
+					else if(y == end_y && !up_ext)
+					{
+						vertices[y * (PATCH_WIDTH + 1) + x].normal = tri_normals[(width * height - 1) * 2 + 1];
+					}
+					else
+					{
+						vec3f normal = 
+							tri_normals[((qy - 1) * width + width - 1) * 2 + 1] +
+							tri_normals[(qy * width + width - 1) * 2] +
+							tri_normals[(qy * width + width - 1) * 2 + 1];
+						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 3.0f;
+					}
+				}
+				else
+				{
+					if(y == start_y && !down_ext)
+					{
+						vec3f normal = 
+							tri_normals[(qx - 1) * 2] +
+							tri_normals[(qx - 1) * 2 + 1] +
+							tri_normals[qx * 2];
+						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 3.0f;
+					}
+					else if(y == end_y && !up_ext)
+					{
+						vec3f normal = 
+							tri_normals[((height - 1) * width + qx - 1) * 2 + 1] +
+							tri_normals[((height - 1) * width + qx) * 2] +
+							tri_normals[((height - 1) * width + qx) * 2 + 1];
+						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 3.0f;
+					}
+					else
+					{
+						vec3f normal = 
+							tri_normals[(qy * width + (qx - 1)) * 2] +
+							tri_normals[(qy * width + (qx - 1)) * 2 + 1] +
+							tri_normals[((qy - 1) * width + (qx - 1)) * 2 + 1] +
+							tri_normals[((qy - 1) * width + qx) * 2] +
+							tri_normals[((qy - 1) * width + qx) * 2 + 1] +
+							tri_normals[(qy * width + qx) * 2];
+						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 6.0f;
+					}
+				}
+
+				vertices[y * (PATCH_WIDTH + 1) + x].normal.normalize();
+			}
+		}
+
+		delete[] tri_normals;
 	}
 
 }

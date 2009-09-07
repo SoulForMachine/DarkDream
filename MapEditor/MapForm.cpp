@@ -85,6 +85,11 @@ namespace MapEditor
 		}
 	}
 
+	System::Void MapForm::MapForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e)
+	{
+		::SendMessage((HWND)_renderWindow->Handle.ToPointer(), WM_KEYDOWN, e->KeyValue, 0);
+	}
+
 	void MapForm::SetCurrentEditMode(EditMode::EditModeEnum mode)
 	{
 		if(_currentEditMode != nullptr && _currentEditMode->GetModeEnum() == mode)

@@ -21,12 +21,21 @@ namespace Engine
 		_vpTerrain = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Terrain.vp"), true);
 		_fpTerrain = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
 
+		_vpDbgLine = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
+		_fpDbgLine = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
+
 		GL::VertexAttribDesc vert_desc[] =
 		{
 			{ 0, 0, 4, GL::TYPE_FLOAT, false, false, 0 },
 			{ 0, 1, 3, GL::TYPE_FLOAT, false, false, 16 },
 		};
 		_vertFmtTerrain = _renderer->CreateVertexFormat(vert_desc, COUNTOF(vert_desc));
+
+		GL::VertexAttribDesc vert_desc2[] =
+		{
+			{ 0, 0, 3, GL::TYPE_FLOAT, false, false, 0 },
+		};
+		_vertFmtDbgLine = _renderer->CreateVertexFormat(vert_desc2, COUNTOF(vert_desc2));
 
 		return true;
 	}
@@ -35,7 +44,10 @@ namespace Engine
 	{
 		engineAPI.asmProgManager->ReleaseASMProgram(_vpTerrain);
 		engineAPI.asmProgManager->ReleaseASMProgram(_fpTerrain);
+		engineAPI.asmProgManager->ReleaseASMProgram(_vpDbgLine);
+		engineAPI.asmProgManager->ReleaseASMProgram(_fpDbgLine);
 		_renderer->DestroyVertexFormat(_vertFmtTerrain);
+		_renderer->DestroyVertexFormat(_vertFmtDbgLine);
 
 		Clear();
 	}
@@ -73,6 +85,25 @@ namespace Engine
 			_renderer->DrawIndexed(GL::PRIM_TRIANGLES, start, 6);
 		}
 		_renderer->EnableDepthTest(true);*/
+
+		for(int i = 0; i < count; ++i)
+		{
+			_renderer->IndexSource(0, GL::TYPE_VOID);
+			_renderer->VertexSource(0, patches[i]->normalBuf, sizeof(vec3f), 0);
+			_renderer->ActiveVertexASMProgram(_vpDbgLine->GetASMProgram());
+			_renderer->ActiveFragmentASMProgram(_fpDbgLine->GetASMProgram());
+			_renderer->ActiveVertexFormat(_vertFmtDbgLine);
+
+			mat4f transl, wvp;
+			transl.set_translation(patches[i]->boundBox.minPt.x, 0.0f, 0.0f);
+			mul(wvp, transl, camera.GetViewProjectionTransform());
+			_vpDbgLine->GetASMProgram()->LocalMatrix4x4(0, wvp);
+
+			float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+			_fpDbgLine->GetASMProgram()->LocalParameter(0, color);
+
+			_renderer->Draw(GL::PRIM_LINES, 0, terrain->GetPatchIndexCount() * 2);
+		}
 	}
 
 	void TerrainRenderer::Clear()

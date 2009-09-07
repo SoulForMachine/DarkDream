@@ -26,6 +26,7 @@ namespace Engine
 			GL::Buffer* vertBuf;
 			float* elevation;
 			AABBox boundBox;
+			GL::Buffer* normalBuf;
 		};
 
 		struct PatchVertex
@@ -65,7 +66,7 @@ namespace Engine
 	private:
 		bool IntersectPatch(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, math3d::vec3f& point);
 		bool IntersectPatchCell(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, int cell_x, int cell_y, math3d::vec3f& point);
-		void UpdateNormals(PatchVertex* vertices, int start_x, int start_y, int end_x, int end_y);
+		void UpdatePatchNormals(int patch_index, PatchVertex* vertices, int start_x, int start_y, int end_x, int end_y);
 
 		GL::Renderer* _renderer;
 		GL::Buffer* _patchIndexBuf;
