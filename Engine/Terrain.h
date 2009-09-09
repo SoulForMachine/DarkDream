@@ -36,7 +36,7 @@ namespace Engine
 		};
 
 		static const int PATCH_WIDTH = 128;
-		static const int PATCH_HEIGHT = 32;
+		static const int PATCH_HEIGHT = 64;
 		static const int MAX_PATCHES = 32;
 
 		Terrain();
@@ -59,9 +59,9 @@ namespace Engine
 		void OffsetElevation(int start_x, int start_y, int end_x, int end_y, const float* offsets);
 		void GetElevation(int start_x, int start_y, int end_x, int end_y, float* elevation);
 
-		math3d::vec2i _dbgCells[4096];
+		/*math3d::vec2i _dbgCells[4096];
 		int _dbgCellCount;
-		math3d::vec3f _dbgLinePoints[2];
+		math3d::vec3f _dbgLinePoints[2];*/
 
 	private:
 		bool IntersectPatch(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, math3d::vec3f& point);

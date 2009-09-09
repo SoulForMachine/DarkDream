@@ -248,8 +248,9 @@ void Console::Variable::Execute(char* params)
 		SetStringValue(params);
 }
 
-template <class _Type>
-Console::ScalarVariable<_Type>::ScalarVariable(const char* name, _Type default_value, const char* help, bool read_only, _Type min_val, _Type max_val)
+// -------- int variable ---------
+
+Console::IntVar::IntVar(const char* name, int default_value, const char* help, bool read_only, int min_val, int max_val)
 	: Variable(name, help, read_only)
 {
 	_value = default_value;
@@ -258,16 +259,12 @@ Console::ScalarVariable<_Type>::ScalarVariable(const char* name, _Type default_v
 	_maxValue = max_val;
 }
 
-// -------- int variable ---------
-
-template <>
-void Console::ScalarVariable<int>::GetStringValue(char* str) const
+void Console::IntVar::GetStringValue(char* str) const
 {
 	_itoa(_value, str, 10);
 }
 
-template <>
-void Console::ScalarVariable<int>::SetStringValue(const char* val)
+void Console::IntVar::SetStringValue(const char* val)
 {
 	_value = atoi(val);
 
@@ -277,22 +274,28 @@ void Console::ScalarVariable<int>::SetStringValue(const char* val)
 		_value = _minValue;
 }
 
-template <>
-void Console::ScalarVariable<int>::GetDefaultStringValue(char* str) const
+void Console::IntVar::GetDefaultStringValue(char* str) const
 {
 	_itoa(_defaultValue, str, 10);
 }
 
 // ------- float variable -------
 
-template <>
-void Console::ScalarVariable<float>::GetStringValue(char* str) const
+Console::FloatVar::FloatVar(const char* name, float default_value, const char* help, bool read_only, float min_val, float max_val)
+	: Variable(name, help, read_only)
+{
+	_value = default_value;
+	_defaultValue = default_value;
+	_minValue = min_val;
+	_maxValue = max_val;
+}
+
+void Console::FloatVar::GetStringValue(char* str) const
 {
 	sprintf(str, "%f", _value);
 }
 
-template <>
-void Console::ScalarVariable<float>::SetStringValue(const char* val)
+void Console::FloatVar::SetStringValue(const char* val)
 {
 	_value = (float)atof(val);
 
@@ -302,29 +305,32 @@ void Console::ScalarVariable<float>::SetStringValue(const char* val)
 		_value = _minValue;
 }
 
-template <>
-void Console::ScalarVariable<float>::GetDefaultStringValue(char* str) const
+void Console::FloatVar::GetDefaultStringValue(char* str) const
 {
 	sprintf(str, "%f", _defaultValue);
 }
 
 // ------- boolean variable --------
 
-template <>
-void Console::ScalarVariable<bool>::GetStringValue(char* str) const
+Console::BoolVar::BoolVar(const char* name, bool default_value, const char* help, bool read_only)
+	: Variable(name, help, read_only)
+{
+	_value = default_value;
+	_defaultValue = default_value;
+}
+
+void Console::BoolVar::GetStringValue(char* str) const
 {
 	str[0] = _value? '1': '0';
 	str[1] = '\0';
 }
 
-template <>
-void Console::ScalarVariable<bool>::SetStringValue(const char* val)
+void Console::BoolVar::SetStringValue(const char* val)
 {
 	_value = (atoi(val) != 0);
 }
 
-template <>
-void Console::ScalarVariable<bool>::GetDefaultStringValue(char* str) const
+void Console::BoolVar::GetDefaultStringValue(char* str) const
 {
 	str[0] = _defaultValue? '1': '0';
 	str[1] = '\0';

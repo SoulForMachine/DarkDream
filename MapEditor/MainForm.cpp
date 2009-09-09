@@ -200,6 +200,10 @@ namespace MapEditor
 	{
 		_menuViewWireframe->Checked = _wireframe;
 		_menuViewStats->Checked = _viewStats;
+		_menuViewEditorView->Checked = 
+			(engineAPI->renderSystem->GetTerrainRenderer()->GetRenderStyle() == Engine::TerrainRenderer::RENDER_STYLE_EDITOR);
+		_menuViewGameView->Checked = 
+			(engineAPI->renderSystem->GetTerrainRenderer()->GetRenderStyle() == Engine::TerrainRenderer::RENDER_STYLE_GAME);
 
 		while(AppIsIdle())
 		{
@@ -232,6 +236,26 @@ namespace MapEditor
 			}
 		}
 		_mapForm->Redraw();
+	}
+
+	System::Void MainForm::_menuViewTerrainNormals_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		_menuViewTerrainNormals->Checked = !_menuViewTerrainNormals->Checked;
+		char buf[128];
+		sprintf(buf, "r_drawTerrainNormals %d", _menuViewTerrainNormals->Checked? 1: 0);
+		::Console::ExecuteStatement(buf);
+	}
+
+	System::Void MainForm::_menuViewEditorView_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(engineAPI->renderSystem->GetTerrainRenderer()->GetRenderStyle() != Engine::TerrainRenderer::RENDER_STYLE_EDITOR)
+			engineAPI->renderSystem->GetTerrainRenderer()->SetRenderStyle(Engine::TerrainRenderer::RENDER_STYLE_EDITOR);
+	}
+
+	System::Void MainForm::_menuViewGameView_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(engineAPI->renderSystem->GetTerrainRenderer()->GetRenderStyle() != Engine::TerrainRenderer::RENDER_STYLE_GAME)
+			engineAPI->renderSystem->GetTerrainRenderer()->SetRenderStyle(Engine::TerrainRenderer::RENDER_STYLE_GAME);
 	}
 
 }

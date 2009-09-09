@@ -102,6 +102,10 @@ namespace MapEditor {
 	private: System::Windows::Forms::ToolStripMenuItem^  toolStripMenuItem2;
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewWireframe;
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewStats;
+	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewTerrainNormals;
+	private: System::Windows::Forms::ToolStripSeparator^  toolStripMenuItem3;
+	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewEditorView;
+	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewGameView;
 
 
 
@@ -134,6 +138,10 @@ namespace MapEditor {
 			this->toolStripMenuItem2 = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuViewWireframe = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuViewStats = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->_menuViewTerrainNormals = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->toolStripMenuItem3 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->_menuViewEditorView = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->_menuViewGameView = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->regionToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuRegionNewTerrain = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->toolsToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -234,8 +242,8 @@ namespace MapEditor {
 			// 
 			// toolStripMenuItem2
 			// 
-			this->toolStripMenuItem2->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {this->_menuViewWireframe, 
-				this->_menuViewStats});
+			this->toolStripMenuItem2->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {this->_menuViewWireframe, 
+				this->_menuViewStats, this->_menuViewTerrainNormals, this->toolStripMenuItem3, this->_menuViewEditorView, this->_menuViewGameView});
 			this->toolStripMenuItem2->Name = L"toolStripMenuItem2";
 			this->toolStripMenuItem2->Size = System::Drawing::Size(41, 20);
 			this->toolStripMenuItem2->Text = L"&View";
@@ -255,6 +263,34 @@ namespace MapEditor {
 			this->_menuViewStats->Size = System::Drawing::Size(177, 22);
 			this->_menuViewStats->Text = L"&Statistics";
 			this->_menuViewStats->Click += gcnew System::EventHandler(this, &MainForm::_menuViewStats_Click);
+			// 
+			// _menuViewTerrainNormals
+			// 
+			this->_menuViewTerrainNormals->Name = L"_menuViewTerrainNormals";
+			this->_menuViewTerrainNormals->Size = System::Drawing::Size(177, 22);
+			this->_menuViewTerrainNormals->Text = L"Terrain Normals";
+			this->_menuViewTerrainNormals->Click += gcnew System::EventHandler(this, &MainForm::_menuViewTerrainNormals_Click);
+			// 
+			// toolStripMenuItem3
+			// 
+			this->toolStripMenuItem3->Name = L"toolStripMenuItem3";
+			this->toolStripMenuItem3->Size = System::Drawing::Size(174, 6);
+			// 
+			// _menuViewEditorView
+			// 
+			this->_menuViewEditorView->Name = L"_menuViewEditorView";
+			this->_menuViewEditorView->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::E));
+			this->_menuViewEditorView->Size = System::Drawing::Size(177, 22);
+			this->_menuViewEditorView->Text = L"Editor View";
+			this->_menuViewEditorView->Click += gcnew System::EventHandler(this, &MainForm::_menuViewEditorView_Click);
+			// 
+			// _menuViewGameView
+			// 
+			this->_menuViewGameView->Name = L"_menuViewGameView";
+			this->_menuViewGameView->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::G));
+			this->_menuViewGameView->Size = System::Drawing::Size(177, 22);
+			this->_menuViewGameView->Text = L"Game View";
+			this->_menuViewGameView->Click += gcnew System::EventHandler(this, &MainForm::_menuViewGameView_Click);
 			// 
 			// regionToolStripMenuItem
 			// 
@@ -409,6 +445,9 @@ namespace MapEditor {
 	private: System::Void _menuViewWireframe_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void OnIdle(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuViewStats_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _menuViewTerrainNormals_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _menuViewEditorView_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _menuViewGameView_Click(System::Object^  sender, System::EventArgs^  e);
 };
 
 }

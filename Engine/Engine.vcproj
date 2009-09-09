@@ -179,6 +179,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Base\Programs\Lambert.fp"
+				>
+			</File>
+			<File
 				RelativePath="..\Base\Programs\Mesh.fp"
 				>
 			</File>

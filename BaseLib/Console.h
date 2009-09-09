@@ -51,13 +51,11 @@ public:
 
 	class BASELIB_API ConsoleObject;
 	class BASELIB_API Variable;
-	template <class _Type> class BASELIB_API ScalarVariable;
+	class BASELIB_API IntVar;
+	class BASELIB_API FloatVar;
+	class BASELIB_API BoolVar;
 	class BASELIB_API StringVar;
 	class BASELIB_API Command;
-
-	typedef ScalarVariable<int> IntVar;
-	typedef ScalarVariable<float> FloatVar;
-	typedef ScalarVariable<bool> BoolVar;
 
 	static bool Init(int line_size, int line_count);
 	static void Deinit();
@@ -129,7 +127,7 @@ public:
 		{ return _colors[CLR_LIGHTGRAY]; }
 
 private:
-	class BASELIB_API ConsoleObjectList;
+	class ConsoleObjectList;
 
 	static bool RegisterObject(ConsoleObject& obj);
 	static void Print(const char* prefix, const char* str, bool newline, va_list vl);
@@ -215,29 +213,72 @@ protected:
 	bool _readOnly; // this determines if variable can be modified in console by user
 };
 
-// ------- generic variable -------
+// ------- int variable -------
 
-template <class _Type>
-class Console::ScalarVariable: public Console::Variable
+class Console::IntVar: public Console::Variable
 {
 public:
-	ScalarVariable(
-		const char* name, _Type default_value, const char* help = 0, bool read_only = false,
-		_Type min_val = std::numeric_limits<_Type>::min(), _Type max_val = std::numeric_limits<_Type>::max());
+	IntVar(
+		const char* name, int default_value, const char* help = 0, bool read_only = false,
+		int min_val = std::numeric_limits<int>::min(), int max_val = std::numeric_limits<int>::max());
 
-	operator _Type() const
+	operator int() const
 		{ return _value; }
-	operator _Type&()
+	operator int&()
 		{ return _value; }
 	void GetStringValue(char* str) const;
 	void SetStringValue(const char* val);
 	void GetDefaultStringValue(char* str) const;
 
 private:
-	_Type _value;
-	_Type _defaultValue;
-	_Type _minValue;
-	_Type _maxValue;
+	int _value;
+	int _defaultValue;
+	int _minValue;
+	int _maxValue;
+};
+
+// ------- float variable -------
+
+class Console::FloatVar: public Console::Variable
+{
+public:
+	FloatVar(
+		const char* name, float default_value, const char* help = 0, bool read_only = false,
+		float min_val = std::numeric_limits<float>::min(), float max_val = std::numeric_limits<float>::max());
+
+	operator float() const
+		{ return _value; }
+	operator float&()
+		{ return _value; }
+	void GetStringValue(char* str) const;
+	void SetStringValue(const char* val);
+	void GetDefaultStringValue(char* str) const;
+
+private:
+	float _value;
+	float _defaultValue;
+	float _minValue;
+	float _maxValue;
+};
+
+// ------- float variable -------
+
+class Console::BoolVar: public Console::Variable
+{
+public:
+	BoolVar(const char* name, bool default_value, const char* help = 0, bool read_only = false);
+
+	operator bool() const
+		{ return _value; }
+	operator bool&()
+		{ return _value; }
+	void GetStringValue(char* str) const;
+	void SetStringValue(const char* val);
+	void GetDefaultStringValue(char* str) const;
+
+private:
+	bool _value;
+	bool _defaultValue;
 };
 
 // ------- string variable --------

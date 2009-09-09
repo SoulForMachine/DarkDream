@@ -281,6 +281,9 @@ namespace Engine
 		_renderer->EnableColorWrite(true, true, true, true);
 		_renderer->CullFace(GL::FACE_BACK);
 		_terrainRenderer->RenderTerrainPatch(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);
+
+		if(g_cvarDrawTerrainNormals)
+			_terrainRenderer->RenderTerrainPatchNormals(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);
 	}
 
 	void RenderSystem::ReloadShaders()

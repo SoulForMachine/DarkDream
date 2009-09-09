@@ -6,6 +6,7 @@
 #include "Engine/Common.h"
 #include "Engine/ResourceManager.h"
 #include "Render2D.h"
+#include "TerrainRenderer.h"
 #include "EntityRenderer.h"
 
 
@@ -14,7 +15,6 @@ namespace Engine
 
 	class World;
 	class ModelEntity;
-	class TerrainRenderer;
 
 
 	class ENGINE_API RenderSystem
@@ -34,6 +34,8 @@ namespace Engine
 			{ return _renderer; }
 		Render2D* GetRender2D()
 			{ return _render2D; }
+		TerrainRenderer* GetTerrainRenderer()
+			{ return _terrainRenderer; }
 		int GetFrameTime() const
 			{ return _frameTime; }
 		float GetFrameTimeSec() const

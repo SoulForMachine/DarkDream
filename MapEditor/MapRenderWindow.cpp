@@ -79,6 +79,7 @@ namespace MapEditor
 		if(result)
 		{
 			_renderer = _renderSystem->GetRenderer();
+			_renderSystem->GetTerrainRenderer()->SetRenderStyle(Engine::TerrainRenderer::RENDER_STYLE_EDITOR);
 			engineAPI->world->Init();
 		}
 		else
