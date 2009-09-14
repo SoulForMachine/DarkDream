@@ -36,6 +36,9 @@ namespace Engine
 		const math3d::mat4f& GetProjectionTransform() const
 			{ return _projectionTransform; }
 		const math3d::mat4f& GetViewProjectionTransform() const;
+		virtual void SetPosition(const math3d::vec3f& pos);
+		void MoveBy(const math3d::vec3f& transl);
+		void RotateBy(float ax, float ay, float az);
 
 		virtual EntityType GetType() const
 			{ return ENTITY_TYPE_CAMERA; }

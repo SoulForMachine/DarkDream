@@ -490,11 +490,10 @@ void mat4<_ST>::set_adjoint(const mat4& m)
 
 // assumes that it's an affine matrix
 template <class _ST>
+inline
 void mat4<_ST>::translate(const vec3<_ST>& transl)
 {
-	_data[12] += transl.x;
-	_data[13] += transl.y;
-	_data[14] += transl.z;
+	translate(transl.x, transl.y, transl.z);
 }
 
 // assumes that it's an affine matrix

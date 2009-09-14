@@ -198,17 +198,18 @@ namespace MapEditor
 
 	System::Void MainForm::OnIdle(System::Object^  sender, System::EventArgs^  e)
 	{
-		_menuViewWireframe->Checked = _wireframe;
-		_menuViewStats->Checked = _viewStats;
-		_menuViewEditorView->Checked = 
-			(engineAPI->renderSystem->GetTerrainRenderer()->GetRenderStyle() == Engine::TerrainRenderer::RENDER_STYLE_EDITOR);
-		_menuViewGameView->Checked = 
-			(engineAPI->renderSystem->GetTerrainRenderer()->GetRenderStyle() == Engine::TerrainRenderer::RENDER_STYLE_GAME);
-
-		while(AppIsIdle())
+		if(GetForegroundWindow() == (HWND)Handle.ToPointer())
 		{
-			_mapForm->UpdateFrame();
-			_mapForm->Redraw();
+			_menuViewWireframe->Checked = _wireframe;
+			_menuViewStats->Checked = _viewStats;
+			_menuViewEditorView->Checked = (_mapForm->GetViewMode() == MapRenderWindow::ViewMode::EDITOR);
+			_menuViewGameView->Checked = (_mapForm->GetViewMode() == MapRenderWindow::ViewMode::GAME);
+
+			while(AppIsIdle())
+			{
+				_mapForm->UpdateFrame();
+				_mapForm->Redraw();
+			}
 		}
 	}
 
@@ -248,14 +249,14 @@ namespace MapEditor
 
 	System::Void MainForm::_menuViewEditorView_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		if(engineAPI->renderSystem->GetTerrainRenderer()->GetRenderStyle() != Engine::TerrainRenderer::RENDER_STYLE_EDITOR)
-			engineAPI->renderSystem->GetTerrainRenderer()->SetRenderStyle(Engine::TerrainRenderer::RENDER_STYLE_EDITOR);
+		if(_mapForm->GetViewMode() != MapRenderWindow::ViewMode::EDITOR)
+			_mapForm->SetViewMode(MapRenderWindow::ViewMode::EDITOR);
 	}
 
 	System::Void MainForm::_menuViewGameView_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		if(engineAPI->renderSystem->GetTerrainRenderer()->GetRenderStyle() != Engine::TerrainRenderer::RENDER_STYLE_GAME)
-			engineAPI->renderSystem->GetTerrainRenderer()->SetRenderStyle(Engine::TerrainRenderer::RENDER_STYLE_GAME);
+		if(_mapForm->GetViewMode() != MapRenderWindow::ViewMode::GAME)
+			_mapForm->SetViewMode(MapRenderWindow::ViewMode::GAME);
 	}
 
 }

@@ -3,7 +3,7 @@
 ATTRIB		varNormal = fragment.texcoord[0];
 
 PARAM		color = program.local[0];
-PARAM		lightVec = { 0.5773, 0.5773, 0.5773, 0.0 };
+PARAM		lightVec = { 0.0, 1.0, 0.0, 0.0 };		#{ 0.5773, 0.5773, 0.5773, 0.0 };
 
 TEMP		r0;
 

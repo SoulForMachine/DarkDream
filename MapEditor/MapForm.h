@@ -43,6 +43,10 @@ namespace MapEditor {
 			{ _renderWindow->Wireframe(wireframe); }
 		void ShowStats(bool stats)
 			{ _renderWindow->ShowStats(stats); }
+		void SetViewMode(MapRenderWindow::ViewMode mode)
+			{ _renderWindow->SetViewMode(mode); }
+		MapRenderWindow::ViewMode GetViewMode()
+			{ return _renderWindow->GetViewMode(); }
 		void SetCurrentEditMode(EditMode::EditModeEnum mode);
 		EditMode^ GetCurrentEditMode()
 			{ return _currentEditMode; }

@@ -11,9 +11,15 @@ namespace MapEditor
 	ref class EditMode;
 
 
-	ref class MapRenderWindow: public NativeWindow
+	public ref class MapRenderWindow: public NativeWindow
 	{
 	public:
+		enum class ViewMode
+		{
+			GAME,
+			EDITOR,
+		};
+
 		MapRenderWindow(Form^ parent);
 
 		void SetEditMode(EditMode^ mode)
@@ -27,6 +33,9 @@ namespace MapEditor
 		void Draw()
 			{ OnPaint(); }
 		void UpdateFrame();
+		void SetViewMode(ViewMode mode);
+		ViewMode GetViewMode()
+			{ return _viewMode; }
 
 	protected:
 		virtual void WndProc(Message% msg) override;
@@ -47,6 +56,8 @@ namespace MapEditor
 		void RenderStats();
 		bool CreateResources();
 		void DestroyResources();
+		void UpdateEditorCam();
+		void UpdateGameCam();
 
 		Engine::RenderSystem* _renderSystem;
 		GL::Renderer* _renderer;
@@ -72,12 +83,14 @@ namespace MapEditor
 		float _zoom;
 		uint _prevTime;
 		int _frameTime;
+		float _frameTimeSec;
 		int _fpsTime;
 		int _frameCount;
 		float _fps;
 		bool _animate;
 		bool _wireframe;
 		bool _stats;
+		ViewMode _viewMode;
 	};
 
 }

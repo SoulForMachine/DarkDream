@@ -21,6 +21,10 @@ namespace MapEditor
 		vec3f position;
 	};
 
+	vec3f g_camPos;
+	vec3f g_camRight;
+	vec3f g_camUp;
+	vec3f g_camForward;
 
 
 	MapRenderWindow::MapRenderWindow(Form^ parent)
@@ -32,11 +36,18 @@ namespace MapEditor
 		_vpSimple = 0;
 		_fpConstClr = 0;
 
-		_rotX = 45.0f;
-		_rotY = 45.0f;
-		_panX = (float)Terrain::PATCH_WIDTH / 2;
+		_rotX = 0.0f;
+		_rotY = 0.0f;
+		_panX = 0.0f;
 		_panY = 0.0f;
-		_zoom = 150.0f;
+		_zoom = 0.0f;
+		g_camPos.set(100.0f, 100.0f, 100.0f);
+		g_camForward.set(-1.0f, -1.0f, -1.0f);
+		g_camForward.normalize();
+		cross(g_camRight, g_camForward, vec3f::y_axis);
+		g_camRight.normalize();
+		cross(g_camUp, g_camRight, g_camForward);
+		g_camUp.normalize();
 
 		_leftBtnDown = false;
 		_middleBtnDown = false;
@@ -50,6 +61,7 @@ namespace MapEditor
 		_animate = false;
 		_wireframe = false;
 		_stats = true;
+		_viewMode = ViewMode::EDITOR;
 
 		System::Windows::Forms::CreateParams^ cp = gcnew System::Windows::Forms::CreateParams;
 		cp->Caption = "";
@@ -79,7 +91,7 @@ namespace MapEditor
 		if(result)
 		{
 			_renderer = _renderSystem->GetRenderer();
-			_renderSystem->GetTerrainRenderer()->SetRenderStyle(Engine::TerrainRenderer::RENDER_STYLE_EDITOR);
+			SetViewMode(ViewMode::EDITOR);
 			engineAPI->world->Init();
 		}
 		else
@@ -205,20 +217,7 @@ namespace MapEditor
 		if(!_renderer->SetCurrentContext())
 			return;
 
-		mat4f rot, look_at, cam;
-		rot.set_translation(-_panX, 0.0f, -Terrain::PATCH_HEIGHT / 2);
-		rot.rotate_y(_rotY);
-		rot.rotate_x(_rotX);
-		rot.translate(_panX, 0.0f, Terrain::PATCH_HEIGHT / 2);
-		look_at.look_at(
-			vec3f(_panX, _panY, _zoom),
-			vec3f(_panX, _panY, 0.0f),
-			vec3f::y_axis);
-		mul(cam, rot, look_at);
-
-		engineAPI->world->GetCamera().SetViewingTransform(cam);
-
-		_renderer->SwapInterval(0);
+		_renderer->SwapInterval(1);
 		_renderer->ClearColorBuffer(0.5f, 0.5f, 0.5f, 1.0f);
 		_renderer->ClearDepthStencilBuffer(DEPTH_BUFFER_BIT | STENCIL_BUFFER_BIT, 1.0f, 0);
 		_renderer->EnableDepthTest(true);
@@ -282,31 +281,40 @@ namespace MapEditor
 	{
 		_editMode->MouseMove(modifiers, x, y);
 
+		const float ROT_SPEED = 10.0f;
+		const float MOVE_SPEED = 10.0f;
+
 		if(!_editMode->IsExecuting())
 		{
-			if(_leftBtnDown && (modifiers & MK_LBUTTON))
+			if(_viewMode == ViewMode::EDITOR)
 			{
-				
+				if(_leftBtnDown && (modifiers & MK_LBUTTON))
+				{
+					
+				}
+				else if(_middleBtnDown && (modifiers & MK_MBUTTON))
+				{
+					_rotX = -(y - _prevY) * _frameTimeSec * ROT_SPEED;
+					_rotY = -(x - _prevX) * _frameTimeSec * ROT_SPEED;
+
+					if(_rotX > 360.0f)
+						_rotX -= 360.0f;
+
+					if(_rotY > 360.0f)
+						_rotY -= 360.0f;
+				}
+				else if(_rightBtnDown && (modifiers & MK_RBUTTON))
+				{
+					_panX = -(x - _prevX) * _frameTimeSec * MOVE_SPEED;
+					_panY = (y - _prevY) * _frameTimeSec * MOVE_SPEED;
+				}
 			}
-			else if(_middleBtnDown && (modifiers & MK_MBUTTON))
+			else
 			{
-				_rotX += (y - _prevY) * 0.5f;
-				_rotY += (x - _prevX) * 0.5f;
-
-				if(_rotX > 360.0f)
-					_rotX -= 360.0f;
-
-				if(_rotY > 360.0f)
-					_rotY -= 360.0f;
-
-				OnPaint();
-			}
-			else if(_rightBtnDown && (modifiers & MK_RBUTTON))
-			{
-				_panX -= (x - _prevX) * 0.001f * _zoom;
-				_panY += (y - _prevY) * 0.001f * _zoom;
-
-				OnPaint();
+				if(_rightBtnDown && (modifiers & MK_RBUTTON))
+				{
+					_panX = -(x - _prevX) * _frameTimeSec * MOVE_SPEED;
+				}
 			}
 		}
 
@@ -374,14 +382,9 @@ namespace MapEditor
 
 		if(!_editMode->IsExecuting())
 		{
-			for(int i = 0; i < 6; ++i)
+			if(_viewMode == ViewMode::EDITOR)
 			{
-				_zoom -= float(delta) / WHEEL_DELTA;
-				float z = _zoom;
-				clamp(z, 5.0f, 100.0f);
-				_zoom = z;
-
-				OnPaint();
+				_zoom = float(delta) / WHEEL_DELTA * _frameTimeSec * 1000.0f;
 			}
 		}
 	}
@@ -418,6 +421,7 @@ namespace MapEditor
 	{
 		uint cur_time = ::Timer::GetTime();
 		_frameTime = cur_time - _prevTime;
+		_frameTimeSec = _frameTime * 0.001f;
 		_prevTime = cur_time;
 		_fpsTime += _frameTime;
 		_frameCount++;
@@ -428,7 +432,148 @@ namespace MapEditor
 			_frameCount = 0;
 		}
 
-		_editMode->Update(_frameTime * 0.001f);
+		const float MOVE_SPEED = 200.0f;
+
+		if(!_editMode->IsExecuting())
+		{
+			if(	!(GetAsyncKeyState(VK_SHIFT) & 0x8000) &&
+				!(GetAsyncKeyState(VK_CONTROL) & 0x8000) &&
+				!(GetAsyncKeyState(VK_MENU) & 0x8000) )
+			{
+				if(_viewMode == ViewMode::EDITOR)
+				{
+					if(GetAsyncKeyState('W') & 0x8000)
+						_zoom = MOVE_SPEED * _frameTimeSec;
+					else if(GetAsyncKeyState('S') & 0x8000)
+						_zoom = -MOVE_SPEED * _frameTimeSec;
+					if(GetAsyncKeyState('A') & 0x8000)
+						_panX = -MOVE_SPEED * _frameTimeSec;
+					else if(GetAsyncKeyState('D') & 0x8000)
+						_panX = MOVE_SPEED * _frameTimeSec;
+					if(GetAsyncKeyState('E') & 0x8000)
+						_panY = MOVE_SPEED * _frameTimeSec;
+					else if(GetAsyncKeyState('Q') & 0x8000)
+						_panY = -MOVE_SPEED * _frameTimeSec;
+				}
+				else
+				{
+					if(GetAsyncKeyState('A') & 0x8000)
+						_panX = -MOVE_SPEED * _frameTimeSec;
+					else if(GetAsyncKeyState('D') & 0x8000)
+						_panX = MOVE_SPEED * _frameTimeSec;
+				}
+			}
+		}
+
+		if(_viewMode == ViewMode::EDITOR)
+			UpdateEditorCam();
+		else
+			UpdateGameCam();
+
+		_editMode->Update(_frameTimeSec);
+	}
+
+	void MapRenderWindow::UpdateEditorCam()
+	{
+		if(_rotX != 0.0f)
+		{
+			mat3f rot;
+			rot.set_rotation(_rotX, g_camRight);
+			vec3f result;
+			transform(result, g_camForward, rot);
+			g_camForward = result;
+			transform(result, g_camUp, rot);
+			g_camUp = result;
+		}
+
+		if(_rotY != 0.0f)
+		{
+			mat3f rot;
+			rot.set_rotation(_rotY, vec3f::y_axis);
+			vec3f result;
+			transform(result, g_camForward, rot);
+			g_camForward = result;
+			transform(result, g_camUp, rot);
+			g_camUp = result;
+		}
+
+		g_camPos += g_camForward * _zoom;
+		g_camPos += g_camRight * _panX;
+		g_camPos += g_camUp * _panY;
+
+		g_camForward.normalize();
+		cross(g_camRight, g_camForward, g_camUp);
+		g_camRight.normalize();
+		cross(g_camUp, g_camRight, g_camForward);
+		g_camUp.normalize();
+
+		mat4f cam(
+			g_camRight.x, g_camUp.x, -g_camForward.x, 0.0f,
+			g_camRight.y, g_camUp.y, -g_camForward.y, 0.0f,
+			g_camRight.z, g_camUp.z, -g_camForward.z, 0.0f,
+			-dot(g_camRight, g_camPos),
+			-dot(g_camUp, g_camPos),
+			dot(g_camForward, g_camPos),
+			1.0f);
+
+		engineAPI->world->GetCamera().SetViewingTransform(cam);
+
+		_rotX = 0.0f;
+		_rotY = 0.0f;
+		_panX = 0.0f;
+		_panY = 0.0f;
+		_zoom = 0.0f;
+	}
+
+	void MapRenderWindow::UpdateGameCam()
+	{
+		g_camPos.x += _panX;
+		float elev = 0.0f;
+		engineAPI->world->GetTerrain().ElevationFromPoint(vec2f(g_camPos.x, (float)Terrain::PATCH_HEIGHT - 0.5f), elev);
+		g_camPos.y = elev + 5.0f;
+		_panX = 0.0f;
+
+		mat4f cam(
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			-g_camPos.x, -g_camPos.y, -g_camPos.z, 1.0f);
+
+		engineAPI->world->GetCamera().SetViewingTransform(cam);
+	}
+
+	void MapRenderWindow::SetViewMode(ViewMode mode)
+	{
+		if(mode == ViewMode::GAME)
+		{
+			float max_x = (float)Terrain::PATCH_WIDTH * engineAPI->world->GetTerrain().GetPatchCount();
+			if(g_camPos.x < 0.0f)
+				g_camPos.x = 0.0f;
+			else if(g_camPos.x > max_x)
+				g_camPos.x = max_x;
+			float elev = 0.0f;
+			engineAPI->world->GetTerrain().ElevationFromPoint(vec2f(g_camPos.x, (float)Terrain::PATCH_HEIGHT - 0.5f), elev);
+			g_camPos.y = elev + 5.0f;
+			g_camPos.z = Terrain::PATCH_HEIGHT + 5.0f;
+
+			g_camRight = vec3f::x_axis;
+			g_camUp = vec3f::y_axis;
+			g_camForward = -vec3f::z_axis;
+
+			engineAPI->renderSystem->GetTerrainRenderer()->SetRenderStyle(Engine::TerrainRenderer::RENDER_STYLE_GAME);
+		}
+		else
+		{
+			engineAPI->renderSystem->GetTerrainRenderer()->SetRenderStyle(Engine::TerrainRenderer::RENDER_STYLE_EDITOR);
+		}
+
+		_rotX = 0.0f;
+		_rotY = 0.0f;
+		_panX = 0.0f;
+		_panY = 0.0f;
+		_zoom = 0.0f;
+
+		_viewMode = mode;
 	}
 
 }
