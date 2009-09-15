@@ -229,14 +229,16 @@ namespace MapEditor {
 			// _menuEditUndo
 			// 
 			this->_menuEditUndo->Name = L"_menuEditUndo";
-			this->_menuEditUndo->Size = System::Drawing::Size(110, 22);
+			this->_menuEditUndo->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Z));
+			this->_menuEditUndo->Size = System::Drawing::Size(152, 22);
 			this->_menuEditUndo->Text = L"&Undo";
 			this->_menuEditUndo->Click += gcnew System::EventHandler(this, &MainForm::_menuEditUndo_Click);
 			// 
 			// _menuEditRedo
 			// 
 			this->_menuEditRedo->Name = L"_menuEditRedo";
-			this->_menuEditRedo->Size = System::Drawing::Size(110, 22);
+			this->_menuEditRedo->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Y));
+			this->_menuEditRedo->Size = System::Drawing::Size(152, 22);
 			this->_menuEditRedo->Text = L"&Redo";
 			this->_menuEditRedo->Click += gcnew System::EventHandler(this, &MainForm::_menuEditRedo_Click);
 			// 
@@ -316,7 +318,7 @@ namespace MapEditor {
 			// _menuToolsOptions
 			// 
 			this->_menuToolsOptions->Name = L"_menuToolsOptions";
-			this->_menuToolsOptions->Size = System::Drawing::Size(122, 22);
+			this->_menuToolsOptions->Size = System::Drawing::Size(152, 22);
 			this->_menuToolsOptions->Text = L"&Options";
 			this->_menuToolsOptions->Click += gcnew System::EventHandler(this, &MainForm::_menuToolsOptions_Click);
 			// 

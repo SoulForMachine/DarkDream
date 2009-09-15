@@ -4,6 +4,7 @@
 #include "ToolPanel.h"
 #include "TerrainEditPanel.h"
 #include "Utility.h"
+#include "UndoManager.h"
 #include "MainForm.h"
 
 #define DOCK_PANEL_XML_FILE		"MapEditorDocking.xml"
@@ -111,12 +112,12 @@ namespace MapEditor
 
 	System::Void MainForm::_menuEditUndo_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		_mapForm->GetUndoManager()->Undo();
 	}
 
 	System::Void MainForm::_menuEditRedo_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		_mapForm->GetUndoManager()->Redo();
 	}
 
 	System::Void MainForm::_menuRegionNewTerrainPatch_Click(System::Object^  sender, System::EventArgs^  e)
@@ -204,6 +205,8 @@ namespace MapEditor
 			_menuViewStats->Checked = _viewStats;
 			_menuViewEditorView->Checked = (_mapForm->GetViewMode() == MapRenderWindow::ViewMode::EDITOR);
 			_menuViewGameView->Checked = (_mapForm->GetViewMode() == MapRenderWindow::ViewMode::GAME);
+			_menuEditUndo->Enabled = _mapForm->GetUndoManager()->HasUndo();
+			_menuEditRedo->Enabled = _mapForm->GetUndoManager()->HasRedo();
 
 			while(AppIsIdle())
 			{

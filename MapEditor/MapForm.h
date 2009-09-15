@@ -50,6 +50,8 @@ namespace MapEditor {
 		void SetCurrentEditMode(EditMode::EditModeEnum mode);
 		EditMode^ GetCurrentEditMode()
 			{ return _currentEditMode; }
+		UndoManager^ GetUndoManager()
+			{ return _undoManager; }
 
 	protected:
 		/// <summary>

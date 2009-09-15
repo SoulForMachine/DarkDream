@@ -10,7 +10,7 @@ namespace MapEditor
 	ref class Action;
 
 
-	ref class UndoManager
+	public ref class UndoManager
 	{
 	public:
 		UndoManager();
@@ -20,6 +20,10 @@ namespace MapEditor
 		void Undo();
 		void Redo();
 		void Clear();
+		bool HasUndo()
+			{ return (_undoList->Count > 0); }
+		bool HasRedo()
+			{ return (_redoList->Count > 0); }
 
 	private:
 		void ClearList(LinkedList<Action^>^ list);

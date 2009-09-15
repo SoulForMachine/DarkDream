@@ -28,10 +28,24 @@ namespace MapEditor
 
 	void UndoManager::Undo()
 	{
+		if(_undoList->Count > 0)
+		{
+			Action^ action = _undoList->Last->Value;
+			action->Undo();
+			_undoList->RemoveLast();
+			_redoList->AddLast(action);
+		}
 	}
 
 	void UndoManager::Redo()
 	{
+		if(_redoList->Count > 0)
+		{
+			Action^ action = _redoList->Last->Value;
+			action->Redo();
+			_redoList->RemoveLast();
+			_undoList->AddLast(action);
+		}
 	}
 
 	void UndoManager::Clear()

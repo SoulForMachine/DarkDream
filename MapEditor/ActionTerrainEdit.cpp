@@ -96,9 +96,18 @@ namespace MapEditor
 		delete[] elevation;
 	}
 
-	void ActionTerrainEdit::Revert()
+	void ActionTerrainEdit::Undo()
 	{
-	
+		float* cur_elev = new(tempPool) float[(_undoRect.Width + 1) * (_undoRect.Height + 1)];
+		engineAPI->world->GetTerrain().GetElevation(_undoRect.X, _undoRect.Y, _undoRect.Right, _undoRect.Bottom, cur_elev);
+		engineAPI->world->GetTerrain().SetElevation(_undoRect.X, _undoRect.Y, _undoRect.Right, _undoRect.Bottom, _undoElevation);
+		memcpy(_undoElevation, cur_elev, (_undoRect.Width + 1) * (_undoRect.Height + 1) * sizeof(float));
+		delete[] cur_elev;
+	}
+
+	void ActionTerrainEdit::Redo()
+	{
+		Undo();
 	}
 
 	void ActionTerrainEdit::BuildStrengthMatrix(System::Drawing::Rectangle rect)
