@@ -24,18 +24,28 @@ namespace MapEditor
 			break;
 		case EM_TerrainEdit::EditType::SMOOTH:
 			_btnSmooth->Checked = true;
+			_trackHeight->Enabled = false;
+			_numHeight->Enabled = false;
 			break;
 		case EM_TerrainEdit::EditType::NOISE:
 			_btnNoise->Checked = true;
+			_trackHeight->Enabled = false;
+			_numHeight->Enabled = false;
 			break;
 		case EM_TerrainEdit::EditType::PLATEAU:
 			_btnPlateau->Checked = true;
+			_trackHeight->Enabled = true;
+			_numHeight->Enabled = true;
 			break;
 		case EM_TerrainEdit::EditType::RELATIVE_PLATEAU:
 			_btnRelativePlateau->Checked = true;
+			_trackHeight->Enabled = true;
+			_numHeight->Enabled = true;
 			break;
 		case EM_TerrainEdit::EditType::RAMP:
 			_btnRamp->Checked = true;
+			_trackHeight->Enabled = false;
+			_numHeight->Enabled = false;
 			break;
 		}
 
@@ -57,6 +67,56 @@ namespace MapEditor
 		if(_parameters->editType != EM_TerrainEdit::EditType::RAISE_LOWER)
 		{
 			_parameters->editType = EM_TerrainEdit::EditType::RAISE_LOWER;
+			_trackHeight->Enabled = false;
+			_numHeight->Enabled = false;
+		}
+	}
+
+	System::Void TerrainEditPanel::_btnSmooth_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(_parameters->editType != EM_TerrainEdit::EditType::SMOOTH)
+		{
+			_parameters->editType = EM_TerrainEdit::EditType::SMOOTH;
+			_trackHeight->Enabled = false;
+			_numHeight->Enabled = false;
+		}
+	}
+
+	System::Void TerrainEditPanel::_btnNoise_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(_parameters->editType != EM_TerrainEdit::EditType::NOISE)
+		{
+			_parameters->editType = EM_TerrainEdit::EditType::NOISE;
+			_trackHeight->Enabled = false;
+			_numHeight->Enabled = false;
+		}
+	}
+
+	System::Void TerrainEditPanel::_btnPlateau_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(_parameters->editType != EM_TerrainEdit::EditType::PLATEAU)
+		{
+			_parameters->editType = EM_TerrainEdit::EditType::PLATEAU;
+			_trackHeight->Enabled = true;
+			_numHeight->Enabled = true;
+		}
+	}
+
+	System::Void TerrainEditPanel::_btnRelativePlateau_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(_parameters->editType != EM_TerrainEdit::EditType::RELATIVE_PLATEAU)
+		{
+			_parameters->editType = EM_TerrainEdit::EditType::RELATIVE_PLATEAU;
+			_trackHeight->Enabled = true;
+			_numHeight->Enabled = true;
+		}
+	}
+
+	System::Void TerrainEditPanel::_btnRamp_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(_parameters->editType != EM_TerrainEdit::EditType::RAMP)
+		{
+			_parameters->editType = EM_TerrainEdit::EditType::RAMP;
 			_trackHeight->Enabled = false;
 			_numHeight->Enabled = false;
 		}

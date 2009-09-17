@@ -23,6 +23,22 @@ namespace Engine
 
 	Camera::ClipResult Camera::IsInsideFrustum(const AABBox& bbox)
 	{
+		UpdateViewProjectionMat();
+
+		for(int i = 0; i < 6; ++i)
+		{
+			if(point_to_plane_sgn_dist(vec3f(bbox.minPt.x, bbox.minPt.y, bbox.minPt.z), _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(vec3f(bbox.maxPt.x, bbox.minPt.y, bbox.minPt.z), _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(vec3f(bbox.minPt.x, bbox.maxPt.y, bbox.minPt.z), _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(vec3f(bbox.maxPt.x, bbox.maxPt.y, bbox.minPt.z), _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(vec3f(bbox.minPt.x, bbox.minPt.y, bbox.maxPt.z), _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(vec3f(bbox.maxPt.x, bbox.minPt.y, bbox.maxPt.z), _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(vec3f(bbox.minPt.x, bbox.maxPt.y, bbox.maxPt.z), _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(vec3f(bbox.maxPt.x, bbox.maxPt.y, bbox.maxPt.z), _clipPlanes[i]) > 0) continue;
+
+			return CLIP_OUTSIDE;
+		}
+
 		return CLIP_INSIDE;
 	}
 
@@ -58,11 +74,7 @@ namespace Engine
 
 	const math3d::mat4f& Camera::GetViewProjectionTransform() const
 	{
-		if(_viewProjDirty)
-		{
-			math3d::mul(_viewProjectionTransform, _viewTransform, _projectionTransform);
-			_viewProjDirty = false;
-		}
+		UpdateViewProjectionMat();
 		return _viewProjectionTransform;
 	}
 
@@ -99,6 +111,36 @@ namespace Engine
 		mul(result, prev_rot, rot);
 		_viewTransform.set3x3(result);
 		_viewProjDirty = true;
+	}
+
+	const vec4f& Camera::GetClipPlane(ClipPlane plane)
+	{
+		UpdateViewProjectionMat();
+		return _clipPlanes[plane];
+	}
+
+	void Camera::UpdateViewProjectionMat() const
+	{
+		if(_viewProjDirty)
+		{
+			math3d::mul(_viewProjectionTransform, _viewTransform, _projectionTransform);
+			_viewProjDirty = false;
+
+			// calculate world space clip planes
+			_clipPlanes[CP_RIGHT] = _viewProjectionTransform.get_col(3) - _viewProjectionTransform.get_col(0);
+			_clipPlanes[CP_LEFT] = _viewProjectionTransform.get_col(3) + _viewProjectionTransform.get_col(0);
+			_clipPlanes[CP_BOTTOM] = _viewProjectionTransform.get_col(3) + _viewProjectionTransform.get_col(1);
+			_clipPlanes[CP_TOP] = _viewProjectionTransform.get_col(3) - _viewProjectionTransform.get_col(1);
+			_clipPlanes[CP_NEAR] = _viewProjectionTransform.get_col(3) + _viewProjectionTransform.get_col(2);
+			_clipPlanes[CP_FAR] = _viewProjectionTransform.get_col(3) - _viewProjectionTransform.get_col(2);
+
+			// normalize planes
+			for(int i = 0; i < 6; ++i)
+			{
+				float rcp_len = 1.0f / _clipPlanes[i].rvec3.length();
+				_clipPlanes[i] *= rcp_len;
+			}
+		}
 	}
 
 }

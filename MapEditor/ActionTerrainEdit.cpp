@@ -27,6 +27,7 @@ namespace MapEditor
 
 	void ActionTerrainEdit::BeginAction()
 	{
+		// save whole terrain elevation
 		Terrain& terrain = engineAPI->world->GetTerrain();
 		const Terrain::TerrainPatch* patches = terrain.GetPatches();
 		int patch_count = terrain.GetPatchCount();
@@ -35,13 +36,14 @@ namespace MapEditor
 
 		GetBrushRect(_undoRect);
 
-		BuildStrengthMatrix(_undoRect);
+		BuildRaiseLowerMatrix(_undoRect);
 
 		_oldRect = _undoRect;
 	}
 
 	void ActionTerrainEdit::EndAction()
 	{
+		// save only modified part of terrain for undo
 		int patch_count = engineAPI->world->GetTerrain().GetPatchCount();
 		_undoElevation = new(mainPool) float[(_undoRect.Width + 1) * (_undoRect.Height + 1)];
 		int n = 0;
@@ -75,25 +77,29 @@ namespace MapEditor
 		System::Drawing::Rectangle rect;
 		GetBrushRect(rect);
 
-		if(rect != _oldRect)
-		{
-			_oldRect = rect;
-			BuildStrengthMatrix(rect);
-		}
-
 		_undoRect = System::Drawing::Rectangle::Union(_undoRect, rect);
 
-		if(GetAsyncKeyState(VK_SHIFT) & 0x8000)
-			dt = -dt;
-
-		int size = (rect.Width + 1) * (rect.Height + 1);
-		float* elevation = new(tempPool) float[size];
-		for(int n = 0; n < size; ++n)
+		switch(_parameters->editType)
 		{
-			elevation[n] = _strengthMatrix[n] * dt;
+		case EM_TerrainEdit::EditType::RAISE_LOWER:
+			UpdateRaiseLower(rect, dt);
+			break;
+		case EM_TerrainEdit::EditType::SMOOTH:
+			UpdateSmooth(rect, dt);
+			break;
+		case EM_TerrainEdit::EditType::NOISE:
+			UpdateNoise(rect, dt);
+			break;
+		case EM_TerrainEdit::EditType::PLATEAU:
+			UpdatePlateau(rect, dt);
+			break;
+		case EM_TerrainEdit::EditType::RELATIVE_PLATEAU:
+			UpdateRelativePlateau(rect, dt);
+			break;
+		case EM_TerrainEdit::EditType::RAMP:
+			UpdateRamp(rect, dt);
+			break;
 		}
-		engineAPI->world->GetTerrain().OffsetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, elevation);
-		delete[] elevation;
 	}
 
 	void ActionTerrainEdit::Undo()
@@ -110,7 +116,7 @@ namespace MapEditor
 		Undo();
 	}
 
-	void ActionTerrainEdit::BuildStrengthMatrix(System::Drawing::Rectangle rect)
+	void ActionTerrainEdit::BuildRaiseLowerMatrix(System::Drawing::Rectangle rect)
 	{
 		delete[] _strengthMatrix;
 		_strengthMatrix = new(tempPool) float[(rect.Width + 1)* (rect.Height + 1)];
@@ -137,6 +143,302 @@ namespace MapEditor
 				_strengthMatrix[n++] = strength * _parameters->strength;
 			}
 		}
+	}
+
+	void ActionTerrainEdit::BuildSmoothMatrix(System::Drawing::Rectangle rect)
+	{
+		int count = (rect.Width + 1) * (rect.Height + 1);
+		delete[] _strengthMatrix;
+		_strengthMatrix = new(tempPool) float[count];
+		vec2f center(_parameters->posX, _parameters->posZ);
+		float inner_rad = _parameters->hardness * _parameters->radius;
+		int n = 0;
+
+		float* elevation = new(tempPool) float[count];
+		engineAPI->world->GetTerrain().GetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, elevation);
+
+		for(int y = rect.Top; y <= rect.Bottom; ++y)
+		{
+			for(int x = rect.Left; x <= rect.Right; ++x)
+			{
+				vec2f pt((float)x, (float)y);
+				float dist = (pt - center).length();
+				float strength;
+				if(dist < _parameters->radius)
+				{
+					int sc = 0; // sample count
+					float mean = 0.0f;
+
+					if(x > rect.Left)
+					{
+						mean += elevation[n - 1];
+						sc++;
+					}
+
+					mean += elevation[n];
+					sc++;
+
+					if(x < rect.Right)
+					{
+						mean += elevation[n + 1];
+						sc++;
+					}
+
+					if(y > rect.Top)
+					{
+						if(x > rect.Left)
+						{
+							mean += elevation[n - (rect.Width + 1) - 1];
+							sc++;
+						}
+
+						mean += elevation[n - (rect.Width + 1)];
+						sc++;
+
+						if(x < rect.Right)
+						{
+							mean += elevation[n - (rect.Width + 1) + 1];
+							sc++;
+						}
+					}
+
+					if(y < rect.Bottom)
+					{
+						if(x > rect.Left)
+						{
+							mean += elevation[n + (rect.Width + 1) - 1];
+							sc++;
+						}
+
+						mean += elevation[n + (rect.Width + 1)];
+						sc++;
+
+						if(x < rect.Right)
+						{
+							mean += elevation[n + (rect.Width + 1) + 1];
+							sc++;
+						}
+					}
+
+					mean /= sc;
+
+					if(dist > inner_rad)
+						strength = - (1.0f - (dist - inner_rad) / (_parameters->radius - inner_rad)) * (elevation[n] - mean);
+					else
+						strength = - (elevation[n] - mean);
+				}
+				else
+				{
+					strength = 0.0f;
+				}
+				_strengthMatrix[n++] = strength * _parameters->strength;
+			}
+		}
+
+		delete[] elevation;
+	}
+
+	void ActionTerrainEdit::BuildNoiseMatrix(System::Drawing::Rectangle rect)
+	{
+		int count = (rect.Width + 1) * (rect.Height + 1);
+		delete[] _strengthMatrix;
+		_strengthMatrix = new(tempPool) float[count];
+		vec2f center(_parameters->posX, _parameters->posZ);
+		float inner_rad = _parameters->hardness * _parameters->radius;
+		int n = 0;
+
+		srand(666);
+		float noise = 0.0f;
+
+		for(int y = rect.Top; y <= rect.Bottom; ++y)
+		{
+			for(int x = rect.Left; x <= rect.Right; ++x)
+			{
+				vec2f pt((float)x, (float)y);
+				float dist = (pt - center).length();
+				float strength;
+				if(rand() % 10 < 3)
+					noise = 1.0f;
+				else
+					noise = 0.5f;
+				if(dist < _parameters->radius)
+				{
+					if(dist > inner_rad)
+						strength = (1.0f - (dist - inner_rad) / (_parameters->radius - inner_rad)) * noise;
+					else
+						strength = noise;
+				}
+				else
+				{
+					strength = 0.0f;
+				}
+				_strengthMatrix[n++] = strength * _parameters->strength;
+			}
+		}
+	}
+
+	void ActionTerrainEdit::BuildPlateauMatrix(System::Drawing::Rectangle rect)
+	{
+		int count = (rect.Width + 1) * (rect.Height + 1);
+		delete[] _strengthMatrix;
+		_strengthMatrix = new(tempPool) float[count];
+		vec2f center(_parameters->posX, _parameters->posZ);
+		float inner_rad = _parameters->hardness * _parameters->radius;
+		int n = 0;
+
+		float* elevation = new(tempPool) float[count];
+		engineAPI->world->GetTerrain().GetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, elevation);
+
+		float height = (GetAsyncKeyState(VK_SHIFT) & 0x8000)? - _parameters->height: _parameters->height;
+
+		for(int y = rect.Top; y <= rect.Bottom; ++y)
+		{
+			for(int x = rect.Left; x <= rect.Right; ++x)
+			{
+				vec2f pt((float)x, (float)y);
+				float dist = (pt - center).length();
+				if(dist < _parameters->radius)
+				{
+					if(dist > inner_rad)
+					{
+						float strength = (dist - inner_rad) / (_parameters->radius - inner_rad);
+						strength = cos(Min(strength, 1.0f) * PI) * 0.5f + 0.5f;
+						_strengthMatrix[n] = height + (elevation[n] - height) * (1 - strength);
+					}
+					else
+						_strengthMatrix[n] = height;
+				}
+				else
+				{
+					_strengthMatrix[n] = elevation[n];
+				}
+
+				++n;
+			}
+		}
+
+		delete[] elevation;
+	}
+
+	void ActionTerrainEdit::BuildRelativePlateauMatrix(System::Drawing::Rectangle rect)
+	{
+		int count = (rect.Width + 1) * (rect.Height + 1);
+		delete[] _strengthMatrix;
+		_strengthMatrix = new(tempPool) float[count];
+		vec2f center(_parameters->posX, _parameters->posZ);
+		float inner_rad = _parameters->hardness * _parameters->radius;
+		int n = 0;
+
+		float* elevation = new(tempPool) float[count];
+		engineAPI->world->GetTerrain().GetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, elevation);
+
+		float height = (GetAsyncKeyState(VK_SHIFT) & 0x8000)? - _parameters->height: _parameters->height;
+		int patch_count = engineAPI->world->GetTerrain().GetPatchCount();
+		int ter_w = patch_count * Terrain::PATCH_WIDTH + 1;
+
+		for(int y = rect.Top; y <= rect.Bottom; ++y)
+		{
+			for(int x = rect.Left; x <= rect.Right; ++x)
+			{
+				vec2f pt((float)x, (float)y);
+				float dist = (pt - center).length();
+				if(dist < _parameters->radius)
+				{
+					if(dist > inner_rad)
+					{
+						float strength = (dist - inner_rad) / (_parameters->radius - inner_rad);
+						strength = cos(Min(strength, 1.0f) * PI) * 0.5f + 0.5f;
+						_strengthMatrix[n] = height + ((elevation[n] - _oldElevation[y * ter_w + x]) - height) * (1 - strength);
+					}
+					else
+						_strengthMatrix[n] = height;
+
+					_strengthMatrix[n] += _oldElevation[y * ter_w + x];
+				}
+				else
+				{
+					_strengthMatrix[n] = elevation[n];
+				}
+
+				++n;
+			}
+		}
+
+		delete[] elevation;
+	}
+
+	void ActionTerrainEdit::BuildRampMatrix(System::Drawing::Rectangle rect)
+	{
+	}
+
+	void ActionTerrainEdit::UpdateRaiseLower(System::Drawing::Rectangle rect, float dt)
+	{
+		if(rect != _oldRect)
+		{
+			_oldRect = rect;
+			BuildRaiseLowerMatrix(rect);
+		}
+
+		if(GetAsyncKeyState(VK_SHIFT) & 0x8000)
+			dt = -dt;
+
+		int count = (rect.Width + 1) * (rect.Height + 1);
+		float* offsets = new(tempPool) float[count];
+		for(int n = 0; n < count; ++n)
+		{
+			offsets[n] = _strengthMatrix[n] * dt;
+		}
+		engineAPI->world->GetTerrain().OffsetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, offsets);
+		delete[] offsets;
+	}
+
+	void ActionTerrainEdit::UpdateSmooth(System::Drawing::Rectangle rect, float dt)
+	{
+		BuildSmoothMatrix(rect);
+
+		int count = (rect.Width + 1) * (rect.Height + 1);
+		float* offsets = new(tempPool) float[count];
+		for(int i = 0; i < count; ++i)
+		{
+			offsets[i] = _strengthMatrix[i] * dt;
+		}
+		engineAPI->world->GetTerrain().OffsetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, offsets);
+		delete[] offsets;
+	}
+
+	void ActionTerrainEdit::UpdateNoise(System::Drawing::Rectangle rect, float dt)
+	{
+		BuildNoiseMatrix(rect);
+
+		if(GetAsyncKeyState(VK_SHIFT) & 0x8000)
+			dt = -dt;
+
+		int count = (rect.Width + 1) * (rect.Height + 1);
+		float* offsets = new(tempPool) float[count];
+		for(int i = 0; i < count; ++i)
+		{
+			offsets[i] = _strengthMatrix[i] * dt;
+		}
+		engineAPI->world->GetTerrain().OffsetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, offsets);
+		delete[] offsets;
+	}
+
+	void ActionTerrainEdit::UpdatePlateau(System::Drawing::Rectangle rect, float dt)
+	{
+		BuildPlateauMatrix(rect);
+
+		engineAPI->world->GetTerrain().SetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, _strengthMatrix);
+	}
+
+	void ActionTerrainEdit::UpdateRelativePlateau(System::Drawing::Rectangle rect, float dt)
+	{
+		BuildRelativePlateauMatrix(rect);
+
+		engineAPI->world->GetTerrain().SetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, _strengthMatrix);
+	}
+
+	void ActionTerrainEdit::UpdateRamp(System::Drawing::Rectangle rect, float dt)
+	{
 	}
 
 	void ActionTerrainEdit::GetBrushRect(System::Drawing::Rectangle% rect)

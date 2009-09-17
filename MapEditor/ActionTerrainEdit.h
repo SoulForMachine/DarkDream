@@ -21,7 +21,18 @@ namespace MapEditor
 		virtual void Undo() override;
 		virtual void Redo() override;
 	private:
-		void BuildStrengthMatrix(System::Drawing::Rectangle rect);
+		void BuildRaiseLowerMatrix(System::Drawing::Rectangle rect);
+		void BuildSmoothMatrix(System::Drawing::Rectangle rect);
+		void BuildNoiseMatrix(System::Drawing::Rectangle rect);
+		void BuildPlateauMatrix(System::Drawing::Rectangle rect);
+		void BuildRelativePlateauMatrix(System::Drawing::Rectangle rect);
+		void BuildRampMatrix(System::Drawing::Rectangle rect);
+		void UpdateRaiseLower(System::Drawing::Rectangle rect, float dt);
+		void UpdateSmooth(System::Drawing::Rectangle rect, float dt);
+		void UpdateNoise(System::Drawing::Rectangle rect, float dt);
+		void UpdatePlateau(System::Drawing::Rectangle rect, float dt);
+		void UpdateRelativePlateau(System::Drawing::Rectangle rect, float dt);
+		void UpdateRamp(System::Drawing::Rectangle rect, float dt);
 		void GetBrushRect(System::Drawing::Rectangle% rect);
 
 		EM_TerrainEdit::Parameters^ _parameters;

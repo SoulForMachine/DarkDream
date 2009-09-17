@@ -99,6 +99,7 @@ public:
 	void set3x3(const mat3<_ST>& m3);
 	void get(vec4<_ST>& x, vec4<_ST>& y, vec4<_ST>& z, vec4<_ST>& w) const;
 	void get(mat3<_ST>& m3) const;
+	vec4<_ST> get_col(int col) const;
 
 
 // operations
@@ -355,6 +356,14 @@ void mat4<_ST>::get(mat3<_ST>& m3) const
 	m3.row1 = row1.rvec3;
 	m3.row2 = row2.rvec3;
 }
+
+template <class _ST>
+inline
+vec4<_ST> mat4<_ST>::get_col(int col) const
+{
+	return vec4<_ST>(_data[col], _data[col + 4], _data[col + 8], _data[col + 12]);
+}
+
 
 
 // operations

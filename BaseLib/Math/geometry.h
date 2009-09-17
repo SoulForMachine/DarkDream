@@ -184,6 +184,35 @@ namespace math3d
 		return true;
 	}
 
+	/*
+		Evaluates the point relative to a plane (returns signed distance).
+		If less than 0, the point is behind the plane,
+		if greater than 0, the point is in front of plane,
+		and if 0, the point is on the plane.
+	*/
+	template <class _FT>
+	inline
+	_FT point_to_plane_sgn_dist(const vec3<_FT>& point, const vec4<_FT>& plane)
+	{
+		return dot(point, plane.rvec3) + plane.w;
+	}
+
+	// returns absolute distance of a point from a plane
+	template <class _FT>
+	inline
+	_FT point_to_plane_dist(const vec3<_FT>& point, const vec4<_FT>& plane)
+	{
+		return fabs(point_to_plane_sgn_dist(point, plane));
+	}
+
+	template <class _FT>
+	inline
+	void nearest_point_on_plane(vec3<_FT>& result, const vec3<_FT>& point, const vec4<_FT>& plane)
+	{
+		_FT d = point_to_plane_sgn_dist(point, plane);
+		result = point - d * plane.rvec3;
+	}
+
 }
 
 

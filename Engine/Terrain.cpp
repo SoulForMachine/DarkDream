@@ -632,7 +632,13 @@ namespace Engine
 			{
 				for(int x = x1, src_x = start_src_x; x <= x2; ++x, ++src_x)
 				{
-					patch.elevation[y * X_COUNT + x] = elevation[src_y * PART_X_COUNT + src_x];
+					float elev = elevation[src_y * PART_X_COUNT + src_x];
+					patch.elevation[y * X_COUNT + x] = elev;
+
+					if(elev < patch.boundBox.minPt.y)
+						patch.boundBox.minPt.y = elev;
+					else if(elev > patch.boundBox.maxPt.y)
+						patch.boundBox.maxPt.y = elev;
 				}
 			}
 
@@ -688,7 +694,13 @@ namespace Engine
 			{
 				for(int x = x1, src_x = start_src_x; x <= x2; ++x, ++src_x)
 				{
-					patch.elevation[y * X_COUNT + x] += offsets[src_y * PART_X_COUNT + src_x];
+					float elev = patch.elevation[y * X_COUNT + x] + offsets[src_y * PART_X_COUNT + src_x];
+					patch.elevation[y * X_COUNT + x] = elev;
+
+					if(elev < patch.boundBox.minPt.y)
+						patch.boundBox.minPt.y = elev;
+					else if(elev > patch.boundBox.maxPt.y)
+						patch.boundBox.maxPt.y = elev;
 				}
 			}
 
@@ -728,7 +740,7 @@ namespace Engine
 		const int X_COUNT = PATCH_WIDTH + 1;
 		const int DEST_X_COUNT = end_x - start_x + 1;
 		int i1 = Min(start_x / PATCH_WIDTH, _patchCount - 1); // index of first patch
-		int i2 = Max(end_x / PATCH_WIDTH - 1, 0); // index of last patch
+		int i2 = Max(end_x - 1, 0) / PATCH_WIDTH; // index of last patch
 		int start_dest_x = 0;
 
 		for(int i = i1; i <= i2; ++i)
