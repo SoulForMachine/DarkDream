@@ -190,27 +190,49 @@ namespace math3d
 		if greater than 0, the point is in front of plane,
 		and if 0, the point is on the plane.
 	*/
-	template <class _FT>
+	template <class _ST>
 	inline
-	_FT point_to_plane_sgn_dist(const vec3<_FT>& point, const vec4<_FT>& plane)
+	_ST point_to_plane_sgn_dist(const vec3<_ST>& point, const vec4<_ST>& plane)
 	{
 		return dot(point, plane.rvec3) + plane.w;
 	}
 
 	// returns absolute distance of a point from a plane
-	template <class _FT>
+	template <class _ST>
 	inline
-	_FT point_to_plane_dist(const vec3<_FT>& point, const vec4<_FT>& plane)
+	_ST point_to_plane_dist(const vec3<_ST>& point, const vec4<_ST>& plane)
 	{
 		return fabs(point_to_plane_sgn_dist(point, plane));
 	}
 
-	template <class _FT>
+	template <class _ST>
 	inline
-	void nearest_point_on_plane(vec3<_FT>& result, const vec3<_FT>& point, const vec4<_FT>& plane)
+	void nearest_point_on_plane(vec3<_ST>& result, const vec3<_ST>& point, const vec4<_ST>& plane)
 	{
-		_FT d = point_to_plane_sgn_dist(point, plane);
+		_ST d = point_to_plane_sgn_dist(point, plane);
 		result = point - d * plane.rvec3;
+	}
+
+	template <class _ST>
+	inline
+	_ST point_to_line_sgn_dist_2d(const vec2<_ST>& point, const vec3<_ST>& line)
+	{
+		return dot(point, line.rvec2) + line.z;
+	}
+
+	template <class _ST>
+	inline
+	_ST point_to_line_dist_2d(const vec2<_ST>& point, const vec3<_ST>& line)
+	{
+		return fabs(point_to_line_sgn_dist_2d(point, line));
+	}
+
+	template <class _ST>
+	inline
+	void nearest_point_on_line_2d(vec2<_ST>& result, const vec2<_ST>& point, const vec3<_ST>& line)
+	{
+		_ST d = point_to_line_sgn_dist_2d(point, line);
+		result = point - d * line.rvec2;
 	}
 
 }

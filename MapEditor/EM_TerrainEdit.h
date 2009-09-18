@@ -37,6 +37,11 @@ namespace MapEditor
 			float posX;
 			float posY;
 			float posZ;
+			// brush center start position (used for ramp brush only)
+			float startPosX;
+			float startPosY;
+			float startPosZ;
+			bool executing;
 		};
 
 		EM_TerrainEdit(UndoManager^ undo_manager);

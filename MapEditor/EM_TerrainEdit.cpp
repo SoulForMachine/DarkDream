@@ -23,6 +23,10 @@ namespace MapEditor
 		_parameters->posX = 0.0f;
 		_parameters->posY = 0.0f;
 		_parameters->posZ = 0.0f;
+		_parameters->startPosX = 0.0f;
+		_parameters->startPosY = 0.0f;
+		_parameters->startPosZ = 0.0f;
+		_parameters->executing = false;
 
 		_panel = gcnew TerrainEditPanel(_parameters);
 		_action = nullptr;
@@ -72,8 +76,16 @@ namespace MapEditor
 		if(_overTerrain)
 		{
 			_isExecuting = true;
+			_parameters->executing = true;
 			_action = gcnew ActionTerrainEdit(_parameters);
 			_action->BeginAction();
+
+			if(_parameters->editType == EditType::RAMP)
+			{
+				_parameters->startPosX = _parameters->posX;
+				_parameters->startPosY = _parameters->posY;
+				_parameters->startPosZ = _parameters->posZ;
+			}
 		}
 	}
 
@@ -82,6 +94,7 @@ namespace MapEditor
 		if(_isExecuting && _action != nullptr)
 		{
 			_isExecuting = false;
+			_parameters->executing = false;
 			_action->EndAction();
 			_undoManager->Add(_action);
 			_action = nullptr;
@@ -95,9 +108,52 @@ namespace MapEditor
 			if(_isExecuting && _action != nullptr)
 			{
 				_isExecuting = false;
+				_parameters->executing = false;
 				_action->CancelAction();
 				delete _action;
 			}
+		}
+		else if(key == VK_OEM_4)
+		{
+			_parameters->radius -= 0.5f;
+			if(_parameters->radius < 1.0f)
+				_parameters->radius = 1.0f;
+			_panel->UpdateControls();
+		}
+		else if(key == VK_OEM_6)
+		{
+			_parameters->radius += 0.5f;
+			if(_parameters->radius > 16.0f)
+				_parameters->radius = 16.0f;
+			_panel->UpdateControls();
+		}
+		else if(key == VK_OEM_1)
+		{
+			_parameters->hardness = (int(round(_parameters->hardness * 100.0f)) - 1) / 100.0f;
+			if(_parameters->hardness < 0.0f)
+				_parameters->hardness = 0.0f;
+			_panel->UpdateControls();
+		}
+		else if(key == VK_OEM_7)
+		{
+			_parameters->hardness = (int(round(_parameters->hardness * 100.0f)) + 1) / 100.0f;
+			if(_parameters->hardness > 1.0f)
+				_parameters->hardness = 1.0f;
+			_panel->UpdateControls();
+		}
+		else if(key == VK_OEM_PLUS)
+		{
+			_parameters->strength += 1.0f;
+			if(_parameters->strength > 10.0f)
+				_parameters->strength = 10.0f;
+			_panel->UpdateControls();
+		}
+		else if(key == VK_OEM_MINUS)
+		{
+			_parameters->strength -= 1.0f;
+			if(_parameters->strength < 1.0f)
+				_parameters->strength = 1.0f;
+			_panel->UpdateControls();
 		}
 	}
 

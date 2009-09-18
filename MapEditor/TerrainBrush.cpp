@@ -21,8 +21,11 @@ namespace MapEditor
 	{
 		_renderer = engineAPI->renderSystem->GetRenderer();
 
-		// allocate vertex memory for 2 lines that represent brush center, plus for two circles with 64 vertices each
-		_vertBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, sizeof(BrushVertex) * (4 + CIRCLE_VERTEX_COUNT * 2), 0, GL::USAGE_DYNAMIC_DRAW);
+		// allocate vertex memory for:
+		// - 2 lines that represent brush center
+		// - 2 circles with 64 vertices each
+		// - for ramp brush, 1 circle with 64, 2 lines, and a quad with 6 vertices
+		_vertBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, sizeof(BrushVertex) * (4 + CIRCLE_VERTEX_COUNT * 3 + 4 + 6), 0, GL::USAGE_DYNAMIC_DRAW);
 		if(!_vertBuf)
 			return false;
 
@@ -78,6 +81,20 @@ namespace MapEditor
 				_renderer->Draw(GL::PRIM_LINE_LOOP, 4, CIRCLE_VERTEX_COUNT);
 			_fragpBrush->GetASMProgram()->LocalParameter(0, orange);
 			_renderer->Draw(GL::PRIM_LINE_LOOP, 4 + CIRCLE_VERTEX_COUNT, CIRCLE_VERTEX_COUNT);
+
+			if( _parameters->editType == EM_TerrainEdit::EditType::RAMP &&
+				_parameters->executing)
+			{
+				vec4f green(0.0f, 1.0f, 0.0f, 0.3f);
+				_fragpBrush->GetASMProgram()->LocalParameter(0, red);
+				_renderer->Draw(GL::PRIM_LINES, 4 + CIRCLE_VERTEX_COUNT * 2, CIRCLE_VERTEX_COUNT);
+				_renderer->Draw(GL::PRIM_LINE_LOOP, 4 + CIRCLE_VERTEX_COUNT * 2 + 4, CIRCLE_VERTEX_COUNT);
+				_fragpBrush->GetASMProgram()->LocalParameter(0, green);
+				_renderer->EnableBlending(true);
+				_renderer->BlendingFunc(GL::BLEND_FUNC_SRC_ALPHA, GL::BLEND_FUNC_ONE_MINUS_SRC_ALPHA);
+				_renderer->Draw(GL::PRIM_TRIANGLES, 4 + CIRCLE_VERTEX_COUNT * 3 + 4, 6);
+				_renderer->EnableBlending(false);
+			}
 		}
 	}
 
@@ -114,6 +131,51 @@ namespace MapEditor
 				vertices++;
 				angle += d;
 			}
+		}
+
+		// ramp
+		if(	_parameters->editType == EM_TerrainEdit::EditType::RAMP &&
+			_parameters->executing )
+		{
+			// start point marker
+			vec3f start_pt(_parameters->startPosX, _parameters->startPosY, _parameters->startPosZ);
+			vertices[0].position.set(start_pt.x - 1.0f, start_pt.y + VERT_OFFSET, start_pt.z);
+			vertices[1].position.set(start_pt.x + 1.0f, start_pt.y + VERT_OFFSET, start_pt.z);
+			vertices[2].position.set(start_pt.x, start_pt.y + VERT_OFFSET, start_pt.z - 1.0f);
+			vertices[3].position.set(start_pt.x, start_pt.y + VERT_OFFSET, start_pt.z + 1.0f);
+			vertices += 4;
+
+			float angle = 0.0f;
+			const float radius = 2.0f;
+			for(int j = 0; j < CIRCLE_VERTEX_COUNT; ++j)
+			{
+				float elev;
+				vec2f pt(cos(angle) * radius + start_pt.x, sin(angle) * radius + start_pt.z);
+				if(!engineAPI->world->GetTerrain().ElevationFromPoint(pt, elev))
+					elev = 0.0f;
+				vertices->position.set(pt.x, elev + VERT_OFFSET, pt.y);
+				vertices++;
+				angle += d;
+			}
+
+			// ramp quad
+			vec3f dir;
+			cross(dir, vec3f::y_axis, center - start_pt);
+			dir.normalize();
+			dir *= _parameters->radius;
+
+			vertices[0].position = start_pt + dir;
+			vertices[0].position.y += VERT_OFFSET;
+			vertices[1].position = start_pt - dir;
+			vertices[1].position.y += VERT_OFFSET;
+			vertices[2].position = center - dir;
+			vertices[2].position.y += VERT_OFFSET;
+			vertices[3].position = start_pt + dir;
+			vertices[3].position.y += VERT_OFFSET;
+			vertices[4].position = center - dir;
+			vertices[4].position.y += VERT_OFFSET;
+			vertices[5].position = center + dir;
+			vertices[5].position.y += VERT_OFFSET;
 		}
 
 		return _vertBuf->UnmapBuffer();

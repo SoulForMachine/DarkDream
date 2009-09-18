@@ -10,6 +10,10 @@ using namespace Engine;
 namespace MapEditor
 {
 
+	static vec3f g_rampStart;
+	static vec3f g_rampEnd;
+
+
 	ActionTerrainEdit::ActionTerrainEdit(EM_TerrainEdit::Parameters^ params)
 	{
 		_parameters = params;
@@ -34,15 +38,28 @@ namespace MapEditor
 		_oldElevation = new(tempPool) float[(patch_count * Terrain::PATCH_WIDTH + 1) * (Terrain::PATCH_HEIGHT + 1)];
 		terrain.GetElevation(0, 0, patch_count * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _oldElevation);
 
-		GetBrushRect(_undoRect);
-
-		BuildRaiseLowerMatrix(_undoRect);
-
-		_oldRect = _undoRect;
+		// for ramp brush type, save starting point
+		if(_parameters->editType == EM_TerrainEdit::EditType::RAMP)
+		{
+			g_rampStart.set(_parameters->posX, _parameters->posY, _parameters->posZ);
+			GetBrushRect(_undoRect);
+		}
 	}
 
 	void ActionTerrainEdit::EndAction()
 	{
+		// for ramp brush type, get the ending point and perform action
+		if(_parameters->editType == EM_TerrainEdit::EditType::RAMP)
+		{
+			g_rampEnd.set(_parameters->posX, _parameters->posY, _parameters->posZ);
+
+			System::Drawing::Rectangle rect;
+			GetBrushRect(rect);
+			_undoRect = System::Drawing::Rectangle::Union(_undoRect, rect);
+
+			MakeRamp();
+		}
+
 		// save only modified part of terrain for undo
 		int patch_count = engineAPI->world->GetTerrain().GetPatchCount();
 		_undoElevation = new(mainPool) float[(_undoRect.Width + 1) * (_undoRect.Height + 1)];
@@ -63,9 +80,13 @@ namespace MapEditor
 
 	void ActionTerrainEdit::CancelAction()
 	{
-		Terrain& terrain = engineAPI->world->GetTerrain();
-		int patch_count = terrain.GetPatchCount();
-		terrain.SetElevation(0, 0, patch_count * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _oldElevation);
+		if(_parameters->editType != EM_TerrainEdit::EditType::RAMP)
+		{
+			Terrain& terrain = engineAPI->world->GetTerrain();
+			int patch_count = terrain.GetPatchCount();
+			terrain.SetElevation(0, 0, patch_count * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _oldElevation);
+		}
+
 		delete[] _oldElevation;
 		_oldElevation = 0;
 		delete[] _strengthMatrix;
@@ -74,31 +95,31 @@ namespace MapEditor
 
 	void ActionTerrainEdit::Update(float dt)
 	{
-		System::Drawing::Rectangle rect;
-		GetBrushRect(rect);
-
-		_undoRect = System::Drawing::Rectangle::Union(_undoRect, rect);
-
-		switch(_parameters->editType)
+		if(_parameters->editType != EM_TerrainEdit::EditType::RAMP)
 		{
-		case EM_TerrainEdit::EditType::RAISE_LOWER:
-			UpdateRaiseLower(rect, dt);
-			break;
-		case EM_TerrainEdit::EditType::SMOOTH:
-			UpdateSmooth(rect, dt);
-			break;
-		case EM_TerrainEdit::EditType::NOISE:
-			UpdateNoise(rect, dt);
-			break;
-		case EM_TerrainEdit::EditType::PLATEAU:
-			UpdatePlateau(rect, dt);
-			break;
-		case EM_TerrainEdit::EditType::RELATIVE_PLATEAU:
-			UpdateRelativePlateau(rect, dt);
-			break;
-		case EM_TerrainEdit::EditType::RAMP:
-			UpdateRamp(rect, dt);
-			break;
+			System::Drawing::Rectangle rect;
+			GetBrushRect(rect);
+
+			_undoRect = System::Drawing::Rectangle::Union(_undoRect, rect);
+
+			switch(_parameters->editType)
+			{
+			case EM_TerrainEdit::EditType::RAISE_LOWER:
+				UpdateRaiseLower(rect, dt);
+				break;
+			case EM_TerrainEdit::EditType::SMOOTH:
+				UpdateSmooth(rect, dt);
+				break;
+			case EM_TerrainEdit::EditType::NOISE:
+				UpdateNoise(rect, dt);
+				break;
+			case EM_TerrainEdit::EditType::PLATEAU:
+				UpdatePlateau(rect, dt);
+				break;
+			case EM_TerrainEdit::EditType::RELATIVE_PLATEAU:
+				UpdateRelativePlateau(rect, dt);
+				break;
+			}
 		}
 	}
 
@@ -367,17 +388,9 @@ namespace MapEditor
 		delete[] elevation;
 	}
 
-	void ActionTerrainEdit::BuildRampMatrix(System::Drawing::Rectangle rect)
-	{
-	}
-
 	void ActionTerrainEdit::UpdateRaiseLower(System::Drawing::Rectangle rect, float dt)
 	{
-		if(rect != _oldRect)
-		{
-			_oldRect = rect;
-			BuildRaiseLowerMatrix(rect);
-		}
+		BuildRaiseLowerMatrix(rect);
 
 		if(GetAsyncKeyState(VK_SHIFT) & 0x8000)
 			dt = -dt;
@@ -437,8 +450,64 @@ namespace MapEditor
 		engineAPI->world->GetTerrain().SetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, _strengthMatrix);
 	}
 
-	void ActionTerrainEdit::UpdateRamp(System::Drawing::Rectangle rect, float dt)
+	void ActionTerrainEdit::MakeRamp()
 	{
+		vec2f dir(g_rampEnd.x - g_rampStart.x, g_rampEnd.z - g_rampStart.z);
+		dir.normalize();
+		vec2f start_pt(g_rampStart.x, g_rampStart.z);
+		vec2f end_pt(g_rampEnd.x, g_rampEnd.z);
+		vec3f start_line(dir, -dot(dir, start_pt));
+		vec3f end_line(-dir, -dot(-dir, end_pt));
+		vec3f mid_line(-dir.y, dir.x, -dot(vec2f(-dir.y, dir.x), start_pt));
+		float mid_len = (end_pt - start_pt).length();
+
+		int patch_count = engineAPI->world->GetTerrain().GetPatchCount();
+		int ter_w = patch_count * Terrain::PATCH_WIDTH + 1;
+
+		int count = (_undoRect.Width + 1) * (_undoRect.Height + 1);
+		float* elevation = new(tempPool) float[count];
+
+		float inner_rad = _parameters->hardness * _parameters->radius;
+		int n = 0;
+
+		for(int y = _undoRect.Top; y <= _undoRect.Bottom; ++y)
+		{
+			for(int x = _undoRect.Left; x <= _undoRect.Right; ++x)
+			{
+				vec2f pt((float)x, (float)y);
+				float dist = point_to_line_dist_2d(pt, mid_line);
+
+				if(	point_to_line_sgn_dist_2d(pt, start_line) > 0 &&
+					point_to_line_sgn_dist_2d(pt, end_line) > 0 &&
+					dist < _parameters->radius )
+				{
+					vec2f p;
+					nearest_point_on_line_2d(p, pt, mid_line);
+					float t = (p - start_pt).length() / mid_len;
+					float elev = lerp(g_rampStart.y, g_rampEnd.y, t);
+
+					if(dist > inner_rad)
+					{
+						float strength = (dist - inner_rad) / (_parameters->radius - inner_rad);
+						strength = cos(Min(strength, 1.0f) * PI) * 0.5f + 0.5f;
+						elevation[n] = elev + (_oldElevation[y * ter_w + x] - elev) * (1 - strength);
+					}
+					else
+					{
+						elevation[n] = elev;
+					}
+				}
+				else
+				{
+					elevation[n] = _oldElevation[y * ter_w + x];
+				}
+
+				n++;
+			}
+		}
+
+		engineAPI->world->GetTerrain().SetElevation(_undoRect.X, _undoRect.Y, _undoRect.Right, _undoRect.Bottom, elevation);
+		delete[] elevation;
 	}
 
 	void ActionTerrainEdit::GetBrushRect(System::Drawing::Rectangle% rect)

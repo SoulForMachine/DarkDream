@@ -643,6 +643,16 @@ namespace Engine
 			}
 
 			start_src_x += x2 - x1;
+		}
+
+		for(int i = i1; i <= i2; ++i)
+		{
+			TerrainPatch& patch = _patches[i];
+
+			int x1 = Max(start_x, i * PATCH_WIDTH) - i * PATCH_WIDTH;
+			int x2 = Min(end_x, (i + 1) * PATCH_WIDTH) - i * PATCH_WIDTH;
+			int y1 = start_y;
+			int y2 = end_y;
 
 			PatchVertex* vertices = (PatchVertex*)patch.vertBuf->MapBuffer(GL::ACCESS_READ_WRITE, false);
 			if(vertices)
@@ -705,6 +715,16 @@ namespace Engine
 			}
 
 			start_src_x += x2 - x1;
+		}
+
+		for(int i = i1; i <= i2; ++i)
+		{
+			TerrainPatch& patch = _patches[i];
+
+			int x1 = Max(start_x, i * PATCH_WIDTH) - i * PATCH_WIDTH;
+			int x2 = Min(end_x, (i + 1) * PATCH_WIDTH) - i * PATCH_WIDTH;
+			int y1 = start_y;
+			int y2 = end_y;
 
 			PatchVertex* vertices = (PatchVertex*)patch.vertBuf->MapBuffer(GL::ACCESS_READ_WRITE, false);
 			if(vertices)

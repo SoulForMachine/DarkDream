@@ -26,13 +26,12 @@ namespace MapEditor
 		void BuildNoiseMatrix(System::Drawing::Rectangle rect);
 		void BuildPlateauMatrix(System::Drawing::Rectangle rect);
 		void BuildRelativePlateauMatrix(System::Drawing::Rectangle rect);
-		void BuildRampMatrix(System::Drawing::Rectangle rect);
 		void UpdateRaiseLower(System::Drawing::Rectangle rect, float dt);
 		void UpdateSmooth(System::Drawing::Rectangle rect, float dt);
 		void UpdateNoise(System::Drawing::Rectangle rect, float dt);
 		void UpdatePlateau(System::Drawing::Rectangle rect, float dt);
 		void UpdateRelativePlateau(System::Drawing::Rectangle rect, float dt);
-		void UpdateRamp(System::Drawing::Rectangle rect, float dt);
+		void MakeRamp();
 		void GetBrushRect(System::Drawing::Rectangle% rect);
 
 		EM_TerrainEdit::Parameters^ _parameters;
@@ -40,7 +39,6 @@ namespace MapEditor
 		float* _undoElevation;
 		System::Drawing::Rectangle _undoRect;
 		float* _strengthMatrix;
-		System::Drawing::Rectangle _oldRect;
 	};
 
 }

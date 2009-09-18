@@ -119,8 +119,8 @@ inline _ST deg_atan(_ST t) { return rad2deg(atan(t)); }
 template <class _ST>
 inline void clamp(_ST& t, _ST low, _ST high)
 {
-	if(fcmp_lt(t, low)) t = low;
-	else if(fcmp_gt(t, high)) t = high;
+	if(t < low) t = low;
+	else if(t > high) t = high;
 }
 
 template <class _ST>

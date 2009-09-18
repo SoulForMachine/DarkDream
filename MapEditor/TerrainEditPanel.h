@@ -20,6 +20,8 @@ namespace MapEditor {
 	public:
 		TerrainEditPanel(EM_TerrainEdit::Parameters^ params);
 
+		void UpdateControls();
+
 	protected:
 		/// <summary>
 		/// Clean up any resources being used.
@@ -33,7 +35,6 @@ namespace MapEditor {
 		}
 
 	private:
-		void UpdateControls();
 
 		EM_TerrainEdit::Parameters^ _parameters;
 
@@ -91,7 +92,6 @@ namespace MapEditor {
 			this->_tableLayoutBrushProperties = (gcnew System::Windows::Forms::TableLayoutPanel());
 			this->_numRadius = (gcnew System::Windows::Forms::NumericUpDown());
 			this->label2 = (gcnew System::Windows::Forms::Label());
-			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->_trackRadius = (gcnew System::Windows::Forms::TrackBar());
 			this->_trackHardness = (gcnew System::Windows::Forms::TrackBar());
@@ -101,6 +101,7 @@ namespace MapEditor {
 			this->_numHardness = (gcnew System::Windows::Forms::NumericUpDown());
 			this->_numStrength = (gcnew System::Windows::Forms::NumericUpDown());
 			this->_numHeight = (gcnew System::Windows::Forms::NumericUpDown());
+			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->groupBox1->SuspendLayout();
 			this->_tableLayoutBrushProperties->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numRadius))->BeginInit();
@@ -214,7 +215,7 @@ namespace MapEditor {
 			this->_tableLayoutBrushProperties->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent, 
 				78.81944F)));
 			this->_tableLayoutBrushProperties->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Absolute, 
-				66)));
+				68)));
 			this->_tableLayoutBrushProperties->Controls->Add(this->_numRadius, 2, 0);
 			this->_tableLayoutBrushProperties->Controls->Add(this->label2, 0, 0);
 			this->_tableLayoutBrushProperties->Controls->Add(this->label4, 0, 2);
@@ -245,7 +246,7 @@ namespace MapEditor {
 			// 
 			this->_numRadius->DecimalPlaces = 1;
 			this->_numRadius->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {5, 0, 0, 65536});
-			this->_numRadius->Location = System::Drawing::Point(272, 3);
+			this->_numRadius->Location = System::Drawing::Point(270, 3);
 			this->_numRadius->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {16, 0, 0, 0});
 			this->_numRadius->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
 			this->_numRadius->Name = L"_numRadius";
@@ -263,16 +264,6 @@ namespace MapEditor {
 			this->label2->Text = L"Radius:";
 			this->label2->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
 			// 
-			// label3
-			// 
-			this->label3->Anchor = System::Windows::Forms::AnchorStyles::None;
-			this->label3->Location = System::Drawing::Point(3, 30);
-			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(50, 15);
-			this->label3->TabIndex = 3;
-			this->label3->Text = L"Hardness:";
-			this->label3->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
-			// 
 			// label4
 			// 
 			this->label4->Location = System::Drawing::Point(3, 50);
@@ -284,31 +275,32 @@ namespace MapEditor {
 			// 
 			// _trackRadius
 			// 
-			this->_trackRadius->Location = System::Drawing::Point(60, 3);
+			this->_trackRadius->Location = System::Drawing::Point(59, 3);
 			this->_trackRadius->Maximum = 32;
 			this->_trackRadius->Minimum = 2;
 			this->_trackRadius->Name = L"_trackRadius";
-			this->_trackRadius->Size = System::Drawing::Size(206, 19);
+			this->_trackRadius->Size = System::Drawing::Size(205, 19);
 			this->_trackRadius->TabIndex = 1;
 			this->_trackRadius->Value = 2;
 			this->_trackRadius->Scroll += gcnew System::EventHandler(this, &TerrainEditPanel::_trackRadius_Scroll);
 			// 
 			// _trackHardness
 			// 
-			this->_trackHardness->Location = System::Drawing::Point(60, 28);
+			this->_trackHardness->Location = System::Drawing::Point(59, 28);
 			this->_trackHardness->Maximum = 100;
 			this->_trackHardness->Name = L"_trackHardness";
-			this->_trackHardness->Size = System::Drawing::Size(206, 19);
+			this->_trackHardness->Size = System::Drawing::Size(205, 19);
 			this->_trackHardness->TabIndex = 4;
 			this->_trackHardness->TickFrequency = 5;
 			this->_trackHardness->Scroll += gcnew System::EventHandler(this, &TerrainEditPanel::_trackHardness_Scroll);
 			// 
 			// _trackStrength
 			// 
-			this->_trackStrength->Location = System::Drawing::Point(60, 53);
+			this->_trackStrength->LargeChange = 2;
+			this->_trackStrength->Location = System::Drawing::Point(59, 53);
 			this->_trackStrength->Minimum = 1;
 			this->_trackStrength->Name = L"_trackStrength";
-			this->_trackStrength->Size = System::Drawing::Size(206, 19);
+			this->_trackStrength->Size = System::Drawing::Size(205, 19);
 			this->_trackStrength->TabIndex = 7;
 			this->_trackStrength->Value = 1;
 			this->_trackStrength->Scroll += gcnew System::EventHandler(this, &TerrainEditPanel::_trackStrength_Scroll);
@@ -324,18 +316,19 @@ namespace MapEditor {
 			// 
 			// _trackHeight
 			// 
-			this->_trackHeight->Location = System::Drawing::Point(60, 78);
+			this->_trackHeight->LargeChange = 2;
+			this->_trackHeight->Location = System::Drawing::Point(59, 78);
 			this->_trackHeight->Maximum = 15;
 			this->_trackHeight->Minimum = -15;
 			this->_trackHeight->Name = L"_trackHeight";
-			this->_trackHeight->Size = System::Drawing::Size(206, 19);
+			this->_trackHeight->Size = System::Drawing::Size(205, 19);
 			this->_trackHeight->TabIndex = 10;
 			this->_trackHeight->Value = -15;
 			this->_trackHeight->Scroll += gcnew System::EventHandler(this, &TerrainEditPanel::_trackHeight_Scroll);
 			// 
 			// _numHardness
 			// 
-			this->_numHardness->Location = System::Drawing::Point(272, 28);
+			this->_numHardness->Location = System::Drawing::Point(270, 28);
 			this->_numHardness->Name = L"_numHardness";
 			this->_numHardness->Size = System::Drawing::Size(52, 20);
 			this->_numHardness->TabIndex = 5;
@@ -343,7 +336,7 @@ namespace MapEditor {
 			// 
 			// _numStrength
 			// 
-			this->_numStrength->Location = System::Drawing::Point(272, 53);
+			this->_numStrength->Location = System::Drawing::Point(270, 53);
 			this->_numStrength->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {10, 0, 0, 0});
 			this->_numStrength->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
 			this->_numStrength->Name = L"_numStrength";
@@ -356,7 +349,7 @@ namespace MapEditor {
 			// 
 			this->_numHeight->DecimalPlaces = 1;
 			this->_numHeight->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 65536});
-			this->_numHeight->Location = System::Drawing::Point(272, 78);
+			this->_numHeight->Location = System::Drawing::Point(270, 78);
 			this->_numHeight->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {15, 0, 0, 0});
 			this->_numHeight->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {15, 0, 0, System::Int32::MinValue});
 			this->_numHeight->Name = L"_numHeight";
@@ -364,6 +357,16 @@ namespace MapEditor {
 			this->_numHeight->TabIndex = 11;
 			this->_numHeight->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {5, 0, 0, 0});
 			this->_numHeight->ValueChanged += gcnew System::EventHandler(this, &TerrainEditPanel::_numHeight_ValueChanged);
+			// 
+			// label3
+			// 
+			this->label3->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->label3->Location = System::Drawing::Point(3, 30);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(50, 15);
+			this->label3->TabIndex = 3;
+			this->label3->Text = L"Hardness:";
+			this->label3->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
 			// 
 			// TerrainEditPanel
 			// 
