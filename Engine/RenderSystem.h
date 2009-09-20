@@ -40,6 +40,10 @@ namespace Engine
 			{ return _frameTime; }
 		float GetFrameTimeSec() const
 			{ return _frameTime * 0.001f; }
+		const math3d::vec4f& GetMainColor() const
+			{ return _mainColor; }
+		void SetMainColor(const math3d::vec4f& color)
+			{ _mainColor = color; }
 
 	private:
 		static const int MAX_NUM_ENTITIES = 4 * 1024;
@@ -56,6 +60,7 @@ namespace Engine
 		EntityRenderer::MeshRenderData* _transpMeshBuf;
 		TerrainRenderer* _terrainRenderer;
 		int _frameTime;
+		math3d::vec4f _mainColor;
 
 		int _smapWidth;
 		int _smapHeight;

@@ -52,7 +52,7 @@ namespace MapEditor
 
 		Application::Idle += gcnew EventHandler(this, &MainForm::OnIdle);
 
-		AddTerrainPatch();
+		engineAPI->world->GetTerrain().AddPatch();
 	}
 
 	void MainForm::FormNotify(Form^ form, EditorCommon::NotifyMessage msg)
@@ -122,7 +122,34 @@ namespace MapEditor
 
 	System::Void MainForm::_menuRegionNewTerrainPatch_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		AddTerrainPatch();
+		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::ADD_PATCH);
+	}
+
+	System::Void MainForm::_menuTerrainNewPatchAtEnd_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(engineAPI->world->GetTerrain().GetPatchCount() == Engine::Terrain::MAX_PATCHES)
+		{
+			MessageBox::Show(
+				"Failed to add terrain patch - maximum of 32 patches reached.", GetAppName(),
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+			return;
+		}
+
+		if(engineAPI->world->GetTerrain().AddPatch() == -1)
+		{
+			MessageBox::Show(
+				"Failed to add terrain patch.", GetAppName(),
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+		}
+		else
+		{
+			_mapForm->GetUndoManager()->Clear();
+		}
+	}
+
+	System::Void MainForm::_menuTerrainRemovePatch_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::REMOVE_PATCH);
 	}
 
 	System::Void MainForm::_menuToolsOptions_Click(System::Object^  sender, System::EventArgs^  e)
@@ -133,7 +160,7 @@ namespace MapEditor
 	System::Void MainForm::_toolBtnViewMode_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
-		_toolPanel->SetPanel(nullptr);
+		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
 		UpdateToolbarButtons();
 	}
 
@@ -220,26 +247,6 @@ namespace MapEditor
 	{
 		_viewStats = !_viewStats;
 		_mapForm->ShowStats(_viewStats);
-	}
-
-	void MainForm::AddTerrainPatch()
-	{
-		if(!engineAPI->world->GetTerrain().AddPatch())
-		{
-			if(engineAPI->world->GetTerrain().GetPatchCount() == Engine::Terrain::MAX_PATCHES)
-			{
-				Windows::Forms::MessageBox::Show(
-					this, "Failed to add terrain patch - maximum of 32 patches reached.", GetAppName(),
-					MessageBoxButtons::OK, MessageBoxIcon::Error);
-			}
-			else
-			{
-				Windows::Forms::MessageBox::Show(
-					this, "Failed to add terrain patch.", GetAppName(),
-					MessageBoxButtons::OK, MessageBoxIcon::Error);
-			}
-		}
-		_mapForm->Redraw();
 	}
 
 	System::Void MainForm::_menuViewTerrainNormals_Click(System::Object^  sender, System::EventArgs^  e)

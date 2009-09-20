@@ -27,7 +27,8 @@ namespace MapEditor {
 	///          the designers will not be able to interact properly with localized
 	///          resources associated with this form.
 	/// </summary>
-	public ref class MapForm : public WeifenLuo::WinFormsUI::Docking::DockContent
+	public ref class MapForm :	public WeifenLuo::WinFormsUI::Docking::DockContent,
+								public EditModeEventListener
 	{
 	public:
 		MapForm(EditorCommon::FormDirector^ director);
@@ -52,6 +53,7 @@ namespace MapEditor {
 			{ return _currentEditMode; }
 		UndoManager^ GetUndoManager()
 			{ return _undoManager; }
+		virtual void EditModeEvent(EditModeEventListener::EMEvent ev);
 
 	protected:
 		/// <summary>
@@ -70,6 +72,7 @@ namespace MapEditor {
 		MapRenderWindow^ _renderWindow;
 		array<EditMode^>^ _editModes;
 		EditMode^ _currentEditMode;
+		EditMode^ _prevEditMode;
 		UndoManager^ _undoManager;
 
 	private:

@@ -12,7 +12,8 @@ using namespace math3d;
 namespace MapEditor
 {
 
-	EM_TerrainEdit::EM_TerrainEdit(UndoManager^ undo_manager)
+	EM_TerrainEdit::EM_TerrainEdit(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager)
+			: EditMode(listener, persistent)
 	{
 		_parameters = gcnew Parameters;
 		_parameters->editType = EditType::RAISE_LOWER;
@@ -56,7 +57,7 @@ namespace MapEditor
 		int vp_x, vp_y, vp_width, vp_height;
 		engineAPI->renderSystem->GetRenderer()->GetViewport(vp_x, vp_y, vp_width, vp_height);
 		vec3f point;
-		_overTerrain = engineAPI->world->GetTerrain().PickTerrainPoint(x, vp_height - y, point);
+		_overTerrain = engineAPI->world->GetTerrain().PickTerrainPoint(x, vp_height - y, point) != -1;
 		if(_overTerrain)
 		{
 			_parameters->posX = point.x;
@@ -111,6 +112,7 @@ namespace MapEditor
 				_parameters->executing = false;
 				_action->CancelAction();
 				delete _action;
+				_action = nullptr;
 			}
 		}
 		else if(key == VK_OEM_4)

@@ -14,7 +14,7 @@ namespace MapEditor
 		ActionTerrainEdit(EM_TerrainEdit::Parameters^ params);
 		~ActionTerrainEdit();
 
-		virtual void BeginAction() override;
+		virtual bool BeginAction() override;
 		virtual void EndAction() override;
 		virtual void Update(float dt) override;
 		virtual void CancelAction() override;

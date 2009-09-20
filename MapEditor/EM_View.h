@@ -10,8 +10,8 @@ namespace MapEditor
 	ref class EM_View: public EditMode
 	{
 	public:
-		virtual System::Windows::Forms::UserControl^ GetPanel() override
-			{ return nullptr; }
+		EM_View(EditModeEventListener^ listener, bool persistent)
+			: EditMode(listener, persistent) {}
 
 		virtual EditModeEnum GetModeEnum() override
 			{ return EditModeEnum::VIEW; }

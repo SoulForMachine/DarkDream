@@ -221,7 +221,7 @@ namespace MapEditor
 		_renderer->ClearColorBuffer(0.5f, 0.5f, 0.5f, 1.0f);
 		_renderer->ClearDepthStencilBuffer(DEPTH_BUFFER_BIT | STENCIL_BUFFER_BIT, 1.0f, 0);
 		_renderer->EnableDepthTest(true);
-		_renderer->EnableFaceCulling(false);
+		_renderer->EnableFaceCulling(true);
 
 		if(_wireframe)
 			_renderer->RasterizationMode(GL::RASTER_LINE);

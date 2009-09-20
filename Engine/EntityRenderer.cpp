@@ -91,7 +91,7 @@ namespace Engine
 		}
 
 		_renderer->ActiveFragmentASMProgram(_fpMesh->GetASMProgram());
-		float color[] = { 0.31f, 0.67f, 0.79f, 1.0f };
+		const float* color = engineAPI.renderSystem->GetMainColor();
 		_fpMesh->GetASMProgram()->LocalParameter(0, color);
 
 		_renderer->DrawIndexed(GL::PRIM_TRIANGLES, 0, mesh_data->mesh->numIndices);

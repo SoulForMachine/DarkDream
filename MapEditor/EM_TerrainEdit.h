@@ -44,7 +44,7 @@ namespace MapEditor
 			bool executing;
 		};
 
-		EM_TerrainEdit(UndoManager^ undo_manager);
+		EM_TerrainEdit(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager);
 		~EM_TerrainEdit();
 
 		virtual System::Windows::Forms::UserControl^ GetPanel() override;

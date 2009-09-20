@@ -97,6 +97,8 @@ namespace Engine
 			return false;
 		}
 
+		_mainColor.set(0.31f, 0.67f, 0.79f, 1.0f);
+
 		return true;
 	}
 

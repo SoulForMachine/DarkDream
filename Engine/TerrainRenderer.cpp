@@ -68,8 +68,9 @@ namespace Engine
 		_renderer->ActiveFragmentASMProgram(frag_prog);
 		_renderer->ActiveVertexFormat(_vertFmtTerrain);
 		_vpTerrain->GetASMProgram()->LocalMatrix4x4(1, camera.GetViewProjectionTransform());
-		float color[] = { 0.31f, 0.67f, 0.79f, 1.0f };
+		const float* color = engineAPI.renderSystem->GetMainColor();
 		frag_prog->LocalParameter(0, color);
+		const Terrain::TerrainPatch* hlight = terrain->GetHighlightPatch();
 
 		for(int i = 0; i < count; ++i)
 		{
@@ -78,22 +79,19 @@ namespace Engine
 			float transl[] = { patches[i]->boundBox.minPt.x, 0.0f, 0.0f, 0.0f };
 			_vpTerrain->GetASMProgram()->LocalParameter(0, transl);
 
-			_renderer->DrawIndexed(GL::PRIM_TRIANGLES, 0, terrain->GetPatchIndexCount());
-		}
+			if(patches[i] == hlight)
+			{
+				float hlcolor[] = { 0.9215f, 0.5529f, 0.4470f, 1.0f };
+				frag_prog->LocalParameter(0, hlcolor);
+			}
 
-		/*_renderer->EnableDepthTest(false);
-		float dbg_color[] = { 0.7f, 0.2f, 0.2f, 1.0f };
-		_fpTerrain->GetASMProgram()->LocalParameter(0, dbg_color);
-		for(int i = 0; i < terrain->_dbgCellCount; ++i)
-		{
-			assert(terrain->_dbgCells[i].x >= 0);
-			assert(terrain->_dbgCells[i].y >= 0);
-			assert(terrain->_dbgCells[i].x < Terrain::PATCH_WIDTH);
-			assert(terrain->_dbgCells[i].y < Terrain::PATCH_HEIGHT);
-			size_t start = (size_t)(terrain->_dbgCells[i].y * Terrain::PATCH_WIDTH + terrain->_dbgCells[i].x) * 6 * sizeof(ushort);
-			_renderer->DrawIndexed(GL::PRIM_TRIANGLES, start, 6);
+			_renderer->DrawIndexed(GL::PRIM_TRIANGLES, 0, terrain->GetPatchIndexCount());
+
+			if(patches[i] == hlight)
+			{
+				frag_prog->LocalParameter(0, color);
+			}
 		}
-		_renderer->EnableDepthTest(true);*/
 	}
 
 	void TerrainRenderer::RenderTerrainPatchNormals(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count)

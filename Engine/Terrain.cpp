@@ -72,6 +72,7 @@ namespace Engine
 		}
 
 		_patchCount = 0;
+		_hlightPatch = 0;
 
 		return true;
 	}
@@ -94,16 +95,37 @@ namespace Engine
 		_renderer = 0;
 	}
 
-	bool Terrain::AddPatch(float* heights)
+	/*
+		If index is -1, new patch is added at the end.
+		Returns an index of the new patch or -1 on error.
+	*/
+	int Terrain::AddPatch(int index, float* heights)
 	{
 		if(_patchCount == MAX_PATCHES)
-			return false;
+			return -1;
 
-		TerrainPatch& patch = _patches[_patchCount];
+		if(index == -1 || index > _patchCount)
+			index = _patchCount;
+
+		int n = _patchCount - index;
+		if(n)
+		{
+			TerrainPatch* tmp = new(tempPool) TerrainPatch[n];
+			memcpy(tmp, &_patches[index], sizeof(TerrainPatch) * n);
+			memcpy(&_patches[index + 1], tmp, sizeof(TerrainPatch) * n);
+			delete[] tmp;
+			for(int i = 0; i < n; ++i)
+			{
+				_patches[index + 1 + i].boundBox.minPt.x = (float)(index + 1 + i) * PATCH_WIDTH;
+				_patches[index + 1 + i].boundBox.maxPt.x = (float)(index + 1 + i) * PATCH_WIDTH + PATCH_WIDTH;
+			}
+		}
+
+		TerrainPatch& patch = _patches[index];
 		int vert_count = (PATCH_WIDTH + 1) * (PATCH_HEIGHT + 1);
 		patch.vertBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, vert_count * sizeof(PatchVertex), 0, GL::USAGE_STATIC_DRAW);
 		if(!patch.vertBuf)
-			return false;
+			return -1;
 
 		patch.normalBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, vert_count * sizeof(vec3f) * 2, 0, GL::USAGE_STATIC_DRAW);
 
@@ -113,11 +135,11 @@ namespace Engine
 			_renderer->DestroyBuffer(patch.vertBuf);
 			_renderer->DestroyBuffer(patch.normalBuf);
 			delete[] patch.elevation;
-			return false;
+			return -1;
 		}
 
 		patch.elevation = new(mapPool) float[vert_count];
-		float x_pos = (float)_patchCount * PATCH_WIDTH;
+		float x_pos = (float)index * PATCH_WIDTH;
 		patch.boundBox.minPt.set(x_pos, heights? heights[0]: 0.0f, 0.0f);
 		patch.boundBox.maxPt.set(x_pos + PATCH_WIDTH, heights? heights[0]: 0.0f, (float)PATCH_HEIGHT);
 		PatchVertex* vert_ptr = vertices;
@@ -128,10 +150,22 @@ namespace Engine
 			for(int w = 0; w <= PATCH_WIDTH; ++w)
 			{
 				float elev;
-				if(w == 0 && _patchCount > 0) // use hight from previous patch's edge
-					elev = _patches[_patchCount - 1].elevation[h * (PATCH_WIDTH + 1) + PATCH_WIDTH];
+				if(w == 0 && index > 0) // use hight from previous patch's edge
+				{
+					elev = _patches[index - 1].elevation[h * (PATCH_WIDTH + 1) + PATCH_WIDTH];
+					if(heights)
+						elev = (elev + heights[h * (PATCH_WIDTH + 1) + w]) * 0.5f;
+				}
+				else if(w == PATCH_WIDTH && index < _patchCount) // use hight from next patch's edge
+				{
+					elev = _patches[index + 1].elevation[h * (PATCH_WIDTH + 1)];
+					if(heights)
+						elev = (elev + heights[h * (PATCH_WIDTH + 1) + w]) * 0.5f;
+				}
 				else
+				{
 					elev = heights? heights[h * (PATCH_WIDTH + 1) + w]: 0.0f;
+				}
 
 				vert_ptr->position.x = (float)w;
 				vert_ptr->position.y = elev;
@@ -154,32 +188,64 @@ namespace Engine
 
 		// if grid elevation is supplied, calculate the normals
 		if(heights)
-			UpdatePatchNormals(_patchCount - 1, vertices, 0, 0, PATCH_WIDTH, PATCH_HEIGHT);
+			UpdatePatchNormals(index, vertices, 0, 0, PATCH_WIDTH, PATCH_HEIGHT);
 
-		if(_patchCount > 1)
+		if(index > 0)
 		{
 			// update normals on the edge of previous patch
-			PatchVertex* prev_verts = (PatchVertex*)_patches[_patchCount - 2].vertBuf->MapBuffer(GL::ACCESS_READ_WRITE, false);
+			PatchVertex* prev_verts = (PatchVertex*)_patches[index - 1].vertBuf->MapBuffer(GL::ACCESS_READ_WRITE, false);
 			if(prev_verts)
 			{
-				UpdatePatchNormals(_patchCount - 2, prev_verts, PATCH_WIDTH, 0, PATCH_WIDTH, PATCH_HEIGHT);
-				vec3f* normals = (vec3f*)_patches[_patchCount - 2].normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+				UpdatePatchNormals(index - 1, prev_verts, PATCH_WIDTH - 1, 0, PATCH_WIDTH, PATCH_HEIGHT);
+				vec3f* normals = (vec3f*)_patches[index - 1].normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
 				if(normals)
 				{
 					for(int h = 0; h <= PATCH_HEIGHT; ++h)
 					{
-						normals[(h * (PATCH_WIDTH + 1) + PATCH_WIDTH) * 2] = prev_verts[h * (PATCH_WIDTH + 1) + PATCH_WIDTH].position.rvec3;
-						normals[(h * (PATCH_WIDTH + 1) + PATCH_WIDTH) * 2 + 1] = 
-							prev_verts[h * (PATCH_WIDTH + 1) + PATCH_WIDTH].position.rvec3 + prev_verts[h * (PATCH_WIDTH + 1) + PATCH_WIDTH].normal;
+						for(int w = PATCH_WIDTH - 1; w <= PATCH_WIDTH; ++w)
+						{
+							int i = h * (PATCH_WIDTH + 1) + w;
+							normals[i * 2] = prev_verts[i].position.rvec3;
+							normals[i * 2 + 1] = prev_verts[i].position.rvec3 + prev_verts[i].normal;
+						}
 					}
-					_patches[_patchCount - 2].normalBuf->UnmapBuffer();
+					_patches[index - 1].normalBuf->UnmapBuffer();
 				}
-				_patches[_patchCount - 2].vertBuf->UnmapBuffer();
+				_patches[index - 1].vertBuf->UnmapBuffer();
 			}
 
 			// update normals on the first two columns of new patch
 			if(!heights)
-				UpdatePatchNormals(_patchCount - 1, vertices, 0, 0, 1, PATCH_HEIGHT);
+				UpdatePatchNormals(index, vertices, 0, 0, 1, PATCH_HEIGHT);
+		}
+
+		if(index + 1 < _patchCount)
+		{
+			// update normals on the edge of next patch
+			PatchVertex* next_verts = (PatchVertex*)_patches[index + 1].vertBuf->MapBuffer(GL::ACCESS_READ_WRITE, false);
+			if(next_verts)
+			{
+				UpdatePatchNormals(index + 1, next_verts, 0, 0, 1, PATCH_HEIGHT);
+				vec3f* normals = (vec3f*)_patches[index + 1].normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+				if(normals)
+				{
+					for(int h = 0; h <= PATCH_HEIGHT; ++h)
+					{
+						for(int w = 0; w <= 1; ++w)
+						{
+							int i = h * (PATCH_WIDTH + 1) + w;
+							normals[i * 2] = next_verts[i].position.rvec3;
+							normals[i * 2 + 1] = next_verts[i].position.rvec3 + next_verts[i].normal;
+						}
+					}
+					_patches[index + 1].normalBuf->UnmapBuffer();
+				}
+				_patches[index + 1].vertBuf->UnmapBuffer();
+			}
+
+			// update normals on the last two columns of new patch
+			if(!heights)
+				UpdatePatchNormals(index, vertices, PATCH_WIDTH - 1, 0, PATCH_WIDTH, PATCH_HEIGHT);
 		}
 
 		vec3f* normals = (vec3f*)patch.normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
@@ -187,9 +253,9 @@ namespace Engine
 		{
 			for(int w = 0; w <= PATCH_WIDTH; ++w)
 			{
-				normals[0] = vertices[h * (PATCH_WIDTH + 1) + w].position.rvec3;
-				normals[1] = vertices[h * (PATCH_WIDTH + 1) + w].position.rvec3 + vertices[h * (PATCH_WIDTH + 1) + w].normal;
-				normals += 2;
+				int i = h * (PATCH_WIDTH + 1) + w;
+				normals[i * 2] = vertices[i].position.rvec3;
+				normals[i * 2 + 1] = vertices[i].position.rvec3 + vertices[i].normal;
 			}
 		}
 		patch.normalBuf->UnmapBuffer();
@@ -200,10 +266,11 @@ namespace Engine
 			_renderer->DestroyBuffer(patch.normalBuf);
 			delete[] patch.elevation;
 			_patchCount--;
-			return false;
+			return -1;
 		}
 
-		return true;
+		_hlightPatch = 0;
+		return _patchCount - 1;
 	}
 
 	void Terrain::RemovePatch(int index)
@@ -212,10 +279,96 @@ namespace Engine
 		_renderer->DestroyBuffer(_patches[index].vertBuf);
 		_renderer->DestroyBuffer(_patches[index].normalBuf);
 		delete[] _patches[index].elevation;
+
+		if(index < _patchCount - 1)
+		{
+			int n = _patchCount - 1 - index;
+			if(n)
+			{
+				TerrainPatch* tmp = new(tempPool) TerrainPatch[n];
+				memcpy(tmp, &_patches[index + 1], sizeof(TerrainPatch) * n);
+				memcpy(&_patches[index], tmp, sizeof(TerrainPatch) * n);
+				delete[] tmp;
+				for(int i = 0; i < n; ++i)
+				{
+					_patches[index + i].boundBox.minPt.x = (float)(index + i) * PATCH_WIDTH;
+					_patches[index + i].boundBox.maxPt.x = (float)(index + i) * PATCH_WIDTH + PATCH_WIDTH;
+				}
+			}
+
+			if(index > 0)
+			{
+				// weld edges of previous and next patch
+				TerrainPatch& prev_patch = _patches[index - 1];
+				TerrainPatch& next_patch = _patches[index];
+				PatchVertex* prev_verts = (PatchVertex*)prev_patch.vertBuf->MapBuffer(GL::ACCESS_READ_WRITE, false);
+				PatchVertex* next_verts = (PatchVertex*)next_patch.vertBuf->MapBuffer(GL::ACCESS_READ_WRITE, false);
+
+				if(prev_verts && next_verts)
+				{
+					for(int h = 0; h <= PATCH_HEIGHT; ++h)
+					{
+						int i = h * (PATCH_WIDTH + 1);
+						float height = (prev_patch.elevation[i + PATCH_WIDTH] + next_patch.elevation[i]) * 0.5f;
+
+						prev_patch.elevation[i + PATCH_WIDTH] = height;
+						if(height < prev_patch.boundBox.minPt.y)
+							prev_patch.boundBox.minPt.y = height;
+						else if(height > prev_patch.boundBox.maxPt.y)
+							prev_patch.boundBox.maxPt.y = height;
+
+						next_patch.elevation[i] = height;
+						if(height < next_patch.boundBox.minPt.y)
+							next_patch.boundBox.minPt.y = height;
+						else if(height > next_patch.boundBox.maxPt.y)
+							next_patch.boundBox.maxPt.y = height;
+
+						prev_verts[i + PATCH_WIDTH].position.y = height;
+						next_verts[i].position.y = height;
+					}
+
+					// update normals on the last two columns of previous patch
+					UpdatePatchNormals(index - 1, prev_verts, PATCH_WIDTH - 1, 0, PATCH_WIDTH, PATCH_HEIGHT);
+					vec3f* normals = (vec3f*)prev_patch.normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+					if(normals)
+					{
+						for(int h = 0; h <= PATCH_HEIGHT; ++h)
+						{
+							int i = h * (PATCH_WIDTH + 1) + PATCH_WIDTH;
+							normals[i * 2] = prev_verts[i].position.rvec3;
+							normals[i * 2 + 1] = prev_verts[i].position.rvec3 + prev_verts[i].normal;
+						}
+						prev_patch.normalBuf->UnmapBuffer();
+					}
+
+					// update normals on the first two columns of next patch
+					UpdatePatchNormals(index, next_verts, 0, 0, 1, PATCH_HEIGHT);
+					normals = (vec3f*)next_patch.normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+					if(normals)
+					{
+						for(int h = 0; h <= PATCH_HEIGHT; ++h)
+						{
+							int i = h * (PATCH_WIDTH + 1);
+							normals[i * 2] = next_verts[i].position.rvec3;
+							normals[i * 2 + 1] = next_verts[i].position.rvec3 + next_verts[i].normal;
+						}
+						next_patch.normalBuf->UnmapBuffer();
+					}
+
+					prev_patch.vertBuf->UnmapBuffer();
+					next_patch.vertBuf->UnmapBuffer();
+				}
+			}
+		}
+
 		_patchCount--;
+		_hlightPatch = 0;
 	}
 
-	bool Terrain::PickTerrainPoint(int screen_x, int screen_y, math3d::vec3f& point)
+	/*
+		Returns an index of the patch containing the point or -1
+	*/
+	int Terrain::PickTerrainPoint(int screen_x, int screen_y, math3d::vec3f& point)
 	{
 		// calculate world space point and direction vector of the picking ray
 
@@ -262,7 +415,7 @@ namespace Engine
 			}
 			else
 			{
-				return false;
+				return -1;
 			}
 
 			if(intersect_ray_plane(pt, ray_pt, ray_dir, vec4f(0.0f, 0.0f, 1.0f, (float)-PATCH_HEIGHT)))
@@ -271,14 +424,14 @@ namespace Engine
 			}
 			else
 			{
-				return false;
+				return -1;
 			}
 		}
 
 		if(	(start_i >= _patchCount && end_i >= _patchCount) ||
 			(start_i < 0 && end_i < 0) )
 		{
-			return false;
+			return -1;
 		}
 
 		start_i = Min(Max(start_i, 0), _patchCount - 1);
@@ -296,10 +449,10 @@ namespace Engine
 		for(int i = start_i; i <= end_i; ++i)
 		{
 			if(IntersectPatch(ray_pt, ray_dir, _patches[i], point))
-				return true;
+				return i;
 		}
 
-		return false;
+		return -1;
 	}
 
 	bool Terrain::IntersectPatch(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, math3d::vec3f& point)
@@ -420,18 +573,9 @@ namespace Engine
 			// test all cells for intersection along the projected line
 			float dx = x2 - x1;
 			float dy = y2 - y1;
-			/*x1 = Min(x1, (float)PATCH_WIDTH - 0.0001f);
-			y1 = Min(y1, (float)PATCH_HEIGHT - 0.0001f);
-			x2 = Min(x2, (float)PATCH_WIDTH - 0.0001f);
-			y2 = Min(y2, (float)PATCH_HEIGHT - 0.0001f);*/
-
-			/*_dbgCellCount = 0;
-			_dbgLinePoints[0].set(pts[0].x, 0.0f, pts[0].y);
-			_dbgLinePoints[1].set(pts[1].x, 0.0f, pts[1].y);*/
 
 			int cell_x = Min((int)x1, PATCH_WIDTH - 1);
 			int cell_y = Min((int)y1, PATCH_HEIGHT - 1);
-		//	_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
 			if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
 				return true;
 			
@@ -460,14 +604,12 @@ namespace Engine
 					{
 						cell_x = Min(ix1 - xstep, PATCH_WIDTH - 1);
 						cell_y = Min(int(y), PATCH_HEIGHT - 1);
-					//	_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
 						if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
 							return true;
 					}
 
 					cell_x = Min(ix1, PATCH_WIDTH - 1);
 					cell_y = Min(int(y), PATCH_HEIGHT - 1);
-				//	_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
 					if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
 						return true;
 
@@ -480,7 +622,6 @@ namespace Engine
 				{
 					cell_x = Min(ix1 - xstep, PATCH_WIDTH - 1);
 					cell_y = Min(int(y), PATCH_HEIGHT - 1);
-				//	_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
 					if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
 						return true;
 				}
@@ -510,14 +651,12 @@ namespace Engine
 					{
 						cell_x = Min(int(x), PATCH_WIDTH - 1);
 						cell_y = Min(iy1 - ystep, PATCH_HEIGHT - 1);
-					//	_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
 						if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
 							return true;
 					}
 
 					cell_x = Min(int(x), PATCH_WIDTH - 1);
 					cell_y = Min(iy1, PATCH_HEIGHT - 1);
-				//	_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
 					if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
 						return true;
 
@@ -530,7 +669,6 @@ namespace Engine
 				{
 					cell_x = Min(int(x), PATCH_WIDTH - 1);
 					cell_y = Min(iy1 - ystep, PATCH_HEIGHT - 1);
-				//	_dbgCells[_dbgCellCount++].set(cell_x, cell_y);
 					if(IntersectPatchCell(ray_pt, ray_dir, patch, cell_x, cell_y, point))
 						return true;
 				}

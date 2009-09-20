@@ -206,7 +206,7 @@
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\EditorCommon.dll"
-			AssemblyName="EditorCommon, Version=1.0.3516.40175, processorArchitecture=x86"
+			AssemblyName="EditorCommon, Version=1.0.3548.24630, processorArchitecture=x86"
 			MinFrameworkVersion="131072"
 		/>
 	</References>
@@ -344,6 +344,22 @@
 			>
 			<File
 				RelativePath=".\EditMode.h"
+				>
+			</File>
+			<File
+				RelativePath=".\EM_AddPatch.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\EM_AddPatch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\EM_RemovePatch.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\EM_RemovePatch.h"
 				>
 			</File>
 			<File

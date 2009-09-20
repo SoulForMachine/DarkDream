@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "EM_View.h"
 #include "EM_TerrainEdit.h"
+#include "EM_AddPatch.h"
+#include "EM_RemovePatch.h"
 #include "ToolPanel.h"
 #include "UndoManager.h"
 #include "MapForm.h"
@@ -14,6 +16,8 @@ namespace MapEditor
 		InitializeComponent();
 		_director = director;
 		_undoManager = gcnew UndoManager;
+		_currentEditMode = nullptr;
+		_prevEditMode = nullptr;
 	}
 
 	void MapForm::RedrawAsync()
@@ -54,11 +58,12 @@ namespace MapEditor
 			_renderWindow = gcnew MapRenderWindow(this);
 
 			_editModes = gcnew array<EditMode^>((int)EditMode::EditModeEnum::EDIT_MODE_COUNT);
-			_editModes[(int)EditMode::EditModeEnum::VIEW] = gcnew EM_View;
-			_editModes[(int)EditMode::EditModeEnum::TERRAIN_EDIT] = gcnew EM_TerrainEdit(_undoManager);
+			_editModes[(int)EditMode::EditModeEnum::VIEW] = gcnew EM_View(this, true);
+			_editModes[(int)EditMode::EditModeEnum::TERRAIN_EDIT] = gcnew EM_TerrainEdit(this, true, _undoManager);
+			_editModes[(int)EditMode::EditModeEnum::ADD_PATCH] = gcnew EM_AddPatch(this, false);
+			_editModes[(int)EditMode::EditModeEnum::REMOVE_PATCH] = gcnew EM_RemovePatch(this, false);
 
-			_currentEditMode = _editModes[(int)EditMode::EditModeEnum::VIEW];
-			_renderWindow->SetEditMode(_currentEditMode);
+			SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
 		}
 		catch(...)
 		{
@@ -73,6 +78,7 @@ namespace MapEditor
 			delete em;
 		delete _editModes;
 		_currentEditMode = nullptr;
+		_prevEditMode = nullptr;
 		_renderWindow->DestroyHandle();
 		delete _renderWindow;
 	}
@@ -95,10 +101,31 @@ namespace MapEditor
 		if(_currentEditMode != nullptr && _currentEditMode->GetModeEnum() == mode)
 			return;
 
+		if(_currentEditMode != nullptr && _currentEditMode->IsPersistent())
+			_prevEditMode = _currentEditMode;
 		_currentEditMode = _editModes[(int)mode];
+		_currentEditMode->Activate();
 
 		if(_renderWindow != nullptr)
 			_renderWindow->SetEditMode(_currentEditMode);
+	}
+
+	void MapForm::EditModeEvent(EditModeEventListener::EMEvent ev)
+	{
+		if(	ev == EditModeEventListener::EMEvent::EDIT_COMPLETE &&
+			(_currentEditMode->GetModeEnum() == EditMode::EditModeEnum::ADD_PATCH ||
+			_currentEditMode->GetModeEnum() == EditMode::EditModeEnum::REMOVE_PATCH ))
+		{
+			_undoManager->Clear();
+		}
+
+		if(	ev == EditModeEventListener::EMEvent::EDIT_COMPLETE ||
+			ev == EditModeEventListener::EMEvent::EDIT_CANCELED ||
+			ev == EditModeEventListener::EMEvent::EDIT_ERROR )
+		{
+			if(_prevEditMode != nullptr)
+				SetCurrentEditMode(_prevEditMode->GetModeEnum());
+		}
 	}
 
 }

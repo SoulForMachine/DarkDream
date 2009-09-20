@@ -29,7 +29,7 @@ namespace MapEditor
 		delete[] _strengthMatrix;
 	}
 
-	void ActionTerrainEdit::BeginAction()
+	bool ActionTerrainEdit::BeginAction()
 	{
 		// save whole terrain elevation
 		Terrain& terrain = engineAPI->world->GetTerrain();
@@ -44,6 +44,8 @@ namespace MapEditor
 			g_rampStart.set(_parameters->posX, _parameters->posY, _parameters->posZ);
 			GetBrushRect(_undoRect);
 		}
+
+		return true;
 	}
 
 	void ActionTerrainEdit::EndAction()

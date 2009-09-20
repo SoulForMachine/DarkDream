@@ -43,7 +43,7 @@ namespace Engine
 
 		bool Init();
 		void Deinit();
-		bool AddPatch(float* heights = 0);
+		int AddPatch(int index = -1, float* heights = 0);
 		void RemovePatch(int index);
 		const GL::Buffer* GetPatchIndexBuffer() const
 			{ return _patchIndexBuf; }
@@ -53,15 +53,15 @@ namespace Engine
 			{ return _patches; }
 		int GetPatchCount() const
 			{ return _patchCount; }
-		bool PickTerrainPoint(int screen_x, int screen_y, math3d::vec3f& point);
+		int PickTerrainPoint(int screen_x, int screen_y, math3d::vec3f& point);
 		bool ElevationFromPoint(const math3d::vec2f& point, float& elevation);
 		void SetElevation(int start_x, int start_y, int end_x, int end_y, const float* elevation);
 		void OffsetElevation(int start_x, int start_y, int end_x, int end_y, const float* offsets);
 		void GetElevation(int start_x, int start_y, int end_x, int end_y, float* elevation);
-
-		/*math3d::vec2i _dbgCells[4096];
-		int _dbgCellCount;
-		math3d::vec3f _dbgLinePoints[2];*/
+		void HighlightPatch(int index)
+			{ _hlightPatch = &_patches[index]; }
+		const TerrainPatch* GetHighlightPatch() const
+			{ return _hlightPatch; }
 
 	private:
 		bool IntersectPatch(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, math3d::vec3f& point);
@@ -73,6 +73,7 @@ namespace Engine
 		TerrainPatch _patches[MAX_PATCHES];
 		int _patchCount;
 		int _patchIndexCount;
+		TerrainPatch* _hlightPatch; // used by map editor
 	};
 
 }
