@@ -134,7 +134,7 @@ namespace Engine
 	class ENGINE_API ModelEntityManager: public ResourceManager
 	{
 	public:
-		const ModelEntityRes* CreateEntity(const tchar* file_name);
+		ModelEntityRes* CreateEntity(const tchar* file_name);
 
 	private:
 		virtual ModelEntityRes* CreateResObj(const tchar* file_name);

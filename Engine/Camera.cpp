@@ -21,7 +21,7 @@ namespace Engine
 	{
 	}
 
-	Camera::ClipResult Camera::IsInsideFrustum(const AABBox& bbox)
+	bool Camera::IsInsideFrustum(const AABBox& bbox)
 	{
 		UpdateViewProjectionMat();
 
@@ -36,10 +36,10 @@ namespace Engine
 			if(point_to_plane_sgn_dist(vec3f(bbox.minPt.x, bbox.maxPt.y, bbox.maxPt.z), _clipPlanes[i]) > 0) continue;
 			if(point_to_plane_sgn_dist(vec3f(bbox.maxPt.x, bbox.maxPt.y, bbox.maxPt.z), _clipPlanes[i]) > 0) continue;
 
-			return CLIP_OUTSIDE;
+			return false;
 		}
 
-		return CLIP_INSIDE;
+		return true;
 	}
 
 	void Camera::LookAt(const math3d::vec3f& eye, const math3d::vec3f& at, const math3d::vec3f& up)

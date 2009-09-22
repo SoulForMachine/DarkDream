@@ -16,6 +16,17 @@ using namespace Memory;
 namespace Engine
 {
 
+	const char* ModelEntity::_classNames[MODEL_CLASS_COUNT] =
+	{
+		"Generic",
+		"NPC",
+		"Monster",
+		"Boss",
+		"Building",
+		"Foliage",
+		"Debris",
+	};
+
 	ModelEntity::ModelEntity()
 	{
 		_worldMat.set_identity();
@@ -26,7 +37,7 @@ namespace Engine
 		_aiScript = 0;
 
 		// set initial properties
-		_class = ENTITY_CLASS_GENERIC;
+		_class = MODEL_CLASS_GENERIC;
 		_name[0] = '\0';
 		_clip = true;;
 		_lifePoints = 100;
@@ -114,6 +125,8 @@ namespace Engine
 			return false;
 		file->Close();
 
+		Unload();
+
 		const int MAX_IDENT_LEN = 64;
 		char buf[MAX_IDENT_LEN];
 
@@ -132,7 +145,7 @@ namespace Engine
 		if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
 			return false;
 		_class = GetClassFromString(buf);
-		if(_class == ENTITY_CLASS_COUNT)
+		if(_class == MODEL_CLASS_COUNT)
 		{
 			Console::PrintError("Invalid value for entity class: %s", buf);
 			return false;
@@ -378,7 +391,7 @@ namespace Engine
 		file->Printf("\t\tname\t\t\"%s\"\n", _name);
 		file->Printf("\t\tclip\t\t%s\n", _clip? "True": "False");
 		file->Printf("\t\tlifePoints\t\t%d\n", _lifePoints);
-		file->Printf("\t\ttransparency\t\t%d\n", _transparency);
+		file->Printf("\t\ttransparency\t\t%f\n", _transparency);
 		file->Printf("\t}\n\n");
 
 		// entity resources
@@ -515,7 +528,7 @@ namespace Engine
 	}
 
 	/*
-		This function is to be called after model has been loaded to set up some data
+		This function is to be called after model resources have been loaded to set up some data
 	*/
 	void ModelEntity::SetupModelData()
 	{
@@ -598,7 +611,7 @@ namespace Engine
 		const FileResource* res;
 		if(type == JOINT_ATTACH_MODEL)
 		{
-			const ModelEntityRes* ent = engineAPI.modelEntityManager->CreateEntity(file_name);
+			ModelEntityRes* ent = engineAPI.modelEntityManager->CreateEntity(file_name);
 			if(ent && ent->GetEntity())
 			{
 				// This entity must not have attachments; only 1 level allowed.
@@ -744,6 +757,26 @@ namespace Engine
 				return JOINT_ATTACH_PARTICLE_SYSTEM;
 		}
 		return JOINT_ATTACH_UNKNOWN;
+	}
+
+	ModelClass ModelEntity::GetClassFromString(const char* name)
+	{
+		for(int i = 0; i < MODEL_CLASS_COUNT; ++i)
+		{
+			if(!strcmp(name, _classNames[i]))
+				return (ModelClass)i;
+		}
+
+		return MODEL_CLASS_COUNT;
+	}
+
+	const char* ModelEntity::GetClassString(ModelClass c)
+	{
+		int i = (int)c;
+		if(i >= 0 && i < MODEL_CLASS_COUNT)
+			return _classNames[i];
+		else
+			return "";
 	}
 
 }

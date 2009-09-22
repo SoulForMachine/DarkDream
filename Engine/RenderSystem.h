@@ -27,6 +27,7 @@ namespace Engine
 
 		void RenderFrame(int frame_time);
 		void RenderEntities(int frame_time);
+		void RenderEntities(int frame_time, const Camera& camera, ModelEntity** entities, int ent_count);
 		void RenderTerrain(int frame_time);
 		void ReloadShaders();
 
@@ -36,6 +37,9 @@ namespace Engine
 			{ return _render2D; }
 		TerrainRenderer* GetTerrainRenderer()
 			{ return _terrainRenderer; }
+		EntityRenderer* GetEntityRenderer()
+			{ return _entityRenderer; }
+
 		int GetFrameTime() const
 			{ return _frameTime; }
 		float GetFrameTimeSec() const

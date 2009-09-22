@@ -3,6 +3,7 @@
 #include "EM_TerrainEdit.h"
 #include "EM_AddPatch.h"
 #include "EM_RemovePatch.h"
+#include "EM_PlaceObject.h"
 #include "ToolPanel.h"
 #include "UndoManager.h"
 #include "MapForm.h"
@@ -62,6 +63,7 @@ namespace MapEditor
 			_editModes[(int)EditMode::EditModeEnum::TERRAIN_EDIT] = gcnew EM_TerrainEdit(this, true, _undoManager);
 			_editModes[(int)EditMode::EditModeEnum::ADD_PATCH] = gcnew EM_AddPatch(this, false);
 			_editModes[(int)EditMode::EditModeEnum::REMOVE_PATCH] = gcnew EM_RemovePatch(this, false);
+			_editModes[(int)EditMode::EditModeEnum::PLACE_OBJECT] = gcnew EM_PlaceObject(this, true);
 
 			SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
 		}

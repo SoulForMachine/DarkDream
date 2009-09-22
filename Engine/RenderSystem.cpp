@@ -220,25 +220,29 @@ namespace Engine
 
 	void RenderSystem::RenderEntities(int frame_time)
 	{
-		_frameTime = frame_time;
 		int ent_count = engineAPI.world->GetVisibleEntities(_entityBuf, MAX_NUM_ENTITIES);
+		RenderEntities(frame_time, engineAPI.world->GetCamera(), _entityBuf, ent_count);
+	}
+
+	void RenderSystem::RenderEntities(int frame_time, const Camera& camera, ModelEntity** entities, int ent_count)
+	{
 		int mesh_count = 0;
 		int transp_mesh_count = 0;
 		for(int ent_i = 0; ent_i < ent_count; ++ent_i)
 		{
-			if(_entityBuf[ent_i]->GetModelRes())
+			if(entities[ent_i]->GetModelRes())
 			{
 				//! this should be somewhere else
-				_entityBuf[ent_i]->UpdateGraphics(frame_time);
+				entities[ent_i]->UpdateGraphics(frame_time);
 
-				const Model* model = _entityBuf[ent_i]->GetModelRes()->GetModel();
+				const Model* model = entities[ent_i]->GetModelRes()->GetModel();
 				const StaticArray<Mesh>& meshes = model->GetMeshes();
-				const mat4f& world_mat = _entityBuf[ent_i]->GetWorldTransform();
-				const StaticArray<mat4f>& joint_mat_palette = _entityBuf[ent_i]->GetJointTransforms();
+				const mat4f& world_mat = entities[ent_i]->GetWorldTransform();
+				const StaticArray<mat4f>& joint_mat_palette = entities[ent_i]->GetJointTransforms();
 
 				for(size_t mesh_i = 0; mesh_i < meshes.GetCount(); ++mesh_i)
 				{
-					if(_entityBuf[ent_i]->HasTransparency())
+					if(entities[ent_i]->HasTransparency())
 					{
 						_transpMeshBuf[transp_mesh_count].mesh = &meshes[mesh_i];
 						_transpMeshBuf[transp_mesh_count].worldMat = &world_mat;
@@ -247,7 +251,7 @@ namespace Engine
 
 						vec3f wcenter;
 						transform(wcenter, meshes[mesh_i].center, world_mat);
-						float dist_sq = (engineAPI.world->GetCamera().GetPosition() - wcenter).length_sq();
+						float dist_sq = (camera.GetPosition() - wcenter).length_sq();
 						_transpMeshBuf[transp_mesh_count].eyeDistSq = dist_sq;
 
 						transp_mesh_count++;
@@ -268,19 +272,15 @@ namespace Engine
 		qsort(_meshBuf, mesh_count, sizeof(EntityRenderer::MeshRenderData), MeshCmpFunc);
 		qsort(_transpMeshBuf, transp_mesh_count, sizeof(EntityRenderer::MeshRenderData), TranspMeshCmpFunc);
 
-		_renderer->ActiveDrawFramebuffer(0);
-		_renderer->EnableColorWrite(true, true, true, true);
 		_renderer->CullFace(GL::FACE_BACK);
-		_entityRenderer->Render(engineAPI.world->GetCamera(), _meshBuf, mesh_count);
-		_entityRenderer->Render(engineAPI.world->GetCamera(), _transpMeshBuf, transp_mesh_count);
+		_entityRenderer->Render(camera, _meshBuf, mesh_count);
+		_entityRenderer->Render(camera, _transpMeshBuf, transp_mesh_count);
 	}
 
 	void RenderSystem::RenderTerrain(int frame_time)
 	{
 		const Terrain::TerrainPatch* patches[Terrain::MAX_PATCHES];
 		int count = engineAPI.world->GetVisibleTerrainPatches(patches, Terrain::MAX_PATCHES);
-		_renderer->ActiveDrawFramebuffer(0);
-		_renderer->EnableColorWrite(true, true, true, true);
 		_renderer->CullFace(GL::FACE_BACK);
 		_terrainRenderer->RenderTerrainPatch(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);
 

@@ -105,7 +105,7 @@ namespace EntityEditor
 	{
 		if(_entity)
 		{
-			_entity->SetClass((Engine::EntityClass)(int)_properties->Class);
+			_entity->SetClass((Engine::ModelClass)(int)_properties->Class);
 			char* name = ConvertString<char>(_properties->Name);
 			_entity->SetName(name);
 			delete[] name;

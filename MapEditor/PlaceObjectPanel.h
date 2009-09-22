@@ -16,37 +16,45 @@ namespace MapEditor {
 	public ref class PlaceObjectPanel : public System::Windows::Forms::UserControl
 	{
 	public:
-		PlaceObjectPanel(void)
-		{
-			InitializeComponent();
-			//
-			//TODO: Add the constructor code here
-			//
-		}
+		PlaceObjectPanel();
+		~PlaceObjectPanel();
 
-	protected:
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		~PlaceObjectPanel()
-		{
-			if (components)
-			{
-				delete components;
-			}
-		}
+		void RefreshObjectTree();
+
 	private: System::Windows::Forms::Label^  label1;
-	private: System::Windows::Forms::Button^  button1;
-	private: System::Windows::Forms::Button^  button2;
-	private: System::Windows::Forms::Button^  button3;
-	private: System::Windows::Forms::Button^  button4;
+	private: System::Windows::Forms::TreeView^  _treeObjects;
+	private: System::Windows::Forms::Panel^  _panelObjectView;
+	private: System::Windows::Forms::Button^  _buttonDrop;
+	private: System::Windows::Forms::ImageList^  _imageListObjTree;
+	private: System::Windows::Forms::Button^  _buttonRefresh;
+	private: System::Windows::Forms::TextBox^  _textFilter;
+	private: System::Windows::Forms::Label^  label2;
+	private: System::ComponentModel::IContainer^  components;
+
 	protected: 
 
 	private:
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		System::ComponentModel::Container ^components;
+
+		void AddDir(String^ path, TreeNodeCollection^ nodes);
+		bool MatchFilter(String^ str);
+
+		String^ _filterText;
+		Engine::ModelEntity* _modelEntity;
+		bool _modelLoaded;
+		GL::Renderer* _renderer;
+		GL::Renderbuffer* _objViewColorBuf;
+		GL::Renderbuffer* _objViewDepthBuf;
+		GL::Framebuffer* _objViewFrameBuf;
+		bool _fbufOk;
+		Engine::Camera* _objViewCam;
+		Bitmap^ _objViewBmp;
+		float _objRotX;
+		float _objRotY;
+		int _prevX;
+		int _prevY;
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -55,11 +63,16 @@ namespace MapEditor {
 		/// </summary>
 		void InitializeComponent(void)
 		{
+			this->components = (gcnew System::ComponentModel::Container());
+			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(PlaceObjectPanel::typeid));
 			this->label1 = (gcnew System::Windows::Forms::Label());
-			this->button1 = (gcnew System::Windows::Forms::Button());
-			this->button2 = (gcnew System::Windows::Forms::Button());
-			this->button3 = (gcnew System::Windows::Forms::Button());
-			this->button4 = (gcnew System::Windows::Forms::Button());
+			this->_treeObjects = (gcnew System::Windows::Forms::TreeView());
+			this->_imageListObjTree = (gcnew System::Windows::Forms::ImageList(this->components));
+			this->_panelObjectView = (gcnew System::Windows::Forms::Panel());
+			this->_buttonDrop = (gcnew System::Windows::Forms::Button());
+			this->_buttonRefresh = (gcnew System::Windows::Forms::Button());
+			this->_textFilter = (gcnew System::Windows::Forms::TextBox());
+			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// label1
@@ -70,60 +83,103 @@ namespace MapEditor {
 			this->label1->Location = System::Drawing::Point(20, 18);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(119, 20);
-			this->label1->TabIndex = 1;
+			this->label1->TabIndex = 0;
 			this->label1->Text = L"Place Objects";
 			// 
-			// button1
+			// _treeObjects
 			// 
-			this->button1->Location = System::Drawing::Point(24, 61);
-			this->button1->Name = L"button1";
-			this->button1->Size = System::Drawing::Size(75, 23);
-			this->button1->TabIndex = 2;
-			this->button1->Text = L"Select";
-			this->button1->UseVisualStyleBackColor = true;
+			this->_treeObjects->HideSelection = false;
+			this->_treeObjects->ImageIndex = 0;
+			this->_treeObjects->ImageList = this->_imageListObjTree;
+			this->_treeObjects->Location = System::Drawing::Point(24, 81);
+			this->_treeObjects->Name = L"_treeObjects";
+			this->_treeObjects->SelectedImageIndex = 0;
+			this->_treeObjects->Size = System::Drawing::Size(334, 361);
+			this->_treeObjects->TabIndex = 3;
+			this->_treeObjects->AfterSelect += gcnew System::Windows::Forms::TreeViewEventHandler(this, &PlaceObjectPanel::_treeObjects_AfterSelect);
 			// 
-			// button2
+			// _imageListObjTree
 			// 
-			this->button2->Location = System::Drawing::Point(267, 61);
-			this->button2->Name = L"button2";
-			this->button2->Size = System::Drawing::Size(75, 23);
-			this->button2->TabIndex = 3;
-			this->button2->Text = L"Add";
-			this->button2->UseVisualStyleBackColor = true;
+			this->_imageListObjTree->ImageStream = (cli::safe_cast<System::Windows::Forms::ImageListStreamer^  >(resources->GetObject(L"_imageListObjTree.ImageStream")));
+			this->_imageListObjTree->TransparentColor = System::Drawing::Color::Transparent;
+			this->_imageListObjTree->Images->SetKeyName(0, L"f2.ico");
+			this->_imageListObjTree->Images->SetKeyName(1, L"obj.PNG");
 			// 
-			// button3
+			// _panelObjectView
 			// 
-			this->button3->Location = System::Drawing::Point(105, 61);
-			this->button3->Name = L"button3";
-			this->button3->Size = System::Drawing::Size(75, 23);
-			this->button3->TabIndex = 4;
-			this->button3->Text = L"Move";
-			this->button3->UseVisualStyleBackColor = true;
+			this->_panelObjectView->BackColor = System::Drawing::Color::DarkGray;
+			this->_panelObjectView->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
+			this->_panelObjectView->Location = System::Drawing::Point(24, 458);
+			this->_panelObjectView->Name = L"_panelObjectView";
+			this->_panelObjectView->Size = System::Drawing::Size(334, 238);
+			this->_panelObjectView->TabIndex = 4;
+			this->_panelObjectView->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &PlaceObjectPanel::_panelObjectView_Paint);
+			this->_panelObjectView->MouseMove += gcnew System::Windows::Forms::MouseEventHandler(this, &PlaceObjectPanel::_panelObjectView_MouseMove);
+			this->_panelObjectView->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &PlaceObjectPanel::_panelObjectView_MouseDown);
+			this->_panelObjectView->MouseUp += gcnew System::Windows::Forms::MouseEventHandler(this, &PlaceObjectPanel::_panelObjectView_MouseUp);
 			// 
-			// button4
+			// _buttonDrop
 			// 
-			this->button4->Location = System::Drawing::Point(186, 61);
-			this->button4->Name = L"button4";
-			this->button4->Size = System::Drawing::Size(75, 23);
-			this->button4->TabIndex = 5;
-			this->button4->Text = L"Rotate";
-			this->button4->UseVisualStyleBackColor = true;
+			this->_buttonDrop->Location = System::Drawing::Point(24, 722);
+			this->_buttonDrop->Name = L"_buttonDrop";
+			this->_buttonDrop->Size = System::Drawing::Size(75, 23);
+			this->_buttonDrop->TabIndex = 5;
+			this->_buttonDrop->Text = L"Drop";
+			this->_buttonDrop->UseVisualStyleBackColor = true;
+			this->_buttonDrop->Click += gcnew System::EventHandler(this, &PlaceObjectPanel::_buttonDrop_Click);
+			// 
+			// _buttonRefresh
+			// 
+			this->_buttonRefresh->Location = System::Drawing::Point(105, 722);
+			this->_buttonRefresh->Name = L"_buttonRefresh";
+			this->_buttonRefresh->Size = System::Drawing::Size(75, 23);
+			this->_buttonRefresh->TabIndex = 6;
+			this->_buttonRefresh->Text = L"Refresh";
+			this->_buttonRefresh->UseVisualStyleBackColor = true;
+			this->_buttonRefresh->Click += gcnew System::EventHandler(this, &PlaceObjectPanel::_buttonRefresh_Click);
+			// 
+			// _textFilter
+			// 
+			this->_textFilter->Location = System::Drawing::Point(59, 55);
+			this->_textFilter->Name = L"_textFilter";
+			this->_textFilter->Size = System::Drawing::Size(299, 20);
+			this->_textFilter->TabIndex = 2;
+			this->_textFilter->TextChanged += gcnew System::EventHandler(this, &PlaceObjectPanel::_textFilter_TextChanged);
+			// 
+			// label2
+			// 
+			this->label2->AutoSize = true;
+			this->label2->Location = System::Drawing::Point(21, 58);
+			this->label2->Name = L"label2";
+			this->label2->Size = System::Drawing::Size(32, 13);
+			this->label2->TabIndex = 1;
+			this->label2->Text = L"Filter:";
 			// 
 			// PlaceObjectPanel
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->Controls->Add(this->button4);
-			this->Controls->Add(this->button3);
-			this->Controls->Add(this->button2);
-			this->Controls->Add(this->button1);
+			this->Controls->Add(this->label2);
+			this->Controls->Add(this->_textFilter);
+			this->Controls->Add(this->_buttonRefresh);
+			this->Controls->Add(this->_buttonDrop);
+			this->Controls->Add(this->_panelObjectView);
+			this->Controls->Add(this->_treeObjects);
 			this->Controls->Add(this->label1);
 			this->Name = L"PlaceObjectPanel";
-			this->Size = System::Drawing::Size(385, 527);
+			this->Size = System::Drawing::Size(385, 869);
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
 #pragma endregion
-	};
+	private: System::Void _buttonRefresh_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _buttonDrop_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _textFilter_TextChanged(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _treeObjects_AfterSelect(System::Object^  sender, System::Windows::Forms::TreeViewEventArgs^  e);
+	private: System::Void _panelObjectView_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e);
+	private: System::Void _panelObjectView_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+	private: System::Void _panelObjectView_MouseUp(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+	private: System::Void _panelObjectView_MouseMove(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+};
 }

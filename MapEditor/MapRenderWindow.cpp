@@ -436,31 +436,34 @@ namespace MapEditor
 
 		if(!_editMode->IsExecuting())
 		{
-			if(	!(GetAsyncKeyState(VK_SHIFT) & 0x8000) &&
-				!(GetAsyncKeyState(VK_CONTROL) & 0x8000) &&
-				!(GetAsyncKeyState(VK_MENU) & 0x8000) )
+			if(GetFocus() == GetParent((HWND)Handle.ToPointer()))
 			{
-				if(_viewMode == ViewMode::EDITOR)
+				if(	!(GetAsyncKeyState(VK_SHIFT) & 0x8000) &&
+					!(GetAsyncKeyState(VK_CONTROL) & 0x8000) &&
+					!(GetAsyncKeyState(VK_MENU) & 0x8000) )
 				{
-					if(GetAsyncKeyState('W') & 0x8000)
-						_zoom = MOVE_SPEED * _frameTimeSec;
-					else if(GetAsyncKeyState('S') & 0x8000)
-						_zoom = -MOVE_SPEED * _frameTimeSec;
-					if(GetAsyncKeyState('A') & 0x8000)
-						_panX = -MOVE_SPEED * _frameTimeSec;
-					else if(GetAsyncKeyState('D') & 0x8000)
-						_panX = MOVE_SPEED * _frameTimeSec;
-					if(GetAsyncKeyState('E') & 0x8000)
-						_panY = MOVE_SPEED * _frameTimeSec;
-					else if(GetAsyncKeyState('Q') & 0x8000)
-						_panY = -MOVE_SPEED * _frameTimeSec;
-				}
-				else
-				{
-					if(GetAsyncKeyState('A') & 0x8000)
-						_panX = -MOVE_SPEED * _frameTimeSec;
-					else if(GetAsyncKeyState('D') & 0x8000)
-						_panX = MOVE_SPEED * _frameTimeSec;
+					if(_viewMode == ViewMode::EDITOR)
+					{
+						if(GetAsyncKeyState('W') & 0x8000)
+							_zoom = MOVE_SPEED * _frameTimeSec;
+						else if(GetAsyncKeyState('S') & 0x8000)
+							_zoom = -MOVE_SPEED * _frameTimeSec;
+						if(GetAsyncKeyState('A') & 0x8000)
+							_panX = -MOVE_SPEED * _frameTimeSec;
+						else if(GetAsyncKeyState('D') & 0x8000)
+							_panX = MOVE_SPEED * _frameTimeSec;
+						if(GetAsyncKeyState('E') & 0x8000)
+							_panY = MOVE_SPEED * _frameTimeSec;
+						else if(GetAsyncKeyState('Q') & 0x8000)
+							_panY = -MOVE_SPEED * _frameTimeSec;
+					}
+					else
+					{
+						if(GetAsyncKeyState('A') & 0x8000)
+							_panX = -MOVE_SPEED * _frameTimeSec;
+						else if(GetAsyncKeyState('D') & 0x8000)
+							_panX = MOVE_SPEED * _frameTimeSec;
+					}
 				}
 			}
 		}

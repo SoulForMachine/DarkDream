@@ -20,7 +20,7 @@ namespace Engine
 	class ENGINE_API World
 	{
 	public:
-		typedef FreeList<const Entity*> EntityList;
+		typedef FreeList<Entity*> EntityList;
 
 		World();
 
@@ -29,15 +29,12 @@ namespace Engine
 
 		bool LoadMap(const tchar* file_name);
 		bool SaveMap(const tchar* file_name);
+		void AddEntity(Entity* entity);
+		void RemoveAllEntities();
+		int GetVisibleEntities(ModelEntity** entities, int max_entities);
+		int GetVisibleTerrainPatches(const Terrain::TerrainPatch** patches, int max_patches);
 		Camera& GetCamera()
 			{ return _camera; }
-		void AddEntity(const Entity* entity)
-			{ _entities.PushBack(entity); }
-		void RemoveAllEntities()
-			{ _entities.Reset(); }
-		int GetVisibleEntities(ModelEntity** entities, int max_entities);
-		int GetVisibleShadowcasters(ModelEntity** entities, int max_entities);
-		int GetVisibleTerrainPatches(const Terrain::TerrainPatch** patches, int max_patches);
 		Terrain& GetTerrain()
 			{ return _terrain; }
 
@@ -45,7 +42,7 @@ namespace Engine
 		static const int MAX_NUM_ENTITIES = 16 * 1024;
 
 		Camera _camera;
-		FreePool<FreeListNode<const Entity*> > _entityPool;
+		FreePool<FreeListNode<Entity*> > _entityPool;
 		EntityList _entities;
 		Terrain _terrain;
 	};

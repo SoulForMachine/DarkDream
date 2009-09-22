@@ -9,32 +9,13 @@
 namespace Engine
 {
 
-	enum EntityClass
-	{
-		ENTITY_CLASS_GENERIC,
-		ENTITY_CLASS_NPC,
-		ENTITY_CLASS_MONSTER,
-		ENTITY_CLASS_BOSS,
-		ENTITY_CLASS_BUILDING,
-		ENTITY_CLASS_FOLIAGE,
-		ENTITY_CLASS_DEBRIS,
-
-		ENTITY_CLASS_COUNT,
-	};
-
 	enum EntityType
 	{
 		ENTITY_TYPE_MODEL,
-		ENTITY_TYPE_TERRAIN,
-		ENTITY_TYPE_GRID,
 		ENTITY_TYPE_PARTICLE_SYS,
-		ENTITY_TYPE_LIGHT,
 		ENTITY_TYPE_CAMERA,
 		ENTITY_TYPE_TRIGGER,
 		ENTITY_TYPE_SPAWN_POINT,
-		ENTITY_TYPE_WATER_PATCH,
-		ENTITY_TYPE_RIVER,
-		ENTITY_TYPE_ROAD,
 	};
 
 
@@ -50,13 +31,7 @@ namespace Engine
 		virtual EntityType GetType() const = 0;
 
 	protected:
-		EntityClass GetClassFromString(const char* name);
-		const char* GetClassString(EntityClass c);
-
 		math3d::vec3f _position;
-	private:
-
-		static const char* _classNames[ENTITY_CLASS_COUNT];
 	};
 
 }

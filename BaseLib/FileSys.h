@@ -50,8 +50,7 @@ namespace FileSys
 		bool		FindFirstFile(const tchar* path, uint flags = FINDF_FILES);
 		const tchar*
 					GetFileName() const { return m_fd.cFileName; }
-		const WIN32_FIND_DATA*	
-					GetFileData() const { return &m_fd; }
+		bool		IsDirectory() const { return (m_fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0; }
 		bool		FindNextFile();
 		void		EndSearch();
 

@@ -173,7 +173,8 @@ namespace MapEditor
 
 	System::Void MainForm::_toolBtnObjectPlacement_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::PLACE_OBJECT);
+		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
 		UpdateToolbarButtons();
 	}
 
@@ -212,6 +213,9 @@ namespace MapEditor
 		case EditMode::EditModeEnum::TERRAIN_EDIT:
 			_toolBtnTerrainEdit->Checked = true;
 			break;
+		case EditMode::EditModeEnum::PLACE_OBJECT:
+			_toolBtnObjectPlacement->Checked = true;
+			break;
 		default:
 			assert(0);
 		}
@@ -230,7 +234,6 @@ namespace MapEditor
 		{
 			_menuViewWireframe->Checked = _wireframe;
 			_menuViewStats->Checked = _viewStats;
-			_menuViewEditorView->Checked = (_mapForm->GetViewMode() == MapRenderWindow::ViewMode::EDITOR);
 			_menuViewGameView->Checked = (_mapForm->GetViewMode() == MapRenderWindow::ViewMode::GAME);
 			_menuEditUndo->Enabled = _mapForm->GetUndoManager()->HasUndo();
 			_menuEditRedo->Enabled = _mapForm->GetUndoManager()->HasRedo();
@@ -257,16 +260,12 @@ namespace MapEditor
 		::Console::ExecuteStatement(buf);
 	}
 
-	System::Void MainForm::_menuViewEditorView_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-		if(_mapForm->GetViewMode() != MapRenderWindow::ViewMode::EDITOR)
-			_mapForm->SetViewMode(MapRenderWindow::ViewMode::EDITOR);
-	}
-
 	System::Void MainForm::_menuViewGameView_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		if(_mapForm->GetViewMode() != MapRenderWindow::ViewMode::GAME)
+		if(_mapForm->GetViewMode() == MapRenderWindow::ViewMode::EDITOR)
 			_mapForm->SetViewMode(MapRenderWindow::ViewMode::GAME);
+		else
+			_mapForm->SetViewMode(MapRenderWindow::ViewMode::EDITOR);
 	}
 
 }

@@ -103,7 +103,7 @@ namespace MapEditor {
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewStats;
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewTerrainNormals;
 	private: System::Windows::Forms::ToolStripSeparator^  toolStripMenuItem3;
-	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewEditorView;
+
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewGameView;
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuTerrainRemovePatch;
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuTerrainNewPatchAtEnd;
@@ -141,10 +141,10 @@ namespace MapEditor {
 			this->_menuViewStats = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuViewTerrainNormals = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->toolStripMenuItem3 = (gcnew System::Windows::Forms::ToolStripSeparator());
-			this->_menuViewEditorView = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuViewGameView = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->regionToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuRegionNewTerrain = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->_menuTerrainNewPatchAtEnd = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuTerrainRemovePatch = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->toolsToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuToolsOptions = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -158,7 +158,6 @@ namespace MapEditor {
 			this->_toolBtnObjectPlacement = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnTriggers = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnParticleSystems = (gcnew System::Windows::Forms::ToolStripButton());
-			this->_menuTerrainNewPatchAtEnd = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_mainMenu->SuspendLayout();
 			this->_mainToolbar->SuspendLayout();
 			this->SuspendLayout();
@@ -247,8 +246,8 @@ namespace MapEditor {
 			// 
 			// toolStripMenuItem2
 			// 
-			this->toolStripMenuItem2->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {this->_menuViewWireframe, 
-				this->_menuViewStats, this->_menuViewTerrainNormals, this->toolStripMenuItem3, this->_menuViewEditorView, this->_menuViewGameView});
+			this->toolStripMenuItem2->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) {this->_menuViewWireframe, 
+				this->_menuViewStats, this->_menuViewTerrainNormals, this->toolStripMenuItem3, this->_menuViewGameView});
 			this->toolStripMenuItem2->Name = L"toolStripMenuItem2";
 			this->toolStripMenuItem2->Size = System::Drawing::Size(41, 20);
 			this->toolStripMenuItem2->Text = L"&View";
@@ -281,14 +280,6 @@ namespace MapEditor {
 			this->toolStripMenuItem3->Name = L"toolStripMenuItem3";
 			this->toolStripMenuItem3->Size = System::Drawing::Size(174, 6);
 			// 
-			// _menuViewEditorView
-			// 
-			this->_menuViewEditorView->Name = L"_menuViewEditorView";
-			this->_menuViewEditorView->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::E));
-			this->_menuViewEditorView->Size = System::Drawing::Size(177, 22);
-			this->_menuViewEditorView->Text = L"Editor View";
-			this->_menuViewEditorView->Click += gcnew System::EventHandler(this, &MainForm::_menuViewEditorView_Click);
-			// 
 			// _menuViewGameView
 			// 
 			this->_menuViewGameView->Name = L"_menuViewGameView";
@@ -312,6 +303,13 @@ namespace MapEditor {
 			this->_menuRegionNewTerrain->Text = L"&New Patch";
 			this->_menuRegionNewTerrain->Click += gcnew System::EventHandler(this, &MainForm::_menuRegionNewTerrainPatch_Click);
 			// 
+			// _menuTerrainNewPatchAtEnd
+			// 
+			this->_menuTerrainNewPatchAtEnd->Name = L"_menuTerrainNewPatchAtEnd";
+			this->_menuTerrainNewPatchAtEnd->Size = System::Drawing::Size(171, 22);
+			this->_menuTerrainNewPatchAtEnd->Text = L"New Patch At &End";
+			this->_menuTerrainNewPatchAtEnd->Click += gcnew System::EventHandler(this, &MainForm::_menuTerrainNewPatchAtEnd_Click);
+			// 
 			// _menuTerrainRemovePatch
 			// 
 			this->_menuTerrainRemovePatch->Name = L"_menuTerrainRemovePatch";
@@ -329,7 +327,7 @@ namespace MapEditor {
 			// _menuToolsOptions
 			// 
 			this->_menuToolsOptions->Name = L"_menuToolsOptions";
-			this->_menuToolsOptions->Size = System::Drawing::Size(152, 22);
+			this->_menuToolsOptions->Size = System::Drawing::Size(122, 22);
 			this->_menuToolsOptions->Text = L"&Options";
 			this->_menuToolsOptions->Click += gcnew System::EventHandler(this, &MainForm::_menuToolsOptions_Click);
 			// 
@@ -417,13 +415,6 @@ namespace MapEditor {
 			this->_toolBtnParticleSystems->Text = L"Particle Systems";
 			this->_toolBtnParticleSystems->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnParticleSystems_Click);
 			// 
-			// _menuTerrainNewPatchAtEnd
-			// 
-			this->_menuTerrainNewPatchAtEnd->Name = L"_menuTerrainNewPatchAtEnd";
-			this->_menuTerrainNewPatchAtEnd->Size = System::Drawing::Size(171, 22);
-			this->_menuTerrainNewPatchAtEnd->Text = L"New Patch At &End";
-			this->_menuTerrainNewPatchAtEnd->Click += gcnew System::EventHandler(this, &MainForm::_menuTerrainNewPatchAtEnd_Click);
-			// 
 			// MainForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -466,7 +457,6 @@ namespace MapEditor {
 	private: System::Void OnIdle(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuViewStats_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuViewTerrainNormals_Click(System::Object^  sender, System::EventArgs^  e);
-	private: System::Void _menuViewEditorView_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuViewGameView_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuTerrainRemovePatch_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuTerrainNewPatchAtEnd_Click(System::Object^  sender, System::EventArgs^  e);

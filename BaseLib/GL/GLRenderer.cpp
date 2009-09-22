@@ -588,7 +588,7 @@ namespace GL
 		LOAD_EXTENSION(GL_EXT_transform_feedback, extTransformFeedback)
 		LOAD_EXTENSION_REQ(GL_EXT_draw_buffers2, extDrawBuffers2)
 		CHECK_EXTENSION_REQ(GL_EXT_framebuffer_sRGB, extFramebufferSRGB)
-		CHECK_EXTENSION_REQ(GL_EXT_framebuffer_multisample, extFramebufferMultisample)
+		LOAD_EXTENSION_REQ(GL_EXT_framebuffer_multisample, extFramebufferMultisample)
 		LOAD_EXTENSION_REQ(GL_EXT_framebuffer_blit, extFramebufferBlit)
 		LOAD_EXTENSION(GL_NV_conditional_render, extConditionalRender)
 		LOAD_EXTENSION(GL_ARB_map_buffer_range, extMapBufferRange)

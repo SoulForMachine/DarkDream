@@ -182,7 +182,7 @@ namespace Engine
 		void Unload();
 		bool IsLoaded() const
 			{ return (_entity != 0); }
-		const ModelEntity* GetEntity() const
+		ModelEntity* GetEntity()
 			{ return _entity; }
 		bool IsEntityReferenced(const tchar* file_name);
 

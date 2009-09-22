@@ -22,6 +22,19 @@ namespace Engine
 	class SoundRes;
 
 
+	enum ModelClass
+	{
+		MODEL_CLASS_GENERIC,
+		MODEL_CLASS_NPC,
+		MODEL_CLASS_MONSTER,
+		MODEL_CLASS_BOSS,
+		MODEL_CLASS_BUILDING,
+		MODEL_CLASS_FOLIAGE,
+		MODEL_CLASS_DEBRIS,
+
+		MODEL_CLASS_COUNT,
+	};
+
 
 	class ENGINE_API ModelEntity: public RenderableEntity
 	{
@@ -68,7 +81,7 @@ namespace Engine
 			{ return ENTITY_TYPE_MODEL; }
 
 		bool Load(const tchar* file_name);
-		void SetupModelData(); // call after model has been loaded
+		void SetupModelData(); // call after model resources have been loaded
 		bool Save(const tchar* file_name);
 		void Unload();
 
@@ -102,9 +115,9 @@ namespace Engine
 		bool AddSound(const char* snd_name, const tchar* file_name);
 		bool RemoveSound(const char* snd_name);
 
-		EntityClass GetClass() const
+		ModelClass GetClass() const
 			{ return _class; }
-		void SetClass(EntityClass cls)
+		void SetClass(ModelClass cls)
 			{ _class = cls; }
 		const char* GetName() const
 			{ return _name; }
@@ -132,6 +145,8 @@ namespace Engine
 		static JointAttachType GetJointAttachTypeByExt(const tchar* file_name);
 		void ClearModelData();
 		void CalcWorldBBox();
+		ModelClass GetClassFromString(const char* name);
+		const char* GetClassString(ModelClass c);
 
 		AABBox _worldBBox; // model's world space bounding box
 		math3d::mat4f _worldMat;
@@ -146,12 +161,14 @@ namespace Engine
 		AnimMap _animations;
 		SoundMap _sounds;
 
-		EntityClass _class;
+		ModelClass _class;
 		static const int MAX_NAME_LENGTH = 64;
 		char _name[MAX_NAME_LENGTH];
 		bool _clip;
 		int _lifePoints;
 		float _transparency;
+
+		static const char* _classNames[MODEL_CLASS_COUNT];
 	};
 
 }

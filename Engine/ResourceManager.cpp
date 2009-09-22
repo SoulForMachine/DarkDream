@@ -366,7 +366,7 @@ namespace Engine
 		return new(mapPool) AnimationRes(file_name);
 	}
 
-	const ModelEntityRes* ModelEntityManager::CreateEntity(const tchar* file_name)
+	ModelEntityRes* ModelEntityManager::CreateEntity(const tchar* file_name)
 	{
 		const ModelEntityRes* ent = (const ModelEntityRes*)ResourceManager::CreateRes(file_name, true);
 		return new(mapPool) ModelEntityRes(*ent);

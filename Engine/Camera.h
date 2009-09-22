@@ -16,12 +16,6 @@ namespace Engine
 	class ENGINE_API Camera: public Entity
 	{
 	public:
-		enum ClipResult
-		{
-			CLIP_OUTSIDE,
-			CLIP_INSIDE,
-		};
-
 		enum ClipPlane
 		{
 			CP_RIGHT,
@@ -40,7 +34,7 @@ namespace Engine
 		void Perspective(float fovy, float aspect, float znear, float zfar);
 		void SetViewingTransform(const math3d::mat4f& mat);
 		void SetProjectionTransform(const math3d::mat4f& mat);
-		const math3d::mat4f& GetCameraTransform() const
+		const math3d::mat4f& GetViewingTransform() const
 			{ return _viewTransform; }
 		const math3d::mat4f& GetProjectionTransform() const
 			{ return _projectionTransform; }
@@ -53,7 +47,7 @@ namespace Engine
 		virtual EntityType GetType() const
 			{ return ENTITY_TYPE_CAMERA; }
 
-		ClipResult IsInsideFrustum(const AABBox& bbox);
+		bool IsInsideFrustum(const AABBox& bbox);
 
 	private:
 		void UpdateViewProjectionMat() const;
