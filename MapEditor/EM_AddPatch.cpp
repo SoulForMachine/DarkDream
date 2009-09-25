@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+#include "ActionAddPatch.h"
+#include "UndoManager.h"
 #include "EM_AddPatch.h"
 
 using namespace Engine;
@@ -10,10 +12,11 @@ using namespace System::Windows::Forms;
 namespace MapEditor
 {
 
-	EM_AddPatch::EM_AddPatch(EditModeEventListener^ listener, bool persistent)
+	EM_AddPatch::EM_AddPatch(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager)
 			: EditMode(listener, persistent)
 	{
 		_isExecuting = false;
+		_undoManager = undo_manager;
 
 		_renderer = engineAPI->renderSystem->GetRenderer();
 		_vertBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, (Terrain::PATCH_HEIGHT + 1) * 2 * sizeof(vec3f), 0, GL::USAGE_DYNAMIC_DRAW);
@@ -76,8 +79,15 @@ namespace MapEditor
 				return;
 			}
 
-			if(engineAPI->world->GetTerrain().AddPatch(_patchIndex) == -1)
+			ActionAddPatch^ action = gcnew ActionAddPatch(_patchIndex);
+			if(action->BeginAction())
 			{
+				action->EndAction();
+				_undoManager->Add(action);
+			}
+			else
+			{
+				delete action;
 				MessageBox::Show(
 					"Failed to add terrain patch.", GetAppName(),
 					MessageBoxButtons::OK, MessageBoxIcon::Error);

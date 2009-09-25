@@ -1,7 +1,6 @@
 
 #pragma once
 
-using namespace System::Collections::Generic;
 
 
 namespace MapEditor
@@ -26,10 +25,10 @@ namespace MapEditor
 			{ return (_redoList->Count > 0); }
 
 	private:
-		void ClearList(LinkedList<Action^>^ list);
+		void ClearList(System::Collections::Generic::LinkedList<Action^>^ list);
 
-		LinkedList<Action^>^ _undoList;
-		LinkedList<Action^>^ _redoList;
+		System::Collections::Generic::LinkedList<Action^>^ _undoList;
+		System::Collections::Generic::LinkedList<Action^>^ _redoList;
 	};
 
 }

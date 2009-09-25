@@ -22,6 +22,8 @@ namespace Engine
 	public:
 		typedef FreeList<Entity*> EntityList;
 
+		static const int MAX_NUM_ENTITIES = 16 * 1024;
+
 		World();
 
 		bool Init();
@@ -29,7 +31,8 @@ namespace Engine
 
 		bool LoadMap(const tchar* file_name);
 		bool SaveMap(const tchar* file_name);
-		void AddEntity(Entity* entity);
+		bool AddEntity(Entity* entity);
+		bool RemoveEntity(Entity* entity);
 		void RemoveAllEntities();
 		int GetVisibleEntities(ModelEntity** entities, int max_entities);
 		int GetVisibleTerrainPatches(const Terrain::TerrainPatch** patches, int max_patches);
@@ -39,8 +42,6 @@ namespace Engine
 			{ return _terrain; }
 
 	private:
-		static const int MAX_NUM_ENTITIES = 16 * 1024;
-
 		Camera _camera;
 		FreePool<FreeListNode<Entity*> > _entityPool;
 		EntityList _entities;

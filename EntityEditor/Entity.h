@@ -80,6 +80,7 @@ namespace EntityEditor
 	{
 	public:
 		Entity();
+		~Entity();
 
 		bool Load(String^ file_name);
 		bool Save(String^ file_name);

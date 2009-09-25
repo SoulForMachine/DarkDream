@@ -65,6 +65,18 @@ void rotate(vec3<_ST>& result, const vec3<_ST>& v, const quat<_ST>& q)
 	mul(result, temp, conjugate(q));*/
 }
 
+template <class _ST>
+void unproject(vec3<_ST>& result, int screen_x, int screen_y, const mat4<_ST>& inv_view_proj, _ST viewport[4])
+{
+	vec4<_ST> ndc(
+		(_ST(2.0) * ((float)screen_x - viewport[0]) - viewport[2]) / viewport[2],
+		(_ST(2.0) * ((float)screen_y - viewport[1]) - viewport[3]) / viewport[3],
+		_ST(-1.0), _ST(1.0));
+
+	vec4f temp;
+	transform(temp, ndc, inv_view_proj);
+	result = temp.rvec3 / temp.w;
+}
 
 } // namespace math3d
 

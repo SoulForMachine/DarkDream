@@ -227,6 +227,7 @@ namespace MapEditor
 			_renderer->RasterizationMode(GL::RASTER_LINE);
 
 		engineAPI->renderSystem->RenderTerrain(_frameTime);
+		engineAPI->renderSystem->RenderEntities(_frameTime);
 
 		if(_wireframe)
 			_renderer->RasterizationMode(GL::RASTER_FILL);
@@ -299,9 +300,13 @@ namespace MapEditor
 
 					if(_rotX > 360.0f)
 						_rotX -= 360.0f;
+					else if(_rotX < 0.0f)
+						_rotX = 360.0f + _rotX;
 
 					if(_rotY > 360.0f)
 						_rotY -= 360.0f;
+					else if(_rotY < 0.0f)
+						_rotY = 360.0f + _rotY;
 				}
 				else if(_rightBtnDown && (modifiers & MK_RBUTTON))
 				{

@@ -3,6 +3,8 @@
 #include "Action.h"
 #include "UndoManager.h"
 
+using namespace System::Collections::Generic;
+
 
 namespace MapEditor
 {

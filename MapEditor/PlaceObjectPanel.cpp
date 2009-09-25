@@ -44,7 +44,7 @@ namespace MapEditor
 			   Reflection::BindingFlags::NonPublic | 
 			   Reflection::BindingFlags::Instance);
 		array<Object^, 1>^ params = gcnew array<Object^, 1>(2);
-		params[0] = ControlStyles::AllPaintingInWmPaint | ControlStyles::DoubleBuffer;
+		params[0] = ControlStyles::AllPaintingInWmPaint | ControlStyles::OptimizedDoubleBuffer;
 		params[1] = true;
 		method->Invoke(_panelObjectView, params);
 	//	_panelObjectView->SetStyle(ControlStyles::AllPaintingInWmPaint | ControlStyles::DoubleBuffer, true);
@@ -260,19 +260,31 @@ namespace MapEditor
 		{
 			_objRotX += (e->Y - _prevY);
 			if(_objRotX < 0.0f)
-				_objRotX = 360.0f - _objRotX;
+				_objRotX = 360.0f + _objRotX;
 			else if(_objRotX > 360.0f)
 				_objRotX -= 360.0f;
 			_prevY = e->Y;
 
 			_objRotY += (e->X - _prevX);
 			if(_objRotY < 0.0f)
-				_objRotY = 360.0f - _objRotY;
+				_objRotY = 360.0f + _objRotY;
 			else if(_objRotY > 360.0f)
 				_objRotY -= 360.0f;
 			_prevX = e->X;
 			_panelObjectView->Invalidate();
 		}
+	}
+
+	String^ PlaceObjectPanel::GetSelObjectPath()
+	{
+		if(_treeObjects->SelectedNode == nullptr)
+			return nullptr;
+
+		ObjectTreeNode^ node = (ObjectTreeNode^)_treeObjects->SelectedNode;
+		if(node->IsDirectory())
+			return nullptr;
+
+		return node->GetRelativePath();
 	}
 
 }

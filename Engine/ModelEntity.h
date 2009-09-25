@@ -94,6 +94,7 @@ namespace Engine
 			{ return _worldBBox; }
 		void UpdateGraphics(int frame_time);
 		void ActiveAnimation(const char* anim_name);
+		virtual void SetPosition(const math3d::vec3f& pos);
 
 		const ModelRes* GetModelRes() const
 			{ return _model; }

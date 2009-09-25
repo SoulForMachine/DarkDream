@@ -20,6 +20,7 @@ namespace MapEditor {
 		~PlaceObjectPanel();
 
 		void RefreshObjectTree();
+		String^ GetSelObjectPath();
 
 	private: System::Windows::Forms::Label^  label1;
 	private: System::Windows::Forms::TreeView^  _treeObjects;
@@ -91,10 +92,10 @@ namespace MapEditor {
 			this->_treeObjects->HideSelection = false;
 			this->_treeObjects->ImageIndex = 0;
 			this->_treeObjects->ImageList = this->_imageListObjTree;
-			this->_treeObjects->Location = System::Drawing::Point(24, 81);
+			this->_treeObjects->Location = System::Drawing::Point(15, 81);
 			this->_treeObjects->Name = L"_treeObjects";
 			this->_treeObjects->SelectedImageIndex = 0;
-			this->_treeObjects->Size = System::Drawing::Size(334, 361);
+			this->_treeObjects->Size = System::Drawing::Size(331, 361);
 			this->_treeObjects->TabIndex = 3;
 			this->_treeObjects->AfterSelect += gcnew System::Windows::Forms::TreeViewEventHandler(this, &PlaceObjectPanel::_treeObjects_AfterSelect);
 			// 
@@ -109,9 +110,9 @@ namespace MapEditor {
 			// 
 			this->_panelObjectView->BackColor = System::Drawing::Color::DarkGray;
 			this->_panelObjectView->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
-			this->_panelObjectView->Location = System::Drawing::Point(24, 458);
+			this->_panelObjectView->Location = System::Drawing::Point(15, 458);
 			this->_panelObjectView->Name = L"_panelObjectView";
-			this->_panelObjectView->Size = System::Drawing::Size(334, 238);
+			this->_panelObjectView->Size = System::Drawing::Size(331, 238);
 			this->_panelObjectView->TabIndex = 4;
 			this->_panelObjectView->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &PlaceObjectPanel::_panelObjectView_Paint);
 			this->_panelObjectView->MouseMove += gcnew System::Windows::Forms::MouseEventHandler(this, &PlaceObjectPanel::_panelObjectView_MouseMove);
@@ -120,9 +121,9 @@ namespace MapEditor {
 			// 
 			// _buttonDrop
 			// 
-			this->_buttonDrop->Location = System::Drawing::Point(24, 722);
+			this->_buttonDrop->Location = System::Drawing::Point(15, 722);
 			this->_buttonDrop->Name = L"_buttonDrop";
-			this->_buttonDrop->Size = System::Drawing::Size(75, 23);
+			this->_buttonDrop->Size = System::Drawing::Size(72, 23);
 			this->_buttonDrop->TabIndex = 5;
 			this->_buttonDrop->Text = L"Drop";
 			this->_buttonDrop->UseVisualStyleBackColor = true;
@@ -130,9 +131,9 @@ namespace MapEditor {
 			// 
 			// _buttonRefresh
 			// 
-			this->_buttonRefresh->Location = System::Drawing::Point(105, 722);
+			this->_buttonRefresh->Location = System::Drawing::Point(93, 722);
 			this->_buttonRefresh->Name = L"_buttonRefresh";
-			this->_buttonRefresh->Size = System::Drawing::Size(75, 23);
+			this->_buttonRefresh->Size = System::Drawing::Size(72, 23);
 			this->_buttonRefresh->TabIndex = 6;
 			this->_buttonRefresh->Text = L"Refresh";
 			this->_buttonRefresh->UseVisualStyleBackColor = true;
@@ -140,16 +141,16 @@ namespace MapEditor {
 			// 
 			// _textFilter
 			// 
-			this->_textFilter->Location = System::Drawing::Point(59, 55);
+			this->_textFilter->Location = System::Drawing::Point(50, 55);
 			this->_textFilter->Name = L"_textFilter";
-			this->_textFilter->Size = System::Drawing::Size(299, 20);
+			this->_textFilter->Size = System::Drawing::Size(296, 20);
 			this->_textFilter->TabIndex = 2;
 			this->_textFilter->TextChanged += gcnew System::EventHandler(this, &PlaceObjectPanel::_textFilter_TextChanged);
 			// 
 			// label2
 			// 
 			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(21, 58);
+			this->label2->Location = System::Drawing::Point(12, 58);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(32, 13);
 			this->label2->TabIndex = 1;
@@ -167,7 +168,7 @@ namespace MapEditor {
 			this->Controls->Add(this->_treeObjects);
 			this->Controls->Add(this->label1);
 			this->Name = L"PlaceObjectPanel";
-			this->Size = System::Drawing::Size(385, 869);
+			this->Size = System::Drawing::Size(366, 869);
 			this->ResumeLayout(false);
 			this->PerformLayout();
 

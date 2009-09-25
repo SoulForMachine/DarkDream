@@ -19,11 +19,15 @@ namespace EntityEditor
 		_fileName = nullptr;
 	}
 
+	Entity::~Entity()
+	{
+		Unload();
+		_entity->ModelEntity::~ModelEntity();
+		::operator delete(_entity);
+	}
+
 	bool Entity::Load(String^ file_name)
 	{
-		if(!_entity)
-			_entity = new(mainPool) ModelEntity;
-
 		tchar* fn = GetRelativePath(file_name);
 		::Console::PrintLn("Loading entity: %ls", fn);
 		bool result = _entity->Load(fn);
@@ -73,10 +77,7 @@ namespace EntityEditor
 	{
 		if(_entity)
 		{
-			//! resiti ovo sranje
-			_entity->ModelEntity::~ModelEntity();
-			::operator delete(_entity);
-			_entity = 0;
+			_entity->Unload();
 			_modified = false;
 			_fileName = nullptr;
 			LoadProperties();

@@ -22,7 +22,11 @@ namespace Engine
 	class ENGINE_API Entity
 	{
 	public:
+		Entity()
+			{ _position.set_null(); }
 		virtual ~Entity() = 0 {}
+
+		Entity& operator = (const Entity& entity);
 
 		virtual void SetPosition(const math3d::vec3f& pos)
 			{ _position = pos; }

@@ -93,7 +93,7 @@ namespace EntityEditor
 	{
 		if(PromptSave())
 		{
-			_entity->Unload();
+			_modelForm->SetEntity(0);
 			delete _entity;
 			// save layout for dock panels to xml
 			_dockPanel->SaveAsXml(Application::StartupPath + "\\" + DOCK_PANEL_XML_FILE);

@@ -206,7 +206,7 @@
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\EditorCommon.dll"
-			AssemblyName="EditorCommon, Version=1.0.3551.27524, processorArchitecture=x86"
+			AssemblyName="EditorCommon, Version=1.0.3553.33749, processorArchitecture=x86"
 			MinFrameworkVersion="131072"
 		/>
 	</References>
@@ -328,6 +328,46 @@
 			>
 			<File
 				RelativePath=".\Action.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionAddObject.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionAddObject.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionAddPatch.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionAddPatch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionPlaceObjects.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionPlaceObjects.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionRemoveObjects.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionRemoveObjects.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionRemovePatch.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionRemovePatch.h"
 				>
 			</File>
 			<File

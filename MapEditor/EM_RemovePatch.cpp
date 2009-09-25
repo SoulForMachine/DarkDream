@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+#include "UndoManager.h"
+#include "ActionRemovePatch.h"
 #include "EM_RemovePatch.h"
 
 using namespace Engine;
@@ -10,10 +12,11 @@ using namespace System::Windows::Forms;
 namespace MapEditor
 {
 
-	EM_RemovePatch::EM_RemovePatch(EditModeEventListener^ listener, bool persistent)
+	EM_RemovePatch::EM_RemovePatch(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager)
 			: EditMode(listener, persistent)
 	{
 		_isExecuting = false;
+		_undoManager = undo_manager;
 	}
 
 	void EM_RemovePatch::Activate()
@@ -48,7 +51,10 @@ namespace MapEditor
 				return;
 			}
 
-			engineAPI->world->GetTerrain().RemovePatch(_patchIndex);
+			ActionRemovePatch^ action = gcnew ActionRemovePatch(_patchIndex);
+			action->BeginAction();
+			action->EndAction();
+			_undoManager->Add(action);
 
 			// if shift is not being held we exit this edit mode
 			if(!(GetAsyncKeyState(VK_SHIFT) & 0x8000))

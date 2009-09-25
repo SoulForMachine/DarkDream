@@ -61,9 +61,9 @@ namespace MapEditor
 			_editModes = gcnew array<EditMode^>((int)EditMode::EditModeEnum::EDIT_MODE_COUNT);
 			_editModes[(int)EditMode::EditModeEnum::VIEW] = gcnew EM_View(this, true);
 			_editModes[(int)EditMode::EditModeEnum::TERRAIN_EDIT] = gcnew EM_TerrainEdit(this, true, _undoManager);
-			_editModes[(int)EditMode::EditModeEnum::ADD_PATCH] = gcnew EM_AddPatch(this, false);
-			_editModes[(int)EditMode::EditModeEnum::REMOVE_PATCH] = gcnew EM_RemovePatch(this, false);
-			_editModes[(int)EditMode::EditModeEnum::PLACE_OBJECT] = gcnew EM_PlaceObject(this, true);
+			_editModes[(int)EditMode::EditModeEnum::ADD_PATCH] = gcnew EM_AddPatch(this, false, _undoManager);
+			_editModes[(int)EditMode::EditModeEnum::REMOVE_PATCH] = gcnew EM_RemovePatch(this, false, _undoManager);
+			_editModes[(int)EditMode::EditModeEnum::PLACE_OBJECT] = gcnew EM_PlaceObject(this, true, _undoManager);
 
 			SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
 		}
@@ -114,13 +114,6 @@ namespace MapEditor
 
 	void MapForm::EditModeEvent(EditModeEventListener::EMEvent ev)
 	{
-		if(	ev == EditModeEventListener::EMEvent::EDIT_COMPLETE &&
-			(_currentEditMode->GetModeEnum() == EditMode::EditModeEnum::ADD_PATCH ||
-			_currentEditMode->GetModeEnum() == EditMode::EditModeEnum::REMOVE_PATCH ))
-		{
-			_undoManager->Clear();
-		}
-
 		if(	ev == EditModeEventListener::EMEvent::EDIT_COMPLETE ||
 			ev == EditModeEventListener::EMEvent::EDIT_CANCELED ||
 			ev == EditModeEventListener::EMEvent::EDIT_ERROR )

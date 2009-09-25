@@ -30,6 +30,12 @@ namespace Engine
 	void World::Deinit()
 	{
 		_terrain.Deinit();
+
+		for(EntityList::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
+		{
+			delete *it;
+		}
+		_entities.Reset();
 	}
 
 	bool World::LoadMap(const tchar* file_name)
@@ -42,9 +48,26 @@ namespace Engine
 		return true;
 	}
 
-	void World::AddEntity(Entity* entity)
+	bool World::AddEntity(Entity* entity)
 	{
+		if(_entities.GetCount() == MAX_NUM_ENTITIES)
+			return false;
+
 		_entities.PushBack(entity);
+		return true;
+	}
+
+	bool World::RemoveEntity(Entity* entity)
+	{
+		for(EntityList::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
+		{
+			if(*it == entity)
+			{
+				_entities.Remove(it);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	void World::RemoveAllEntities()

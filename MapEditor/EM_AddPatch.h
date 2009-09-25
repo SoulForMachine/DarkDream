@@ -7,10 +7,13 @@
 namespace MapEditor
 {
 
+	ref class UndoManager;
+
+
 	public ref class EM_AddPatch: public EditMode
 	{
 	public:
-		EM_AddPatch(EditModeEventListener^ listener, bool persistent);
+		EM_AddPatch(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager);
 		~EM_AddPatch();
 
 		virtual EditModeEnum GetModeEnum() override
@@ -23,6 +26,7 @@ namespace MapEditor
 		virtual void Render() override;
 
 	private:
+		UndoManager^ _undoManager;
 		int _patchIndex;
 		GL::Renderer* _renderer;
 		GL::Buffer* _vertBuf;

@@ -11,6 +11,7 @@
 #include "ModelEntity.h"
 
 using namespace Memory;
+using namespace math3d;
 
 
 namespace Engine
@@ -450,9 +451,10 @@ namespace Engine
 		ClearModelData();
 	}
 
-	void ModelEntity::SetWorldTransform(const math3d::mat4f& transform)
+	void ModelEntity::SetWorldTransform(const mat4f& transform)
 	{
 		_worldMat = transform;
+		_position = _worldMat.transl_vec.rvec3;
 		CalcWorldBBox();
 	}
 
@@ -487,6 +489,13 @@ namespace Engine
 			_curAnim = 0;
 		}
 		_animTime = 0.0f;
+	}
+
+	void ModelEntity::SetPosition(const vec3f& pos)
+	{
+		_position = pos;
+		_worldMat.transl_vec.rvec3 = pos;
+		CalcWorldBBox();
 	}
 
 	void ModelEntity::ClearModelData()

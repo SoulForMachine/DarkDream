@@ -135,6 +135,7 @@ namespace Engine
 	{
 	public:
 		ModelEntityRes* CreateEntity(const tchar* file_name);
+		ModelEntity* CreateEntityObject(const tchar* file_name);
 
 	private:
 		virtual ModelEntityRes* CreateResObj(const tchar* file_name);

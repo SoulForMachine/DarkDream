@@ -83,11 +83,11 @@ namespace Engine
 			for(size_t i = 0; i < mesh_data->jointCount; ++i)
 				vert_prog->LocalMatrix4x4(8 + i * 3, mesh_data->jointMatPalette[i]);
 
-			_renderer->ActiveVertexFormat(_vertFmtMesh);
+			_renderer->ActiveVertexFormat(_vertFmtSkinnedMesh);
 		}
 		else
 		{
-			_renderer->ActiveVertexFormat(_vertFmtSkinnedMesh);
+			_renderer->ActiveVertexFormat(_vertFmtMesh);
 		}
 
 		_renderer->ActiveFragmentASMProgram(_fpMesh->GetASMProgram());

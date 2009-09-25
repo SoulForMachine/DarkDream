@@ -3,6 +3,7 @@
 #include "Engine/Common.h"
 #include "EngineInternal.h"
 #include "Engine/RenderSystem.h"
+#include "Engine/ModelEntity.h"
 #include "ResourceManager.h"
 
 using namespace Memory;
@@ -370,6 +371,12 @@ namespace Engine
 	{
 		const ModelEntityRes* ent = (const ModelEntityRes*)ResourceManager::CreateRes(file_name, true);
 		return new(mapPool) ModelEntityRes(*ent);
+	}
+
+	ModelEntity* ModelEntityManager::CreateEntityObject(const tchar* file_name)
+	{
+		ModelEntityRes* ent = (ModelEntityRes*)ResourceManager::CreateRes(file_name, true);
+		return new(mapPool) ModelEntity(*ent->GetEntity());
 	}
 
 	ModelEntityRes* ModelEntityManager::CreateResObj(const tchar* file_name)
