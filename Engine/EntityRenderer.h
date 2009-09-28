@@ -36,6 +36,7 @@ namespace Engine
 		const ASMProgRes* _vpMesh;
 		const ASMProgRes* _vpMeshSkin;
 		const ASMProgRes* _fpMesh;
+		const ASMProgRes* _fpLambert;
 		GL::VertexFormat* _vertFmtMesh;
 		GL::VertexFormat* _vertFmtSkinnedMesh;
 

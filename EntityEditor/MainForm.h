@@ -66,6 +66,7 @@ namespace EntityEditor {
 		bool _animate;
 		bool _wireframe;
 		bool _modelStats;
+		bool _skelet;
 
 	private: WeifenLuo::WinFormsUI::Docking::DockPanel^  _dockPanel;
 	private: System::Windows::Forms::MenuStrip^  _mainMenu;
@@ -109,6 +110,7 @@ namespace EntityEditor {
 	private: System::Windows::Forms::ToolStripMenuItem^  renderToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^  _mnuAnimate;
 	private: System::Windows::Forms::ToolStripMenuItem^  _mnuWireframe;
+	private: System::Windows::Forms::ToolStripMenuItem^  _mnuViewSkelet;
 
 
 
@@ -163,6 +165,7 @@ namespace EntityEditor {
 			this->_toolBtnConsole = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_saveEntityDlg = (gcnew System::Windows::Forms::SaveFileDialog());
 			this->_openEntityDlg = (gcnew System::Windows::Forms::OpenFileDialog());
+			this->_mnuViewSkelet = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_mainMenu->SuspendLayout();
 			this->_mainToolbar->SuspendLayout();
 			this->SuspendLayout();
@@ -243,8 +246,8 @@ namespace EntityEditor {
 			// 
 			// _mnuView
 			// 
-			this->_mnuView->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) {this->_mnuViewConsole, 
-				this->_mnuModelStats, this->_mnuViewEntityPanel, this->_mnuViewMaterialPanel, this->_mnuViewPropertyPanel});
+			this->_mnuView->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {this->_mnuViewConsole, 
+				this->_mnuModelStats, this->_mnuViewEntityPanel, this->_mnuViewMaterialPanel, this->_mnuViewPropertyPanel, this->_mnuViewSkelet});
 			this->_mnuView->Name = L"_mnuView";
 			this->_mnuView->Size = System::Drawing::Size(41, 20);
 			this->_mnuView->Text = L"&View";
@@ -388,6 +391,13 @@ namespace EntityEditor {
 			this->_openEntityDlg->Filter = L"Entity Files (*.entity)|*.entity|All Files (*.*)|*.*";
 			this->_openEntityDlg->Title = L"Open Entity";
 			// 
+			// _mnuViewSkelet
+			// 
+			this->_mnuViewSkelet->Name = L"_mnuViewSkelet";
+			this->_mnuViewSkelet->Size = System::Drawing::Size(178, 22);
+			this->_mnuViewSkelet->Text = L"Skelet";
+			this->_mnuViewSkelet->Click += gcnew System::EventHandler(this, &MainForm::_mnuViewSkelet_Click);
+			// 
 			// MainForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -427,6 +437,7 @@ namespace EntityEditor {
 	private: System::Void fileDialog_FileOk(System::Object^  sender, System::ComponentModel::CancelEventArgs^  e);
 	private: System::Void _mnuAnimate_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _mnuWireframe_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _mnuViewSkelet_Click(System::Object^  sender, System::EventArgs^  e);
 };
 }
 

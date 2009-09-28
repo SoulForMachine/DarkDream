@@ -25,6 +25,7 @@ namespace Engine
 		_vpMesh = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh.vp"), true);
 		_vpMeshSkin = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh_Skin.vp"), true);
 		_fpMesh = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh.fp"), true);
+		_fpLambert = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Lambert.fp"), true);
 
 		GL::VertexAttribDesc vfmt[] =
 		{
@@ -49,6 +50,7 @@ namespace Engine
 		engineAPI.asmProgManager->ReleaseASMProgram(_vpMesh);
 		engineAPI.asmProgManager->ReleaseASMProgram(_vpMeshSkin);
 		engineAPI.asmProgManager->ReleaseASMProgram(_fpMesh);
+		engineAPI.asmProgManager->ReleaseASMProgram(_fpLambert);
 
 		_renderer->DestroyVertexFormat(_vertFmtMesh);
 		_renderer->DestroyVertexFormat(_vertFmtSkinnedMesh);
@@ -75,6 +77,9 @@ namespace Engine
 
 		bool animated = (mesh_data->mesh->flags & Mesh::FLAG_SKIN_DATA) != 0;
 		const GL::ASMProgram* vert_prog = animated? _vpMeshSkin->GetASMProgram(): _vpMesh->GetASMProgram();
+		const GL::ASMProgram* frag_prog = 
+			(engineAPI.renderSystem->GetRenderStyle() == RenderSystem::RENDER_STYLE_GAME)?
+			_fpMesh->GetASMProgram(): _fpLambert->GetASMProgram();
 		_renderer->ActiveVertexASMProgram(vert_prog);
 		vert_prog->LocalMatrix4x4(0, *mesh_data->worldMat);
 		vert_prog->LocalMatrix4x4(4, camera.GetViewProjectionTransform());
@@ -90,9 +95,9 @@ namespace Engine
 			_renderer->ActiveVertexFormat(_vertFmtMesh);
 		}
 
-		_renderer->ActiveFragmentASMProgram(_fpMesh->GetASMProgram());
-		const float* color = engineAPI.renderSystem->GetMainColor();
-		_fpMesh->GetASMProgram()->LocalParameter(0, color);
+		_renderer->ActiveFragmentASMProgram(frag_prog);
+		const float* color = engineAPI.renderSystem->GetRenderColor();
+		frag_prog->LocalParameter(0, color);
 
 		_renderer->DrawIndexed(GL::PRIM_TRIANGLES, 0, mesh_data->mesh->numIndices);
 	}
@@ -102,6 +107,7 @@ namespace Engine
 		_vpMesh = 0;
 		_vpMeshSkin = 0;
 		_fpMesh = 0;
+		_fpLambert = 0;
 		_vertFmtMesh = 0;
 		_vertFmtSkinnedMesh = 0;
 		_renderer = 0;

@@ -42,6 +42,8 @@ namespace EntityEditor {
 			{ _renderWindow->Wireframe(wireframe); }
 		void ShowStats(bool stats)
 			{ _renderWindow->ShowStats(stats); }
+		void ShowSkelet(bool show)
+			{ _renderWindow->ShowSkelet(show); }
 		void ModelChanged()
 			{ _renderWindow->ModelChanged(); }
 

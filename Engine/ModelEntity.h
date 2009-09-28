@@ -106,6 +106,9 @@ namespace Engine
 			{ return _animations; }
 		const SoundMap& GetSounds() const
 			{ return _sounds; }
+		const AnimData* GetCurrentAnimation() const
+			{ return _curAnim; }
+
 
 		bool SetModel(const tchar* file_name);
 		bool SetAIScript(const tchar* file_name);

@@ -17,6 +17,12 @@ namespace MapEditor
 		virtual void EndAction() override;
 		virtual void Undo() override;
 		virtual void Redo() override;
+
+	private:
+		void RemoveObjects();
+
+		List<Engine::ModelEntity*>* _objList;
+		bool _ownObjects;
 	};
 
 }

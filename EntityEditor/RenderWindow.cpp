@@ -32,6 +32,7 @@ namespace EntityEditor
 		_font = 0;
 		_gridVertBuf = 0;
 		_lightVertBuf = 0;
+		_jointVertBuf = 0;
 		_lineVertFmt = 0;
 		_vpSimple = 0;
 		_fpConstClr = 0;
@@ -40,6 +41,8 @@ namespace EntityEditor
 		_gridHorizCount = 20;
 		_gridVertSpacing = 1.0f;
 		_gridHorizSpacing = 1.0f;
+
+		_jointRadius = 0.25f;
 
 		_rotX = 45.0f;
 		_rotY = 45.0f;
@@ -61,6 +64,7 @@ namespace EntityEditor
 		_animate = false;
 		_wireframe = false;
 		_modelStats = false;
+		_skelet = true;
 
 		System::Windows::Forms::CreateParams^ cp = gcnew System::Windows::Forms::CreateParams;
 		cp->Caption = "";
@@ -114,6 +118,15 @@ namespace EntityEditor
 
 	void RenderWindow::ModelChanged()
 	{
+		if(_entity && _entity->GetModelRes())
+		{
+			const AABBox& bbox = _entity->GetModelRes()->GetModel()->GetBoundingBox();
+			float max_dim = Max(
+				bbox.maxPt.x - bbox.minPt.x,
+				Max(bbox.maxPt.y - bbox.minPt.y,
+				bbox.maxPt.z - bbox.minPt.z));
+			_jointRadius = max_dim * 0.025f;
+		}
 	}
 
 	bool RenderWindow::CreateResources()
@@ -200,6 +213,34 @@ namespace EntityEditor
 			return false;
 		}
 
+		// joint vertex buffer
+		const int seg = 60;
+		int count = seg * 3;
+		_jointVertBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, sizeof(LineVert3D) * count, 0, GL::USAGE_STATIC_DRAW);
+		LineVert3D* joint_verts = (LineVert3D*)_jointVertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+		if(joint_verts)
+		{
+			LineVert3D* p1 = joint_verts;
+			LineVert3D* p2 = joint_verts + seg;
+			LineVert3D* p3 = joint_verts + seg * 2;
+
+			float step = TWO_PI / seg;
+			float angle = 0.0f;
+			for(int i = 0; i < seg; ++i)
+			{
+				float ca = cos(angle);
+				float sa = sin(angle);
+				p1->position.set(ca, sa, 0.0f);
+				p2->position.set(ca, 0.0f, sa);
+				p3->position.set(0.0f, ca, sa);
+				++p1;
+				++p2;
+				++p3;
+				angle += step;
+			}
+			_jointVertBuf->UnmapBuffer();
+		}
+
 		_vpSimple = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
 		_fpConstClr = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
 
@@ -235,6 +276,9 @@ namespace EntityEditor
 
 		_renderer->DestroyBuffer(_lightVertBuf);
 		_lightVertBuf = 0;
+
+		_renderer->DestroyBuffer(_jointVertBuf);
+		_jointVertBuf = 0;
 
 		_renderer->DestroyVertexFormat(_lineVertFmt);
 		_lineVertFmt = 0;
@@ -324,7 +368,7 @@ namespace EntityEditor
 			vec3f(_panX, _panY, 0.0f),
 			vec3f::y_axis);
 
-		_renderer->SwapInterval(0);
+		_renderer->SwapInterval(1);
 		_renderer->ClearColorBuffer(0.5f, 0.5f, 0.5f, 1.0f);
 		_renderer->ClearDepthStencilBuffer(DEPTH_BUFFER_BIT | STENCIL_BUFFER_BIT, 1.0f, 0);
 		_renderer->EnableDepthTest(true);
@@ -333,6 +377,8 @@ namespace EntityEditor
 		RenderEntity();
 		if(_modelStats)
 			RenderStats();
+		if(_skelet)
+			RenderSkelet(vec3f(0.0f, 1.0f, 0.0f));
 
 		_renderer->Finish();
 		_renderer->SwapBuffers();
@@ -409,7 +455,7 @@ namespace EntityEditor
 		{
 			_zoom += (x - _prevX) * 0.2f;
 			float z = _zoom;
-			clamp(z, 5.0f, 100.0f);
+			clamp(z, 1.0f, 100.0f);
 			_zoom = z;
 
 			OnPaint();
@@ -467,7 +513,7 @@ namespace EntityEditor
 		{
 			_zoom -= float(delta) / WHEEL_DELTA;
 			float z = _zoom;
-			clamp(z, 5.0f, 100.0f);
+			clamp(z, 1.0f, 100.0f);
 			_zoom = z;
 
 			OnPaint();
@@ -559,6 +605,105 @@ namespace EntityEditor
 
 		_renderSystem->GetRender2D()->FlushText();
 		_renderer->EnableDepthTest(true);
+	}
+
+	void RenderWindow::RenderSkelet(const vec3f& color)
+	{
+		if(!_entity->GetModelRes())
+			return;
+
+		const Model& model = *_entity->GetModelRes()->GetModel();
+		if(!model.GetRootJoint())
+			return;
+
+		const Animation* animation = _entity->GetCurrentAnimation()? _entity->GetCurrentAnimation()->animation->GetAnimation(): 0;
+
+		mat4f wvp, matrix;
+		const mat4f& view_proj = engineAPI->world->GetCamera().GetViewProjectionTransform();
+		mul(wvp, s_worldMat, view_proj);
+
+		_renderer->ActiveVertexFormat(_lineVertFmt);
+		_renderer->VertexSource(0, _gridVertBuf, sizeof(LineVert3D), 0);
+		_renderer->IndexSource(0, TYPE_VOID);
+
+		_renderer->ActiveVertexASMProgram(_vpSimple->GetASMProgram());
+		_renderer->ActiveFragmentASMProgram(_fpConstClr->GetASMProgram());
+
+		_vpSimple->GetASMProgram()->LocalMatrix4x4(0, wvp);
+		_fpConstClr->GetASMProgram()->LocalParameter(0, vec4f(color));
+
+		const StaticArray<Joint>& joints = model.GetJoints();
+		const mat4f* joint_transforms = _entity->GetJointTransforms().GetData();
+		for(size_t i = 0; i < joints.GetCount(); ++i)
+		{
+			if(animation)
+			{
+				mul(matrix, joint_transforms[i], wvp);
+				RenderBone(&joints[i], matrix);
+			}
+			else
+			{
+				RenderBone(&joints[i], wvp);
+			}
+		}
+	}
+
+	void RenderWindow::RenderBone(const Joint* joint, const mat4f& matrix)
+	{
+		if(!joint)
+			return;
+
+		mat4f mat;
+
+		if(joint->child)
+		{
+			Joint* ptr = joint->child;
+			while(ptr)
+			{
+				mat4f temp = joint->offsetMatrix, temp2 = ptr->offsetMatrix;
+				temp.inverse();
+				temp2.inverse();
+
+				vec3f vec1 = temp.row3.rvec3;
+				vec3f vec2 = temp2.row3.rvec3;
+				vec3f v = vec2 - vec1;
+				float len = v.length();
+				v.normalize();
+				quatf q(acos(v.x), acos(v.y), acos(v.z));
+				mat4f scale, rot;
+				scale.set_scale(len - 2 * _jointRadius, _jointRadius, _jointRadius);
+				scale.row3.set(joint->jointMatrix.row3.rvec3);
+				scale.row3.x += _jointRadius;
+				q.to_matrix(rot);
+				rot.set_identity();
+				mul(temp, scale, matrix);
+				temp = matrix;
+				_vpSimple->GetASMProgram()->LocalMatrix4x4(0, temp);
+
+				glBegin(GL_LINES);
+					glVertex3fv(vec1);
+					glVertex3fv(vec2);
+				glEnd();
+
+				ptr = ptr->sibling;
+			}
+		}
+
+		// draw joint
+		mat4f inv_bind;
+		joint->offsetMatrix.get_inverse(inv_bind);
+		mul(mat, inv_bind, matrix);
+		mat4f temp;
+		mat4f scale;
+		scale.set_scale(_jointRadius, _jointRadius, _jointRadius);
+		mul(temp, scale, mat);
+		_vpSimple->GetASMProgram()->LocalMatrix4x4(0, temp);
+
+		_renderer->VertexSource(0, _jointVertBuf, sizeof(LineVert3D), 0);
+		_renderer->IndexSource(0, GL::TYPE_VOID);
+		_renderer->Draw(GL::PRIM_LINE_LOOP, 0, 60);
+		_renderer->Draw(GL::PRIM_LINE_LOOP, 60, 60);
+		_renderer->Draw(GL::PRIM_LINE_LOOP, 120, 60);
 	}
 
 }

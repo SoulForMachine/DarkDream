@@ -187,6 +187,18 @@ namespace Engine
 
 			joint_inds = new(tempPool) vec2ub[mesh.numVertices];
 			file->Read(joint_inds, sizeof(vec2ub) * mesh.numVertices);
+
+			//for(size_t i = 0; i < mesh.numVertices; ++i)
+			//{
+			//	assert(joint_inds[i].x < 38);
+			//	assert(joint_inds[i].y < 38);
+			//	/*if(fcmp_lt(weights[i].x + weights[i].y, 0.9f))
+			//	{
+			//		weights[i].x = 0.5f;
+			//		weights[i].y = 0.5f;
+			//	}*/
+			////	assert(fcmp_gt(weights[i].x + weights[i].y, 0.1f));
+			//}
 		}
 
 		GL::Renderer* renderer = engineAPI.renderSystem->GetRenderer();

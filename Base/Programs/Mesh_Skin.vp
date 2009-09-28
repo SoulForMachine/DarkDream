@@ -6,7 +6,9 @@ ATTRIB		vertSkin = vertex.attrib[2]; # x, y - weights; z, w - indices
 
 PARAM		worldMat[] = { program.local[0..3] };
 PARAM		viewProjMat[] = { program.local[4..7] };
-PARAM		skinMatPalette[] = { program.local[8..94] }; # 29 matrices max
+#PARAM		skinMatPalette[] = { program.local[8..94] }; # 29 matrices max
+#PARAM		skinMatPalette[] = { program.local[8..254] }; # 82 matrices max
+PARAM		skinMatPalette[] = { program.local[8..512] };
 
 ADDRESS		index1, index2;
 

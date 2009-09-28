@@ -33,13 +33,22 @@ namespace MapEditor
 		void SelectObjects();
 		void DeleteObjects();
 		bool BBoxInSelRect(const AABBox& bbox, const math3d::vec4f planes[4]);
+		void UpdateSelectionRect(int x, int y);
 
 		PlaceObjectPanel^ _panel;
 		UndoManager^ _undoManager;
 		List<Engine::ModelEntity*>* _selectedEntities;
 		System::Drawing::Rectangle _selectionRect;
+		System::Drawing::Point _selStartPoint;
 		bool _selecting;
 		GL::Renderer* _renderer;
+		GL::Buffer* _vertBufSelRect;
+		GL::Buffer* _indBufSelRect;
+		GL::Buffer* _vertBufSelMark;
+		GL::VertexFormat* _vertFmtPos;
+		const Engine::ASMProgRes* _vertpSimple2D;
+		const Engine::ASMProgRes* _vertpSimple;
+		const Engine::ASMProgRes* _fragpConstColor;
 	};
 
 }

@@ -20,6 +20,12 @@ namespace Engine
 	class ENGINE_API RenderSystem
 	{
 	public:
+		enum RenderStyle
+		{
+			RENDER_STYLE_GAME,
+			RENDER_STYLE_EDITOR,
+		};
+
 		RenderSystem();
 
 		bool Init(void* instance_handle, void* window_handle);
@@ -48,6 +54,16 @@ namespace Engine
 			{ return _mainColor; }
 		void SetMainColor(const math3d::vec4f& color)
 			{ _mainColor = color; }
+		const math3d::vec4f& GetEditorColor() const
+			{ return _editorColor; }
+		void SetEditorColor(const math3d::vec4f& color)
+			{ _editorColor = color; }
+		const math3d::vec4f& GetRenderColor() const
+			{ return (_renderStyle == RENDER_STYLE_GAME)? _mainColor: _editorColor; }
+		void SetRenderStyle(RenderStyle style)
+			{ _renderStyle = style; }
+		RenderStyle GetRenderStyle() const
+			{ return _renderStyle; }
 
 	private:
 		static const int MAX_NUM_ENTITIES = 4 * 1024;
@@ -65,6 +81,8 @@ namespace Engine
 		TerrainRenderer* _terrainRenderer;
 		int _frameTime;
 		math3d::vec4f _mainColor;
+		math3d::vec4f _editorColor;
+		RenderStyle _renderStyle;
 
 		int _smapWidth;
 		int _smapHeight;

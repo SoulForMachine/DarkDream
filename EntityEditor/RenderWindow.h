@@ -21,6 +21,8 @@ namespace EntityEditor
 			{ _wireframe = wireframe; }
 		void ShowStats(bool stats)
 			{ _modelStats = stats; }
+		void ShowSkelet(bool show)
+			{ _skelet = show; }
 		void Draw()
 			{ OnPaint(); }
 		void ModelChanged();
@@ -43,6 +45,8 @@ namespace EntityEditor
 		void RenderGrid();
 		void RenderEntity();
 		void RenderStats();
+		void RenderSkelet(const math3d::vec3f& color);
+		void RenderBone(const Engine::Joint* joint, const math3d::mat4f& matrix);
 		bool CreateResources();
 		void DestroyResources();
 
@@ -54,6 +58,7 @@ namespace EntityEditor
 		Engine::Font* _font;
 		GL::Buffer* _gridVertBuf;
 		GL::Buffer* _lightVertBuf;
+		GL::Buffer* _jointVertBuf;
 		GL::VertexFormat* _lineVertFmt;
 		const Engine::ASMProgRes* _vpSimple;
 		const Engine::ASMProgRes* _fpConstClr;
@@ -61,6 +66,7 @@ namespace EntityEditor
 		int _gridHorizCount;
 		float _gridVertSpacing;
 		float _gridHorizSpacing;
+		float _jointRadius;
 
 		int _width;
 		int _height;
@@ -84,6 +90,7 @@ namespace EntityEditor
 		bool _animate;
 		bool _wireframe;
 		bool _modelStats;
+		bool _skelet;
 	};
 
 }

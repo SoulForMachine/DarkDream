@@ -9,6 +9,7 @@ using namespace System::Drawing::Imaging;
 using namespace System::Drawing::Drawing2D;
 using namespace math3d;
 using namespace Memory;
+using namespace Engine;
 
 
 namespace MapEditor
@@ -61,14 +62,14 @@ namespace MapEditor
 		_objViewFrameBuf->AttachRenderbuffer(GL::BUFFER_DEPTH, _objViewDepthBuf);
 		_fbufOk = (_objViewFrameBuf->CheckStatus() == GL::FBUF_STATUS_COMPLETE);
 
-		_objViewCam = new(mainPool) Engine::Camera;
+		_objViewCam = new(mainPool) Camera;
 		float ratio = float(cl_width) / cl_height;
 		_objViewCam->Perspective(60.0f, ratio, 0.1f, 1000.0f);
 		_objViewBmp = gcnew Bitmap(cl_width, cl_height, PixelFormat::Format32bppArgb);
 		_objRotX = 0.0f;
 		_objRotY = 0.0f;
 
-		_modelEntity = new(mainPool) Engine::ModelEntity;
+		_modelEntity = new(mainPool) ModelEntity;
 		_modelLoaded = false;
 		_filterText = "";
 		RefreshObjectTree();
@@ -218,8 +219,11 @@ namespace MapEditor
 			_renderer->ActiveDrawFramebuffer(_objViewFrameBuf);
 			_renderer->ClearColorBuffer(0.5f, 0.5f, 0.5f, 1.0f);
 			_renderer->ClearDepthStencilBuffer(GL::DEPTH_BUFFER_BIT, 1.0f, 0);
-			Engine::ModelEntity* ents[] = { _modelEntity };
+			ModelEntity* ents[] = { _modelEntity };
+			RenderSystem::RenderStyle render_style = engineAPI->renderSystem->GetRenderStyle();
+			engineAPI->renderSystem->SetRenderStyle(RenderSystem::RENDER_STYLE_EDITOR);
 			engineAPI->renderSystem->RenderEntities(0, *_objViewCam, ents, 1);
+			engineAPI->renderSystem->SetRenderStyle(render_style);
 			_renderer->ActiveDrawFramebuffer(0);
 			_renderer->Viewport(old_vp[0], old_vp[1], old_vp[2], old_vp[3]);
 

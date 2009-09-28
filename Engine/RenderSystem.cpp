@@ -97,7 +97,9 @@ namespace Engine
 			return false;
 		}
 
-		_mainColor.set(0.31f, 0.67f, 0.79f, 1.0f);
+		_mainColor.set(1.0f, 1.0f, 1.0f, 1.0f);
+		_editorColor.set(0.31f, 0.67f, 0.79f, 1.0f);
+		_renderStyle = RENDER_STYLE_GAME;
 
 		return true;
 	}

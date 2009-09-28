@@ -52,6 +52,7 @@ namespace EntityEditor
 		_modelForm->Animate(true);
 		_wireframe = false;
 		_modelStats = true;
+		_skelet = true;
 		_modelForm->ShowStats(true);
 		_entity = nullptr;
 		NewEntity();
@@ -168,6 +169,12 @@ namespace EntityEditor
 	{
 		_wireframe = !_wireframe;
 		_modelForm->Wireframe(_wireframe);
+	}
+
+	System::Void MainForm::_mnuViewSkelet_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		_skelet = !_skelet;
+		_modelForm->ShowSkelet(_skelet);
 	}
 
 	System::Void MainForm::_mnuEntityNew_Click(System::Object^  sender, System::EventArgs^  e)
@@ -311,6 +318,7 @@ namespace EntityEditor
 		_mnuViewPropertyPanel->Checked = !_propertyForm->IsHidden;
 		_mnuAnimate->Checked = _animate;
 		_mnuWireframe->Checked = _wireframe;
+		_mnuViewSkelet->Checked = _skelet;
 		_mnuModelStats->Checked = _modelStats;
 		_toolBtnConsole->Checked = !_consoleForm->IsHidden;
 

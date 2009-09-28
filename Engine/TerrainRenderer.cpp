@@ -42,8 +42,6 @@ namespace Engine
 		};
 		_vertFmtDbgLine = _renderer->CreateVertexFormat(vert_desc2, COUNTOF(vert_desc2));
 
-		_renderStyle = RENDER_STYLE_GAME;
-
 		return true;
 	}
 
@@ -62,13 +60,15 @@ namespace Engine
 
 	void TerrainRenderer::RenderTerrainPatch(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count)
 	{
-		const GL::ASMProgram* frag_prog = (_renderStyle == RENDER_STYLE_GAME)? _fpTerrain->GetASMProgram(): _fpLambert->GetASMProgram();
+		const GL::ASMProgram* frag_prog = 
+			(engineAPI.renderSystem->GetRenderStyle() == RenderSystem::RENDER_STYLE_GAME)?
+			_fpTerrain->GetASMProgram(): _fpLambert->GetASMProgram();
 		_renderer->IndexSource(terrain->GetPatchIndexBuffer(), GL::TYPE_UNSIGNED_SHORT);
 		_renderer->ActiveVertexASMProgram(_vpTerrain->GetASMProgram());
 		_renderer->ActiveFragmentASMProgram(frag_prog);
 		_renderer->ActiveVertexFormat(_vertFmtTerrain);
 		_vpTerrain->GetASMProgram()->LocalMatrix4x4(1, camera.GetViewProjectionTransform());
-		const float* color = engineAPI.renderSystem->GetMainColor();
+		const float* color = engineAPI.renderSystem->GetRenderColor();
 		frag_prog->LocalParameter(0, color);
 		const Terrain::TerrainPatch* hlight = terrain->GetHighlightPatch();
 

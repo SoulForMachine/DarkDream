@@ -568,11 +568,11 @@ namespace MapEditor
 			g_camUp = vec3f::y_axis;
 			g_camForward = -vec3f::z_axis;
 
-			engineAPI->renderSystem->GetTerrainRenderer()->SetRenderStyle(Engine::TerrainRenderer::RENDER_STYLE_GAME);
+			engineAPI->renderSystem->SetRenderStyle(Engine::RenderSystem::RENDER_STYLE_GAME);
 		}
 		else
 		{
-			engineAPI->renderSystem->GetTerrainRenderer()->SetRenderStyle(Engine::TerrainRenderer::RENDER_STYLE_EDITOR);
+			engineAPI->renderSystem->SetRenderStyle(Engine::RenderSystem::RENDER_STYLE_EDITOR);
 		}
 
 		_rotX = 0.0f;
