@@ -179,6 +179,8 @@ List<_Type>::List(const List<_Type>& list):
 	_end((NodeType*)&_endDummy),
 	_count(0)
 {
+	_end->next = _end;
+	_end->prev = _end;
 	*this = list;
 }
 

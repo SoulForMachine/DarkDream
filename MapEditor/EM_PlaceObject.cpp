@@ -3,13 +3,13 @@
 #include "ActionPlaceObjects.h"
 #include "ActionAddObject.h"
 #include "ActionRemoveObjects.h"
-#include "UndoManager.h"
 #include "EM_PlaceObject.h"
 
 #define CIRCLE_VERTEX_COUNT		64
 
 
 using namespace System;
+using namespace System::Windows;
 using namespace System::Drawing;
 using namespace math3d;
 using namespace Memory;
@@ -24,6 +24,7 @@ namespace MapEditor
 	{
 		_panel = gcnew PlaceObjectPanel;
 		_undoManager = undo_manager;
+		_undoManager->RegisterListener(this);
 		_selectedEntities = new(mainPool) List<ModelEntity*>;
 		_selecting = false;
 		_renderer = engineAPI->renderSystem->GetRenderer();
@@ -52,7 +53,7 @@ namespace MapEditor
 				float x = cos(angle);
 				float z = sin(angle);
 				vertices[4 + i].set(x, 0.0f, z);
-				vertices[4 + CIRCLE_VERTEX_COUNT + i].set(x * 1.25f, 0.0f, z * 1.25f);
+				vertices[4 + CIRCLE_VERTEX_COUNT + i].set(x * 2.0f, 0.0f, z * 2.0f);
 				angle += d;
 			}
 
@@ -102,14 +103,19 @@ namespace MapEditor
 	void EM_PlaceObject::MouseMove(int modifiers, int x, int y)
 	{
 		SetCursor(LoadCursor(0, IDC_ARROW));
-		UpdateSelectionRect(x, y);
+		if(_selecting)
+			UpdateSelectionRect(x, y);
 	}
 
 	void EM_PlaceObject::LeftButtonDown(int x, int y)
 	{
-		if(GetAsyncKeyState(VK_SHIFT) & 0x8000)
+		if(_panel->GetMode() == PlaceObjectPanel::Mode::ADD_OBJECT)
 		{
 			AddObject(x, y);
+			if(!(GetAsyncKeyState(VK_SHIFT) & 0x8000))
+			{
+				_panel->SetMode(PlaceObjectPanel::Mode::PLACE_OBJECT);
+			}
 		}
 		else
 		{
@@ -138,7 +144,10 @@ namespace MapEditor
 		switch(key)
 		{
 		case VK_ESCAPE:
-			_selectedEntities->Clear();
+			if(_selecting)
+				_selecting = false;
+			else
+				_selectedEntities->Clear();
 			break;
 		case VK_DELETE:
 			DeleteObjects();
@@ -158,7 +167,27 @@ namespace MapEditor
 
 		_selectionRect.Location = min_pt;
 		_selectionRect.Width = max_pt.X - min_pt.X;
+		if(_selectionRect.Width == 0)
+			_selectionRect.Width = 1;
 		_selectionRect.Height = max_pt.Y - min_pt.Y;
+		if(_selectionRect.Height == 0)
+			_selectionRect.Height = 1;
+	}
+
+	void EM_PlaceObject::SelectEntity(ModelEntity* entity, SelectMode mode)
+	{
+		// check if already in list
+		for(List<ModelEntity*>::Iterator it = _selectedEntities->Begin(); it != _selectedEntities->End(); ++it)
+		{
+			if(*it == entity)
+			{
+				if(mode == SelectMode::INVERT_SELECTION)
+					_selectedEntities->Remove(it);
+				return;
+			}
+		}
+
+		_selectedEntities->PushBack(entity);
 	}
 
 	void EM_PlaceObject::Render()
@@ -183,7 +212,7 @@ namespace MapEditor
 					(bbox.maxPt.x + bbox.minPt.x) * 0.5f,
 					bbox.minPt.y,
 					(bbox.maxPt.z + bbox.minPt.z) * 0.5f);
-				float scale = Max(bbox.maxPt.x - bbox.minPt.x, bbox.maxPt.z - bbox.minPt.z) * 0.5f;
+				float scale = 1.0f;//Max(bbox.maxPt.x - bbox.minPt.x, bbox.maxPt.z - bbox.minPt.z) * 0.5f;
 
 				mat4f world, wvp;
 				world.set_scale(scale);
@@ -242,6 +271,15 @@ namespace MapEditor
 		}
 	}
 
+	void EM_PlaceObject::UndoEvent(UndoEventListener::EventType type)
+	{
+		if(	type == UndoEventListener::EventType::UNDO ||
+			type == UndoEventListener::EventType::REDO )
+		{
+			ClearSelection();
+		}
+	}
+
 	void EM_PlaceObject::ClearSelection()
 	{
 		_selectedEntities->Clear();
@@ -249,6 +287,13 @@ namespace MapEditor
 
 	void EM_PlaceObject::AddObject(int x, int y)
 	{
+		if(_panel->GetSelObjectPath() == nullptr)
+		{
+			Forms::MessageBox::Show("You must select an entity in entity tree.", GetAppName(),
+				MessageBoxButtons::OK, MessageBoxIcon::Information);
+			return;
+		}
+
 		int vp_x, vp_y, vp_width, vp_height;
 		_renderer->GetViewport(vp_x, vp_y, vp_width, vp_height);
 		vec3f point;
@@ -265,7 +310,17 @@ namespace MapEditor
 
 	void EM_PlaceObject::SelectObjects()
 	{
-		_selectedEntities->Clear();
+		SelectMode mode;
+		if((GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0)
+			mode = SelectMode::INVERT_SELECTION;
+		else if((GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0)
+			mode = SelectMode::ADD_TO_SELECTION;
+		else
+		{
+			mode = SelectMode::NEW_SELECTION;
+			_selectedEntities->Clear();
+		}
+
 		ModelEntity** vis_ents = new(tempPool) ModelEntity*[World::MAX_NUM_ENTITIES];
 		int count = engineAPI->world->GetVisibleEntities(vis_ents, World::MAX_NUM_ENTITIES);
 		if(count > 0)
@@ -276,31 +331,39 @@ namespace MapEditor
 			mat4f inv_view_proj = engineAPI->world->GetCamera().GetViewProjectionTransform();
 			inv_view_proj.inverse();
 
+			vec3f points[4]; // world-space points of selection frustum top
+
+			unproject(points[0], _selectionRect.Left, (int)viewport[3] - _selectionRect.Top, inv_view_proj, viewport);
+			unproject(points[1], _selectionRect.Left, (int)viewport[3] - _selectionRect.Bottom, inv_view_proj, viewport);
+			unproject(points[2], _selectionRect.Right, (int)viewport[3] - _selectionRect.Bottom, inv_view_proj, viewport);
+			unproject(points[3], _selectionRect.Right, (int)viewport[3] - _selectionRect.Top, inv_view_proj, viewport);
+
+			const vec3f& cam_pos = engineAPI->world->GetCamera().GetPosition();
+			vec3f vec1 = cam_pos - points[0];
+			vec3f vec2 = cam_pos - points[2];
 			vec4f planes[4]; // left, top, right, bottom
-			vec3f point;
 
-			const vec4f& cp_left = engineAPI->world->GetCamera().GetClipPlane(Camera::CP_LEFT);
-			const vec4f& cp_right = engineAPI->world->GetCamera().GetClipPlane(Camera::CP_RIGHT);
-			const vec4f& cp_top = engineAPI->world->GetCamera().GetClipPlane(Camera::CP_TOP);
-			const vec4f& cp_bottom = engineAPI->world->GetCamera().GetClipPlane(Camera::CP_BOTTOM);
+			cross(planes[0].rvec3, points[1] - points[0], points[0] - cam_pos);
+			planes[0].rvec3.normalize();
+			planes[0].w = -dot(planes[0].rvec3, points[0]);
 
-			unproject(point, _selectionRect.Left, (int)viewport[3] - _selectionRect.Bottom, inv_view_proj, viewport);
-			planes[0].rvec3 = cp_left.rvec3;
-			planes[0].w = -dot(cp_left.rvec3, point);
-			planes[1].rvec3 = cp_top.rvec3;
-			planes[1].w = -dot(cp_top.rvec3, point);
+			cross(planes[1].rvec3, points[0] - cam_pos, points[3] - points[0]);
+			planes[1].rvec3.normalize();
+			planes[1].w = -dot(planes[1].rvec3, points[0]);
 
-			unproject(point, _selectionRect.Right, (int)viewport[3] - _selectionRect.Top, inv_view_proj, viewport);
-			planes[2].rvec3 = cp_right.rvec3;
-			planes[2].w = -dot(cp_right.rvec3, point);
-			planes[3].rvec3 = cp_bottom.rvec3;
-			planes[3].w = -dot(cp_bottom.rvec3, point);
+			cross(planes[2].rvec3, points[3] - cam_pos, points[2] - points[3]);
+			planes[2].rvec3.normalize();
+			planes[2].w = -dot(planes[2].rvec3, points[2]);
+
+			cross(planes[3].rvec3, points[2] - cam_pos, points[1] - points[2]);
+			planes[3].rvec3.normalize();
+			planes[3].w = -dot(planes[3].rvec3, points[2]);
 
 			for(int i = 0; i < count; ++i)
 			{
 				const AABBox& bbox = vis_ents[i]->GetWorldBoundingBox();
 				if(BBoxInSelRect(bbox, planes))
-					_selectedEntities->PushBack(vis_ents[i]);
+					SelectEntity(vis_ents[i], mode);
 			}
 		}
 		delete[] vis_ents;

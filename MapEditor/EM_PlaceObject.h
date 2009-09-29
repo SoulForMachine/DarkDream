@@ -1,16 +1,16 @@
 #pragma once
 
 #include "EditMode.h"
+#include "UndoManager.h"
 
 
 
 namespace MapEditor
 {
 	ref class PlaceObjectPanel;
-	ref class UndoManager;
 
 
-	public ref class EM_PlaceObject: public EditMode
+	public ref class EM_PlaceObject: public EditMode, public UndoEventListener
 	{
 	public:
 		EM_PlaceObject(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager);
@@ -26,14 +26,24 @@ namespace MapEditor
 		virtual void KeyDown(int key) override;
 		virtual void Render() override;
 
+		virtual void UndoEvent(UndoEventListener::EventType type);
+
 		void ClearSelection();
 
 	private:
+		enum class SelectMode
+		{
+			NEW_SELECTION,
+			ADD_TO_SELECTION,
+			INVERT_SELECTION,
+		};
+
 		void AddObject(int x, int y);
 		void SelectObjects();
 		void DeleteObjects();
 		bool BBoxInSelRect(const AABBox& bbox, const math3d::vec4f planes[4]);
 		void UpdateSelectionRect(int x, int y);
+		void SelectEntity(Engine::ModelEntity* entity, SelectMode mode);
 
 		PlaceObjectPanel^ _panel;
 		UndoManager^ _undoManager;

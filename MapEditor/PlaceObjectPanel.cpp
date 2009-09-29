@@ -3,6 +3,7 @@
 #include "PlaceObjectPanel.h"
 
 using namespace System;
+using namespace System::Windows;
 using namespace System::IO;
 using namespace System::Drawing;
 using namespace System::Drawing::Imaging;
@@ -73,6 +74,7 @@ namespace MapEditor
 		_modelLoaded = false;
 		_filterText = "";
 		RefreshObjectTree();
+		SetMode(Mode::PLACE_OBJECT);
 	}
 
 	PlaceObjectPanel::~PlaceObjectPanel()
@@ -147,6 +149,20 @@ namespace MapEditor
 		}
 	}
 
+	System::Void PlaceObjectPanel::_buttonAdd_MouseClick(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e)
+	{
+		_mode = Mode::ADD_OBJECT;
+		_buttonAdd->Checked = true;
+		_buttonPlace->Checked = false;
+	}
+
+	System::Void PlaceObjectPanel::_buttonPlace_MouseClick(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e)
+	{
+		_mode = Mode::PLACE_OBJECT;
+		_buttonPlace->Checked = true;
+		_buttonAdd->Checked = false;
+	}
+
 	System::Void PlaceObjectPanel::_buttonRefresh_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		RefreshObjectTree();
@@ -184,6 +200,7 @@ namespace MapEditor
 		{
 			tchar* path = ConvertString<tchar>(node->GetRelativePath());
 			_modelLoaded = _modelEntity->Load(path);
+			delete[] path;
 			if(_modelLoaded)
 			{
 				engineAPI->textureManager->LoadAll();
@@ -193,7 +210,6 @@ namespace MapEditor
 				_objRotX = 0.0f;
 				_objRotY = 0.0f;
 			}
-			delete[] path;
 		}
 		_panelObjectView->Refresh();
 	}
@@ -281,7 +297,7 @@ namespace MapEditor
 
 	String^ PlaceObjectPanel::GetSelObjectPath()
 	{
-		if(_treeObjects->SelectedNode == nullptr)
+		if(_treeObjects->SelectedNode == nullptr || !_modelLoaded)
 			return nullptr;
 
 		ObjectTreeNode^ node = (ObjectTreeNode^)_treeObjects->SelectedNode;
@@ -289,6 +305,22 @@ namespace MapEditor
 			return nullptr;
 
 		return node->GetRelativePath();
+	}
+
+	void PlaceObjectPanel::SetMode(Mode mode)
+	{
+		_mode = mode;
+		switch(mode)
+		{
+		case Mode::ADD_OBJECT:
+			_buttonAdd->Checked = true;
+			_buttonPlace->Checked = false;
+			break;
+		case Mode::PLACE_OBJECT:
+			_buttonPlace->Checked = true;
+			_buttonAdd->Checked = false;
+			break;
+		}
 	}
 
 }
