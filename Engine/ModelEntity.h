@@ -2,7 +2,7 @@
 #ifndef _ENGINE_MODEL_ENTITY_H_
 #define _ENGINE_MODEL_ENTITY_H_
 
-#include "BaseLib/AABBox.h"
+#include "BaseLib/Bounds.h"
 #include "BaseLib/HashMap.h"
 #include "BaseLib/Math/mat4.h"
 #include "Animation.h"
@@ -90,7 +90,7 @@ namespace Engine
 		void SetWorldTransform(const math3d::mat4f& transform);
 		const StaticArray<math3d::mat4f>& GetJointTransforms() const
 			{ return _jointMatPalette; }
-		const AABBox& GetWorldBoundingBox() const
+		const OBBox& GetWorldBoundingBox() const
 			{ return _worldBBox; }
 		void UpdateGraphics(int frame_time);
 		void ActiveAnimation(const char* anim_name);
@@ -152,7 +152,7 @@ namespace Engine
 		ModelClass GetClassFromString(const char* name);
 		const char* GetClassString(ModelClass c);
 
-		AABBox _worldBBox; // model's world space bounding box
+		OBBox _worldBBox; // model's world space bounding box
 		math3d::mat4f _worldMat;
 		StaticArray<math3d::mat4f> _jointMatPalette;
 		float _animTime;

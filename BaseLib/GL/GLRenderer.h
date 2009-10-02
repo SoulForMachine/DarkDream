@@ -283,6 +283,9 @@ namespace GL
 		// state queries
 		void GetViewport(int& x, int& y, int& width, int& height);
 		void GetViewport(float& x, float& y, float& width, float& height);
+		void GetViewport(int viewport[4]);
+		void GetViewport(float viewport[4]);
+
 
 		// object creation
 		VertexFormat* CreateVertexFormat(const VertexAttribDesc* descriptors, int count);

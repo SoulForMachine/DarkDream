@@ -16,6 +16,9 @@ using namespace math3d;
 namespace Engine
 {
 
+	Console::BoolVar g_cvarDrawEntityBBoxes("r_drawEntityBBoxes", false);
+
+
 	RenderSystem::RenderSystem()
 	{
 		Clear();
@@ -97,6 +100,10 @@ namespace Engine
 			return false;
 		}
 
+		// init debug rendering
+		_debugRenderer = new(mainPool) DebugRenderer;
+		result = _debugRenderer->Init();
+
 		_mainColor.set(1.0f, 1.0f, 1.0f, 1.0f);
 		_editorColor.set(0.31f, 0.67f, 0.79f, 1.0f);
 		_renderStyle = RENDER_STYLE_GAME;
@@ -124,6 +131,12 @@ namespace Engine
 		{
 			_terrainRenderer->Deinit();
 			delete _terrainRenderer;
+		}
+
+		if(_debugRenderer)
+		{
+			_debugRenderer->Deinit();
+			delete _debugRenderer;
 		}
 
 		GL::DestroyRenderer(_renderer);
@@ -277,6 +290,14 @@ namespace Engine
 		_renderer->CullFace(GL::FACE_BACK);
 		_entityRenderer->Render(camera, _meshBuf, mesh_count);
 		_entityRenderer->Render(camera, _transpMeshBuf, transp_mesh_count);
+
+		if(g_cvarDrawEntityBBoxes)
+		{
+			for(int ent_i = 0; ent_i < ent_count; ++ent_i)
+			{
+				_debugRenderer->RenderBoundingBox(entities[ent_i]->GetWorldBoundingBox());
+			}
+		}
 	}
 
 	void RenderSystem::RenderTerrain(int frame_time)
@@ -305,6 +326,7 @@ namespace Engine
 		_meshBuf = 0;
 		_transpMeshBuf = 0;
 		_terrainRenderer = 0;
+		_debugRenderer = 0;
 	}
 
 }

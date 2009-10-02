@@ -65,7 +65,7 @@ namespace MapEditor
 
 		_objViewCam = new(mainPool) Camera;
 		float ratio = float(cl_width) / cl_height;
-		_objViewCam->Perspective(60.0f, ratio, 0.1f, 1000.0f);
+		_objViewCam->Perspective(70.0f, ratio, 0.1f, 1000.0f);
 		_objViewBmp = gcnew Bitmap(cl_width, cl_height, PixelFormat::Format32bppArgb);
 		_objRotX = 0.0f;
 		_objRotY = 0.0f;
@@ -223,10 +223,14 @@ namespace MapEditor
 			int old_vp[4];
 			_renderer->GetViewport(old_vp[0], old_vp[1], old_vp[2], old_vp[3]);
 			_renderer->Viewport(0, 0, cl_width, cl_height);
-			const AABBox& bbox = _modelEntity->GetWorldBoundingBox();
-			vec3f at = (bbox.minPt + bbox.maxPt) / 2.0f;
+			const OBBox& bbox = _modelEntity->GetWorldBoundingBox();
+			vec3f at = bbox.GetCenterPoint();
 			mat4f cam, rot, look;
-			look.look_at(at + vec3f::z_axis * (bbox.maxPt.z - bbox.minPt.z) * 2.0f, at, vec3f::y_axis);
+			float max_dim = 
+				Max(abs(bbox.points[0].x - bbox.points[7].x), 
+				Max(abs(bbox.points[0].y - bbox.points[7].y),
+				abs(bbox.points[0].z - bbox.points[7].z)));
+			look.look_at(at + vec3f::z_axis * max_dim, at, vec3f::y_axis);
 			rot.set_rotation_y(_objRotY);
 			rot.rotate_x(_objRotX);
 			mul(cam, rot, look);

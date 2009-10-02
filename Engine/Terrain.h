@@ -4,7 +4,7 @@
 
 #include "BaseLib/List.h"
 #include "BaseLib/Math/math3d.h"
-#include "BaseLib/AABBox.h"
+#include "BaseLib/Bounds.h"
 #include "Engine/Common.h"
 
 

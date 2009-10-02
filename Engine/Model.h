@@ -5,7 +5,7 @@
 #include "BaseLib/Math/math3d.h"
 #include "BaseLib/GL/GLRenderer.h"
 #include "BaseLib/StaticArray.h"
-#include "BaseLib/AABBox.h"
+#include "BaseLib/Bounds.h"
 #include "BaseLib/FileSys.h"
 #include "Engine/Common.h"
 

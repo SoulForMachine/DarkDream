@@ -1,5 +1,5 @@
 
-#include "BaseLib/AABBox.h"
+#include "BaseLib/Bounds.h"
 #include "Camera.h"
 
 using namespace math3d;
@@ -35,6 +35,27 @@ namespace Engine
 			if(point_to_plane_sgn_dist(vec3f(bbox.maxPt.x, bbox.minPt.y, bbox.maxPt.z), _clipPlanes[i]) > 0) continue;
 			if(point_to_plane_sgn_dist(vec3f(bbox.minPt.x, bbox.maxPt.y, bbox.maxPt.z), _clipPlanes[i]) > 0) continue;
 			if(point_to_plane_sgn_dist(vec3f(bbox.maxPt.x, bbox.maxPt.y, bbox.maxPt.z), _clipPlanes[i]) > 0) continue;
+
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Camera::IsInsideFrustum(const OBBox& bbox)
+	{
+		UpdateViewProjectionMat();
+
+		for(int i = 0; i < 6; ++i)
+		{
+			if(point_to_plane_sgn_dist(bbox.points[0], _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[1], _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[2], _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[3], _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[4], _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[5], _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[6], _clipPlanes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[7], _clipPlanes[i]) > 0) continue;
 
 			return false;
 		}

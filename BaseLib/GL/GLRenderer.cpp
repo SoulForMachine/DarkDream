@@ -1648,6 +1648,22 @@ namespace GL
 		height = (float)_viewport[3];
 	}
 
+	void Renderer::GetViewport(int viewport[4])
+	{
+		viewport[0] = _viewport[0];
+		viewport[1] = _viewport[1];
+		viewport[2] = _viewport[2];
+		viewport[3] = _viewport[3];
+	}
+
+	void Renderer::GetViewport(float viewport[4])
+	{
+		viewport[0] = (float)_viewport[0];
+		viewport[1] = (float)_viewport[1];
+		viewport[2] = (float)_viewport[2];
+		viewport[3] = (float)_viewport[3];
+	}
+
 	VertexFormat* Renderer::CreateVertexFormat(const VertexAttribDesc* descriptors, int count)
 	{
 		if(count <= 0 || !descriptors)

@@ -283,7 +283,7 @@ namespace MapEditor
 		_editMode->MouseMove(modifiers, x, y);
 
 		const float ROT_SPEED = 10.0f;
-		const float MOVE_SPEED = 10.0f;
+		const float MOVE_SPEED = 5.0f;
 
 		if(!_editMode->IsExecuting())
 		{
@@ -389,7 +389,7 @@ namespace MapEditor
 		{
 			if(_viewMode == ViewMode::EDITOR)
 			{
-				_zoom = float(delta) / WHEEL_DELTA * _frameTimeSec * 1000.0f;
+				_zoom = float(delta) / WHEEL_DELTA * _frameTimeSec * 200.0f;
 			}
 		}
 	}
@@ -437,7 +437,7 @@ namespace MapEditor
 			_frameCount = 0;
 		}
 
-		const float MOVE_SPEED = 200.0f;
+		const float MOVE_SPEED = 100.0f;
 
 		if(!_editMode->IsExecuting())
 		{

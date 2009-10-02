@@ -8,6 +8,7 @@
 
 
 class AABBox;
+class OBBox;
 
 
 namespace Engine
@@ -48,6 +49,7 @@ namespace Engine
 			{ return ENTITY_TYPE_CAMERA; }
 
 		bool IsInsideFrustum(const AABBox& bbox);
+		bool IsInsideFrustum(const OBBox& bbox);
 
 	private:
 		void UpdateViewProjectionMat() const;

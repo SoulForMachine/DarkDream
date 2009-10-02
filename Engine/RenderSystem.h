@@ -8,6 +8,7 @@
 #include "Render2D.h"
 #include "TerrainRenderer.h"
 #include "EntityRenderer.h"
+#include "DebugRenderer.h"
 
 
 namespace Engine
@@ -45,6 +46,8 @@ namespace Engine
 			{ return _terrainRenderer; }
 		EntityRenderer* GetEntityRenderer()
 			{ return _entityRenderer; }
+		DebugRenderer* GetDebugRenderer()
+			{ return _debugRenderer; }
 
 		int GetFrameTime() const
 			{ return _frameTime; }
@@ -79,6 +82,7 @@ namespace Engine
 		EntityRenderer::MeshRenderData* _meshBuf;
 		EntityRenderer::MeshRenderData* _transpMeshBuf;
 		TerrainRenderer* _terrainRenderer;
+		DebugRenderer* _debugRenderer;
 		int _frameTime;
 		math3d::vec4f _mainColor;
 		math3d::vec4f _editorColor;

@@ -377,14 +377,6 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\AABBox.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\AABBox.h"
-			>
-		</File>
-		<File
 			RelativePath=".\Algorithm.cpp"
 			>
 		</File>
@@ -398,6 +390,14 @@
 		</File>
 		<File
 			RelativePath=".\BaseLib.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Bounds.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Bounds.h"
 			>
 		</File>
 		<File

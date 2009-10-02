@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "resource.h"
 #include "PlaceObjectPanel.h"
 #include "ActionPlaceObjects.h"
 #include "ActionAddObject.h"
@@ -6,6 +7,8 @@
 #include "EM_PlaceObject.h"
 
 #define CIRCLE_VERTEX_COUNT		64
+#define GIZMO_INNER_SCALE		1.0f
+#define GIZMO_OUTER_SCALE		2.0f
 
 
 using namespace System;
@@ -25,8 +28,11 @@ namespace MapEditor
 		_panel = gcnew PlaceObjectPanel;
 		_undoManager = undo_manager;
 		_undoManager->RegisterListener(this);
+		_actionPlaceObjs = nullptr;
+		_parameters = gcnew Parameters;
 		_selectedEntities = new(mainPool) List<ModelEntity*>;
 		_selecting = false;
+		_placing = false;
 		_renderer = engineAPI->renderSystem->GetRenderer();
 
 		_vertBufSelRect = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, 4 * sizeof(vec3f), 0, GL::USAGE_DYNAMIC_DRAW);
@@ -52,8 +58,8 @@ namespace MapEditor
 			{
 				float x = cos(angle);
 				float z = sin(angle);
-				vertices[4 + i].set(x, 0.0f, z);
-				vertices[4 + CIRCLE_VERTEX_COUNT + i].set(x * 2.0f, 0.0f, z * 2.0f);
+				vertices[4 + i].set(x * GIZMO_INNER_SCALE, 0.0f, z * GIZMO_INNER_SCALE);
+				vertices[4 + CIRCLE_VERTEX_COUNT + i].set(x * GIZMO_OUTER_SCALE, 0.0f, z * GIZMO_OUTER_SCALE);
 				angle += d;
 			}
 
@@ -69,6 +75,11 @@ namespace MapEditor
 		_vertpSimple2D = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/Simple2D.vp"), true);
 		_vertpSimple = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
 		_fragpConstColor = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
+
+		HINSTANCE hinst = (HINSTANCE)Runtime::InteropServices::Marshal::GetHINSTANCE(GetType()->Module).ToPointer();
+		_cursorMove = LoadCursor(hinst, MAKEINTRESOURCE(IDC_CURSOR_MOVE));
+		_cursorMoveUD = LoadCursor(hinst, MAKEINTRESOURCE(IDC_CURSOR_MOVE_UD));
+		_cursorRotate = LoadCursor(hinst, MAKEINTRESOURCE(IDC_CURSOR_ROTATE));
 	}
 
 	EM_PlaceObject::~EM_PlaceObject()
@@ -102,9 +113,48 @@ namespace MapEditor
 
 	void EM_PlaceObject::MouseMove(int modifiers, int x, int y)
 	{
-		SetCursor(LoadCursor(0, IDC_ARROW));
 		if(_selecting)
+		{
+			SetCursor(LoadCursor(0, IDC_ARROW));
 			UpdateSelectionRect(x, y);
+		}
+		else if(_placing)
+		{
+			switch(_parameters->transformType)
+			{
+			case TransformType::MOVE_XZ:
+				SetCursor(_cursorMove);
+				_parameters->translX;
+				_parameters->translZ;
+				break;
+			case TransformType::MOVE_Y:
+				SetCursor(_cursorMoveUD);
+				_parameters->translY;
+				break;
+			case TransformType::ROTATE:
+				SetCursor(_cursorRotate);
+				_parameters->rotateY;
+				break;
+			}
+		}
+		else
+		{
+			GizmoType gizmo = MouseOverGizmo(x, y);
+			switch(gizmo)
+			{
+			case GizmoType::MOVE_XZ:
+				SetCursor(_cursorMove);
+				break;
+			case GizmoType::MOVE_Y:
+				SetCursor(_cursorMoveUD);
+				break;
+			case GizmoType::ROTATE:
+				SetCursor(_cursorRotate);
+				break;
+			default:
+				SetCursor(LoadCursor(0, IDC_ARROW));
+			}
+		}
 	}
 
 	void EM_PlaceObject::LeftButtonDown(int x, int y)
@@ -117,15 +167,47 @@ namespace MapEditor
 				_panel->SetMode(PlaceObjectPanel::Mode::PLACE_OBJECT);
 			}
 		}
-		else
+		else if(_panel->GetMode() == PlaceObjectPanel::Mode::PLACE_OBJECT)
 		{
-			_selectionRect.X = x;
-			_selectionRect.Y = y;
-			_selectionRect.Width = 0;
-			_selectionRect.Height = 0;
-			_selStartPoint.X = x;
-			_selStartPoint.Y = y;
-			_selecting = true;
+			GizmoType gizmo = MouseOverGizmo(x, y);
+			if(gizmo == GizmoType::NONE)
+			{
+				// start selecting
+				_selectionRect.X = x;
+				_selectionRect.Y = y;
+				_selectionRect.Width = 0;
+				_selectionRect.Height = 0;
+				_selStartPoint.X = x;
+				_selStartPoint.Y = y;
+				_selecting = true;
+			}
+			else
+			{
+				switch(gizmo)
+				{
+				case GizmoType::MOVE_XZ:
+					_parameters->transformType = TransformType::MOVE_XZ;
+					_parameters->translX = 0.0f;
+					_parameters->translZ = 0.0f;
+					break;
+				case GizmoType::MOVE_Y:
+					_parameters->transformType = TransformType::MOVE_Y;
+					_parameters->translY = 0.0f;
+					break;
+				case GizmoType::ROTATE:
+					_parameters->transformType = TransformType::ROTATE;
+					_parameters->rotateY = 0.0f;
+					break;
+				}
+
+				_actionPlaceObjs = gcnew ActionPlaceObjects(_parameters);
+				_placing = _actionPlaceObjs->BeginAction();
+				if(!_placing)
+				{
+					delete _actionPlaceObjs;
+					_actionPlaceObjs = nullptr;
+				}
+			}
 		}
 	}
 
@@ -137,6 +219,13 @@ namespace MapEditor
 			SelectObjects();
 			_selecting = false;
 		}
+		else if(_placing && _actionPlaceObjs != nullptr)
+		{
+			_actionPlaceObjs->EndAction();
+			_undoManager->Add(_actionPlaceObjs);
+			_actionPlaceObjs = nullptr;
+			_placing = false;
+		}
 	}
 
 	void EM_PlaceObject::KeyDown(int key)
@@ -145,9 +234,20 @@ namespace MapEditor
 		{
 		case VK_ESCAPE:
 			if(_selecting)
+			{
 				_selecting = false;
+			}
+			else if(_placing && _actionPlaceObjs != nullptr)
+			{
+				_placing = false;
+				_actionPlaceObjs->CancelAction();
+				delete _actionPlaceObjs;
+				_actionPlaceObjs = nullptr;
+			}
 			else
+			{
 				_selectedEntities->Clear();
+			}
 			break;
 		case VK_DELETE:
 			DeleteObjects();
@@ -190,6 +290,56 @@ namespace MapEditor
 		_selectedEntities->PushBack(entity);
 	}
 
+	EM_PlaceObject::GizmoType EM_PlaceObject::MouseOverGizmo(int x, int y)
+	{
+		if(_selectedEntities->GetCount() > 0)
+		{
+			float viewport[4];
+			_renderer->GetViewport(viewport);
+			mat4f view_proj = engineAPI->world->GetCamera().GetViewProjectionTransform();
+			view_proj.inverse();
+
+			for(List<ModelEntity*>::ConstIterator it = _selectedEntities->Begin(); it != _selectedEntities->End(); ++it)
+			{
+				const OBBox& bbox = (*it)->GetWorldBoundingBox();
+				vec3f center = bbox.GetCenterPoint();
+				center.y = bbox.points[0].y;
+				vec4f plane(vec3f::y_axis, -center.y);
+				vec3f ray_pt;
+				unproject(ray_pt, x, (int)viewport[3] - y, view_proj, viewport);
+				vec3f ray_dir = ray_pt - engineAPI->world->GetCamera().GetPosition();
+				vec3f pt;
+
+				if(intersect_ray_plane(pt, ray_pt, ray_dir, plane))
+				{
+					float dist = (pt - center).length();
+					if(dist <= GIZMO_INNER_SCALE)
+					{
+						return GizmoType::MOVE_XZ;
+					}
+					else if(dist < GIZMO_OUTER_SCALE - (GIZMO_OUTER_SCALE - GIZMO_INNER_SCALE) / 2.0f)
+					{
+						return GizmoType::MOVE_Y;
+					}
+					else if(dist < GIZMO_OUTER_SCALE * 1.1f)
+					{
+						return GizmoType::ROTATE;
+					}
+				}
+			}
+		}
+
+		return GizmoType::NONE;
+	}
+
+	void EM_PlaceObject::Update(float dt)
+	{
+		if(_placing && _actionPlaceObjs != nullptr)
+		{
+			_actionPlaceObjs->Update(dt);
+		}
+	}
+
 	void EM_PlaceObject::Render()
 	{
 		// render markers/gizmos on selected objects
@@ -207,11 +357,9 @@ namespace MapEditor
 
 			for(List<ModelEntity*>::ConstIterator it = _selectedEntities->Begin(); it != _selectedEntities->End(); ++it)
 			{
-				const AABBox& bbox = (*it)->GetWorldBoundingBox();
-				vec3f center(
-					(bbox.maxPt.x + bbox.minPt.x) * 0.5f,
-					bbox.minPt.y,
-					(bbox.maxPt.z + bbox.minPt.z) * 0.5f);
+				const OBBox& bbox = (*it)->GetWorldBoundingBox();
+				vec3f center = bbox.GetCenterPoint();
+				center.y = bbox.points[0].y;
 				float scale = 1.0f;//Max(bbox.maxPt.x - bbox.minPt.x, bbox.maxPt.z - bbox.minPt.z) * 0.5f;
 
 				mat4f world, wvp;
@@ -361,7 +509,7 @@ namespace MapEditor
 
 			for(int i = 0; i < count; ++i)
 			{
-				const AABBox& bbox = vis_ents[i]->GetWorldBoundingBox();
+				const OBBox& bbox = vis_ents[i]->GetWorldBoundingBox();
 				if(BBoxInSelRect(bbox, planes))
 					SelectEntity(vis_ents[i], mode);
 			}
@@ -383,18 +531,18 @@ namespace MapEditor
 		}
 	}
 
-	bool EM_PlaceObject::BBoxInSelRect(const AABBox& bbox, const vec4f planes[4])
+	bool EM_PlaceObject::BBoxInSelRect(const OBBox& bbox, const vec4f planes[4])
 	{
 		for(int i = 0; i < 4; ++i)
 		{
-			if(point_to_plane_sgn_dist(vec3f(bbox.minPt.x, bbox.minPt.y, bbox.minPt.z), planes[i]) > 0) continue;
-			if(point_to_plane_sgn_dist(vec3f(bbox.maxPt.x, bbox.minPt.y, bbox.minPt.z), planes[i]) > 0) continue;
-			if(point_to_plane_sgn_dist(vec3f(bbox.minPt.x, bbox.maxPt.y, bbox.minPt.z), planes[i]) > 0) continue;
-			if(point_to_plane_sgn_dist(vec3f(bbox.maxPt.x, bbox.maxPt.y, bbox.minPt.z), planes[i]) > 0) continue;
-			if(point_to_plane_sgn_dist(vec3f(bbox.minPt.x, bbox.minPt.y, bbox.maxPt.z), planes[i]) > 0) continue;
-			if(point_to_plane_sgn_dist(vec3f(bbox.maxPt.x, bbox.minPt.y, bbox.maxPt.z), planes[i]) > 0) continue;
-			if(point_to_plane_sgn_dist(vec3f(bbox.minPt.x, bbox.maxPt.y, bbox.maxPt.z), planes[i]) > 0) continue;
-			if(point_to_plane_sgn_dist(vec3f(bbox.maxPt.x, bbox.maxPt.y, bbox.maxPt.z), planes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[0], planes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[1], planes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[2], planes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[3], planes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[4], planes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[5], planes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[6], planes[i]) > 0) continue;
+			if(point_to_plane_sgn_dist(bbox.points[7], planes[i]) > 0) continue;
 
 			return false;
 		}

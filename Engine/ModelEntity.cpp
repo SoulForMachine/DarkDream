@@ -531,9 +531,7 @@ namespace Engine
 	void ModelEntity::CalcWorldBBox()
 	{
 		const Model* model = _model->GetModel();
-		const AABBox& obb = model->GetBoundingBox();
-		transform(_worldBBox.minPt, obb.minPt, _worldMat);
-		transform(_worldBBox.maxPt, obb.maxPt, _worldMat);
+		model->GetBoundingBox().GetOrientedBBox(_worldBBox, _worldMat);
 	}
 
 	/*

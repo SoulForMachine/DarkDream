@@ -6,6 +6,15 @@
 namespace MapEditor
 {
 
+	ActionPlaceObjects::ActionPlaceObjects(EM_PlaceObject::Parameters^ params)
+	{
+		_parameters = params;
+	}
+
+	ActionPlaceObjects::~ActionPlaceObjects()
+	{
+	}
+
 	bool ActionPlaceObjects::BeginAction()
 	{
 		return true;

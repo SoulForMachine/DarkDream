@@ -236,6 +236,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\DebugRenderer.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\DebugRenderer.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Engine.cpp"
 			>
 		</File>

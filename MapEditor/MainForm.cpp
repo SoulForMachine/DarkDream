@@ -235,6 +235,8 @@ namespace MapEditor
 			_menuViewWireframe->Checked = _wireframe;
 			_menuViewStats->Checked = _viewStats;
 			_menuViewGameView->Checked = (_mapForm->GetViewMode() == MapRenderWindow::ViewMode::GAME);
+			_menuViewToolPanel->Checked = !_toolPanel->IsHidden;
+			_menuViewConsole->Checked = !_consoleForm->IsHidden;
 			_menuEditUndo->Enabled = _mapForm->GetUndoManager()->HasUndo();
 			_menuEditRedo->Enabled = _mapForm->GetUndoManager()->HasRedo();
 
@@ -260,12 +262,38 @@ namespace MapEditor
 		::Console::ExecuteStatement(buf);
 	}
 
+	System::Void MainForm::_menuViewEntityBBoxes_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		_menuViewEntityBBoxes->Checked = !_menuViewEntityBBoxes->Checked;
+		char buf[128];
+		sprintf(buf, "r_drawEntityBBoxes %d", _menuViewEntityBBoxes->Checked? 1: 0);
+		::Console::ExecuteStatement(buf);
+	}
+
 	System::Void MainForm::_menuViewGameView_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_mapForm->GetViewMode() == MapRenderWindow::ViewMode::EDITOR)
 			_mapForm->SetViewMode(MapRenderWindow::ViewMode::GAME);
 		else
 			_mapForm->SetViewMode(MapRenderWindow::ViewMode::EDITOR);
+	}
+
+	System::Void MainForm::_menuViewToolPanel_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		ToggleForm(_toolPanel);
+	}
+
+	System::Void MainForm::_menuViewConsole_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		ToggleForm(_consoleForm);
+	}
+
+	void MainForm::ToggleForm(WeifenLuo::WinFormsUI::Docking::DockContent^ form)
+	{
+		if(form->IsHidden)
+			form->Show(_dockPanel);
+		else
+			form->Hide();
 	}
 
 }
