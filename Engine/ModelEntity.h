@@ -108,7 +108,10 @@ namespace Engine
 			{ return _sounds; }
 		const AnimData* GetCurrentAnimation() const
 			{ return _curAnim; }
-
+		bool IsDropped() const
+			{ return _dropped; }
+		void SetDropped(bool dropped)
+			{ _dropped = dropped; }
 
 		bool SetModel(const tchar* file_name);
 		bool SetAIScript(const tchar* file_name);
@@ -157,6 +160,7 @@ namespace Engine
 		StaticArray<math3d::mat4f> _jointMatPalette;
 		float _animTime;
 		AnimData* _curAnim;
+		bool _dropped; // true if object is on terrain
 
 		const ModelRes* _model;
 		const AIScriptRes* _aiScript;

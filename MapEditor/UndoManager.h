@@ -17,7 +17,7 @@ namespace MapEditor
 			CLEAR
 		};
 
-		void UndoEvent(EventType type);
+		void UndoEvent(EventType type, Action^ action);
 	};
 
 
@@ -40,7 +40,7 @@ namespace MapEditor
 
 	private:
 		void ClearList(System::Collections::Generic::LinkedList<Action^>^ list);
-		void NotifyListeners(UndoEventListener::EventType type);
+		void NotifyListeners(UndoEventListener::EventType type, Action^ action);
 
 		System::Collections::Generic::LinkedList<Action^>^ _undoList;
 		System::Collections::Generic::LinkedList<Action^>^ _redoList;

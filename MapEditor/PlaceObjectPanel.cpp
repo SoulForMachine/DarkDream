@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Utility.h"
+#include "EM_PlaceObject.h"
 #include "PlaceObjectPanel.h"
 
 using namespace System;
@@ -37,7 +38,7 @@ namespace MapEditor
 	};
 
 
-	PlaceObjectPanel::PlaceObjectPanel()
+	PlaceObjectPanel::PlaceObjectPanel(EM_PlaceObject^ edit_mode)
 	{
 		InitializeComponent();
 
@@ -50,6 +51,8 @@ namespace MapEditor
 		params[1] = true;
 		method->Invoke(_panelObjectView, params);
 	//	_panelObjectView->SetStyle(ControlStyles::AllPaintingInWmPaint | ControlStyles::DoubleBuffer, true);
+
+		_editMode = edit_mode;
 
 		int cl_width = _panelObjectView->ClientRectangle.Width;
 		int cl_height = _panelObjectView->ClientRectangle.Height;
@@ -170,7 +173,7 @@ namespace MapEditor
 
 	System::Void PlaceObjectPanel::_buttonDrop_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		_editMode->DropSelected();
 	}
 
 	System::Void PlaceObjectPanel::_textFilter_TextChanged(System::Object^  sender, System::EventArgs^  e)

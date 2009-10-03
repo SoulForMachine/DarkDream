@@ -47,6 +47,11 @@ namespace MapEditor
 		RemoveObjects();
 	}
 
+	ActionType ActionRemoveObjects::GetActionType()
+	{
+		return ActionType::REMOVE_OBJECTS;
+	}
+
 	void ActionRemoveObjects::RemoveObjects()
 	{
 		for(List<Engine::ModelEntity*>::ConstIterator it = _objList->Begin(); it != _objList->End(); ++it)

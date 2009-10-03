@@ -49,6 +49,11 @@ namespace MapEditor
 		AddObject();
 	}
 
+	ActionType ActionAddObject::GetActionType()
+	{
+		return ActionType::ADD_OBJECT;
+	}
+
 	bool ActionAddObject::AddObject()
 	{
 		tchar* path = ConvertString<tchar>(_path);

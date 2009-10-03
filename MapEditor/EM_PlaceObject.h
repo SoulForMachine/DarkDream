@@ -18,7 +18,8 @@ namespace MapEditor
 		{
 			MOVE_XZ,
 			MOVE_Y,
-			ROTATE
+			ROTATE,
+			DROP,
 		};
 
 		value struct Parameters
@@ -28,6 +29,7 @@ namespace MapEditor
 			float translY;
 			float translZ;
 			float rotateY;
+			List<Engine::ModelEntity*>* selectedEntities;
 		};
 
 		EM_PlaceObject(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager);
@@ -44,9 +46,10 @@ namespace MapEditor
 		virtual void Update(float dt) override;
 		virtual void Render() override;
 
-		virtual void UndoEvent(UndoEventListener::EventType type);
+		virtual void UndoEvent(UndoEventListener::EventType type, Action^ action);
 
 		void ClearSelection();
+		void DropSelected();
 
 	private:
 		enum class SelectMode
@@ -78,7 +81,10 @@ namespace MapEditor
 		Parameters^ _parameters;
 		List<Engine::ModelEntity*>* _selectedEntities;
 		System::Drawing::Rectangle _selectionRect;
-		System::Drawing::Point _selStartPoint;
+		System::Drawing::Point _mouseStartPoint;
+		// used for moving on xz
+		math3d::vec3f* _moveStartPoint;
+		math3d::vec3f* _moveEndPoint;
 		bool _selecting;
 		bool _placing;
 		GL::Renderer* _renderer;

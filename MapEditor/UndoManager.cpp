@@ -38,7 +38,7 @@ namespace MapEditor
 			action->Undo();
 			_undoList->RemoveLast();
 			_redoList->AddLast(action);
-			NotifyListeners(UndoEventListener::EventType::UNDO);
+			NotifyListeners(UndoEventListener::EventType::UNDO, action);
 		}
 	}
 
@@ -50,7 +50,7 @@ namespace MapEditor
 			action->Redo();
 			_redoList->RemoveLast();
 			_undoList->AddLast(action);
-			NotifyListeners(UndoEventListener::EventType::REDO);
+			NotifyListeners(UndoEventListener::EventType::REDO, action);
 		}
 	}
 
@@ -58,7 +58,7 @@ namespace MapEditor
 	{
 		ClearList(_undoList);
 		ClearList(_redoList);
-		NotifyListeners(UndoEventListener::EventType::CLEAR);
+		NotifyListeners(UndoEventListener::EventType::CLEAR, nullptr);
 	}
 
 	void UndoManager::ClearList(LinkedList<Action^>^ list)
@@ -78,11 +78,11 @@ namespace MapEditor
 		_eventListenerList->Remove(listener);
 	}
 
-	void UndoManager::NotifyListeners(UndoEventListener::EventType type)
+	void UndoManager::NotifyListeners(UndoEventListener::EventType type, Action^ action)
 	{
 		for each(UndoEventListener^ listener in _eventListenerList)
 		{
-			listener->UndoEvent(type);
+			listener->UndoEvent(type, action);
 		}
 	}
 

@@ -17,6 +17,7 @@ namespace MapEditor
 		virtual void EndAction() override;
 		virtual void Undo() override;
 		virtual void Redo() override;
+		virtual ActionType GetActionType() override;
 
 	private:
 		int _patchIndex;

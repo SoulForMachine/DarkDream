@@ -35,4 +35,9 @@ namespace MapEditor
 		engineAPI->world->GetTerrain().AddPatch(_patchIndex);
 	}
 
+	ActionType ActionAddPatch::GetActionType()
+	{
+		return ActionType::ADD_PATCH;
+	}
+
 }

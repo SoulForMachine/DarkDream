@@ -10,6 +10,9 @@ using namespace System::Drawing;
 
 namespace MapEditor {
 
+	ref class EM_PlaceObject;
+
+
 	/// <summary>
 	/// Summary for PlaceObjectPanel
 	/// </summary>
@@ -22,7 +25,7 @@ namespace MapEditor {
 			PLACE_OBJECT,
 		};
 
-		PlaceObjectPanel();
+		PlaceObjectPanel(EM_PlaceObject^ edit_mode);
 		~PlaceObjectPanel();
 
 		void RefreshObjectTree();
@@ -57,6 +60,7 @@ namespace MapEditor {
 		void AddDir(String^ path, TreeNodeCollection^ nodes);
 		bool MatchFilter(String^ str);
 
+		EM_PlaceObject^ _editMode;
 		String^ _filterText;
 		Engine::ModelEntity* _modelEntity;
 		bool _modelLoaded;

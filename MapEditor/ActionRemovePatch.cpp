@@ -36,4 +36,9 @@ namespace MapEditor
 		engineAPI->world->GetTerrain().RemovePatch(_patchIndex);
 	}
 
+	ActionType ActionRemovePatch::GetActionType()
+	{
+		return ActionType::REMOVE_PATCH;
+	}
+
 }

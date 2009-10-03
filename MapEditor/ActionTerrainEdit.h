@@ -20,6 +20,8 @@ namespace MapEditor
 		virtual void CancelAction() override;
 		virtual void Undo() override;
 		virtual void Redo() override;
+		virtual ActionType GetActionType() override;
+
 	private:
 		void BuildRaiseLowerMatrix(System::Drawing::Rectangle rect);
 		void BuildSmoothMatrix(System::Drawing::Rectangle rect);

@@ -25,12 +25,15 @@ namespace MapEditor
 	EM_PlaceObject::EM_PlaceObject(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager)
 		: EditMode(listener, persistent)
 	{
-		_panel = gcnew PlaceObjectPanel;
+		_panel = gcnew PlaceObjectPanel(this);
 		_undoManager = undo_manager;
 		_undoManager->RegisterListener(this);
 		_actionPlaceObjs = nullptr;
-		_parameters = gcnew Parameters;
 		_selectedEntities = new(mainPool) List<ModelEntity*>;
+		_parameters = gcnew Parameters;
+		_parameters->selectedEntities = _selectedEntities;
+		_moveStartPoint = new(mainPool) vec3f;
+		_moveEndPoint = new(mainPool) vec3f;
 		_selecting = false;
 		_placing = false;
 		_renderer = engineAPI->renderSystem->GetRenderer();
@@ -86,6 +89,8 @@ namespace MapEditor
 	{
 		delete _panel;
 		delete _selectedEntities;
+		delete _moveStartPoint;
+		delete _moveEndPoint;
 
 		_renderer->DestroyBuffer(_vertBufSelRect);
 		_renderer->DestroyBuffer(_indBufSelRect);
@@ -123,17 +128,25 @@ namespace MapEditor
 			switch(_parameters->transformType)
 			{
 			case TransformType::MOVE_XZ:
-				SetCursor(_cursorMove);
-				_parameters->translX;
-				_parameters->translZ;
+				{
+					SetCursor(_cursorMove);
+
+					int viewport[4];
+					_renderer->GetViewport(viewport);
+					engineAPI->world->GetTerrain().PickTerrainPoint(x, viewport[3] - y, *_moveEndPoint);
+					_parameters->translX = _moveEndPoint->x - _moveStartPoint->x;
+					_parameters->translZ = _moveEndPoint->z - _moveStartPoint->z;
+				}
 				break;
 			case TransformType::MOVE_Y:
 				SetCursor(_cursorMoveUD);
-				_parameters->translY;
+
+				_parameters->translY = (_mouseStartPoint.Y - y) * 0.08f;
 				break;
 			case TransformType::ROTATE:
 				SetCursor(_cursorRotate);
-				_parameters->rotateY;
+
+				_parameters->rotateY = (x - _mouseStartPoint.X) * 0.5f;
 				break;
 			}
 		}
@@ -177,8 +190,8 @@ namespace MapEditor
 				_selectionRect.Y = y;
 				_selectionRect.Width = 0;
 				_selectionRect.Height = 0;
-				_selStartPoint.X = x;
-				_selStartPoint.Y = y;
+				_mouseStartPoint.X = x;
+				_mouseStartPoint.Y = y;
 				_selecting = true;
 			}
 			else
@@ -186,15 +199,27 @@ namespace MapEditor
 				switch(gizmo)
 				{
 				case GizmoType::MOVE_XZ:
-					_parameters->transformType = TransformType::MOVE_XZ;
-					_parameters->translX = 0.0f;
-					_parameters->translZ = 0.0f;
+					{
+						int viewport[4];
+						_renderer->GetViewport(viewport);
+						if(engineAPI->world->GetTerrain().PickTerrainPoint(x, viewport[3] - y, *_moveStartPoint) == -1)
+							return;
+						*_moveEndPoint = *_moveStartPoint;
+
+						_parameters->transformType = TransformType::MOVE_XZ;
+						_parameters->translX = 0.0f;
+						_parameters->translZ = 0.0f;
+					}
 					break;
 				case GizmoType::MOVE_Y:
+					_mouseStartPoint.X = x;
+					_mouseStartPoint.Y = y;
 					_parameters->transformType = TransformType::MOVE_Y;
 					_parameters->translY = 0.0f;
 					break;
 				case GizmoType::ROTATE:
+					_mouseStartPoint.X = x;
+					_mouseStartPoint.Y = y;
 					_parameters->transformType = TransformType::ROTATE;
 					_parameters->rotateY = 0.0f;
 					break;
@@ -260,10 +285,10 @@ namespace MapEditor
 		// update selection rect
 		Point min_pt, max_pt;
 
-		min_pt.X = Min(_selStartPoint.X, x);
-		min_pt.Y = Min(_selStartPoint.Y, y);
-		max_pt.X = Max(_selStartPoint.X, x);
-		max_pt.Y = Max(_selStartPoint.Y, y);
+		min_pt.X = Min(_mouseStartPoint.X, x);
+		min_pt.Y = Min(_mouseStartPoint.Y, y);
+		max_pt.X = Max(_mouseStartPoint.X, x);
+		max_pt.Y = Max(_mouseStartPoint.Y, y);
 
 		_selectionRect.Location = min_pt;
 		_selectionRect.Width = max_pt.X - min_pt.X;
@@ -301,9 +326,7 @@ namespace MapEditor
 
 			for(List<ModelEntity*>::ConstIterator it = _selectedEntities->Begin(); it != _selectedEntities->End(); ++it)
 			{
-				const OBBox& bbox = (*it)->GetWorldBoundingBox();
-				vec3f center = bbox.GetCenterPoint();
-				center.y = bbox.points[0].y;
+				vec3f center = (*it)->GetPosition();
 				vec4f plane(vec3f::y_axis, -center.y);
 				vec3f ray_pt;
 				unproject(ray_pt, x, (int)viewport[3] - y, view_proj, viewport);
@@ -352,19 +375,13 @@ namespace MapEditor
 			_renderer->ActiveVertexASMProgram(_vertpSimple->GetASMProgram());
 			_renderer->ActiveFragmentASMProgram(_fragpConstColor->GetASMProgram());
 
-			float color[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+			float color[] = { 0.0f, 1.0f, 0.0f, 1.0f };
 			_fragpConstColor->GetASMProgram()->LocalParameter(0, color);
 
 			for(List<ModelEntity*>::ConstIterator it = _selectedEntities->Begin(); it != _selectedEntities->End(); ++it)
 			{
-				const OBBox& bbox = (*it)->GetWorldBoundingBox();
-				vec3f center = bbox.GetCenterPoint();
-				center.y = bbox.points[0].y;
-				float scale = 1.0f;//Max(bbox.maxPt.x - bbox.minPt.x, bbox.maxPt.z - bbox.minPt.z) * 0.5f;
-
 				mat4f world, wvp;
-				world.set_scale(scale);
-				world.translate(center);
+				world.set_translation((*it)->GetPosition());
 				mul(wvp, world, engineAPI->world->GetCamera().GetViewProjectionTransform());
 				_vertpSimple->GetASMProgram()->LocalMatrix4x4(0, wvp);
 
@@ -419,10 +436,12 @@ namespace MapEditor
 		}
 	}
 
-	void EM_PlaceObject::UndoEvent(UndoEventListener::EventType type)
+	void EM_PlaceObject::UndoEvent(UndoEventListener::EventType type, Action^ action)
 	{
-		if(	type == UndoEventListener::EventType::UNDO ||
-			type == UndoEventListener::EventType::REDO )
+		if(	(type == UndoEventListener::EventType::UNDO &&
+			action->GetActionType() == ActionType::ADD_OBJECT) ||
+			(type == UndoEventListener::EventType::REDO &&
+			(action->GetActionType() == ActionType::REMOVE_OBJECTS || action->GetActionType() == ActionType::REMOVE_PATCH)) )
 		{
 			ClearSelection();
 		}
@@ -433,11 +452,26 @@ namespace MapEditor
 		_selectedEntities->Clear();
 	}
 
+	void EM_PlaceObject::DropSelected()
+	{
+		_parameters->transformType = TransformType::DROP;
+		ActionPlaceObjects^ action = gcnew ActionPlaceObjects(_parameters);
+		if(action->BeginAction())
+		{
+			action->EndAction();
+			_undoManager->Add(action);
+		}
+		else
+		{
+			delete action;
+		}
+	}
+
 	void EM_PlaceObject::AddObject(int x, int y)
 	{
 		if(_panel->GetSelObjectPath() == nullptr)
 		{
-			Forms::MessageBox::Show("You must select an entity in entity tree.", GetAppName(),
+			Forms::MessageBox::Show("You must select an entity to add.", GetAppName(),
 				MessageBoxButtons::OK, MessageBoxIcon::Information);
 			return;
 		}

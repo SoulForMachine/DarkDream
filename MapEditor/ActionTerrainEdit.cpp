@@ -139,6 +139,11 @@ namespace MapEditor
 		Undo();
 	}
 
+	ActionType ActionTerrainEdit::GetActionType()
+	{
+		return ActionType::TERRAIN_EDIT;
+	}
+
 	void ActionTerrainEdit::BuildRaiseLowerMatrix(System::Drawing::Rectangle rect)
 	{
 		delete[] _strengthMatrix;

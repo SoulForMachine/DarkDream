@@ -33,6 +33,7 @@ namespace Engine
 		_worldMat.set_identity();
 		_animTime = 0.0f;
 		_curAnim = 0;
+		_dropped = true;
 
 		_model = 0;
 		_aiScript = 0;
@@ -62,6 +63,7 @@ namespace Engine
 		Unload();
 
 		_worldMat = entity._worldMat;
+		_dropped = entity._dropped;
 
 		// properties
 		_class = entity._class;
