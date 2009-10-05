@@ -7,14 +7,30 @@
 namespace MapEditor
 {
 
-	ref class EM_View: public EditMode
+	ref class ViewPanel;
+
+
+	public ref class EM_View: public EditMode
 	{
 	public:
-		EM_View(EditModeEventListener^ listener, bool persistent)
-			: EditMode(listener, persistent) {}
+		ref struct Parameters
+		{
+			float camHeight;
+			float camDistance;
+			float camFOV;
+		};
 
-		virtual EditModeEnum GetModeEnum() override
-			{ return EditModeEnum::VIEW; }
+		EM_View(EditModeEventListener^ listener, bool persistent);
+
+		virtual System::Windows::Forms::UserControl^ GetPanel() override;
+		virtual EditModeEnum GetModeEnum() override;
+
+		Parameters^ GetParameters()
+			{ return _parameters; }
+
+	private:
+		ViewPanel^ _panel;
+		Parameters^ _parameters;
 	};
 
 }

@@ -152,6 +152,11 @@ uint GetHash(unsigned long val)
 	return (uint)val;
 }
 
+uint GetHash(void* val)
+{
+	return (uint)val;
+}
+
 unsigned long GetCRC32(const void* data, int length)
 {
 	unsigned long crc = CRC32_INIT_VALUE;

@@ -15,7 +15,6 @@ namespace Engine
 
 	Terrain::Terrain()
 	{
-	//	_dbgCellCount = 0;
 		_patchCount = 0;
 	}
 
@@ -922,6 +921,15 @@ namespace Engine
 
 			start_dest_x += x2 - x1 + 1;
 		}
+	}
+
+	void Terrain::AddEntity(Entity* entity)
+	{
+		const vec3f& pos = entity->GetPosition();
+	}
+
+	void Terrain::RemoveEntity(Entity* entity)
+	{
 	}
 
 	void Terrain::UpdatePatchNormals(int patch_index, PatchVertex* vertices, int start_x, int start_y, int end_x, int end_y)

@@ -146,20 +146,31 @@ quat<_ST>::quat(const mat4<_ST>& mat)
 template <class _ST>
 void quat<_ST>::from_euler(_ST _x, _ST _y, _ST _z)
 {
-	_ST cos_x = cos(_x * _ST(0.5));
-	_ST sin_x = sin(_x * _ST(0.5));
-	_ST cos_y = cos(_y * _ST(0.5));
-	_ST sin_y = sin(_y * _ST(0.5));
-	_ST cos_z = cos(_z * _ST(0.5));
-	_ST sin_z = sin(_z * _ST(0.5));
+	float angle;
 
-	_ST cx_cy = cos_x * cos_y;
-	_ST sx_sy = sin_x * sin_y;
+    angle = _x * 0.5f;
+    const float sr = sin(angle);
+    const float cr = cos(angle);
 
-	x = sin_z * cx_cy - cos_z * sx_sy;
-	y = cos_z * sin_x * cos_y + sin_z * cos_x * sin_y;
-	z = cos_z * cos_x * sin_y - sin_z * sin_x * cos_y;
-	w = cos_z * cx_cy + sin_z * sx_sy;
+    angle = _y * 0.5f;
+    const float sp = sin(angle);
+    const float cp = cos(angle);
+
+    angle = _z * 0.5f;
+    const float sy = sin(angle);
+    const float cy = cos(angle);
+
+    const float cpcy = cp * cy;
+    const float spcy = sp * cy;
+    const float cpsy = cp * sy;
+    const float spsy = sp * sy;
+
+    x = sr * cpcy - cr * spsy;
+    y = cr * spcy + sr * cpsy;
+    z = cr * cpsy - sr * spcy;
+    w = cr * cpcy + sr * spsy;
+
+	normalize();
 }
 
 template <class _ST>
@@ -291,17 +302,17 @@ void quat<_ST>::to_matrix(mat3<_ST>& mat) const
 	_ST wz = w * z;
 	_ST yz = y * z;
 
-	mat(0) = _ST(1) - _ST(2) * (yy - zz);
-	mat(1) = _ST(2) * (xy + wz);
-	mat(2) = _ST(2) * (xz - wy);
-
+	mat(0) = _ST(1) - _ST(2) * (yy + zz);
 	mat(3) = _ST(2) * (xy - wz);
-	mat(4) = _ST(1) - _ST(2) * (xx - zz);
-	mat(5) = _ST(2) * (yz + wx);
-
 	mat(6) = _ST(2) * (xz + wy);
+
+	mat(1) = _ST(2) * (xy + wz);
+	mat(4) = _ST(1) - _ST(2) * (xx + zz);
 	mat(7) = _ST(2) * (yz - wx);
-	mat(8) = _ST(1) - _ST(2) * (xx - yy);
+
+	mat(2) = _ST(2) * (xz - wy);
+	mat(5) = _ST(2) * (yz + wx);
+	mat(8) = _ST(1) - _ST(2) * (xx + yy);
 }
 
 template <class _ST>
@@ -317,24 +328,24 @@ void quat<_ST>::to_matrix(mat4<_ST>& mat) const
 	_ST wz = w * z;
 	_ST yz = y * z;
 
-	mat(0) = _ST(1) - _ST(2) * (yy - zz);
-	mat(1) = _ST(2) * (xy + wz);
-	mat(2) = _ST(2) * (xz - wy);
-	mat(3) = _ST(0);
-
+	mat(0) = _ST(1) - _ST(2) * (yy + zz);
 	mat(4) = _ST(2) * (xy - wz);
-	mat(5) = _ST(1) - _ST(2) * (xx - zz);
-	mat(6) = _ST(2) * (yz + wx);
-	mat(7) = _ST(0);
-
 	mat(8) = _ST(2) * (xz + wy);
-	mat(9) = _ST(2) * (yz - wx);
-	mat(10) = _ST(1) - _ST(2) * (xx - yy);
-	mat(11) = _ST(0);
-
 	mat(12) = _ST(0);
+
+	mat(1) = _ST(2) * (xy + wz);
+	mat(5) = _ST(1) - _ST(2) * (xx + zz);
+	mat(9) = _ST(2) * (yz - wx);
 	mat(13) = _ST(0);
+
+	mat(2) = _ST(2) * (xz - wy);
+	mat(6) = _ST(2) * (yz + wx);
+	mat(10) = _ST(1) - _ST(2) * (xx + yy);
 	mat(14) = _ST(0);
+
+	mat(3) = _ST(0);
+	mat(7) = _ST(0);
+	mat(11) = _ST(0);
 	mat(15) = _ST(1);
 }
 

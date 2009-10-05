@@ -30,15 +30,25 @@ struct HashMapNode
 	_ValueType value;
 };
 
-template <class _KeyType>
-struct DefaultHashMapTraits
+template <class _KeyType, class _ValueType>
+class DefaultHashMapTraits
 {
-	static uint GetHash(const _KeyType& key)
+public:
+	DefaultHashMapTraits(Memory::Allocator& pool, size_t size)
+		: _pool(pool) {}
+	HashMapNode<_ValueType>* New()
+		{ return new(_pool) HashMapNode<_ValueType>; }
+	void Delete(HashMapNode<_ValueType>* ptr)
+		{ delete ptr; }
+	uint GetHash(const _KeyType& key) const
 		{ return ::GetHash(key); }
+
+private:
+	Memory::Allocator& _pool;
 };
 
 
-template <class _KeyType, class _ValueType, class _Traits = DefaultHashMapTraits<_KeyType> >
+template <class _KeyType, class _ValueType, class _Traits = DefaultHashMapTraits<_KeyType, _ValueType> >
 class HashMap
 {
 public:
@@ -49,8 +59,8 @@ public:
 	class ConstIterator;
 	friend class ConstIterator;
 
-	explicit HashMap(Memory::Allocator& pool = Memory::mainPool);
-	HashMap(const HashMap& hash_map);
+	explicit HashMap(Memory::Allocator& pool = Memory::mainPool, size_t max_size = -1);
+	HashMap(const HashMap& hash_map, Memory::Allocator& pool = Memory::mainPool, size_t max_size = -1);
 	~HashMap();
 
 	HashMap& operator = (const HashMap& hash_map);
@@ -92,7 +102,7 @@ private:
 
 	NodeType* _headPtr;
 	size_t _count;
-	Memory::Allocator& _pool;
+	_Traits _traits;
 };
 
 
@@ -234,8 +244,8 @@ public:
 
 template <class _KeyType, class _ValueType, class _Traits>
 inline
-HashMap<_KeyType, _ValueType, _Traits>::HashMap(Memory::Allocator& pool = Memory::mainPool):
-	_pool(pool),
+HashMap<_KeyType, _ValueType, _Traits>::HashMap(Memory::Allocator& pool, size_t max_size):
+	_traits(pool, max_size),
 	_headPtr((NodeType*)&_head)
 {
 	_count = 0;
@@ -247,8 +257,8 @@ HashMap<_KeyType, _ValueType, _Traits>::HashMap(Memory::Allocator& pool = Memory
 
 template <class _KeyType, class _ValueType, class _Traits>
 inline
-HashMap<_KeyType, _ValueType, _Traits>::HashMap(const HashMap& hash_map):
-	_pool(hash_map._pool),
+HashMap<_KeyType, _ValueType, _Traits>::HashMap(const HashMap& hash_map, Memory::Allocator& pool, size_t max_size):
+	_traits(pool, max_size),
 	_headPtr((NodeType*)&_head)
 {
 	_count = 0;
@@ -280,7 +290,7 @@ HashMap<_KeyType, _ValueType, _Traits>::operator = (const HashMap<_KeyType, _Val
 template <class _KeyType, class _ValueType, class _Traits>
 _ValueType& HashMap<_KeyType, _ValueType, _Traits>::operator [] (const _KeyType& key)
 {
-	uint hash = _Traits::GetHash(key);
+	uint hash = _traits.GetHash(key);
 	if(_headPtr->parent != _headPtr)
 	{
 		NodeType* node = _FindOrAdd(hash, _headPtr->parent);
@@ -299,7 +309,7 @@ HashMap<_KeyType, _ValueType, _Traits>::Find(const _KeyType& key) const
 {
 	if(_headPtr->parent != _headPtr)
 	{
-		uint hash = _Traits::GetHash(key);
+		uint hash = _traits.GetHash(key);
 		NodeType* node = _Find(hash, _headPtr->parent);
 		return node? ConstIterator(node): ConstIterator(_headPtr);
 	}
@@ -315,7 +325,7 @@ HashMap<_KeyType, _ValueType, _Traits>::Find(const _KeyType& key)
 {
 	if(_headPtr->parent != _headPtr)
 	{
-		uint hash = _Traits::GetHash(key);
+		uint hash = _traits.GetHash(key);
 		NodeType* node = _Find(hash, _headPtr->parent);
 		return node? Iterator(node): Iterator(_headPtr);
 	}
@@ -330,7 +340,7 @@ void HashMap<_KeyType, _ValueType, _Traits>::Remove(const _KeyType& key)
 {
 	assert(_headPtr->parent != _headPtr);
 
-	uint hash = _Traits::GetHash(key);
+	uint hash = _traits.GetHash(key);
 	NodeType* node = _Find(hash, _headPtr->parent);
 	assert(node);
 	if(node)
@@ -470,7 +480,7 @@ void HashMap<_KeyType, _ValueType, _Traits>::Remove(ConstIterator it)
 	}
 
 	// remove the node
-	delete node;
+	_traits.Delete(node);
 	--_count;
 
 	if(parent != _headPtr)
@@ -540,7 +550,8 @@ template <class _KeyType, class _ValueType, class _Traits>
 typename HashMap<_KeyType, _ValueType, _Traits>::NodeType*
 HashMap<_KeyType, _ValueType, _Traits>::_AddNewLeft(NodeType* node, uint hash)
 {
-	HashMapNode<_ValueType>* new_node = new(_pool) HashMapNode<_ValueType>;
+	HashMapNode<_ValueType>* new_node = _traits.New();
+	assert(new_node);
 	node->left = new_node;
 	new_node->parent = node;
 	new_node->right = 0;
@@ -564,7 +575,8 @@ template <class _KeyType, class _ValueType, class _Traits>
 typename HashMap<_KeyType, _ValueType, _Traits>::NodeType*
 HashMap<_KeyType, _ValueType, _Traits>::_AddNewRight(NodeType* node, uint hash)
 {
-	HashMapNode<_ValueType>* new_node = new(_pool) HashMapNode<_ValueType>;
+	HashMapNode<_ValueType>* new_node = _traits.New();
+	assert(new_node);
 	node->right = new_node;
 	new_node->parent = node;
 	new_node->left = 0;
@@ -588,7 +600,8 @@ template <class _KeyType, class _ValueType, class _Traits>
 typename HashMap<_KeyType, _ValueType, _Traits>::NodeType*
 HashMap<_KeyType, _ValueType, _Traits>::_AddRoot(uint hash)
 {
-	HashMapNode<_ValueType>* new_node = new(_pool) HashMapNode<_ValueType>;
+	HashMapNode<_ValueType>* new_node = _traits.New();
+	assert(new_node);
 	_headPtr->parent = new_node;
 	_headPtr->left = new_node;
 	_headPtr->right = new_node;
@@ -610,7 +623,7 @@ void HashMap<_KeyType, _ValueType, _Traits>::_DeleteTree(NodeType* node)
 	if(!_IsEnd(node->right))
 		_DeleteTree(node->right);
 
-	delete node;
+	_traits.Delete(node);
 }
 
 template <class _KeyType, class _ValueType, class _Traits>
@@ -848,7 +861,9 @@ void HashMap<_KeyType, _ValueType, _Traits>::_CopyTree(NodeType* source, NodeTyp
 template <class _KeyType, class _ValueType, class _Traits>
 void HashMap<_KeyType, _ValueType, _Traits>::_CopyNode(NodeType* source, NodeType*& dest)
 {
-	dest = new(_pool) NodeType(*source);
+	dest = _traits.New();
+	assert(dest);
+	*dest = *source;
 	dest->left = 0;
 	dest->right = 0;
 }

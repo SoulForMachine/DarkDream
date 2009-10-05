@@ -206,7 +206,7 @@
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\EditorCommon.dll"
-			AssemblyName="EditorCommon, Version=1.0.3561.25588, processorArchitecture=x86"
+			AssemblyName="EditorCommon, Version=1.0.3564.39351, processorArchitecture=x86"
 			MinFrameworkVersion="131072"
 		/>
 	</References>
@@ -277,6 +277,15 @@
 						>
 					</File>
 				</File>
+				<File
+					RelativePath=".\ViewPanel.h"
+					FileType="4"
+					>
+					<File
+						RelativePath=".\ViewPanel.resx"
+						>
+					</File>
+				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
@@ -305,6 +314,10 @@
 				</File>
 				<File
 					RelativePath=".\ToolPanel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ViewPanel.cpp"
 					>
 				</File>
 			</Filter>
@@ -428,6 +441,10 @@
 			</File>
 			<File
 				RelativePath=".\EM_TerrainEdit.h"
+				>
+			</File>
+			<File
+				RelativePath=".\EM_View.cpp"
 				>
 			</File>
 			<File

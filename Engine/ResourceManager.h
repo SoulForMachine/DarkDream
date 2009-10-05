@@ -32,17 +32,26 @@ namespace Engine
 		void ReleaseAll();
 
 	protected:
-		struct HashMapTraits
+		struct ResHashMapTraits
 		{
-			static uint GetHash(const tchar* str)
+			ResHashMapTraits(Memory::Allocator& pool, size_t size)
+				: _pool(pool) {}
+			HashMapNode<FileResource*>* New()
+				{ return new(_pool) HashMapNode<FileResource*>; }
+			void Delete(HashMapNode<FileResource*>* ptr)
+				{ delete ptr; }
+			uint GetHash(const tchar* str)
 				{ return ::GetStringiHash(str); }
+
+		private:
+			Memory::Allocator& _pool;
 		};
 
 		const FileResource* CreateRes(const tchar* file_name, bool immediate);
 		bool ReleaseRes(const FileResource* res);
 		const FileResource* FindRes(const tchar* file_name);
 
-		typedef HashMap<const tchar*, FileResource*, HashMapTraits> ResHashMap;
+		typedef HashMap<const tchar*, FileResource*, ResHashMapTraits> ResHashMap;
 		virtual FileResource* CreateResObj(const tchar* file_name) = 0;
 		ResHashMap _resources;
 	};

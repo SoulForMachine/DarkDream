@@ -18,6 +18,7 @@ uint BASELIB_API GetHash(int val);
 uint BASELIB_API GetHash(unsigned int val);
 uint BASELIB_API GetHash(long val);
 uint BASELIB_API GetHash(unsigned long val);
+uint BASELIB_API GetHash(void* val);
 unsigned long BASELIB_API GetCRC32(const void* data, int length);
 
 

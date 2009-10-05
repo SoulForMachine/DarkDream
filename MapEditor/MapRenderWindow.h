@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EM_View.h"
+
 
 namespace MapEditor
 {
@@ -36,6 +38,8 @@ namespace MapEditor
 		void SetViewMode(ViewMode mode);
 		ViewMode GetViewMode()
 			{ return _viewMode; }
+		void SetViewParameters(EM_View::Parameters^ params)
+			{ _parameters = params; }
 
 	protected:
 		virtual void WndProc(Message% msg) override;
@@ -91,6 +95,7 @@ namespace MapEditor
 		bool _wireframe;
 		bool _stats;
 		ViewMode _viewMode;
+		EM_View::Parameters^ _parameters;
 	};
 
 }

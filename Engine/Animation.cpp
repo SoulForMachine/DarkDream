@@ -178,12 +178,23 @@ namespace Engine
 			transform(1, 1) = results[ANIM_CH_SCALE_Y];
 		if(valid[ANIM_CH_SCALE_Z])
 			transform(2, 2) = results[ANIM_CH_SCALE_X];
+
 		if(valid[ANIM_CH_ROTATE_X])
 			transform.rotate_x(rad2deg(results[ANIM_CH_ROTATE_X]));
 		if(valid[ANIM_CH_ROTATE_Y])
 			transform.rotate_y(rad2deg(results[ANIM_CH_ROTATE_Y]));
 		if(valid[ANIM_CH_ROTATE_Z])
 			transform.rotate_z(rad2deg(results[ANIM_CH_ROTATE_Z]));
+
+		/*quatf q;
+		q.from_euler(
+			valid[ANIM_CH_ROTATE_X]? results[ANIM_CH_ROTATE_X]: 0.0f,
+			valid[ANIM_CH_ROTATE_Y]? results[ANIM_CH_ROTATE_Y]: 0.0f,
+			valid[ANIM_CH_ROTATE_Z]? results[ANIM_CH_ROTATE_Z]: 0.0f);
+		mat4f rot;
+		q.to_matrix(rot);
+		transform = rot;*/
+
 		if(valid[ANIM_CH_TRANSLATE_X])
 			transform.row3.x = results[ANIM_CH_TRANSLATE_X];
 		else

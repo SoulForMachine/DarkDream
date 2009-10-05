@@ -10,6 +10,7 @@
 #include "Engine/ModelEntity.h"
 #include "Engine/Camera.h"
 #include "Engine/Terrain.h"
+#include "Engine/EntityHashMap.h"
 
 
 namespace Engine
@@ -20,8 +21,6 @@ namespace Engine
 	class ENGINE_API World
 	{
 	public:
-		typedef FreeList<Entity*> EntityList;
-
 		static const int MAX_NUM_ENTITIES = 16 * 1024;
 
 		World();
@@ -43,8 +42,7 @@ namespace Engine
 
 	private:
 		Camera _camera;
-		FreePool<FreeListNode<Entity*> > _entityPool;
-		EntityList _entities;
+		EntityHashMap _entities;
 		Terrain _terrain;
 	};
 

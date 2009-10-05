@@ -43,6 +43,7 @@ namespace MapEditor
 			_toolPanel->Show(_dockPanel);
 
 		_mapForm->Show();
+		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
 		UpdateToolbarButtons();
 
 		_dockPanel->ResumeLayout(true, true);

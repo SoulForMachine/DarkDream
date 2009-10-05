@@ -264,6 +264,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\EntityHashMap.h"
+			>
+		</File>
+		<File
 			RelativePath=".\EntityRenderer.cpp"
 			>
 		</File>

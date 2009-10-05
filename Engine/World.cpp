@@ -14,8 +14,7 @@ namespace Engine
 {
 
 	World::World():
-		_entityPool(MAX_NUM_ENTITIES, mapPool),
-		_entities(_entityPool)
+		_entities(mapPool, MAX_NUM_ENTITIES)
 	{
 	}
 
@@ -31,11 +30,11 @@ namespace Engine
 	{
 		_terrain.Deinit();
 
-		for(EntityList::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
+		for(EntityHashMap::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
 		{
 			delete *it;
 		}
-		_entities.Reset();
+		_entities.Clear();
 	}
 
 	bool World::LoadMap(const tchar* file_name)
@@ -53,13 +52,13 @@ namespace Engine
 		if(_entities.GetCount() == MAX_NUM_ENTITIES)
 			return false;
 
-		_entities.PushBack(entity);
+		_entities[entity] = entity;
 		return true;
 	}
 
 	bool World::RemoveEntity(Entity* entity)
 	{
-		for(EntityList::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
+		for(EntityHashMap::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
 		{
 			if(*it == entity)
 			{
@@ -72,7 +71,7 @@ namespace Engine
 
 	void World::RemoveAllEntities()
 	{
-		_entities.Reset();
+		_entities.Clear();
 	}
 
 	int World::GetVisibleEntities(ModelEntity** entities, int max_entities)
@@ -81,7 +80,7 @@ namespace Engine
 			return 0;
 
 		int count = 0;
-		for(EntityList::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
+		for(EntityHashMap::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
 		{
 			if((*it)->GetType() == ENTITY_TYPE_MODEL)
 			{

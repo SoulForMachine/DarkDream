@@ -62,6 +62,7 @@ namespace MapEditor
 		_wireframe = false;
 		_stats = true;
 		_viewMode = ViewMode::EDITOR;
+		_parameters = nullptr;
 
 		System::Windows::Forms::CreateParams^ cp = gcnew System::Windows::Forms::CreateParams;
 		cp->Caption = "";
@@ -535,19 +536,51 @@ namespace MapEditor
 
 	void MapRenderWindow::UpdateGameCam()
 	{
-		g_camPos.x += _panX;
+		float cam_height, cam_dist, cam_fov;
+		if(_parameters == nullptr)
+		{
+			cam_height = 5.0f;
+			cam_dist = 5.0f;
+			cam_fov = 60.0f;
+		}
+		else
+		{
+			cam_height = _parameters->camHeight;
+			cam_dist = _parameters->camDistance;
+			cam_fov = _parameters->camFOV;
+		}
+
 		float elev = 0.0f;
 		engineAPI->world->GetTerrain().ElevationFromPoint(vec2f(g_camPos.x, (float)Terrain::PATCH_HEIGHT - 0.5f), elev);
-		g_camPos.y = elev + 5.0f;
+		g_camPos.y = elev + cam_height;
+		g_camPos.z = Terrain::PATCH_HEIGHT + cam_dist;
+
+		g_camRight = vec3f::x_axis;
+		g_camUp = vec3f::y_axis;
+
+		engineAPI->world->GetTerrain().ElevationFromPoint(vec2f(g_camPos.x, Terrain::PATCH_HEIGHT * 4.0f / 5.0f), elev);
+		g_camForward = vec3f(g_camPos.x, elev + 1.0f, Terrain::PATCH_HEIGHT * 4.0f / 5.0f) - g_camPos;
+
+		g_camPos.x += _panX;
 		_panX = 0.0f;
 
+		g_camForward.normalize();
+		cross(g_camRight, g_camForward, g_camUp);
+		g_camRight.normalize();
+		cross(g_camUp, g_camRight, g_camForward);
+		g_camUp.normalize();
+
 		mat4f cam(
-			1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			-g_camPos.x, -g_camPos.y, -g_camPos.z, 1.0f);
+			g_camRight.x, g_camUp.x, -g_camForward.x, 0.0f,
+			g_camRight.y, g_camUp.y, -g_camForward.y, 0.0f,
+			g_camRight.z, g_camUp.z, -g_camForward.z, 0.0f,
+			-dot(g_camRight, g_camPos),
+			-dot(g_camUp, g_camPos),
+			dot(g_camForward, g_camPos),
+			1.0f);
 
 		engineAPI->world->GetCamera().SetViewingTransform(cam);
+		engineAPI->world->GetCamera().Perspective(cam_fov, float(_width) / _height, 0.1f, 10000.0f);
 	}
 
 	void MapRenderWindow::SetViewMode(ViewMode mode)
@@ -559,19 +592,13 @@ namespace MapEditor
 				g_camPos.x = 0.0f;
 			else if(g_camPos.x > max_x)
 				g_camPos.x = max_x;
-			float elev = 0.0f;
-			engineAPI->world->GetTerrain().ElevationFromPoint(vec2f(g_camPos.x, (float)Terrain::PATCH_HEIGHT - 0.5f), elev);
-			g_camPos.y = elev + 5.0f;
-			g_camPos.z = Terrain::PATCH_HEIGHT + 5.0f;
-
-			g_camRight = vec3f::x_axis;
-			g_camUp = vec3f::y_axis;
-			g_camForward = -vec3f::z_axis;
 
 			engineAPI->renderSystem->SetRenderStyle(Engine::RenderSystem::RENDER_STYLE_GAME);
 		}
 		else
 		{
+			engineAPI->world->GetCamera().Perspective(60.0f, float(_width) / _height, 0.1f, 10000.0f);
+
 			engineAPI->renderSystem->SetRenderStyle(Engine::RenderSystem::RENDER_STYLE_EDITOR);
 		}
 

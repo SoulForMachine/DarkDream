@@ -5,6 +5,8 @@
 #include "BaseLib/List.h"
 #include "BaseLib/Math/math3d.h"
 #include "BaseLib/Bounds.h"
+#include "BaseLib/HashMap.h"
+#include "Engine/EntityHashMap.h"
 #include "Engine/Common.h"
 
 
@@ -21,12 +23,23 @@ namespace Engine
 	class ENGINE_API Terrain
 	{
 	public:
-		struct TerrainPatch
+		static const int MAX_NUM_ENTITIES = 16 * 1024;
+
+		class TerrainPatch
 		{
+		public:
+			TerrainPatch()
+				: entities(Memory::mapPool, MAX_NUM_ENTITIES) {}
+
 			GL::Buffer* vertBuf;
 			float* elevation;
 			AABBox boundBox;
 			GL::Buffer* normalBuf;
+			EntityHashMap entities;
+
+		private:
+			TerrainPatch(const TerrainPatch&);
+			TerrainPatch& operator = (const TerrainPatch&);
 		};
 
 		struct PatchVertex
@@ -62,6 +75,8 @@ namespace Engine
 			{ _hlightPatch = &_patches[index]; }
 		const TerrainPatch* GetHighlightPatch() const
 			{ return _hlightPatch; }
+		void AddEntity(Entity* entity);
+		void RemoveEntity(Entity* entity);
 
 	private:
 		bool IntersectPatch(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, math3d::vec3f& point);

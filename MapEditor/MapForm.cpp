@@ -66,6 +66,7 @@ namespace MapEditor
 			_editModes[(int)EditMode::EditModeEnum::PLACE_OBJECT] = gcnew EM_PlaceObject(this, true, _undoManager);
 
 			SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
+			_renderWindow->SetViewParameters(((EM_View^)_editModes[(int)EditMode::EditModeEnum::VIEW])->GetParameters());
 		}
 		catch(...)
 		{
