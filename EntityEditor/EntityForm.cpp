@@ -20,6 +20,7 @@ namespace EntityEditor
 		_btnAddAnim->Enabled = false;
 		_btnRemoveAnim->Enabled = false;
 		_btnPlayAnim->Enabled = false;
+		_btnTPose->Enabled = false;
 		_btnAddSound->Enabled = false;
 		_btnRemoveSound->Enabled = false;
 		_btnPlaySound->Enabled = false;
@@ -72,6 +73,7 @@ namespace EntityEditor
 		_btnAddAnim->Enabled = has_skelet;
 		_btnRemoveAnim->Enabled = false;
 		_btnPlayAnim->Enabled = false;
+		_btnTPose->Enabled = has_skelet;
 		_listAnimations->Items->Clear();
 		if(has_skelet)
 		{
@@ -214,13 +216,33 @@ namespace EntityEditor
 
 	System::Void EntityForm::_btnPlayAnim_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		if(!_listAnimations->SelectedItems->Count)
-			return;
+		if(_entity->IsAnimationPlaying())
+		{
+			// pause animation
+			_entity->PauseAnimation();
+			_btnPlayAnim->ImageIndex = 2;
+		}
+		else
+		{
+			// play selected
+			if(!_listAnimations->SelectedItems->Count)
+				return;
 
-		ListViewItem^ item = _listAnimations->SelectedItems[0];
-		char* name = ConvertString<char>(item->Text);
-		_entity->ActiveAnimation(name);
-		delete[] name;
+			ListViewItem^ item = _listAnimations->SelectedItems[0];
+			char* name = ConvertString<char>(item->Text);
+			const ModelEntity::AnimData* anim_data = _entity->GetCurrentAnimation();
+			if(anim_data && !strcmp(name, anim_data->name))
+			{
+				_entity->PlayAnimation();
+				_btnPlayAnim->ImageIndex = 3;
+			}
+			else
+			{
+				if(_entity->SetActiveAnimation(name))
+					_btnPlayAnim->ImageIndex = 3;
+			}
+			delete[] name;
+		}
 	}
 
 	System::Void EntityForm::_btnAddAnim_Click(System::Object^  sender, System::EventArgs^  e)
@@ -250,6 +272,8 @@ namespace EntityEditor
 					item->SubItems->Add(form->FileName);
 					_listAnimations->Items->Add(item);
 				}
+
+				_director->FormNotify(this, NotifyMessage::AnimationChanged);
 			}
 			else
 			{
@@ -264,15 +288,20 @@ namespace EntityEditor
 
 	System::Void EntityForm::_btnRemoveAnim_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		for each(ListViewItem^ item in  _listAnimations->SelectedItems)
+		array<ListViewItem^>^ selected = gcnew array<ListViewItem^>(_listAnimations->SelectedItems->Count);
+		_listAnimations->SelectedItems->CopyTo(selected, 0);
+		for each(ListViewItem^ item in selected)
 		{
 			char* name = ConvertString<char>(item->Text);
+			const ModelEntity::AnimData* anim_data = _entity->GetCurrentAnimation();
+			if(anim_data && !strcmp(name, anim_data->name))
+				_btnPlayAnim->ImageIndex = 2;
 			_entity->RemoveAnimation(name);
 			delete[] name;
-			
 			_listAnimations->Items->Remove(item);
 		}
 		_btnRemoveAnim->Enabled = false;
+		_director->FormNotify(this, NotifyMessage::AnimationChanged);
 	}
 
 	System::Void EntityForm::_btnPlaySound_Click(System::Object^  sender, System::EventArgs^  e)
@@ -354,6 +383,12 @@ namespace EntityEditor
 	System::Void EntityForm::_btnCollapseAllSkelet_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		_treeSkelet->CollapseAll();
+	}
+
+	System::Void EntityForm::_btnTPose_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		_entity->SetActiveAnimation("");
+		_btnPlayAnim->ImageIndex = 2;
 	}
 
 }

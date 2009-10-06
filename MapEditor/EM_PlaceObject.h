@@ -86,6 +86,7 @@ namespace MapEditor
 		math3d::vec3f* _moveStartPoint;
 		math3d::vec3f* _moveEndPoint;
 		bool _selecting;
+		bool _selectOne;
 		bool _placing;
 		GL::Renderer* _renderer;
 		GL::Buffer* _vertBufSelRect;

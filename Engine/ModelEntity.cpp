@@ -34,6 +34,7 @@ namespace Engine
 		_animTime = 0.0f;
 		_curAnim = 0;
 		_dropped = true;
+		_animPlaying = false;
 
 		_model = 0;
 		_aiScript = 0;
@@ -64,6 +65,7 @@ namespace Engine
 
 		_worldMat = entity._worldMat;
 		_dropped = entity._dropped;
+		_animPlaying = entity._animPlaying;
 
 		// properties
 		_class = entity._class;
@@ -108,7 +110,6 @@ namespace Engine
 			_sounds[it->name] = sd;
 		}
 
-		ClearModelData();
 		SetupModelData();
 
 		return *this;
@@ -464,7 +465,7 @@ namespace Engine
 	{
 		float tsec = frame_time * 0.001f;
 
-		if(_curAnim)
+		if(_curAnim && _animPlaying)
 		{
 			const Animation* anim = _curAnim->animation->GetAnimation();
 			_animTime += tsec;
@@ -479,18 +480,25 @@ namespace Engine
 		}
 	}
 
-	void ModelEntity::ActiveAnimation(const char* anim_name)
+	bool ModelEntity::SetActiveAnimation(const char* anim_name)
 	{
+		bool result;
 		AnimMap::Iterator it = _animations.Find(anim_name);
 		if(it != _animations.End())
 		{
 			_curAnim = &(*it);
+			_animPlaying = true;
+			result = true;
 		}
 		else
 		{
 			_curAnim = 0;
+			_animPlaying = false;
+			IdentityJointMatPalette();
+			result = false;
 		}
 		_animTime = 0.0f;
+		return result;
 	}
 
 	void ModelEntity::SetPosition(const vec3f& pos)
@@ -707,6 +715,12 @@ namespace Engine
 		AnimMap::Iterator it = _animations.Find(anim_name);
 		if(it != _animations.End())
 		{
+			if(&(*it) == _curAnim)
+			{
+				_curAnim = 0;
+				_animPlaying = false;
+				IdentityJointMatPalette();
+			}
 			delete[] it->name;
 			engineAPI.animationManager->ReleaseAnimation(it->animation);
 			_animations.Remove(it);
@@ -786,6 +800,12 @@ namespace Engine
 			return _classNames[i];
 		else
 			return "";
+	}
+
+	void ModelEntity::IdentityJointMatPalette()
+	{
+		for(size_t i = 0; i < _jointMatPalette.GetCount(); ++i)
+			_jointMatPalette[i].set_identity();
 	}
 
 }

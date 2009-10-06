@@ -20,12 +20,10 @@ namespace MapEditor
 		virtual ActionType GetActionType() override;
 
 	private:
-		bool AddObject();
-
 		System::String^ _path;
 		const math3d::vec3f* _point;
-		math3d::mat4f* _transform;
 		Engine::ModelEntity* _entity;
+		bool _ownObject;
 	};
 
 }

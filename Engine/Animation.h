@@ -13,54 +13,41 @@ namespace Engine
 	struct Joint;
 
 
-	enum AnimType
-	{
-		ANIM_CUSTOM = -1,
-		ANIM_IDLE,
-		ANIM_WALK,
-		ANIM_RUN,
-		ANIM_PAIN,
-		ANIM_DEATH1,
-		ANIM_DEATH2,
-		ANIM_DEATH3,
-		ANIM_ATTACK,
-		ANIM_MELEE_ATTACK,
-
-		ANIM_COUNT,
-	};
-
-	enum AnimChannelType
-	{
-		ANIM_CH_TRANSLATE_X,
-		ANIM_CH_TRANSLATE_Y,
-		ANIM_CH_TRANSLATE_Z,
-		ANIM_CH_ROTATE_X,
-		ANIM_CH_ROTATE_Y,
-		ANIM_CH_ROTATE_Z,
-		ANIM_CH_SCALE_X,
-		ANIM_CH_SCALE_Y,
-		ANIM_CH_SCALE_Z,
-
-		ANIM_CH_COUNT,
-	};
-
-	struct AnimChannel
-	{
-		AnimChannelType channel;
-		StaticArray<float> values;
-	};
-
-	struct AnimTrack
-	{
-		char* name;
-		int parentIndex;
-		StaticArray<AnimChannel> channels;
-	};
-
-
 	class ENGINE_API Animation
 	{
 	public:
+		enum AnimType
+		{
+			ANIM_TYPE_CUSTOM = -1,
+			ANIM_TYPE_IDLE,
+			ANIM_TYPE_WALK,
+			ANIM_TYPE_RUN,
+			ANIM_TYPE_JUMP,
+			ANIM_TYPE_ALARM,
+			ANIM_TYPE_PAIN,
+			ANIM_TYPE_DEATH1,
+			ANIM_TYPE_DEATH2,
+			ANIM_TYPE_ATTACK1,
+			ANIM_TYPE_ATTACK2,
+
+			ANIM_TYPE_COUNT,
+		};
+
+		enum AnimChannelType
+		{
+			ANIM_CH_TRANSLATE_X,
+			ANIM_CH_TRANSLATE_Y,
+			ANIM_CH_TRANSLATE_Z,
+			ANIM_CH_ROTATE_X,
+			ANIM_CH_ROTATE_Y,
+			ANIM_CH_ROTATE_Z,
+			ANIM_CH_SCALE_X,
+			ANIM_CH_SCALE_Y,
+			ANIM_CH_SCALE_Z,
+
+			ANIM_CH_COUNT,
+		};
+
 		Animation();
 		~Animation();
 
@@ -78,6 +65,19 @@ namespace Engine
 		static AnimType GetAnimTypeByName(const char* name);
 
 	private:
+		struct AnimChannel
+		{
+			AnimChannelType channel;
+			StaticArray<float> values;
+		};
+
+		struct AnimTrack
+		{
+			char* name;
+			int parentIndex;
+			StaticArray<AnimChannel> channels;
+		};
+
 		void JointCombinedMatrix(float time, const Joint* joint) const;
 		void EvalTime(float time, math3d::mat4f& transform, const Joint* joint) const;
 
@@ -86,7 +86,7 @@ namespace Engine
 		int		_frameCount;
 		StaticArray<AnimTrack> _tracks;
 		mutable StaticArray<math3d::mat4f> _combinedTransforms;
-		static const char* _commonAnimNames[ANIM_COUNT];
+		static const char* _commonAnimNames[ANIM_TYPE_COUNT];
 	};
 
 }

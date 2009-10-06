@@ -139,8 +139,6 @@ namespace EntityEditor {
 				| System::Windows::Forms::AnchorStyles::Right));
 			this->_cmbStandardAnim->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->_cmbStandardAnim->FormattingEnabled = true;
-			this->_cmbStandardAnim->Items->AddRange(gcnew cli::array< System::Object^  >(9) {L"Idle", L"Walk", L"Run", L"Pain", L"Death1", 
-				L"Death2", L"Death3", L"Attack", L"Melee attack"});
 			this->_cmbStandardAnim->Location = System::Drawing::Point(132, 35);
 			this->_cmbStandardAnim->Name = L"_cmbStandardAnim";
 			this->_cmbStandardAnim->Size = System::Drawing::Size(249, 21);

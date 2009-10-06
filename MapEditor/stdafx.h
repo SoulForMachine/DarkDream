@@ -14,7 +14,11 @@
 
 #include "Engine/Engine.h"
 
-#pragma comment(lib, "../Debug/Engine.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "../Debug/Engine.lib")
+#else
+	#pragma comment(lib, "../Release/Engine.lib")
+#endif
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "gdi32.lib")
 

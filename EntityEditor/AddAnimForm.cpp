@@ -2,6 +2,8 @@
 #include "Utility.h"
 #include "AddAnimForm.h"
 
+using namespace Engine;
+
 
 namespace EntityEditor
 {
@@ -9,6 +11,11 @@ namespace EntityEditor
 	System::Void AddAnimForm::AddAnimForm_Load(System::Object^  sender, System::EventArgs^  e)
 	{
 		_radioStandardAnim->Checked = true;
+
+		for(int i = 0; i < Animation::ANIM_TYPE_COUNT; ++i)
+		{
+			_cmbStandardAnim->Items->Add(gcnew String(Animation::GetAnimTypeName((Animation::AnimType)i)));
+		}
 		_cmbStandardAnim->SelectedIndex = 0;
 	}
 

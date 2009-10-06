@@ -297,6 +297,8 @@ namespace MapEditor
 		_selectionRect.Height = max_pt.Y - min_pt.Y;
 		if(_selectionRect.Height == 0)
 			_selectionRect.Height = 1;
+
+		_selectOne = (_selectionRect.Width == 1 && _selectionRect.Height == 1);
 	}
 
 	void EM_PlaceObject::SelectEntity(ModelEntity* entity, SelectMode mode)
@@ -541,11 +543,37 @@ namespace MapEditor
 			planes[3].rvec3.normalize();
 			planes[3].w = -dot(planes[3].rvec3, points[2]);
 
-			for(int i = 0; i < count; ++i)
+			if(_selectOne)
 			{
-				const OBBox& bbox = vis_ents[i]->GetWorldBoundingBox();
-				if(BBoxInSelRect(bbox, planes))
-					SelectEntity(vis_ents[i], mode);
+				ModelEntity* entity = 0;
+				for(int i = 0; i < count; ++i)
+				{
+					const OBBox& bbox = vis_ents[i]->GetWorldBoundingBox();
+					if(BBoxInSelRect(bbox, planes))
+					{
+						if(entity)
+						{
+							if((cam_pos - vis_ents[i]->GetPosition()).length() < (cam_pos - entity->GetPosition()).length())
+								entity = vis_ents[i];
+						}
+						else
+						{
+							entity = vis_ents[i];
+						}
+					}
+				}
+
+				if(entity)
+					SelectEntity(entity, mode);
+			}
+			else
+			{
+				for(int i = 0; i < count; ++i)
+				{
+					const OBBox& bbox = vis_ents[i]->GetWorldBoundingBox();
+					if(BBoxInSelRect(bbox, planes))
+						SelectEntity(vis_ents[i], mode);
+				}
 			}
 		}
 		delete[] vis_ents;

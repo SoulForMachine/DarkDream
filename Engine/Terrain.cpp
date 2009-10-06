@@ -109,10 +109,26 @@ namespace Engine
 		int n = _patchCount - index;
 		if(n)
 		{
+			// move objects
+			EntityHashMap& entities = engineAPI.world->GetEntities();
+			for(EntityHashMap::Iterator it = entities.Begin(); it != entities.End(); ++it)
+			{
+				vec3f pos = (*it)->GetPosition();
+				if(	pos.x >= _patches[index].boundBox.minPt.x &&
+					pos.x <= _patches[index + n - 1].boundBox.maxPt.x &&
+					pos.z >= 0 &&
+					pos.z <= PATCH_HEIGHT )
+				{
+					pos.x += PATCH_WIDTH;
+					(*it)->SetPosition(pos);
+				}
+			}
+
 			TerrainPatch* tmp = new(tempPool) TerrainPatch[n];
 			memcpy(tmp, &_patches[index], sizeof(TerrainPatch) * n);
 			memcpy(&_patches[index + 1], tmp, sizeof(TerrainPatch) * n);
 			delete[] tmp;
+			// modify bounding boxes
 			for(int i = 0; i < n; ++i)
 			{
 				_patches[index + 1 + i].boundBox.minPt.x = (float)(index + 1 + i) * PATCH_WIDTH;
@@ -152,14 +168,14 @@ namespace Engine
 				if(w == 0 && index > 0) // use hight from previous patch's edge
 				{
 					elev = _patches[index - 1].elevation[h * (PATCH_WIDTH + 1) + PATCH_WIDTH];
-					if(heights)
-						elev = (elev + heights[h * (PATCH_WIDTH + 1) + w]) * 0.5f;
+					/*if(heights)
+						elev = (elev + heights[h * (PATCH_WIDTH + 1) + w]) * 0.5f;*/
 				}
 				else if(w == PATCH_WIDTH && index < _patchCount) // use hight from next patch's edge
 				{
 					elev = _patches[index + 1].elevation[h * (PATCH_WIDTH + 1)];
-					if(heights)
-						elev = (elev + heights[h * (PATCH_WIDTH + 1) + w]) * 0.5f;
+					/*if(heights)
+						elev = (elev + heights[h * (PATCH_WIDTH + 1) + w]) * 0.5f;*/
 				}
 				else
 				{
@@ -284,12 +300,28 @@ namespace Engine
 			int n = _patchCount - 1 - index;
 			if(n)
 			{
+				// move objects
+				EntityHashMap& entities = engineAPI.world->GetEntities();
+				for(EntityHashMap::Iterator it = entities.Begin(); it != entities.End(); ++it)
+				{
+					vec3f pos = (*it)->GetPosition();
+					if(	pos.x >= _patches[index + 1].boundBox.minPt.x &&
+						pos.x <= _patches[index + n].boundBox.maxPt.x &&
+						pos.z >= 0 &&
+						pos.z <= PATCH_HEIGHT )
+					{
+						pos.x -= PATCH_WIDTH;
+						(*it)->SetPosition(pos);
+					}
+				}
+
 				TerrainPatch* tmp = new(tempPool) TerrainPatch[n];
 				memcpy(tmp, &_patches[index + 1], sizeof(TerrainPatch) * n);
 				memcpy(&_patches[index], tmp, sizeof(TerrainPatch) * n);
 				delete[] tmp;
 				for(int i = 0; i < n; ++i)
 				{
+					// modify bounding boxes
 					_patches[index + i].boundBox.minPt.x = (float)(index + i) * PATCH_WIDTH;
 					_patches[index + i].boundBox.maxPt.x = (float)(index + i) * PATCH_WIDTH + PATCH_WIDTH;
 				}
@@ -921,15 +953,6 @@ namespace Engine
 
 			start_dest_x += x2 - x1 + 1;
 		}
-	}
-
-	void Terrain::AddEntity(Entity* entity)
-	{
-		const vec3f& pos = entity->GetPosition();
-	}
-
-	void Terrain::RemoveEntity(Entity* entity)
-	{
 	}
 
 	void Terrain::UpdatePatchNormals(int patch_index, PatchVertex* vertices, int start_x, int start_y, int end_x, int end_y)

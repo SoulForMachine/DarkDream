@@ -99,6 +99,7 @@ namespace EntityEditor {
 	private: System::Windows::Forms::ImageList^  _imageList;
 	private: System::Windows::Forms::Button^  _btnCollapseAllSkelet;
 	private: System::Windows::Forms::Button^  _btnExpandAllSkelet;
+	private: System::Windows::Forms::Button^  _btnTPose;
 
 
 	protected: 
@@ -144,8 +145,9 @@ namespace EntityEditor {
 			this->_colHdrName = (gcnew System::Windows::Forms::ColumnHeader());
 			this->_colHdrAnimation = (gcnew System::Windows::Forms::ColumnHeader());
 			this->_btnAddAnim = (gcnew System::Windows::Forms::Button());
-			this->_btnPlayAnim = (gcnew System::Windows::Forms::Button());
 			this->_btnRemoveAnim = (gcnew System::Windows::Forms::Button());
+			this->_btnTPose = (gcnew System::Windows::Forms::Button());
+			this->_btnPlayAnim = (gcnew System::Windows::Forms::Button());
 			this->_panelSkeleton = (gcnew Salamander::Windows::Forms::CollapsiblePanel());
 			this->_btnCollapseAllSkelet = (gcnew System::Windows::Forms::Button());
 			this->_btnExpandAllSkelet = (gcnew System::Windows::Forms::Button());
@@ -199,7 +201,7 @@ namespace EntityEditor {
 			this->_mnuViewExpandAll->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_mnuViewExpandAll.Image")));
 			this->_mnuViewExpandAll->ImageTransparentColor = System::Drawing::Color::White;
 			this->_mnuViewExpandAll->Name = L"_mnuViewExpandAll";
-			this->_mnuViewExpandAll->Size = System::Drawing::Size(139, 22);
+			this->_mnuViewExpandAll->Size = System::Drawing::Size(152, 22);
 			this->_mnuViewExpandAll->Text = L"&Expand All";
 			this->_mnuViewExpandAll->Click += gcnew System::EventHandler(this, &EntityForm::_mnuViewExpandAll_Click);
 			// 
@@ -208,7 +210,7 @@ namespace EntityEditor {
 			this->_mnuViewCollapseAll->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_mnuViewCollapseAll.Image")));
 			this->_mnuViewCollapseAll->ImageTransparentColor = System::Drawing::Color::White;
 			this->_mnuViewCollapseAll->Name = L"_mnuViewCollapseAll";
-			this->_mnuViewCollapseAll->Size = System::Drawing::Size(139, 22);
+			this->_mnuViewCollapseAll->Size = System::Drawing::Size(152, 22);
 			this->_mnuViewCollapseAll->Text = L"&Collapse All";
 			this->_mnuViewCollapseAll->Click += gcnew System::EventHandler(this, &EntityForm::_mnuViewCollapseAll_Click);
 			// 
@@ -290,11 +292,12 @@ namespace EntityEditor {
 			this->_imageList->Images->SetKeyName(0, L"openHS.png");
 			this->_imageList->Images->SetKeyName(1, L"DeleteHS.png");
 			this->_imageList->Images->SetKeyName(2, L"PlayHS.png");
-			this->_imageList->Images->SetKeyName(3, L"StopHS.png");
+			this->_imageList->Images->SetKeyName(3, L"pause.PNG");
 			this->_imageList->Images->SetKeyName(4, L"Expanded.PNG");
 			this->_imageList->Images->SetKeyName(5, L"collapsed.png");
 			this->_imageList->Images->SetKeyName(6, L"joint.PNG");
 			this->_imageList->Images->SetKeyName(7, L"joint_r.PNG");
+			this->_imageList->Images->SetKeyName(8, L"tpose.PNG");
 			// 
 			// _panelSounds
 			// 
@@ -391,8 +394,9 @@ namespace EntityEditor {
 			this->_panelAnimations->BackColor = System::Drawing::SystemColors::Control;
 			this->_panelAnimations->Controls->Add(this->_listAnimations);
 			this->_panelAnimations->Controls->Add(this->_btnAddAnim);
-			this->_panelAnimations->Controls->Add(this->_btnPlayAnim);
 			this->_panelAnimations->Controls->Add(this->_btnRemoveAnim);
+			this->_panelAnimations->Controls->Add(this->_btnPlayAnim);
+			this->_panelAnimations->Controls->Add(this->_btnTPose);
 			this->_panelAnimations->EndColour = System::Drawing::Color::LightGray;
 			this->_panelAnimations->Image = nullptr;
 			this->_panelAnimations->Location = System::Drawing::Point(8, 524);
@@ -448,18 +452,6 @@ namespace EntityEditor {
 			this->_btnAddAnim->UseVisualStyleBackColor = true;
 			this->_btnAddAnim->Click += gcnew System::EventHandler(this, &EntityForm::_btnAddAnim_Click);
 			// 
-			// _btnPlayAnim
-			// 
-			this->_btnPlayAnim->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
-			this->_btnPlayAnim->ImageIndex = 2;
-			this->_btnPlayAnim->ImageList = this->_imageList;
-			this->_btnPlayAnim->Location = System::Drawing::Point(340, 253);
-			this->_btnPlayAnim->Name = L"_btnPlayAnim";
-			this->_btnPlayAnim->Size = System::Drawing::Size(25, 23);
-			this->_btnPlayAnim->TabIndex = 15;
-			this->_btnPlayAnim->UseVisualStyleBackColor = true;
-			this->_btnPlayAnim->Click += gcnew System::EventHandler(this, &EntityForm::_btnPlayAnim_Click);
-			// 
 			// _btnRemoveAnim
 			// 
 			this->_btnRemoveAnim->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
@@ -471,6 +463,30 @@ namespace EntityEditor {
 			this->_btnRemoveAnim->TabIndex = 17;
 			this->_btnRemoveAnim->UseVisualStyleBackColor = true;
 			this->_btnRemoveAnim->Click += gcnew System::EventHandler(this, &EntityForm::_btnRemoveAnim_Click);
+			// 
+			// _btnTPose
+			// 
+			this->_btnTPose->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
+			this->_btnTPose->ImageIndex = 8;
+			this->_btnTPose->ImageList = this->_imageList;
+			this->_btnTPose->Location = System::Drawing::Point(283, 253);
+			this->_btnTPose->Name = L"_btnTPose";
+			this->_btnTPose->Size = System::Drawing::Size(25, 23);
+			this->_btnTPose->TabIndex = 18;
+			this->_btnTPose->UseVisualStyleBackColor = true;
+			this->_btnTPose->Click += gcnew System::EventHandler(this, &EntityForm::_btnTPose_Click);
+			// 
+			// _btnPlayAnim
+			// 
+			this->_btnPlayAnim->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
+			this->_btnPlayAnim->ImageIndex = 2;
+			this->_btnPlayAnim->ImageList = this->_imageList;
+			this->_btnPlayAnim->Location = System::Drawing::Point(252, 253);
+			this->_btnPlayAnim->Name = L"_btnPlayAnim";
+			this->_btnPlayAnim->Size = System::Drawing::Size(25, 23);
+			this->_btnPlayAnim->TabIndex = 15;
+			this->_btnPlayAnim->UseVisualStyleBackColor = true;
+			this->_btnPlayAnim->Click += gcnew System::EventHandler(this, &EntityForm::_btnPlayAnim_Click);
 			// 
 			// _panelSkeleton
 			// 
@@ -500,7 +516,7 @@ namespace EntityEditor {
 			// _btnCollapseAllSkelet
 			// 
 			this->_btnCollapseAllSkelet->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
-			this->_btnCollapseAllSkelet->ImageIndex = 5;
+			this->_btnCollapseAllSkelet->ImageIndex = 4;
 			this->_btnCollapseAllSkelet->ImageList = this->_imageList;
 			this->_btnCollapseAllSkelet->Location = System::Drawing::Point(402, 311);
 			this->_btnCollapseAllSkelet->Name = L"_btnCollapseAllSkelet";
@@ -512,7 +528,7 @@ namespace EntityEditor {
 			// _btnExpandAllSkelet
 			// 
 			this->_btnExpandAllSkelet->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
-			this->_btnExpandAllSkelet->ImageIndex = 4;
+			this->_btnExpandAllSkelet->ImageIndex = 5;
 			this->_btnExpandAllSkelet->ImageList = this->_imageList;
 			this->_btnExpandAllSkelet->Location = System::Drawing::Point(371, 311);
 			this->_btnExpandAllSkelet->Name = L"_btnExpandAllSkelet";
@@ -707,5 +723,6 @@ namespace EntityEditor {
 	System::Void _mnuViewCollapseAll_Click(System::Object^  sender, System::EventArgs^  e);
 	System::Void _btnExpandAllSkelet_Click(System::Object^  sender, System::EventArgs^  e);
 	System::Void _btnCollapseAllSkelet_Click(System::Object^  sender, System::EventArgs^  e);
+	System::Void _btnTPose_Click(System::Object^  sender, System::EventArgs^  e);
 };
 }

@@ -20,7 +20,11 @@ namespace MapEditor
 		virtual ActionType GetActionType() override;
 
 	private:
+		void RemovePatch();
+
 		int _patchIndex;
+		float* _elevation;
+		List<Engine::Entity*>* _entities;
 	};
 
 }

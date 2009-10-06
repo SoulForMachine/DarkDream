@@ -39,6 +39,8 @@ namespace Engine
 			{ return _camera; }
 		Terrain& GetTerrain()
 			{ return _terrain; }
+		EntityHashMap& GetEntities()
+			{ return _entities; }
 
 	private:
 		Camera _camera;

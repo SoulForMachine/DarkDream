@@ -52,20 +52,13 @@ namespace Engine
 		if(_entities.GetCount() == MAX_NUM_ENTITIES)
 			return false;
 
-		_entities[entity] = entity;
+		_entities.Insert(entity);
 		return true;
 	}
 
 	bool World::RemoveEntity(Entity* entity)
 	{
-		for(EntityHashMap::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
-		{
-			if(*it == entity)
-			{
-				_entities.Remove(it);
-				return true;
-			}
-		}
+		_entities.Remove(entity);
 		return false;
 	}
 

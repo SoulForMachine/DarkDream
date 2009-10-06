@@ -42,7 +42,7 @@ namespace EntityEditor
 		_gridVertSpacing = 1.0f;
 		_gridHorizSpacing = 1.0f;
 
-		_jointRadius = 0.25f;
+		_jointRadius = 0.025f;
 
 		_rotX = 45.0f;
 		_rotY = 45.0f;
@@ -113,6 +113,7 @@ namespace EntityEditor
 		if(entity)
 			engineAPI->world->AddEntity(entity);
 		_entity = entity;
+		ModelChanged();
 		InvalidateRect((HWND)Handle.ToPointer(), 0, FALSE);
 	}
 
@@ -453,7 +454,7 @@ namespace EntityEditor
 		}
 		else if(_rightBtnDown && (modifiers & MK_RBUTTON))
 		{
-			_zoom += (x - _prevX) * 0.2f;
+			_zoom += (x - _prevX) * 0.05f;
 			float z = _zoom;
 			clamp(z, 1.0f, 100.0f);
 			_zoom = z;
@@ -509,15 +510,12 @@ namespace EntityEditor
 
 	void RenderWindow::OnMouseWheel(int delta, int x, int y)
 	{
-		for(int i = 0; i < 6; ++i)
-		{
-			_zoom -= float(delta) / WHEEL_DELTA;
-			float z = _zoom;
-			clamp(z, 1.0f, 100.0f);
-			_zoom = z;
+		_zoom -= float(delta) / WHEEL_DELTA;
+		float z = _zoom;
+		clamp(z, 1.0f, 100.0f);
+		_zoom = z;
 
-			OnPaint();
-		}
+		OnPaint();
 	}
 
 	void RenderWindow::RenderGrid()

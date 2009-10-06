@@ -79,6 +79,9 @@ namespace EntityEditor
 				_modelForm->RedrawAsync();
 				_entity->SetModified(true);
 				break;
+			case NotifyMessage::AnimationChanged:
+				_entity->SetModified(true);
+				break;
 			}
 		}
 	}

@@ -17,17 +17,18 @@ using namespace math3d;
 namespace Engine
 {
 
-	const char* Animation::_commonAnimNames[ANIM_COUNT] =
+	const char* Animation::_commonAnimNames[ANIM_TYPE_COUNT] =
 	{
 		"Idle",
 		"Walk",
 		"Run",
+		"Jump",
+		"Alarm",
 		"Pain",
 		"Death 1",
 		"Death 2",
-		"Death 3",
-		"Attack",
-		"Melee Attack",
+		"Attack 1",
+		"Attack 2",
 	};
 
 	Animation::Animation()
@@ -131,20 +132,20 @@ namespace Engine
 
 	const char* Animation::GetAnimTypeName(AnimType anim)
 	{
-		if(anim < ANIM_COUNT)
+		if(anim < ANIM_TYPE_COUNT)
 			return _commonAnimNames[anim];
 		else
 			return "";
 	}
 
-	AnimType Animation::GetAnimTypeByName(const char* name)
+	Animation::AnimType Animation::GetAnimTypeByName(const char* name)
 	{
-		for(int i = 0; i < ANIM_COUNT; ++i)
+		for(int i = 0; i < ANIM_TYPE_COUNT; ++i)
 		{
 			if(!strcmp(name, _commonAnimNames[i]))
 				return (AnimType)i;
 		}
-		return ANIM_CUSTOM;
+		return ANIM_TYPE_CUSTOM;
 	}
 
 	void Animation::EvalTime(float time, math3d::mat4f& transform, const Joint* joint) const
@@ -172,12 +173,12 @@ namespace Engine
 		}
 
 		transform.set_identity();
-		if(valid[ANIM_CH_SCALE_X])
+		/*if(valid[ANIM_CH_SCALE_X])
 			transform(0, 0) = results[ANIM_CH_SCALE_X];
 		if(valid[ANIM_CH_SCALE_Y])
 			transform(1, 1) = results[ANIM_CH_SCALE_Y];
 		if(valid[ANIM_CH_SCALE_Z])
-			transform(2, 2) = results[ANIM_CH_SCALE_X];
+			transform(2, 2) = results[ANIM_CH_SCALE_X];*/
 
 		if(valid[ANIM_CH_ROTATE_X])
 			transform.rotate_x(rad2deg(results[ANIM_CH_ROTATE_X]));

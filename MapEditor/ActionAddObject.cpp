@@ -16,20 +16,35 @@ namespace MapEditor
 	{
 		_path = path;
 		_point = new(tempPool) vec3f(point);
-		_transform = new(tempPool) mat4f(point);
 		_entity = 0;
+		_ownObject = false;
 	}
 
 	ActionAddObject::~ActionAddObject()
 	{
 		delete _point;
-		delete _transform;
+		if(_ownObject)
+			delete _entity;
 	}
 
 	bool ActionAddObject::BeginAction()
 	{
-		_transform->set_translation(*_point);
-		return AddObject();
+		tchar* path = ConvertString<tchar>(_path);
+		_entity = engineAPI->modelEntityManager->CreateEntityObject(path);
+		engineAPI->modelEntityManager->ReleaseAll();
+		delete[] path;
+		if(engineAPI->world->AddEntity(_entity))
+		{
+			_entity->SetPosition(*_point);
+			_entity->ActiveAnimation("Idle");
+			return true;
+		}
+		else
+		{
+			delete _entity;
+			_entity = 0;
+			return false;
+		}
 	}
 
 	void ActionAddObject::EndAction()
@@ -38,39 +53,25 @@ namespace MapEditor
 
 	void ActionAddObject::Undo()
 	{
-		*_transform = _entity->GetWorldTransform(); // save current transform for redo
-		engineAPI->world->RemoveEntity(_entity);
-		delete _entity;
-		_entity = 0;
+		if(_entity)
+		{
+			engineAPI->world->RemoveEntity(_entity);
+			_ownObject = true;
+		}
 	}
 
 	void ActionAddObject::Redo()
 	{
-		AddObject();
+		if(_entity)
+		{
+			engineAPI->world->AddEntity(_entity);
+			_ownObject = false;
+		}
 	}
 
 	ActionType ActionAddObject::GetActionType()
 	{
 		return ActionType::ADD_OBJECT;
-	}
-
-	bool ActionAddObject::AddObject()
-	{
-		tchar* path = ConvertString<tchar>(_path);
-		ModelEntity* entity = engineAPI->modelEntityManager->CreateEntityObject(path);
-		delete[] path;
-		if(engineAPI->world->AddEntity(entity))
-		{
-			_entity = entity;
-			_entity->SetWorldTransform(*_transform);
-			engineAPI->modelEntityManager->ReleaseAll();
-			return true;
-		}
-		else
-		{
-			_entity = 0;
-			return false;
-		}
 	}
 
 }

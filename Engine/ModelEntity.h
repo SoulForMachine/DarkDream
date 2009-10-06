@@ -57,7 +57,7 @@ namespace Engine
 		struct AnimData
 		{
 			char* name;
-			AnimType type;
+			Animation::AnimType type;
 			const AnimationRes* animation;
 		};
 
@@ -93,7 +93,13 @@ namespace Engine
 		const OBBox& GetWorldBoundingBox() const
 			{ return _worldBBox; }
 		void UpdateGraphics(int frame_time);
-		void ActiveAnimation(const char* anim_name);
+		bool SetActiveAnimation(const char* anim_name);
+		void PlayAnimation()
+			{ _animPlaying = true; }
+		void PauseAnimation()
+			{ _animPlaying = false; }
+		bool IsAnimationPlaying() const
+			{ return _animPlaying; }
 		virtual void SetPosition(const math3d::vec3f& pos);
 
 		const ModelRes* GetModelRes() const
@@ -154,12 +160,14 @@ namespace Engine
 		void CalcWorldBBox();
 		ModelClass GetClassFromString(const char* name);
 		const char* GetClassString(ModelClass c);
+		void IdentityJointMatPalette();
 
 		OBBox _worldBBox; // model's world space bounding box
 		math3d::mat4f _worldMat;
 		StaticArray<math3d::mat4f> _jointMatPalette;
 		float _animTime;
 		AnimData* _curAnim;
+		bool _animPlaying;
 		bool _dropped; // true if object is on terrain
 
 		const ModelRes* _model;

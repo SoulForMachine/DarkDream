@@ -34,6 +34,9 @@ namespace Engine
 	public:
 		EntityHashMap(Memory::Allocator& pool, size_t max_size)
 			: HashMap<Entity*, Entity*, EntityHashMapTraits>(pool, max_size) {}
+
+		void Insert(Entity* entity)
+			{ operator [] (entity) = entity; }
 	};
 
 }
