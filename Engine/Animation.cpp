@@ -25,10 +25,10 @@ namespace Engine
 		"Jump",
 		"Alarm",
 		"Pain",
-		"Death 1",
-		"Death 2",
-		"Attack 1",
-		"Attack 2",
+		"Death_1",
+		"Death_2",
+		"Attack_1",
+		"Attack_2",
 	};
 
 	Animation::Animation()

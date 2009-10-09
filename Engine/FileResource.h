@@ -29,6 +29,7 @@ namespace Engine
 
 	class ModelEntity;
 	class Model;
+	class Material;
 	class Animation;
 	class ParticleSystem;
 
@@ -152,6 +153,25 @@ namespace Engine
 
 	private:
 		Model* _model;
+	};
+
+
+	class ENGINE_API MaterialRes: public FileResource
+	{
+	public:
+		MaterialRes(const tchar* file_name);
+		~MaterialRes();
+
+		bool Load();
+		bool LoadDefault();
+		void Unload();
+		bool IsLoaded() const
+			{ return (_material != 0); }
+		const Material* GetMaterial() const
+			{ return _material; }
+
+	private:
+		Material* _material;
 	};
 
 

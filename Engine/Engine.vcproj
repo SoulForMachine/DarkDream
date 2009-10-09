@@ -191,6 +191,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Base\Programs\Mesh_Nrm.fp"
+				>
+			</File>
+			<File
+				RelativePath="..\Base\Programs\Mesh_Nrm.vp"
+				>
+			</File>
+			<File
+				RelativePath="..\Base\Programs\Mesh_NrmSkin.vp"
+				>
+			</File>
+			<File
 				RelativePath="..\Base\Programs\Mesh_Skin.vp"
 				>
 			</File>
@@ -305,6 +317,14 @@
 		</File>
 		<File
 			RelativePath=".\InputSystem.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Material.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Material.h"
 			>
 		</File>
 		<File

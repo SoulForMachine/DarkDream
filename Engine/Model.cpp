@@ -159,6 +159,9 @@ namespace Engine
 
 		vec3f* positions = 0;
 		vec3f* normals = 0;
+		vec3f* tangents = 0;
+		vec3f* binormals = 0;
+		vec2f* uvs = 0;
 		vec2f* weights = 0;
 		vec2ub* joint_inds = 0;
 
@@ -170,14 +173,16 @@ namespace Engine
 
 		if(mesh.flags & Mesh::FLAG_TANGENTS)
 		{
-			// skip tangents and binormals
-			file->Seek(sizeof(vec3f) * mesh.numVertices * 2, SEEK_CUR);
+			tangents = new(tempPool) vec3f[mesh.numVertices];
+			file->Read(tangents, sizeof(vec3f) * mesh.numVertices);
+			binormals = new(tempPool) vec3f[mesh.numVertices];
+			file->Read(binormals, sizeof(vec3f) * mesh.numVertices);
 		}
 
 		if(mesh.flags & Mesh::FLAG_UVS)
 		{
-			// skip uvs
-			file->Seek(sizeof(vec2f) * mesh.numVertices, SEEK_CUR);
+			uvs = new(tempPool) vec2f[mesh.numVertices];
+			file->Read(uvs, sizeof(vec2f) * mesh.numVertices);
 		}
 
 		if(mesh.flags & Mesh::FLAG_SKIN_DATA)
@@ -203,7 +208,63 @@ namespace Engine
 
 		GL::Renderer* renderer = engineAPI.renderSystem->GetRenderer();
 
-		if(mesh.flags & Mesh::FLAG_SKIN_DATA)
+		if(mesh.flags == (Mesh::FLAG_SKIN_DATA | Mesh::FLAG_TANGENTS | Mesh::FLAG_UVS))
+		{
+			mesh.vertexSize = sizeof(MeshVert_UV_Tan_Skin);
+			mesh.vertLayout = Mesh::VERT_LAYOUT_POS_NRM_UV_TAN_SKIN;
+
+			mesh.vertBuf = renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, mesh.numVertices * sizeof(MeshVert_UV_Tan_Skin), 0, GL::USAGE_STATIC_DRAW);
+			if(!mesh.vertBuf)
+				return false;
+			MeshVert_UV_Tan_Skin* buf = (MeshVert_UV_Tan_Skin*)mesh.vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+			if(!buf)
+			{
+				renderer->DestroyBuffer(mesh.vertBuf);
+				return false;
+			}
+
+			for(size_t vert_i = 0; vert_i < mesh.numVertices; ++vert_i)
+			{
+				buf[vert_i].position = vec4f(positions[vert_i], 1.0f);
+				buf[vert_i].normal = normals[vert_i];
+				buf[vert_i].tangent.rvec3 = tangents[vert_i];
+				vec3f b;
+				cross(b, normals[vert_i], tangents[vert_i]);
+				buf[vert_i].tangent.w = (dot(b, binormals[vert_i]) > 0.0)? 1.0f: -1.0f;
+				buf[vert_i].texCoord = uvs[vert_i];
+				buf[vert_i].skinData = vec4f(weights[vert_i].x, weights[vert_i].y, (float)joint_inds[vert_i].x, (float)joint_inds[vert_i].y);
+			}
+
+			if(!mesh.vertBuf->UnmapBuffer())
+				return false;
+		}
+		else if(mesh.flags == (Mesh::FLAG_SKIN_DATA | Mesh::FLAG_UVS))
+		{
+			mesh.vertexSize = sizeof(MeshVert_UV_Skin);
+			mesh.vertLayout = Mesh::VERT_LAYOUT_POS_NRM_UV_SKIN;
+
+			mesh.vertBuf = renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, mesh.numVertices * sizeof(MeshVert_UV_Skin), 0, GL::USAGE_STATIC_DRAW);
+			if(!mesh.vertBuf)
+				return false;
+			MeshVert_UV_Skin* buf = (MeshVert_UV_Skin*)mesh.vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+			if(!buf)
+			{
+				renderer->DestroyBuffer(mesh.vertBuf);
+				return false;
+			}
+
+			for(size_t vert_i = 0; vert_i < mesh.numVertices; ++vert_i)
+			{
+				buf[vert_i].position = vec4f(positions[vert_i], 1.0f);
+				buf[vert_i].normal = normals[vert_i];
+				buf[vert_i].texCoord = uvs[vert_i];
+				buf[vert_i].skinData = vec4f(weights[vert_i].x, weights[vert_i].y, (float)joint_inds[vert_i].x, (float)joint_inds[vert_i].y);
+			}
+
+			if(!mesh.vertBuf->UnmapBuffer())
+				return false;
+		}
+		else if(mesh.flags == Mesh::FLAG_SKIN_DATA)
 		{
 			mesh.vertexSize = sizeof(MeshVert_Skin);
 			mesh.vertLayout = Mesh::VERT_LAYOUT_POS_NRM_SKIN;
@@ -223,6 +284,60 @@ namespace Engine
 				buf[vert_i].position = vec4f(positions[vert_i], 1.0f);
 				buf[vert_i].normal = normals[vert_i];
 				buf[vert_i].skinData = vec4f(weights[vert_i].x, weights[vert_i].y, (float)joint_inds[vert_i].x, (float)joint_inds[vert_i].y);
+			}
+
+			if(!mesh.vertBuf->UnmapBuffer())
+				return false;
+		}
+		else if(mesh.flags == (Mesh::FLAG_TANGENTS | Mesh::FLAG_UVS))
+		{
+			mesh.vertexSize = sizeof(MeshVert_UV_Tan);
+			mesh.vertLayout = Mesh::VERT_LAYOUT_POS_NRM_UV_TAN;
+
+			mesh.vertBuf = renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, mesh.numVertices * sizeof(MeshVert_UV_Tan), 0, GL::USAGE_STATIC_DRAW);
+			if(!mesh.vertBuf)
+				return false;
+			MeshVert_UV_Tan* buf = (MeshVert_UV_Tan*)mesh.vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+			if(!buf)
+			{
+				renderer->DestroyBuffer(mesh.vertBuf);
+				return false;
+			}
+
+			for(size_t vert_i = 0; vert_i < mesh.numVertices; ++vert_i)
+			{
+				buf[vert_i].position = vec4f(positions[vert_i], 1.0f);
+				buf[vert_i].normal = normals[vert_i];
+				buf[vert_i].tangent.rvec3 = tangents[vert_i];
+				vec3f b;
+				cross(b, normals[vert_i], tangents[vert_i]);
+				buf[vert_i].tangent.w = (dot(b, binormals[vert_i]) > 0.0)? 1.0f: -1.0f;
+				buf[vert_i].texCoord = uvs[vert_i];
+			}
+
+			if(!mesh.vertBuf->UnmapBuffer())
+				return false;
+		}
+		else if(mesh.flags == (Mesh::FLAG_UVS))
+		{
+			mesh.vertexSize = sizeof(MeshVert_UV);
+			mesh.vertLayout = Mesh::VERT_LAYOUT_POS_NRM_UV;
+
+			mesh.vertBuf = renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, mesh.numVertices * sizeof(MeshVert_UV), 0, GL::USAGE_STATIC_DRAW);
+			if(!mesh.vertBuf)
+				return false;
+			MeshVert_UV* buf = (MeshVert_UV*)mesh.vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
+			if(!buf)
+			{
+				renderer->DestroyBuffer(mesh.vertBuf);
+				return false;
+			}
+
+			for(size_t vert_i = 0; vert_i < mesh.numVertices; ++vert_i)
+			{
+				buf[vert_i].position = vec4f(positions[vert_i], 1.0f);
+				buf[vert_i].normal = normals[vert_i];
+				buf[vert_i].texCoord = uvs[vert_i];
 			}
 
 			if(!mesh.vertBuf->UnmapBuffer())
@@ -255,6 +370,9 @@ namespace Engine
 
 		delete[] positions;
 		delete[] normals;
+		delete[] tangents;
+		delete[] binormals;
+		delete[] uvs;
 		delete[] weights;
 		delete[] joint_inds;
 

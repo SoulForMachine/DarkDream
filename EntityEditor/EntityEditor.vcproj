@@ -208,7 +208,7 @@
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\EditorCommon.dll"
-			AssemblyName="EditorCommon, Version=1.0.3515.36735, processorArchitecture=x86"
+			AssemblyName="EditorCommon, Version=1.0.3566.37612, processorArchitecture=x86"
 			MinFrameworkVersion="131072"
 		/>
 	</References>
@@ -247,6 +247,16 @@
 					>
 					<File
 						RelativePath=".\MainForm.resX"
+						SubType="Designer"
+						>
+					</File>
+				</File>
+				<File
+					RelativePath=".\MaterialForm.h"
+					FileType="3"
+					>
+					<File
+						RelativePath=".\MaterialForm.resx"
 						SubType="Designer"
 						>
 					</File>
@@ -305,6 +315,10 @@
 				</File>
 				<File
 					RelativePath=".\MainForm.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\MaterialForm.cpp"
 					>
 				</File>
 				<File

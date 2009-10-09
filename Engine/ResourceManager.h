@@ -13,6 +13,7 @@ namespace Engine
 	class ShaderManager;
 	class ASMProgManager;
 	class TextureManager;
+	class MaterialManager;
 	class ModelManager;
 	class AnimationManager;
 	class ModelEntityManager;
@@ -87,6 +88,22 @@ namespace Engine
 
 	protected:
 		virtual ShaderRes* CreateResObj(const tchar* file_name);
+	};
+
+	// ================================================================================================
+
+	class ENGINE_API MaterialManager: public ResourceManager
+	{
+	public:
+		const MaterialRes* CreateMaterial(const tchar* file_name, bool immediate = false)
+			{ return (const MaterialRes*)CreateRes(file_name, immediate); }
+		bool ReleaseMaterial(const MaterialRes* material)
+			{ return ReleaseRes(material); }
+		const MaterialRes* FindMaterial(const tchar* file_name)
+			{ return (const MaterialRes*)FindRes(file_name); }
+
+	protected:
+		virtual MaterialRes* CreateResObj(const tchar* file_name);
 	};
 
 	// ================================================================================================

@@ -14,6 +14,7 @@ namespace EntityEditor {
 
 	ref class ModelForm;
 	ref class EntityForm;
+	ref class MaterialForm;
 	ref class PropertyForm;
 	ref class Entity;
 
@@ -61,6 +62,7 @@ namespace EntityEditor {
 		ModelForm^ _modelForm;
 		EditorCommon::ConsoleForm^ _consoleForm;
 		EntityForm^ _entityForm;
+		MaterialForm^ _materialForm;
 		PropertyForm^ _propertyForm;
 		Entity^ _entity;
 		bool _animate;
@@ -153,6 +155,7 @@ namespace EntityEditor {
 			this->_mnuViewEntityPanel = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_mnuViewMaterialPanel = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_mnuViewPropertyPanel = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->_mnuViewSkelet = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->renderToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_mnuAnimate = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_mnuWireframe = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -165,7 +168,6 @@ namespace EntityEditor {
 			this->_toolBtnConsole = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_saveEntityDlg = (gcnew System::Windows::Forms::SaveFileDialog());
 			this->_openEntityDlg = (gcnew System::Windows::Forms::OpenFileDialog());
-			this->_mnuViewSkelet = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_mainMenu->SuspendLayout();
 			this->_mainToolbar->SuspendLayout();
 			this->SuspendLayout();
@@ -285,6 +287,7 @@ namespace EntityEditor {
 			this->_mnuViewMaterialPanel->ShortcutKeys = System::Windows::Forms::Keys::F5;
 			this->_mnuViewMaterialPanel->Size = System::Drawing::Size(178, 22);
 			this->_mnuViewMaterialPanel->Text = L"&Material Panel";
+			this->_mnuViewMaterialPanel->Click += gcnew System::EventHandler(this, &MainForm::_mnuViewMaterialPanel_Click);
 			// 
 			// _mnuViewPropertyPanel
 			// 
@@ -293,6 +296,13 @@ namespace EntityEditor {
 			this->_mnuViewPropertyPanel->Size = System::Drawing::Size(178, 22);
 			this->_mnuViewPropertyPanel->Text = L"&Property Panel";
 			this->_mnuViewPropertyPanel->Click += gcnew System::EventHandler(this, &MainForm::_mnuViewPropertyPanel_Click);
+			// 
+			// _mnuViewSkelet
+			// 
+			this->_mnuViewSkelet->Name = L"_mnuViewSkelet";
+			this->_mnuViewSkelet->Size = System::Drawing::Size(178, 22);
+			this->_mnuViewSkelet->Text = L"Skelet";
+			this->_mnuViewSkelet->Click += gcnew System::EventHandler(this, &MainForm::_mnuViewSkelet_Click);
 			// 
 			// renderToolStripMenuItem
 			// 
@@ -391,13 +401,6 @@ namespace EntityEditor {
 			this->_openEntityDlg->Filter = L"Entity Files (*.entity)|*.entity|All Files (*.*)|*.*";
 			this->_openEntityDlg->Title = L"Open Entity";
 			// 
-			// _mnuViewSkelet
-			// 
-			this->_mnuViewSkelet->Name = L"_mnuViewSkelet";
-			this->_mnuViewSkelet->Size = System::Drawing::Size(178, 22);
-			this->_mnuViewSkelet->Text = L"Skelet";
-			this->_mnuViewSkelet->Click += gcnew System::EventHandler(this, &MainForm::_mnuViewSkelet_Click);
-			// 
 			// MainForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -438,6 +441,7 @@ namespace EntityEditor {
 	private: System::Void _mnuAnimate_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _mnuWireframe_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _mnuViewSkelet_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _mnuViewMaterialPanel_Click(System::Object^  sender, System::EventArgs^  e);
 };
 }
 

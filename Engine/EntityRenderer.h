@@ -22,6 +22,8 @@ namespace Engine
 			const math3d::mat4f* worldMat;
 			const math3d::mat4f* jointMatPalette;
 			size_t jointCount;
+			const Material* material;
+			int shaderIndex;
 			float eyeDistSq;
 		};
 
@@ -32,16 +34,31 @@ namespace Engine
 		void ReloadShaders();
 
 	private:
-		GL::Renderer* _renderer;
-		const ASMProgRes* _vpMesh;
-		const ASMProgRes* _vpMeshSkin;
-		const ASMProgRes* _fpMesh;
-		const ASMProgRes* _fpLambert;
-		GL::VertexFormat* _vertFmtMesh;
-		GL::VertexFormat* _vertFmtSkinnedMesh;
+		struct Shader
+		{
+			const GL::ASMProgram* vertProg;
+			const GL::ASMProgram* fragProg;
+		};
 
 		void RenderMesh(const Camera& camera, const MeshRenderData* mesh_data);
 		void Clear();
+
+		GL::Renderer* _renderer;
+		const ASMProgRes* _vpMesh;
+		const ASMProgRes* _vpMeshNrm;
+		const ASMProgRes* _vpMeshSkin;
+		const ASMProgRes* _vpMeshNrmSkin;
+		const ASMProgRes* _fpMesh;
+		const ASMProgRes* _fpMeshNrm;
+		const ASMProgRes* _fpLambert;
+		GL::VertexFormat* _vertFmtMesh;
+		GL::VertexFormat* _vertFmtSkinnedMesh;
+		GL::SamplerState* _diffuseSampler;
+		GL::SamplerState* _emissionSampler;
+		GL::SamplerState* _transpSampler;
+		GL::SamplerState* _normalSampler;
+
+		Shader _shaders[4];
 	};
 
 }

@@ -45,6 +45,7 @@ namespace EntityEditor
 		_textModel->Text = model_file;
 
 		// skeleton
+		_treeSkelet->BeginUpdate();
 		_treeSkelet->Nodes->Clear();
 		bool model_loaded = _entity && model && model->GetModel();
 		if(model_loaded && model->GetModel()->GetRootJoint())
@@ -63,6 +64,7 @@ namespace EntityEditor
 			node->SelectedImageIndex = JOINT_NONE_IMAGE_INDEX;
 			_treeSkelet->Nodes->Add(node);
 		}
+		_treeSkelet->EndUpdate();
 
 		_textJointAttachment->Text = "";
 		_btnBrowseAttachment->Enabled = false;

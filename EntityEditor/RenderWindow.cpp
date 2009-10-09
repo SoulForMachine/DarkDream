@@ -376,10 +376,10 @@ namespace EntityEditor
 
 		RenderGrid();
 		RenderEntity();
-		if(_modelStats)
-			RenderStats();
 		if(_skelet)
 			RenderSkelet(vec3f(0.0f, 1.0f, 0.0f));
+		if(_modelStats)
+			RenderStats();
 
 		_renderer->Finish();
 		_renderer->SwapBuffers();

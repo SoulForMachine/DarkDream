@@ -67,6 +67,10 @@ namespace Engine
 			{ _renderStyle = style; }
 		RenderStyle GetRenderStyle() const
 			{ return _renderStyle; }
+		const GL::Texture2D* GetWhiteTexture() const
+			{ return _texWhite; }
+		const GL::Texture2D* GetBlackTexture() const
+			{ return _texBlack; }
 
 	private:
 		static const int MAX_NUM_ENTITIES = 4 * 1024;
@@ -83,6 +87,8 @@ namespace Engine
 		EntityRenderer::MeshRenderData* _transpMeshBuf;
 		TerrainRenderer* _terrainRenderer;
 		DebugRenderer* _debugRenderer;
+		GL::Texture2D* _texWhite;
+		GL::Texture2D* _texBlack;
 		int _frameTime;
 		math3d::vec4f _mainColor;
 		math3d::vec4f _editorColor;

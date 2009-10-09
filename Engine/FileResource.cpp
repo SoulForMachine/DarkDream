@@ -8,6 +8,7 @@
 #include "FileResource.h"
 #include "BaseLib/Memory.h"
 #include "Model.h"
+#include "Material.h"
 #include "Animation.h"
 #include "ParticleSystem.h"
 #include "ModelEntity.h"
@@ -734,6 +735,63 @@ namespace Engine
 			_model->Unload();
 			delete _model;
 			_model = 0;
+		}
+	}
+
+	// ============ MaterialRes =================
+
+	MaterialRes::MaterialRes(const tchar* file_name):
+		FileResource(file_name)
+	{
+		_material = 0;
+	}
+
+	MaterialRes::~MaterialRes()
+	{
+		if(_material)
+		{
+			_material->Unload();
+			delete _material;
+		}
+	}
+
+	bool MaterialRes::Load()
+	{
+		if(!_material && _fileName && *_fileName)
+		{
+			Console::PrintLn("Loading material: %ls", _fileName);
+			_material = new(mapPool) Material;
+			bool result = _material->Load(_fileName);
+			if(!result)
+			{
+				delete _material;
+				_material = 0;
+				Console::PrintError("Failed to load material: %ls", _fileName);
+			}
+			return result;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool MaterialRes::LoadDefault()
+	{
+		if(_material)
+			return false;
+
+		_material = new(mainPool) Material;
+		return (_material != 0);
+	}
+
+	void MaterialRes::Unload()
+	{
+		if(_material)
+		{
+			_material->Unload();
+			delete _material;
+			_material = 0;
 		}
 	}
 

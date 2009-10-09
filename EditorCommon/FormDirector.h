@@ -8,6 +8,7 @@ namespace EditorCommon
 		ModelChanged,
 		AttachmentChanged,
 		AnimationChanged,
+		MaterialChanged,
 	};
 
 	public interface class FormDirector

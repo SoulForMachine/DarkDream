@@ -35,6 +35,7 @@ namespace EntityEditor
 
 		if(result)
 		{
+			engineAPI->materialManager->LoadAll();
 			engineAPI->textureManager->LoadAll();
 			engineAPI->modelManager->LoadAll();
 			engineAPI->animationManager->LoadAll();

@@ -5,6 +5,7 @@
 #include "Engine/EngineInternal.h"
 #include "Engine/TerrainRenderer.h"
 #include "Model.h"
+#include "Material.h"
 #include "RenderSystem.h"
 
 
@@ -108,6 +109,18 @@ namespace Engine
 		_editorColor.set(0.31f, 0.67f, 0.79f, 1.0f);
 		_renderStyle = RENDER_STYLE_GAME;
 
+		// white and black textures
+		int pixels[4];
+		for(int i = 0; i < 4; ++i)
+			pixels[i] = -1;
+		_texWhite = _renderer->CreateTexture2D();
+		_texWhite->TexImage(0, GL::PIXEL_FORMAT_RGBA8, 2, 2, GL::IMAGE_FORMAT_BGRA, GL::TYPE_UNSIGNED_BYTE, 0, pixels);
+
+		for(int i = 0; i < 4; ++i)
+			pixels[i] = 255 << 24;
+		_texBlack = _renderer->CreateTexture2D();
+		_texBlack->TexImage(0, GL::PIXEL_FORMAT_RGBA8, 2, 2, GL::IMAGE_FORMAT_BGRA, GL::TYPE_UNSIGNED_BYTE, 0, pixels);
+
 		return true;
 	}
 
@@ -139,6 +152,9 @@ namespace Engine
 			delete _debugRenderer;
 		}
 
+		_renderer->DestroyTexture(_texWhite);
+		_renderer->DestroyTexture(_texBlack);
+
 		GL::DestroyRenderer(_renderer);
 
 		delete[] _entityBuf;
@@ -166,21 +182,21 @@ namespace Engine
 		const EntityRenderer::MeshRenderData* mesh1 = (EntityRenderer::MeshRenderData*)el1;
 		const EntityRenderer::MeshRenderData* mesh2 = (EntityRenderer::MeshRenderData*)el2;
 
-		if(mesh1->mesh > mesh2->mesh)
+		if(mesh1->mesh->vertLayout > mesh2->mesh->vertLayout)
 		{
 			return 1;
 		}
-		else if(mesh1->mesh < mesh2->mesh)
+		else if(mesh1->mesh->vertLayout < mesh2->mesh->vertLayout)
 		{
 			return -1;
 		}
 		else
 		{
-			if(mesh1->mesh->vertLayout > mesh2->mesh->vertLayout)
+			if(mesh1->material > mesh2->material)
 			{
 				return 1;
 			}
-			else if(mesh1->mesh->vertLayout < mesh2->mesh->vertLayout)
+			else if(mesh1->material < mesh2->material)
 			{
 				return -1;
 			}
@@ -207,21 +223,21 @@ namespace Engine
 		}
 		else
 		{
-			if(mesh1->mesh > mesh2->mesh)
+			if(mesh1->mesh->vertLayout > mesh2->mesh->vertLayout)
 			{
 				return 1;
 			}
-			else if(mesh1->mesh < mesh2->mesh)
+			else if(mesh1->mesh->vertLayout < mesh2->mesh->vertLayout)
 			{
 				return -1;
 			}
 			else
 			{
-				if(mesh1->mesh->vertLayout > mesh2->mesh->vertLayout)
+				if(mesh1->material > mesh2->material)
 				{
 					return 1;
 				}
-				else if(mesh1->mesh->vertLayout < mesh2->mesh->vertLayout)
+				else if(mesh1->material < mesh2->material)
 				{
 					return -1;
 				}
@@ -252,17 +268,20 @@ namespace Engine
 
 				const Model* model = entities[ent_i]->GetModelRes()->GetModel();
 				const StaticArray<Mesh>& meshes = model->GetMeshes();
+				const ModelEntity::MeshDataArray& mesh_data = entities[ent_i]->GetMeshDataArray(); 
 				const mat4f& world_mat = entities[ent_i]->GetWorldTransform();
 				const StaticArray<mat4f>& joint_mat_palette = entities[ent_i]->GetJointTransforms();
 
 				for(size_t mesh_i = 0; mesh_i < meshes.GetCount(); ++mesh_i)
 				{
-					if(entities[ent_i]->HasTransparency())
+					if(mesh_data[mesh_i].materialData->materialRes->GetMaterial()->HasTransparency())
 					{
 						_transpMeshBuf[transp_mesh_count].mesh = &meshes[mesh_i];
 						_transpMeshBuf[transp_mesh_count].worldMat = &world_mat;
 						_transpMeshBuf[transp_mesh_count].jointMatPalette = joint_mat_palette.GetData();
 						_transpMeshBuf[transp_mesh_count].jointCount = joint_mat_palette.GetCount();
+						_transpMeshBuf[transp_mesh_count].material = mesh_data[mesh_i].materialData->materialRes->GetMaterial();
+						_transpMeshBuf[transp_mesh_count].shaderIndex = mesh_data[mesh_i].shaderIndex;
 
 						vec3f wcenter;
 						transform(wcenter, meshes[mesh_i].center, world_mat);
@@ -277,6 +296,8 @@ namespace Engine
 						_meshBuf[mesh_count].worldMat = &world_mat;
 						_meshBuf[mesh_count].jointMatPalette = joint_mat_palette.GetData();
 						_meshBuf[mesh_count].jointCount = joint_mat_palette.GetCount();
+						_meshBuf[mesh_count].material = mesh_data[mesh_i].materialData->materialRes->GetMaterial();
+						_meshBuf[mesh_count].shaderIndex = mesh_data[mesh_i].shaderIndex;
 						_meshBuf[mesh_count].eyeDistSq = 0.0f;
 						mesh_count++;
 					}

@@ -206,6 +206,7 @@ namespace MapEditor
 			delete[] path;
 			if(_modelLoaded)
 			{
+				engineAPI->materialManager->LoadAll();
 				engineAPI->textureManager->LoadAll();
 				engineAPI->modelManager->LoadAll();
 				engineAPI->animationManager->LoadAll();

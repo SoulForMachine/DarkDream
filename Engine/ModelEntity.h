@@ -16,10 +16,12 @@ namespace Engine
 
 	class FileResource;
 	class ModelRes;
+	class MaterialRes;
 	class AIScriptRes;
 	class ModelEntityRes;
 	class AnimationRes;
 	class SoundRes;
+	class Material;
 
 
 	enum ModelClass
@@ -47,6 +49,12 @@ namespace Engine
 			JOINT_ATTACH_LIGHT,
 		};
 
+		struct MaterialData
+		{
+			char* name;
+			const MaterialRes* materialRes;
+		};
+
 		struct JointAttachData
 		{
 			char* name;
@@ -67,6 +75,14 @@ namespace Engine
 			const SoundRes* sound;
 		};
 
+		struct MeshData
+		{
+			MaterialData* materialData;
+			int shaderIndex;
+		};
+
+		typedef HashMap<const char*, ModelEntity::MaterialData> MaterialMap;
+		typedef StaticArray<MeshData> MeshDataArray;
 		typedef HashMap<const char*, ModelEntity::JointAttachData> JointAttachMap;
 		typedef StaticArray<const FileResource*> JointAttachArray;
 		typedef HashMap<const char*, ModelEntity::AnimData> AnimMap;
@@ -92,6 +108,7 @@ namespace Engine
 			{ return _jointMatPalette; }
 		const OBBox& GetWorldBoundingBox() const
 			{ return _worldBBox; }
+		void MaterialChanged(const Material* material);
 		void UpdateGraphics(int frame_time);
 		bool SetActiveAnimation(const char* anim_name);
 		void PlayAnimation()
@@ -106,6 +123,10 @@ namespace Engine
 			{ return _model; }
 		const AIScriptRes* GetAIScriptRes() const
 			{ return _aiScript; }
+		const MeshDataArray& GetMeshDataArray() const
+			{ return _meshDataArray; }
+		const MaterialMap& GetMaterials() const
+			{ return _materials; }
 		const JointAttachMap& GetJointAttachments() const
 			{ return _jointAttachments; }
 		const AnimMap& GetAnimations() const
@@ -121,6 +142,7 @@ namespace Engine
 
 		bool SetModel(const tchar* file_name);
 		bool SetAIScript(const tchar* file_name);
+		bool SetMaterial(const char* mat_name, const tchar* file_name);
 		bool SetJointAttachment(const char* joint_name, const tchar* file_name);
 		bool RemoveJointAttachment(const char* joint_name);
 		bool AddAnimation(const char* anim_name, const tchar* file_name);
@@ -147,12 +169,6 @@ namespace Engine
 			{ return _lifePoints; }
 		void SetLifePoints(int pts)
 			{ _lifePoints = pts; }
-		float GetTransparency() const
-			{ return _transparency; }
-		void SetTransparency(float transp)
-			{ _transparency = transp; }
-		bool HasTransparency() const
-			{ return (_transparency > 0.001f); }
 
 	private:
 		static JointAttachType GetJointAttachTypeByExt(const tchar* file_name);
@@ -161,6 +177,7 @@ namespace Engine
 		ModelClass GetClassFromString(const char* name);
 		const char* GetClassString(ModelClass c);
 		void IdentityJointMatPalette();
+		int GetShaderIndex(uint vert_flags, const Material* material);
 
 		OBBox _worldBBox; // model's world space bounding box
 		math3d::mat4f _worldMat;
@@ -172,6 +189,8 @@ namespace Engine
 
 		const ModelRes* _model;
 		const AIScriptRes* _aiScript;
+		MaterialMap _materials;
+		MeshDataArray _meshDataArray;
 		JointAttachMap _jointAttachments;
 		JointAttachArray _jointAttachArray;
 		AnimMap _animations;
@@ -182,7 +201,6 @@ namespace Engine
 		char _name[MAX_NAME_LENGTH];
 		bool _clip;
 		int _lifePoints;
-		float _transparency;
 
 		static const char* _classNames[MODEL_CLASS_COUNT];
 	};

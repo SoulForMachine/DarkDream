@@ -265,6 +265,11 @@ namespace Engine
 		return 0;
 	}
 
+	MaterialRes* MaterialManager::CreateResObj(const tchar* file_name)
+	{
+		return new(mapPool) MaterialRes(file_name);
+	}
+
 	const ASMProgRes* ASMProgManager::CreateASMProgram(const tchar* file_name, bool immediate)
 	{
 		if(!file_name)

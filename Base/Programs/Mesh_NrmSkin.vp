@@ -2,6 +2,7 @@
 
 ATTRIB		vertPos = vertex.attrib[0];
 ATTRIB		vertNormal = vertex.attrib[1];
+ATTRIB		vertTangent = vertex.attrib[2];
 ATTRIB		vertUV = vertex.attrib[3];
 ATTRIB		vertSkin = vertex.attrib[4]; # x, y - weights; z, w - indices
 
@@ -14,10 +15,9 @@ ADDRESS		index1, index2;
 
 OUTPUT		varPos = result.position;
 OUTPUT		varUV = result.texcoord[0];
-OUTPUT		varNormal = result.texcoord[1]; # world space
-OUTPUT		varLightVec = result.texcoord[2]; # world space
+OUTPUT		varLightVec = result.texcoord[1]; # tangent space
 
-TEMP		r0, r1, worldPos;
+TEMP		r0, r1, worldPos, binormal, lvec;
 
 
 MUL			r0, vertSkin.zwxx, 3.0;
@@ -50,24 +50,31 @@ DP4			varPos.w, viewProjMat[3], worldPos;
 # output UV
 MOV			varUV, vertUV;
 
-# transform normal
+# world space light vector (same as negative view vector)
+SUB			r0, worldPos, camPos;
 
-DP3			r0.x, skinMatPalette[index1.x], vertNormal;
-DP3			r0.y, skinMatPalette[index1.x + 1], vertNormal;
-DP3			r0.z, skinMatPalette[index1.x + 2], vertNormal;
+# object space light vector
+MUL			lvec, worldMat[0], r0.x;
+MAD			lvec, worldMat[1], r0.y, lvec;
+MAD			lvec, worldMat[2], r0.z, lvec;
+
+# bind space light vector
+MUL			r0, skinMatPalette[index1.x], lvec.x;
+MAD			r0, skinMatPalette[index1.x + 1], lvec.y, r0;
+MAD			r0, skinMatPalette[index1.x + 2], lvec.z, r0;
 MUL			r0, r0, vertSkin.x;
 
-DP3			r1.x, skinMatPalette[index2.x], vertNormal;
-DP3			r1.y, skinMatPalette[index2.x + 1], vertNormal;
-DP3			r1.z, skinMatPalette[index2.x + 2], vertNormal;
-MAD			r1, r1, vertSkin.y, r0;
+MUL			r1, skinMatPalette[index2.x], lvec.x;
+MAD			r1, skinMatPalette[index2.x + 1], lvec.y, r1;
+MAD			r1, skinMatPalette[index2.x + 2], lvec.z, r1;
+MAD			lvec, r1, vertSkin.y, r0;
 
-# world space normal
-DP3			varNormal.x, worldMat[0], r1;
-DP3			varNormal.y, worldMat[1], r1;
-DP3			varNormal.z, worldMat[2], r1;
+# tangent space light vector
+XPD			binormal, vertNormal, vertTangent;
+MUL			binormal, binormal, vertTangent.w;
+DP3			varLightVec.x, lvec, vertTangent;
+DP3			varLightVec.y, lvec, binormal;
+DP3			varLightVec.z, lvec, vertNormal;
 
-# world space light vector (same as negative view vector)
-SUB			varLightVec, worldPos, camPos;
 
 END

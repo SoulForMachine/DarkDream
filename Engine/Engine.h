@@ -7,6 +7,7 @@
 #include "RenderSystem.h"
 #include "Model.h"
 #include "Animation.h"
+#include "Material.h"
 #include "ParticleSystem.h"
 #include "Camera.h"
 #include "Terrain.h"

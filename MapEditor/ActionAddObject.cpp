@@ -36,7 +36,7 @@ namespace MapEditor
 		if(engineAPI->world->AddEntity(_entity))
 		{
 			_entity->SetPosition(*_point);
-			_entity->ActiveAnimation("Idle");
+			_entity->SetActiveAnimation("Idle");
 			return true;
 		}
 		else

@@ -4,6 +4,7 @@
 #include "BaseLib/Parser.h"
 #include "BaseLib/Console.h"
 #include "Model.h"
+#include "Material.h"
 #include "ParticleSystem.h"
 #include "FileSystem.h"
 #include "ResourceManager.h"
@@ -44,7 +45,6 @@ namespace Engine
 		_name[0] = '\0';
 		_clip = true;;
 		_lifePoints = 100;
-		_transparency = 0.0f;
 	}
 
 	ModelEntity::ModelEntity(const ModelEntity& entity)
@@ -72,7 +72,6 @@ namespace Engine
 		strcpy(_name, entity._name);
 		_clip = entity._clip;
 		_lifePoints = entity._lifePoints;
-		_transparency = entity._transparency;
 
 		// resources
 		if(entity._model)
@@ -80,6 +79,14 @@ namespace Engine
 
 		if(entity._aiScript)
 			_aiScript = engineAPI.aiScriptManager->CreateAIScript(entity._aiScript->GetFileName());
+
+		for(MaterialMap::ConstIterator it = entity._materials.Begin(); it != entity._materials.End(); ++it)
+		{
+			MaterialData md;
+			md.name = StringDup(it->name);
+			md.materialRes = engineAPI.materialManager->CreateMaterial(it->materialRes->GetFileName());
+			_materials[it->name] = md;
+		}
 
 		for(JointAttachMap::ConstIterator it = entity._jointAttachments.Begin(); it != entity._jointAttachments.End(); ++it)
 		{
@@ -175,10 +182,6 @@ namespace Engine
 			return false;
 		if(!parser.ReadInt(_lifePoints))
 			return false;
-		if(!parser.ExpectTokenString("transparency"))
-			return false;
-		if(!parser.ReadFloat(_transparency))
-			return false;
 		// properties closing brace
 		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_CLOSE_BRACE))
 			return false;
@@ -204,6 +207,58 @@ namespace Engine
 		delete[] p;
 
 		Parser::Token tok_name;
+
+		// materials
+		{
+			if(!parser.ExpectTokenString("materials"))
+				{ Unload(); return false; }
+			if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
+				{ Unload(); return false; }
+			MaterialData md;
+			while(1)
+			{
+				if(!parser.ReadToken(tok_name))
+					{ Unload(); return false; }
+				if(tok_name.type == Parser::TOK_PUNCTUATION &&
+					tok_name.subTypePunct == Parser::PUNCT_CLOSE_BRACE)
+				{
+					break;
+				}
+				else if(tok_name.type == Parser::TOK_IDENTIFIER)
+				{
+					md.name = StringDup(tok_name.str);
+				}
+				else
+				{
+					Console::PrintError("Expected material name, found \'%s\'", tok_name.str);
+					Unload();
+					return false;
+				}
+
+				if(!parser.ReadString(path, MAX_PATH))
+				{
+					Console::PrintError("Expected material path");
+					Unload();
+					return false;
+				}
+				else
+				{
+					tchar* p = CharToWideChar(path);
+					md.materialRes = engineAPI.materialManager->CreateMaterial(p);
+					delete[] p;
+					MaterialMap::ConstIterator it = _materials.Find(md.name);
+					if(it != _materials.End())
+					{
+						Console::PrintWarning("Duplicate material name found: %s", md.name);
+						delete[] md.name;
+					}
+					else
+					{
+						_materials[md.name] = md;
+					}
+				}
+			}
+		}
 
 		// joint attachments
 		{
@@ -395,7 +450,6 @@ namespace Engine
 		file->Printf("\t\tname\t\t\"%s\"\n", _name);
 		file->Printf("\t\tclip\t\t%s\n", _clip? "True": "False");
 		file->Printf("\t\tlifePoints\t\t%d\n", _lifePoints);
-		file->Printf("\t\ttransparency\t\t%f\n", _transparency);
 		file->Printf("\t}\n\n");
 
 		// entity resources
@@ -407,6 +461,14 @@ namespace Engine
 
 		fn = _aiScript? _aiScript->GetFileName(): _T("");
 		file->Printf("\taiScript\t\t\"%ls\"\n\n", fn);
+
+		// materials
+		file->Printf("\tmaterials\n\t{\n");
+		for(MaterialMap::ConstIterator it = _materials.Begin(); it != _materials.End(); ++it)
+		{
+			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->materialRes->GetFileName());
+		}
+		file->Printf("\t}\n\n");
 
 		// joint attachments
 		file->Printf("\tjointAttachments\n\t{\n");
@@ -461,6 +523,21 @@ namespace Engine
 		CalcWorldBBox();
 	}
 
+	void ModelEntity::MaterialChanged(const Material* material)
+	{
+		if(_meshDataArray.GetCount())
+		{
+			const StaticArray<Mesh>& meshes = _model->GetModel()->GetMeshes();
+			for(size_t i = 0; i < _meshDataArray.GetCount(); ++i)
+			{
+				if(_meshDataArray[i].materialData->materialRes->GetMaterial() == material)
+				{
+					_meshDataArray[i].shaderIndex = GetShaderIndex(meshes[i].flags, material);
+				}
+			}
+		}
+	}
+
 	void ModelEntity::UpdateGraphics(int frame_time)
 	{
 		float tsec = frame_time * 0.001f;
@@ -510,6 +587,13 @@ namespace Engine
 
 	void ModelEntity::ClearModelData()
 	{
+		for(MaterialMap::Iterator it = _materials.Begin(); it!= _materials.End(); ++it)
+		{
+			delete[] it->name;
+			engineAPI.materialManager->ReleaseMaterial(it->materialRes);
+		}
+		_materials.Clear();
+
 		for(JointAttachMap::Iterator it = _jointAttachments.Begin(); it != _jointAttachments.End(); ++it)
 		{
 			delete[] it->name;
@@ -531,6 +615,7 @@ namespace Engine
 		}
 		_sounds.Clear();
 
+		_meshDataArray.Clear();
 		_jointMatPalette.Clear();
 		_jointAttachArray.Clear();
 	}
@@ -554,12 +639,37 @@ namespace Engine
 
 		const Model* model = _model->GetModel();
 
+		// Bind meshes to their data (materials and gpu program indices)
+		const StaticArray<Mesh>& meshes = model->GetMeshes();
+		size_t mesh_count = meshes.GetCount();
+		_meshDataArray.SetCount(mesh_count);
+		for(size_t i = 0; i < mesh_count; ++i)
+		{
+			MaterialMap::Iterator it = _materials.Find(meshes[i].material);
+			if(it != _materials.End())
+			{
+				// use material from map
+				_meshDataArray[i].materialData = &(*it);
+			}
+			else
+			{
+				// create default material
+				const MaterialRes* mat = engineAPI.materialManager->CreateMaterial(_T(""), true);
+				// add it to material map
+				char* name = StringDup(meshes[i].material);
+				MaterialData md = { name, mat };
+				_materials[name] = md;
+				_meshDataArray[i].materialData = &_materials[name];
+			}
+			_meshDataArray[i].shaderIndex = GetShaderIndex(meshes[i].flags, _meshDataArray[i].materialData->materialRes->GetMaterial());
+		}
+
 		// Bind joints to their attached entities (i-th entity in attachment array corresponds to i-th joint in model's joint array).
 		const StaticArray<Joint>& joints = model->GetJoints();
-		size_t count = joints.GetCount();
-		_jointAttachArray.SetCount(count);
-		_jointMatPalette.SetCount(count);
-		for(size_t i = 0; i < count; ++i)
+		size_t joint_count = joints.GetCount();
+		_jointAttachArray.SetCount(joint_count);
+		_jointMatPalette.SetCount(joint_count);
+		for(size_t i = 0; i < joint_count; ++i)
 		{
 			JointAttachMap::ConstIterator it = _jointAttachments.Find(joints[i].name);
 			_jointAttachArray[i] = (it != _jointAttachments.End())? it->attachment: 0;
@@ -599,6 +709,39 @@ namespace Engine
 		}
 		else
 			return false;
+	}
+
+	bool ModelEntity::SetMaterial(const char* mat_name, const tchar* file_name)
+	{
+		if(!_model || !_model->GetModel())
+			return false;
+
+		MaterialMap::Iterator it = _materials.Find(mat_name);
+		if(it != _materials.End())
+		{
+			const MaterialRes* mat = engineAPI.materialManager->CreateMaterial(file_name, true);
+			if(mat)
+			{
+				// release old material and set new
+				engineAPI.materialManager->ReleaseMaterial(it->materialRes);
+				it->materialRes = mat;
+
+				// set pointers to new material in _materialArray
+				const StaticArray<Mesh>& meshes = _model->GetModel()->GetMeshes();
+				assert(meshes.GetCount() == _meshDataArray.GetCount());
+				for(size_t i = 0; i < meshes.GetCount(); ++i)
+				{
+					if(!strcmp(mat_name, meshes[i].material))
+					{
+						_meshDataArray[i].materialData->materialRes = mat;
+						_meshDataArray[i].shaderIndex = GetShaderIndex(meshes[i].flags, mat->GetMaterial());
+					}
+				}
+			}
+			return true;
+		}
+
+		return false;
 	}
 
 	bool ModelEntity::SetJointAttachment(const char* joint_name, const tchar* file_name)
@@ -806,6 +949,17 @@ namespace Engine
 	{
 		for(size_t i = 0; i < _jointMatPalette.GetCount(); ++i)
 			_jointMatPalette[i].set_identity();
+	}
+
+	int ModelEntity::GetShaderIndex(uint vert_flags, const Material* material)
+	{
+		int index = 0;
+		if(vert_flags & Mesh::FLAG_SKIN_DATA)
+			index |= 2;
+		if(material->HasNormalMap() && (vert_flags & Mesh::FLAG_TANGENTS))
+			index |= 1;
+
+		return index;
 	}
 
 }

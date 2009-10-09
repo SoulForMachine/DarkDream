@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include "ModelForm.h"
 #include "EntityForm.h"
+#include "MaterialForm.h"
 #include "PropertyForm.h"
 #include "MainForm.h"
 
@@ -22,6 +23,7 @@ namespace EntityEditor
 		_modelForm = gcnew ModelForm;
 		_consoleForm = gcnew ConsoleForm(this);
 		_entityForm = gcnew EntityForm(this);
+		_materialForm = gcnew MaterialForm(this);
 		_propertyForm = gcnew PropertyForm(this);
 
 		// load layout for dock panels from an xml
@@ -39,6 +41,8 @@ namespace EntityEditor
 			_consoleForm->Show(_dockPanel);
 		if(!_entityForm->IsHandleCreated)
 			_entityForm->Show(_dockPanel);
+		if(!_materialForm->IsHandleCreated)
+			_materialForm->Show(_dockPanel);
 		if(!_propertyForm->IsHandleCreated)
 			_propertyForm->Show(_dockPanel);
 
@@ -68,6 +72,7 @@ namespace EntityEditor
 			switch(msg)
 			{
 			case NotifyMessage::ModelChanged:
+				_materialForm->SetEntity(_entity->GetEntity());
 				_consoleForm->RedrawAsync();
 				_modelForm->ModelChanged();
 				_modelForm->RedrawAsync();
@@ -81,6 +86,16 @@ namespace EntityEditor
 				break;
 			case NotifyMessage::AnimationChanged:
 				_entity->SetModified(true);
+				break;
+			}
+		}
+		else if(form == _materialForm)
+		{
+			switch(msg)
+			{
+			case NotifyMessage::MaterialChanged:
+				_consoleForm->RedrawAsync();
+				_modelForm->RedrawAsync();
 				break;
 			}
 		}
@@ -99,6 +114,7 @@ namespace EntityEditor
 		{
 			_modelForm->SetEntity(0);
 			delete _entity;
+			_materialForm->DeleteCopiedMaterial(); // have to call this before render system shuts down
 			// save layout for dock panels to xml
 			_dockPanel->SaveAsXml(Application::StartupPath + "\\" + DOCK_PANEL_XML_FILE);
 		}
@@ -117,6 +133,10 @@ namespace EntityEditor
 		else if(persistString == _entityForm->GetType()->ToString())
 		{
 			return _entityForm;
+		}
+		else if(persistString == _materialForm->GetType()->ToString())
+		{
+			return _materialForm;
 		}
 		else if(persistString == _propertyForm->GetType()->ToString())
 		{
@@ -160,6 +180,11 @@ namespace EntityEditor
 	System::Void MainForm::_mnuView_DropDownOpening(System::Object^  sender, System::EventArgs^  e)
 	{
 		
+	}
+
+	System::Void MainForm::_mnuViewMaterialPanel_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		ToggleForm(_materialForm);
 	}
 
 	System::Void MainForm::_mnuAnimate_Click(System::Object^  sender, System::EventArgs^  e)
@@ -220,6 +245,7 @@ namespace EntityEditor
 			}
 			_entity = gcnew Entity;
 			_entityForm->SetEntity(_entity->GetEntity());
+			_materialForm->SetEntity(_entity->GetEntity());
 			_propertyForm->SetProperties(_entity->GetProperties());
 			_modelForm->SetEntity(_entity->GetEntity());
 			_consoleForm->RedrawAsync();
@@ -237,6 +263,7 @@ namespace EntityEditor
 				_entity->Unload();
 				bool result = _entity->Load(_openEntityDlg->FileName);
 				_entityForm->SetEntity(_entity->GetEntity());
+				_materialForm->SetEntity(_entity->GetEntity());
 				_propertyForm->SetProperties(_entity->GetProperties());
 				_modelForm->SetEntity(_entity->GetEntity());
 				_consoleForm->RedrawAsync();
@@ -318,6 +345,7 @@ namespace EntityEditor
 	{
 		_mnuViewConsole->Checked = !_consoleForm->IsHidden;
 		_mnuViewEntityPanel->Checked = !_entityForm->IsHidden;
+		_mnuViewMaterialPanel->Checked = !_materialForm->IsHidden;
 		_mnuViewPropertyPanel->Checked = !_propertyForm->IsHidden;
 		_mnuAnimate->Checked = _animate;
 		_mnuWireframe->Checked = _wireframe;
