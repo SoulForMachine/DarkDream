@@ -18,12 +18,13 @@ namespace GL
 		TexAddressMode addressW;
 		TexFilter minFilter;
 		TexFilter magFilter;
+		float borderColor[4];
 		float minLOD;
 		float maxLOD;
 		int baseLevel;
 		int maxLevel;
 		float lodBias;
-		DepthTexMode depthTexMode;
+		DepthTexMode depthTexMode; // depricated
 		TexCompareMode texCmpMode;
 		CompareFunc texCmpFunc;
 		float maxAnisotropy;

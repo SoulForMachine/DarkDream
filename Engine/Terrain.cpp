@@ -187,7 +187,7 @@ namespace Engine
 				vert_ptr->position.z = (float)h;
 				vert_ptr->position.w = 1.0f;
 
-				vert_ptr->normal = vec3f::y_axis;
+				vert_ptr->normal = vec4f(vec3f::y_axis, 0.0f);
 
 				++vert_ptr;
 
@@ -221,7 +221,7 @@ namespace Engine
 						{
 							int i = h * (PATCH_WIDTH + 1) + w;
 							normals[i * 2] = prev_verts[i].position.rvec3;
-							normals[i * 2 + 1] = prev_verts[i].position.rvec3 + prev_verts[i].normal;
+							normals[i * 2 + 1] = prev_verts[i].position.rvec3 + prev_verts[i].normal.rvec3;
 						}
 					}
 					_patches[index - 1].normalBuf->UnmapBuffer();
@@ -250,7 +250,7 @@ namespace Engine
 						{
 							int i = h * (PATCH_WIDTH + 1) + w;
 							normals[i * 2] = next_verts[i].position.rvec3;
-							normals[i * 2 + 1] = next_verts[i].position.rvec3 + next_verts[i].normal;
+							normals[i * 2 + 1] = next_verts[i].position.rvec3 + next_verts[i].normal.rvec3;
 						}
 					}
 					_patches[index + 1].normalBuf->UnmapBuffer();
@@ -270,7 +270,7 @@ namespace Engine
 			{
 				int i = h * (PATCH_WIDTH + 1) + w;
 				normals[i * 2] = vertices[i].position.rvec3;
-				normals[i * 2 + 1] = vertices[i].position.rvec3 + vertices[i].normal;
+				normals[i * 2 + 1] = vertices[i].position.rvec3 + vertices[i].normal.rvec3;
 			}
 		}
 		patch.normalBuf->UnmapBuffer();
@@ -367,7 +367,7 @@ namespace Engine
 						{
 							int i = h * (PATCH_WIDTH + 1) + PATCH_WIDTH;
 							normals[i * 2] = prev_verts[i].position.rvec3;
-							normals[i * 2 + 1] = prev_verts[i].position.rvec3 + prev_verts[i].normal;
+							normals[i * 2 + 1] = prev_verts[i].position.rvec3 + prev_verts[i].normal.rvec3;
 						}
 						prev_patch.normalBuf->UnmapBuffer();
 					}
@@ -381,7 +381,7 @@ namespace Engine
 						{
 							int i = h * (PATCH_WIDTH + 1);
 							normals[i * 2] = next_verts[i].position.rvec3;
-							normals[i * 2 + 1] = next_verts[i].position.rvec3 + next_verts[i].normal;
+							normals[i * 2 + 1] = next_verts[i].position.rvec3 + next_verts[i].normal.rvec3;
 						}
 						next_patch.normalBuf->UnmapBuffer();
 					}
@@ -842,7 +842,7 @@ namespace Engine
 					for(int x = Max(x1 - 1, 0); x <= Min(x2 + 1, PATCH_WIDTH); ++x)
 					{
 						normals[(y * X_COUNT + x) * 2 + 0] = vertices[y * X_COUNT + x].position.rvec3;
-						normals[(y * X_COUNT + x) * 2 + 1] = vertices[y * X_COUNT + x].position.rvec3 + vertices[y * X_COUNT + x].normal;
+						normals[(y * X_COUNT + x) * 2 + 1] = vertices[y * X_COUNT + x].position.rvec3 + vertices[y * X_COUNT + x].normal.rvec3;
 					}
 				}
 				patch.normalBuf->UnmapBuffer();
@@ -914,7 +914,7 @@ namespace Engine
 					for(int x = Max(x1 - 1, 0); x <= Min(x2 + 1, PATCH_WIDTH); ++x)
 					{
 						normals[(y * X_COUNT + x) * 2 + 0] = vertices[y * X_COUNT + x].position.rvec3;
-						normals[(y * X_COUNT + x) * 2 + 1] = vertices[y * X_COUNT + x].position.rvec3 + vertices[y * X_COUNT + x].normal;
+						normals[(y * X_COUNT + x) * 2 + 1] = vertices[y * X_COUNT + x].position.rvec3 + vertices[y * X_COUNT + x].normal.rvec3;
 					}
 				}
 				patch.normalBuf->UnmapBuffer();
@@ -1076,14 +1076,14 @@ namespace Engine
 				{
 					if(y == start_y && !down_ext)
 					{
-						vertices[y * (PATCH_WIDTH + 1) + x].normal = tri_normals[0];
+						vertices[y * (PATCH_WIDTH + 1) + x].normal.rvec3 = tri_normals[0];
 					}
 					else if(y == end_y && !up_ext)
 					{
 						vec3f normal = 
 							tri_normals[(height - 1) * width * 2] +
 							tri_normals[(height - 1) * width * 2 + 1];
-						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 2.0f;
+						vertices[y * (PATCH_WIDTH + 1) + x].normal.rvec3 = normal / 2.0f;
 					}
 					else
 					{
@@ -1091,7 +1091,7 @@ namespace Engine
 							tri_normals[(qy - 1) * width * 2] +
 							tri_normals[(qy - 1) * width * 2 + 1] +
 							tri_normals[qy * width * 2];
-						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 3.0f;
+						vertices[y * (PATCH_WIDTH + 1) + x].normal.rvec3 = normal / 3.0f;
 					}
 				}
 				else if(x == end_x && !right_ext)
@@ -1101,11 +1101,11 @@ namespace Engine
 						vec3f normal = 
 							tri_normals[(width - 1) * 2] +
 							tri_normals[(width - 1) * 2 + 1];
-						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 2.0f;
+						vertices[y * (PATCH_WIDTH + 1) + x].normal.rvec3 = normal / 2.0f;
 					}
 					else if(y == end_y && !up_ext)
 					{
-						vertices[y * (PATCH_WIDTH + 1) + x].normal = tri_normals[(width * height - 1) * 2 + 1];
+						vertices[y * (PATCH_WIDTH + 1) + x].normal.rvec3 = tri_normals[(width * height - 1) * 2 + 1];
 					}
 					else
 					{
@@ -1113,7 +1113,7 @@ namespace Engine
 							tri_normals[((qy - 1) * width + width - 1) * 2 + 1] +
 							tri_normals[(qy * width + width - 1) * 2] +
 							tri_normals[(qy * width + width - 1) * 2 + 1];
-						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 3.0f;
+						vertices[y * (PATCH_WIDTH + 1) + x].normal.rvec3 = normal / 3.0f;
 					}
 				}
 				else
@@ -1124,7 +1124,7 @@ namespace Engine
 							tri_normals[(qx - 1) * 2] +
 							tri_normals[(qx - 1) * 2 + 1] +
 							tri_normals[qx * 2];
-						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 3.0f;
+						vertices[y * (PATCH_WIDTH + 1) + x].normal.rvec3 = normal / 3.0f;
 					}
 					else if(y == end_y && !up_ext)
 					{
@@ -1132,7 +1132,7 @@ namespace Engine
 							tri_normals[((height - 1) * width + qx - 1) * 2 + 1] +
 							tri_normals[((height - 1) * width + qx) * 2] +
 							tri_normals[((height - 1) * width + qx) * 2 + 1];
-						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 3.0f;
+						vertices[y * (PATCH_WIDTH + 1) + x].normal.rvec3 = normal / 3.0f;
 					}
 					else
 					{
@@ -1143,11 +1143,38 @@ namespace Engine
 							tri_normals[((qy - 1) * width + qx) * 2] +
 							tri_normals[((qy - 1) * width + qx) * 2 + 1] +
 							tri_normals[(qy * width + qx) * 2];
-						vertices[y * (PATCH_WIDTH + 1) + x].normal = normal / 6.0f;
+						vertices[y * (PATCH_WIDTH + 1) + x].normal.rvec3 = normal / 6.0f;
 					}
 				}
 
-				vertices[y * (PATCH_WIDTH + 1) + x].normal.normalize();
+				vertices[y * (PATCH_WIDTH + 1) + x].normal.rvec3.normalize();
+			}
+		}
+
+		// 
+		for(int y = start_y; y <= end_y; ++y)
+		{
+			for(int x = start_x; x <= end_x; ++x)
+			{
+				int i = y * (PATCH_WIDTH + 1) + x;
+				if(y < PATCH_HEIGHT && y > 0)
+				{
+					if(	_patches[patch_index].elevation[i] > _patches[patch_index].elevation[i + (PATCH_WIDTH + 1)] &&
+						_patches[patch_index].elevation[i] > _patches[patch_index].elevation[i - (PATCH_WIDTH + 1)] )
+					{
+						float val = _patches[patch_index].elevation[i] - _patches[patch_index].elevation[i + (PATCH_WIDTH + 1)];
+						clamp(val, 0.0f, 1.0f);
+						vertices[i].normal.w = val;
+					}
+					else
+					{
+						vertices[i].normal.w = 0.0f;
+					}
+				}
+				else
+				{
+					vertices[i].normal.w = 0.0f;
+				}
 			}
 		}
 

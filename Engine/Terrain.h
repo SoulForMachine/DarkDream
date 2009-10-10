@@ -34,7 +34,7 @@ namespace Engine
 		struct PatchVertex
 		{
 			math3d::vec4f position;
-			math3d::vec3f normal;
+			math3d::vec4f normal;
 		};
 
 		static const int PATCH_WIDTH = 128;

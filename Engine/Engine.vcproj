@@ -183,6 +183,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Base\Programs\Lambert_Nrm.fp"
+				>
+			</File>
+			<File
 				RelativePath="..\Base\Programs\Mesh.fp"
 				>
 			</File>
@@ -212,6 +216,10 @@
 			</File>
 			<File
 				RelativePath="..\Base\Programs\Simple2D.vp"
+				>
+			</File>
+			<File
+				RelativePath="..\Base\Programs\Terrain.fp"
 				>
 			</File>
 			<File

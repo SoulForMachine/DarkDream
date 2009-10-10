@@ -110,16 +110,15 @@ namespace Engine
 		_renderStyle = RENDER_STYLE_GAME;
 
 		// white and black textures
-		int pixels[4];
-		for(int i = 0; i < 4; ++i)
-			pixels[i] = -1;
+		int pixel = -1;
 		_texWhite = _renderer->CreateTexture2D();
-		_texWhite->TexImage(0, GL::PIXEL_FORMAT_RGBA8, 2, 2, GL::IMAGE_FORMAT_BGRA, GL::TYPE_UNSIGNED_BYTE, 0, pixels);
+		_texWhite->TexImage(0, GL::PIXEL_FORMAT_RGBA8, 1, 1, GL::IMAGE_FORMAT_BGRA, GL::TYPE_UNSIGNED_BYTE, 0, &pixel);
+		_texWhite->GenerateMipmap();
 
-		for(int i = 0; i < 4; ++i)
-			pixels[i] = 255 << 24;
+		pixel = 255 << 24;
 		_texBlack = _renderer->CreateTexture2D();
-		_texBlack->TexImage(0, GL::PIXEL_FORMAT_RGBA8, 2, 2, GL::IMAGE_FORMAT_BGRA, GL::TYPE_UNSIGNED_BYTE, 0, pixels);
+		_texBlack->TexImage(0, GL::PIXEL_FORMAT_RGBA8, 1, 1, GL::IMAGE_FORMAT_BGRA, GL::TYPE_UNSIGNED_BYTE, 0, &pixel);
+		_texBlack->GenerateMipmap();
 
 		return true;
 	}
@@ -326,7 +325,7 @@ namespace Engine
 		const Terrain::TerrainPatch* patches[Terrain::MAX_PATCHES];
 		int count = engineAPI.world->GetVisibleTerrainPatches(patches, Terrain::MAX_PATCHES);
 		_renderer->CullFace(GL::FACE_BACK);
-		_terrainRenderer->RenderTerrainPatch(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);
+		_terrainRenderer->RenderTerrainPatches(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);
 
 		if(g_cvarDrawTerrainNormals)
 			_terrainRenderer->RenderTerrainPatchNormals(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);

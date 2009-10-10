@@ -11,12 +11,14 @@ namespace GL
 {
 	class Renderer;
 	class VertexFormat;
+	class SamplerState;
 }
 
 namespace Engine
 {
 
 	class ASMProgRes;
+	class TextureRes;
 	class Camera;
 
 
@@ -28,7 +30,7 @@ namespace Engine
 		bool Init();
 		void Deinit();
 
-		void RenderTerrainPatch(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count);
+		void RenderTerrainPatches(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count);
 		void RenderTerrainPatchNormals(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count);
 
 	private:
@@ -40,6 +42,10 @@ namespace Engine
 		const ASMProgRes* _fpDbgLine;
 		GL::VertexFormat* _vertFmtTerrain;
 		GL::VertexFormat* _vertFmtDbgLine;
+		const TextureRes* _terrainTex;
+		const TextureRes* _gradTex;
+		GL::SamplerState* _gradSampler;
+		GL::SamplerState* _terrainSampler;
 
 		void Clear();
 	};

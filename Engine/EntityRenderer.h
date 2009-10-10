@@ -51,6 +51,7 @@ namespace Engine
 		const ASMProgRes* _fpMesh;
 		const ASMProgRes* _fpMeshNrm;
 		const ASMProgRes* _fpLambert;
+		const ASMProgRes* _fpLambertNrm;
 		GL::VertexFormat* _vertFmtMesh;
 		GL::VertexFormat* _vertFmtSkinnedMesh;
 		GL::SamplerState* _diffuseSampler;
@@ -59,6 +60,7 @@ namespace Engine
 		GL::SamplerState* _normalSampler;
 
 		Shader _shaders[4];
+		Shader _editorShaders[4];
 	};
 
 }

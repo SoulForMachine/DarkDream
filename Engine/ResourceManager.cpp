@@ -14,7 +14,9 @@ namespace Engine
 
 	void CmdReloadShaders(char* args)
 	{
-		engineAPI.renderSystem->ReloadShaders();
+	//	engineAPI.renderSystem->ReloadShaders();
+		engineAPI.asmProgManager->UnloadAll();
+		engineAPI.asmProgManager->LoadAll();
 	}
 
 	Console::Command reloadShaders("reloadShaders", "reloads all curently loaded shaders", CmdReloadShaders);

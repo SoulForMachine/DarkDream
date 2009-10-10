@@ -45,20 +45,21 @@ namespace GL
 
 	const SamplerStateDesc GLState::defaultSamplerState =
 	{
-		TEX_ADDRESS_REPEAT,		// address U
-		TEX_ADDRESS_REPEAT,		// address V
-		TEX_ADDRESS_REPEAT,		// address W
-		TEX_FILTER_LINEAR,		// min filter
-		TEX_FILTER_LINEAR,		// mag filter
-		-1000.0,				// min LOD
-		1000.0,					// max LOD
-		0,						// base level
-		1000,					// max level
-		0.0,					// LOD bias
-		DEPTH_TEX_LUMINANCE,	// depth texture mode
-		DEPTH_CMP_NONE,			// depth comparison mode
-		FUNC_LEQUAL,			// depth comparison function
-		1.0						// max anisotropy
+		TEX_ADDRESS_REPEAT,			// address U
+		TEX_ADDRESS_REPEAT,			// address V
+		TEX_ADDRESS_REPEAT,			// address W
+		TEX_FILTER_LINEAR,			// min filter
+		TEX_FILTER_LINEAR,			// mag filter
+		{ 0.0f, 0.0f, 0.0f, 0.0f },	// border color
+		-1000.0f,					// min LOD
+		1000.0f,					// max LOD
+		0,							// base level
+		1000,						// max level
+		0.0f,						// LOD bias
+		DEPTH_TEX_LUMINANCE,		// depth texture mode
+		DEPTH_CMP_NONE,				// depth comparison mode
+		FUNC_LEQUAL,				// depth comparison function
+		1.0f						// max anisotropy
 	};
 
 	void __SetPixelPackState(const PixelStore* pixel_store)
@@ -1570,6 +1571,7 @@ namespace GL
 					glTexParameteri(sampler.texture->_target, GL_TEXTURE_WRAP_R, sampler.state->_state.addressW);
 					glTexParameteri(sampler.texture->_target, GL_TEXTURE_MIN_FILTER, sampler.state->_state.minFilter);
 					glTexParameteri(sampler.texture->_target, GL_TEXTURE_MAG_FILTER, sampler.state->_state.magFilter);
+					glTexParameterfv(sampler.texture->_target, GL_TEXTURE_BORDER_COLOR, sampler.state->_state.borderColor);
 					glTexParameterf(sampler.texture->_target, GL_TEXTURE_MIN_LOD, sampler.state->_state.minLOD);
 					glTexParameterf(sampler.texture->_target, GL_TEXTURE_MAX_LOD, sampler.state->_state.maxLOD);
 					glTexParameteri(sampler.texture->_target, GL_TEXTURE_BASE_LEVEL, sampler.state->_state.baseLevel);

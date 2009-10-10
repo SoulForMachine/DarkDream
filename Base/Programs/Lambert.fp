@@ -1,6 +1,8 @@
 !!ARBfp1.0
 
-ATTRIB		varNormal = fragment.texcoord[0];
+ATTRIB		varUV = fragment.texcoord[0];
+ATTRIB		varNormal = fragment.texcoord[1];
+ATTRIB		varLightVec = fragment.texcoord[2];
 
 PARAM		color = program.local[0];
 PARAM		lightVec = { 0.0, 1.0, 0.0, 0.0 };		#{ 0.5773, 0.5773, 0.5773, 0.0 };

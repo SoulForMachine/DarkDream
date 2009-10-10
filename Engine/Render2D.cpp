@@ -82,9 +82,9 @@ namespace Engine
 
 		// create sampler state
 		SamplerStateDesc sampler_desc = GLState::defaultSamplerState;
-		sampler_desc.addressU = TEX_ADDRESS_CLAMP;
-		sampler_desc.addressV = TEX_ADDRESS_CLAMP;
-		sampler_desc.addressW = TEX_ADDRESS_CLAMP;
+		sampler_desc.addressU = TEX_ADDRESS_CLAMP_TO_EDGE;
+		sampler_desc.addressV = TEX_ADDRESS_CLAMP_TO_EDGE;
+		sampler_desc.addressW = TEX_ADDRESS_CLAMP_TO_EDGE;
 		sampler_desc.minFilter = TEX_FILTER_NEAREST;
 		sampler_desc.magFilter = TEX_FILTER_NEAREST;
 		_textSamplerState = _renderer->CreateSamplerState(sampler_desc);

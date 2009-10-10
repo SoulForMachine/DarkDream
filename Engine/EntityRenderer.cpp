@@ -29,7 +29,9 @@ namespace Engine
 		_vpMeshNrmSkin = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh_NrmSkin.vp"), true);
 		_fpMesh = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh.fp"), true);
 		_fpMeshNrm = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh_Nrm.fp"), true);
+
 		_fpLambert = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Lambert.fp"), true);
+		_fpLambertNrm = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Lambert_Nrm.fp"), true);
 
 		_shaders[0].vertProg = _vpMesh->GetASMProgram();
 		_shaders[0].fragProg = _fpMesh->GetASMProgram();
@@ -39,6 +41,15 @@ namespace Engine
 		_shaders[2].fragProg = _fpMesh->GetASMProgram();
 		_shaders[3].vertProg = _vpMeshNrmSkin->GetASMProgram();
 		_shaders[3].fragProg = _fpMeshNrm->GetASMProgram();
+
+		_editorShaders[0].vertProg = _vpMesh->GetASMProgram();
+		_editorShaders[0].fragProg = _fpLambert->GetASMProgram();
+		_editorShaders[1].vertProg = _vpMesh->GetASMProgram();
+		_editorShaders[1].fragProg = _fpLambert->GetASMProgram();
+		_editorShaders[2].vertProg = _vpMeshSkin->GetASMProgram();
+		_editorShaders[2].fragProg = _fpLambert->GetASMProgram();
+		_editorShaders[3].vertProg = _vpMeshSkin->GetASMProgram();
+		_editorShaders[3].fragProg = _fpLambert->GetASMProgram();
 
 		GL::VertexAttribDesc vfmt[] =
 		{
@@ -60,10 +71,15 @@ namespace Engine
 		_vertFmtSkinnedMesh = _renderer->CreateVertexFormat(skin_vfmt, COUNTOF(skin_vfmt));
 
 		// samplers
-		_diffuseSampler = _renderer->CreateSamplerState(GL::GLState::defaultSamplerState);
-		_emissionSampler = _renderer->CreateSamplerState(GL::GLState::defaultSamplerState);
-		_transpSampler = _renderer->CreateSamplerState(GL::GLState::defaultSamplerState);
-		_normalSampler = _renderer->CreateSamplerState(GL::GLState::defaultSamplerState);
+		GL::SamplerStateDesc sampler_desc = GL::GLState::defaultSamplerState;
+		sampler_desc.addressU = GL::TEX_ADDRESS_REPEAT;
+		sampler_desc.addressV = GL::TEX_ADDRESS_REPEAT;
+		sampler_desc.minFilter = GL::TEX_FILTER_LINEAR_MIPMAP_LINEAR;
+		sampler_desc.magFilter = GL::TEX_FILTER_LINEAR;
+		_diffuseSampler = _renderer->CreateSamplerState(sampler_desc);
+		_emissionSampler = _renderer->CreateSamplerState(sampler_desc);
+		_transpSampler = _renderer->CreateSamplerState(sampler_desc);
+		_normalSampler = _renderer->CreateSamplerState(sampler_desc);
 
 		return true;
 	}
@@ -76,7 +92,9 @@ namespace Engine
 		engineAPI.asmProgManager->ReleaseASMProgram(_vpMeshNrmSkin);
 		engineAPI.asmProgManager->ReleaseASMProgram(_fpMesh);
 		engineAPI.asmProgManager->ReleaseASMProgram(_fpMeshNrm);
+
 		engineAPI.asmProgManager->ReleaseASMProgram(_fpLambert);
+		engineAPI.asmProgManager->ReleaseASMProgram(_fpLambertNrm);
 
 		_renderer->DestroyVertexFormat(_vertFmtMesh);
 		_renderer->DestroyVertexFormat(_vertFmtSkinnedMesh);
@@ -124,9 +142,18 @@ namespace Engine
 
 		bool animated = (mesh_data->mesh->flags & Mesh::FLAG_SKIN_DATA) != 0;
 		bool nrm = (mesh_data->material->HasNormalMap() && (mesh_data->mesh->flags & Mesh::FLAG_TANGENTS));
-		const GL::ASMProgram* vert_prog = _shaders[mesh_data->shaderIndex].vertProg;
-		const GL::ASMProgram* frag_prog = _shaders[mesh_data->shaderIndex].fragProg;
-		//(engineAPI.renderSystem->GetRenderStyle() == RenderSystem::RENDER_STYLE_GAME)
+		const GL::ASMProgram* vert_prog;
+		const GL::ASMProgram* frag_prog;
+		if(engineAPI.renderSystem->GetRenderStyle() == RenderSystem::RENDER_STYLE_GAME)
+		{
+			vert_prog = _shaders[mesh_data->shaderIndex].vertProg;
+			frag_prog = _shaders[mesh_data->shaderIndex].fragProg;
+		}
+		else
+		{
+			vert_prog = _editorShaders[mesh_data->shaderIndex].vertProg;
+			frag_prog = _editorShaders[mesh_data->shaderIndex].fragProg;
+		}
 
 		_renderer->ActiveVertexASMProgram(vert_prog);
 		vert_prog->LocalMatrix4x4(0, *mesh_data->worldMat);
@@ -145,8 +172,16 @@ namespace Engine
 		}
 
 		_renderer->ActiveFragmentASMProgram(frag_prog);
-		vec4f color(mesh_data->material->GetDiffuseColor(), mesh_data->material->GetOpacity());
-		frag_prog->LocalParameter(0, color);
+		if(engineAPI.renderSystem->GetRenderStyle() == RenderSystem::RENDER_STYLE_GAME)
+		{
+			vec4f color(mesh_data->material->GetDiffuseColor(), mesh_data->material->GetOpacity());
+			frag_prog->LocalParameter(0, color);
+		}
+		else
+		{
+			const vec4f& color = engineAPI.renderSystem->GetEditorColor();
+			frag_prog->LocalParameter(0, color);
+		}
 
 		// set textures
 		_renderer->SetSamplerState(0, _diffuseSampler);
@@ -186,6 +221,7 @@ namespace Engine
 		_fpMesh = 0;
 		_fpMeshNrm = 0;
 		_fpLambert = 0;
+		_fpLambertNrm = 0;
 		_vertFmtMesh = 0;
 		_vertFmtSkinnedMesh = 0;
 		_diffuseSampler = 0;
