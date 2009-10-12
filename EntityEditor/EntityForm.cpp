@@ -180,6 +180,23 @@ namespace EntityEditor
 				char* name = ConvertString<char>(node->Text);
 				if(_entity->SetJointAttachment(name, file_name))
 				{
+					// load resources for attached entity
+					engineAPI->materialManager->LoadAll();
+					engineAPI->textureManager->LoadAll();
+					engineAPI->modelManager->LoadAll();
+					engineAPI->animationManager->LoadAll();
+
+					// initialize the data for model entity attachment
+					ModelEntity::JointAttachMap::ConstIterator att_ent = _entity->GetJointAttachments().Find(name);
+					if(att_ent != _entity->GetJointAttachments().End())
+					{
+						if(att_ent->type == ModelEntity::JOINT_ATTACH_MODEL)
+						{
+							ModelEntityRes* res = (ModelEntityRes*)att_ent->attachment;
+							res->GetEntity()->SetupModelData();
+						}
+					}
+
 					_textJointAttachment->Text = gcnew String(file_name);
 					node->ImageIndex = JOINT_ATT_IMAGE_INDEX;
 					node->SelectedImageIndex = JOINT_ATT_IMAGE_INDEX;

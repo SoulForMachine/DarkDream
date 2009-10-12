@@ -97,6 +97,7 @@ namespace Engine
 				jd.attachment = new(mapPool) ModelEntityRes((const ModelEntityRes&)*it->attachment);
 			else if(jd.type == JOINT_ATTACH_PARTICLE_SYSTEM)
 				jd.attachment = new(mapPool) PartSysRes((const PartSysRes&)*it->attachment);
+			jd.jointIndex = it->jointIndex;
 			_jointAttachments[it->name] = jd;
 		}
 
@@ -283,6 +284,13 @@ namespace Engine
 				else
 				{
 					Console::PrintError("Expected joint attachment name, found \'%s\'", tok_name.str);
+					Unload();
+					return false;
+				}
+
+				if(!parser.ReadInt(jd.jointIndex))
+				{
+					Console::PrintError("Expected attachment joint index");
 					Unload();
 					return false;
 				}
@@ -474,7 +482,7 @@ namespace Engine
 		file->Printf("\tjointAttachments\n\t{\n");
 		for(JointAttachMap::ConstIterator it = _jointAttachments.Begin(); it != _jointAttachments.End(); ++it)
 		{
-			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->attachment->GetFileName());
+			file->Printf("\t\t%s\t\t%d\t\t\"%ls\"\n", it->name, it->jointIndex, it->attachment->GetFileName());
 		}
 		file->Printf("\t}\n\n");
 
@@ -542,18 +550,56 @@ namespace Engine
 	{
 		float tsec = frame_time * 0.001f;
 
-		if(_curAnim && _animPlaying)
+		if(_curAnim)
 		{
 			const Animation* anim = _curAnim->animation->GetAnimation();
-			_animTime += tsec;
-			if(_animTime > anim->GetLength())
-				_animTime = fmod(_animTime, anim->GetLength());
 
-			anim->GetJointTransforms(
-				_animTime,
-				_jointMatPalette.GetData(),
-				_model->GetModel()->GetRootJoint(),
-				_model->GetModel()->GetJoints().GetData());
+			if(_animPlaying)
+			{
+				// update joint transform matrices for current animation time
+				_animTime += tsec;
+				if(_animTime > anim->GetLength())
+					_animTime = fmod(_animTime, anim->GetLength());
+
+				anim->GetJointTransforms(
+					_animTime,
+					_jointMatPalette.GetData(),
+					_model->GetModel()->GetRootJoint(),
+					_model->GetModel()->GetJoints().GetData());
+			}
+
+			// update attachments world matrices
+			const StaticArray<mat4f>& cmb_xforms = anim->GetCombinedTransforms();
+			for(JointAttachMap::Iterator it = _jointAttachments.Begin(); it != _jointAttachments.End(); ++it)
+			{
+				if(it->type == JOINT_ATTACH_MODEL)
+				{
+					ModelEntity* entity = ((ModelEntityRes*)it->attachment)->GetEntity();
+					if(entity)
+					{
+						mat4f ent_mat;
+						mul(ent_mat, cmb_xforms[it->jointIndex], _worldMat);
+						entity->SetWorldTransform(ent_mat);
+					}
+				}
+			}
+		}
+		else
+		{
+			for(JointAttachMap::Iterator it = _jointAttachments.Begin(); it != _jointAttachments.End(); ++it)
+			{
+				if(it->type == JOINT_ATTACH_MODEL)
+				{
+					ModelEntity* entity = ((ModelEntityRes*)it->attachment)->GetEntity();
+					if(entity)
+					{
+						mat4f ent_mat;
+						const Joint* joints = _model->GetModel()->GetJoints().GetData();
+						mul(ent_mat, joints[it->jointIndex].invOffsetMatrix, _worldMat);
+						entity->SetWorldTransform(ent_mat);
+					}
+				}
+			}
 		}
 	}
 
@@ -571,7 +617,7 @@ namespace Engine
 		{
 			_curAnim = 0;
 			_animPlaying = false;
-			IdentityJointMatPalette();
+			BindPoseTransforms();
 			result = false;
 		}
 		_animTime = 0.0f;
@@ -675,6 +721,16 @@ namespace Engine
 			_jointAttachArray[i] = (it != _jointAttachments.End())? it->attachment: 0;
 
 			_jointMatPalette[i].set_identity();
+		}
+
+		// setup data of attached entities
+		for(JointAttachMap::Iterator it = _jointAttachments.Begin(); it != _jointAttachments.End(); ++it)
+		{
+			if(it->type == JOINT_ATTACH_MODEL)
+			{
+				ModelEntityRes* res = (ModelEntityRes*)it->attachment;
+				res->GetEntity()->SetupModelData();
+			}
 		}
 
 		CalcWorldBBox();
@@ -804,6 +860,7 @@ namespace Engine
 				jd.name = StringDup(joint_name);
 				jd.attachment = res;
 				jd.type = type;
+				jd.jointIndex = joint_index;
 				_jointAttachments[joint_name] = jd;
 			}
 			_jointAttachArray[joint_index] = res;
@@ -862,7 +919,7 @@ namespace Engine
 			{
 				_curAnim = 0;
 				_animPlaying = false;
-				IdentityJointMatPalette();
+				BindPoseTransforms();
 			}
 			delete[] it->name;
 			engineAPI.animationManager->ReleaseAnimation(it->animation);
@@ -945,10 +1002,27 @@ namespace Engine
 			return "";
 	}
 
-	void ModelEntity::IdentityJointMatPalette()
+	void ModelEntity::BindPoseTransforms()
 	{
+		// set joint matrix palette to identity
 		for(size_t i = 0; i < _jointMatPalette.GetCount(); ++i)
 			_jointMatPalette[i].set_identity();
+
+		// joint attachments transforms
+		for(JointAttachMap::Iterator it = _jointAttachments.Begin(); it != _jointAttachments.End(); ++it)
+		{
+			if(it->type == JOINT_ATTACH_MODEL)
+			{
+				ModelEntity* entity = ((ModelEntityRes*)it->attachment)->GetEntity();
+				if(entity)
+				{
+					mat4f ent_mat;
+					const Joint* joints = _model->GetModel()->GetJoints().GetData();
+					mul(ent_mat, joints[it->jointIndex].invOffsetMatrix, _worldMat);
+					entity->SetWorldTransform(ent_mat);
+				}
+			}
+		}
 	}
 
 	int ModelEntity::GetShaderIndex(uint vert_flags, const Material* material)

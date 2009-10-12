@@ -256,66 +256,81 @@ namespace Engine
 
 	void RenderSystem::RenderEntities(int frame_time, const Camera& camera, ModelEntity** entities, int ent_count)
 	{
-		int mesh_count = 0;
-		int transp_mesh_count = 0;
+		_meshCount = 0;
+		_transpMeshCount = 0;
 		for(int ent_i = 0; ent_i < ent_count; ++ent_i)
 		{
 			if(entities[ent_i]->GetModelRes())
 			{
 				//! this should be somewhere else
 				entities[ent_i]->UpdateGraphics(frame_time);
-
-				const Model* model = entities[ent_i]->GetModelRes()->GetModel();
-				const StaticArray<Mesh>& meshes = model->GetMeshes();
-				const ModelEntity::MeshDataArray& mesh_data = entities[ent_i]->GetMeshDataArray(); 
-				const mat4f& world_mat = entities[ent_i]->GetWorldTransform();
-				const StaticArray<mat4f>& joint_mat_palette = entities[ent_i]->GetJointTransforms();
-
-				for(size_t mesh_i = 0; mesh_i < meshes.GetCount(); ++mesh_i)
-				{
-					if(mesh_data[mesh_i].materialData->materialRes->GetMaterial()->HasTransparency())
-					{
-						_transpMeshBuf[transp_mesh_count].mesh = &meshes[mesh_i];
-						_transpMeshBuf[transp_mesh_count].worldMat = &world_mat;
-						_transpMeshBuf[transp_mesh_count].jointMatPalette = joint_mat_palette.GetData();
-						_transpMeshBuf[transp_mesh_count].jointCount = joint_mat_palette.GetCount();
-						_transpMeshBuf[transp_mesh_count].material = mesh_data[mesh_i].materialData->materialRes->GetMaterial();
-						_transpMeshBuf[transp_mesh_count].shaderIndex = mesh_data[mesh_i].shaderIndex;
-
-						vec3f wcenter;
-						transform(wcenter, meshes[mesh_i].center, world_mat);
-						float dist_sq = (camera.GetPosition() - wcenter).length_sq();
-						_transpMeshBuf[transp_mesh_count].eyeDistSq = dist_sq;
-
-						transp_mesh_count++;
-					}
-					else
-					{
-						_meshBuf[mesh_count].mesh = &meshes[mesh_i];
-						_meshBuf[mesh_count].worldMat = &world_mat;
-						_meshBuf[mesh_count].jointMatPalette = joint_mat_palette.GetData();
-						_meshBuf[mesh_count].jointCount = joint_mat_palette.GetCount();
-						_meshBuf[mesh_count].material = mesh_data[mesh_i].materialData->materialRes->GetMaterial();
-						_meshBuf[mesh_count].shaderIndex = mesh_data[mesh_i].shaderIndex;
-						_meshBuf[mesh_count].eyeDistSq = 0.0f;
-						mesh_count++;
-					}
-				}
+				AddEntityToDrawArray(entities[ent_i], camera);
 			}
 		}
 
-		qsort(_meshBuf, mesh_count, sizeof(EntityRenderer::MeshRenderData), MeshCmpFunc);
-		qsort(_transpMeshBuf, transp_mesh_count, sizeof(EntityRenderer::MeshRenderData), TranspMeshCmpFunc);
+		qsort(_meshBuf, _meshCount, sizeof(EntityRenderer::MeshRenderData), MeshCmpFunc);
+		qsort(_transpMeshBuf, _transpMeshCount, sizeof(EntityRenderer::MeshRenderData), TranspMeshCmpFunc);
 
 		_renderer->CullFace(GL::FACE_BACK);
-		_entityRenderer->Render(camera, _meshBuf, mesh_count);
-		_entityRenderer->Render(camera, _transpMeshBuf, transp_mesh_count);
+		_entityRenderer->Render(camera, _meshBuf, _meshCount);
+		_entityRenderer->Render(camera, _transpMeshBuf, _transpMeshCount);
 
 		if(g_cvarDrawEntityBBoxes)
 		{
 			for(int ent_i = 0; ent_i < ent_count; ++ent_i)
 			{
 				_debugRenderer->RenderBoundingBox(entities[ent_i]->GetWorldBoundingBox());
+			}
+		}
+	}
+
+	void RenderSystem::AddEntityToDrawArray(ModelEntity* entity, const Camera& camera)
+	{
+		const Model* model = entity->GetModelRes()->GetModel();
+		const StaticArray<Mesh>& meshes = model->GetMeshes();
+		const ModelEntity::MeshDataArray& mesh_data = entity->GetMeshDataArray(); 
+		const mat4f& world_mat = entity->GetWorldTransform();
+		const StaticArray<mat4f>& joint_mat_palette = entity->GetJointTransforms();
+
+		for(size_t mesh_i = 0; mesh_i < meshes.GetCount(); ++mesh_i)
+		{
+			if(mesh_data[mesh_i].materialData->materialRes->GetMaterial()->HasTransparency())
+			{
+				_transpMeshBuf[_transpMeshCount].mesh = &meshes[mesh_i];
+				_transpMeshBuf[_transpMeshCount].worldMat = &world_mat;
+				_transpMeshBuf[_transpMeshCount].jointMatPalette = joint_mat_palette.GetData();
+				_transpMeshBuf[_transpMeshCount].jointCount = joint_mat_palette.GetCount();
+				_transpMeshBuf[_transpMeshCount].material = mesh_data[mesh_i].materialData->materialRes->GetMaterial();
+				_transpMeshBuf[_transpMeshCount].shaderIndex = mesh_data[mesh_i].shaderIndex;
+
+				vec3f wcenter;
+				transform(wcenter, meshes[mesh_i].center, world_mat);
+				float dist_sq = (camera.GetPosition() - wcenter).length_sq();
+				_transpMeshBuf[_transpMeshCount].eyeDistSq = dist_sq;
+
+				_transpMeshCount++;
+			}
+			else
+			{
+				_meshBuf[_meshCount].mesh = &meshes[mesh_i];
+				_meshBuf[_meshCount].worldMat = &world_mat;
+				_meshBuf[_meshCount].jointMatPalette = joint_mat_palette.GetData();
+				_meshBuf[_meshCount].jointCount = joint_mat_palette.GetCount();
+				_meshBuf[_meshCount].material = mesh_data[mesh_i].materialData->materialRes->GetMaterial();
+				_meshBuf[_meshCount].shaderIndex = mesh_data[mesh_i].shaderIndex;
+				_meshBuf[_meshCount].eyeDistSq = 0.0f;
+				_meshCount++;
+			}
+		}
+
+		const ModelEntity::JointAttachMap& attachments = entity->GetJointAttachments();
+		for(ModelEntity::JointAttachMap::ConstIterator it = attachments.Begin(); it != attachments.End(); ++it)
+		{
+			if(it->type == ModelEntity::JOINT_ATTACH_MODEL)
+			{
+				ModelEntity* att_ent = ((ModelEntityRes*)it->attachment)->GetEntity();
+				if(att_ent)
+					AddEntityToDrawArray(att_ent, camera);
 			}
 		}
 	}

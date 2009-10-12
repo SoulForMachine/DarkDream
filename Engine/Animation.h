@@ -54,6 +54,8 @@ namespace Engine
 		bool Load(const tchar* file_name);
 		void Unload();
 		void GetJointTransforms(float time, math3d::mat4f* transforms, const Joint* root_joint, const Joint* joint_array) const;
+		const StaticArray<math3d::mat4f>& GetCombinedTransforms() const
+			{ return _combinedTransforms; }
 		float GetLength() const
 			{ return _animationLength; }
 		int GetFPS() const

@@ -106,6 +106,8 @@ namespace Engine
 			_joints[i].parentIndex = file->ReadInt();
 			file->ReadMat4(_joints[i].offsetMatrix);
 			file->ReadMat4(_joints[i].jointMatrix);
+			_joints[i].invOffsetMatrix = _joints[i].offsetMatrix;
+			_joints[i].invOffsetMatrix.inverse();
 
 			_joints[i].parent = 0;
 			_joints[i].child = 0;

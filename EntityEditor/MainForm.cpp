@@ -115,6 +115,7 @@ namespace EntityEditor
 			_modelForm->SetEntity(0);
 			delete _entity;
 			_materialForm->DeleteCopiedMaterial(); // have to call this before render system shuts down
+			engineAPI->modelEntityManager->ReleaseAll();
 			// save layout for dock panels to xml
 			_dockPanel->SaveAsXml(Application::StartupPath + "\\" + DOCK_PANEL_XML_FILE);
 		}

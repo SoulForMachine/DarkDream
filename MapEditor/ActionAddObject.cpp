@@ -31,7 +31,7 @@ namespace MapEditor
 	{
 		tchar* path = ConvertString<tchar>(_path);
 		_entity = engineAPI->modelEntityManager->CreateEntityObject(path);
-		engineAPI->modelEntityManager->ReleaseAll();
+		engineAPI->modelEntityManager->ReleaseAll(); //!
 		delete[] path;
 		if(engineAPI->world->AddEntity(_entity))
 		{

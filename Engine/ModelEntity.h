@@ -59,6 +59,7 @@ namespace Engine
 		{
 			char* name;
 			JointAttachType type;
+			int jointIndex;
 			const FileResource* attachment;
 		};
 
@@ -176,7 +177,7 @@ namespace Engine
 		void CalcWorldBBox();
 		ModelClass GetClassFromString(const char* name);
 		const char* GetClassString(ModelClass c);
-		void IdentityJointMatPalette();
+		void BindPoseTransforms();
 		int GetShaderIndex(uint vert_flags, const Material* material);
 
 		OBBox _worldBBox; // model's world space bounding box

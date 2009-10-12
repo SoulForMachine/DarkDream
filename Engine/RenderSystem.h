@@ -78,6 +78,7 @@ namespace Engine
 		static const int MAX_NUM_TRANSP_MESHES = 8 * 1024;
 
 		void Clear();
+		void AddEntityToDrawArray(ModelEntity* entity, const Camera& camera);
 
 		GL::Renderer* _renderer;
 		Render2D* _render2D;
@@ -96,6 +97,8 @@ namespace Engine
 
 		int _smapWidth;
 		int _smapHeight;
+		int _meshCount;
+		int _transpMeshCount;
 	};
 
 }

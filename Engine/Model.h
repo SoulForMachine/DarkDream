@@ -54,6 +54,7 @@ namespace Engine
 		Joint* sibling;
 		Joint* parent;
 		math3d::mat4f offsetMatrix; // bind space -> bone space
+		math3d::mat4f invOffsetMatrix; // bone space -> bind space
 		math3d::mat4f jointMatrix; // bone space -> parent bone space
 	};
 
