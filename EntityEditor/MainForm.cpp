@@ -56,7 +56,7 @@ namespace EntityEditor
 		_modelForm->Animate(true);
 		_wireframe = false;
 		_modelStats = true;
-		_skelet = true;
+		_skelet = false;
 		_modelForm->ShowStats(true);
 		_entity = nullptr;
 		NewEntity();

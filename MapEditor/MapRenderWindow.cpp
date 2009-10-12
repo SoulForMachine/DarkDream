@@ -283,8 +283,8 @@ namespace MapEditor
 	{
 		_editMode->MouseMove(modifiers, x, y);
 
-		const float ROT_SPEED = 10.0f;
-		const float MOVE_SPEED = 5.0f;
+		const float ROT_SPEED = 0.2f;
+		const float MOVE_SPEED = 0.1f;
 
 		if(!_editMode->IsExecuting())
 		{
@@ -296,8 +296,8 @@ namespace MapEditor
 				}
 				else if(_middleBtnDown && (modifiers & MK_MBUTTON))
 				{
-					_rotX = -(y - _prevY) * _frameTimeSec * ROT_SPEED;
-					_rotY = -(x - _prevX) * _frameTimeSec * ROT_SPEED;
+					_rotX = -(y - _prevY) * ROT_SPEED;
+					_rotY = -(x - _prevX) * ROT_SPEED;
 
 					if(_rotX > 360.0f)
 						_rotX -= 360.0f;
@@ -311,15 +311,15 @@ namespace MapEditor
 				}
 				else if(_rightBtnDown && (modifiers & MK_RBUTTON))
 				{
-					_panX = -(x - _prevX) * _frameTimeSec * MOVE_SPEED;
-					_panY = (y - _prevY) * _frameTimeSec * MOVE_SPEED;
+					_panX = -(x - _prevX) * MOVE_SPEED;
+					_panY = (y - _prevY) * MOVE_SPEED;
 				}
 			}
 			else
 			{
 				if(_rightBtnDown && (modifiers & MK_RBUTTON))
 				{
-					_panX = -(x - _prevX) * _frameTimeSec * MOVE_SPEED;
+					_panX = -(x - _prevX) * MOVE_SPEED;
 				}
 			}
 		}
@@ -390,7 +390,7 @@ namespace MapEditor
 		{
 			if(_viewMode == ViewMode::EDITOR)
 			{
-				_zoom = float(delta) / WHEEL_DELTA * _frameTimeSec * 200.0f;
+				_zoom = float(delta) / WHEEL_DELTA * 5.0f;
 			}
 		}
 	}
@@ -438,15 +438,17 @@ namespace MapEditor
 			_frameCount = 0;
 		}
 
-		const float MOVE_SPEED = 100.0f;
+		bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+		bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+		bool alt = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
+
+		const float MOVE_SPEED = shift? 100.0f: 50.0f;
 
 		if(!_editMode->IsExecuting())
 		{
 			if(GetFocus() == GetParent((HWND)Handle.ToPointer()))
 			{
-				if(	!(GetAsyncKeyState(VK_SHIFT) & 0x8000) &&
-					!(GetAsyncKeyState(VK_CONTROL) & 0x8000) &&
-					!(GetAsyncKeyState(VK_MENU) & 0x8000) )
+				if(!ctrl && !alt)
 				{
 					if(_viewMode == ViewMode::EDITOR)
 					{

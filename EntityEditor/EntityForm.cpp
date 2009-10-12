@@ -123,20 +123,12 @@ namespace EntityEditor
 		n->ImageIndex = img_index;
 		n->SelectedImageIndex = img_index;
 		nodes->Add(n);
+
 		if(joint->child)
 			InsertJoint(n->Nodes, joint->child);
-		Joint* ptr = joint->sibling;
-		while(ptr)
-		{
-			TreeNode^ n = gcnew TreeNode(gcnew String(ptr->name));
-			img_index = (att.Find(joint->name) != att.End())? JOINT_ATT_IMAGE_INDEX: JOINT_IMAGE_INDEX;
-			n->ImageIndex = img_index;
-			n->SelectedImageIndex = img_index;
-			nodes->Add(n);
-			if(ptr->child)
-				InsertJoint(n->Nodes, ptr->child);
-			ptr = ptr->sibling;
-		}
+
+		if(joint->sibling)
+			InsertJoint(nodes, joint->sibling);
 	}
 
 	System::Void EntityForm::_btnBrowseModel_Click(System::Object^  sender, System::EventArgs^  e)

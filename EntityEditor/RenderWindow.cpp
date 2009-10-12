@@ -64,7 +64,7 @@ namespace EntityEditor
 		_animate = false;
 		_wireframe = false;
 		_modelStats = false;
-		_skelet = true;
+		_skelet = false;
 
 		System::Windows::Forms::CreateParams^ cp = gcnew System::Windows::Forms::CreateParams;
 		cp->Caption = "";
@@ -565,15 +565,16 @@ namespace EntityEditor
 		int width, height;
 		height = _font->GetFontHeight();
 		int x = 5, y = _height - height - 5;
-		vec4f color(1.0f, 1.0f, 1.0f, 1.0f);
+		vec4f white(1.0f, 1.0f, 1.0f, 1.0f);
+		vec4f green(0.0f, 1.0f, 0.0f, 1.0f);
 		char buf[64];
 
 		// FPS
 		width = _font->GetTextWidth("FPS: ");
 		sprintf(buf, "%d", (int)round(_fps));
-		_renderSystem->GetRender2D()->DrawText("FPS: ", x, y, *_font, color);
-		_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, color);
-		y -= height;
+		_renderSystem->GetRender2D()->DrawText("FPS: ", x, y, *_font, white);
+		_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
+		y -= height * 2;
 
 		if(_entity && _entity->GetModelRes() && _entity->GetModelRes()->GetModel())
 		{
@@ -582,23 +583,44 @@ namespace EntityEditor
 			// mesh count
 			width = _font->GetTextWidth("Meshes: ");
 			sprintf(buf, "%d", model->GetMeshCount());
-			_renderSystem->GetRender2D()->DrawText("Meshes: ", x, y, *_font, color);
-			_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, color);
+			_renderSystem->GetRender2D()->DrawText("Meshes: ", x, y, *_font, white);
+			_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
 			y -= height;
 
 			// triangle count
 			width = _font->GetTextWidth("Triangles: ");
 			sprintf(buf, "%d", model->GetIndexCount() / 3);
-			_renderSystem->GetRender2D()->DrawText("Triangles: ", x, y, *_font, color);
-			_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, color);
+			_renderSystem->GetRender2D()->DrawText("Triangles: ", x, y, *_font, white);
+			_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
 			y -= height;
 
 			// vertex count
 			width = _font->GetTextWidth("Vertices: ");
 			sprintf(buf, "%d", model->GetVertexCount());
-			_renderSystem->GetRender2D()->DrawText("Vertices: ", x, y, *_font, color);
-			_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, color);
+			_renderSystem->GetRender2D()->DrawText("Vertices: ", x, y, *_font, white);
+			_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
 			y -= height;
+
+			// joint count
+			if(model->GetJointCount())
+			{
+				width = _font->GetTextWidth("Joints: ");
+				sprintf(buf, "%d", model->GetJointCount());
+				_renderSystem->GetRender2D()->DrawText("Joints: ", x, y, *_font, white);
+				_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
+				y -= height;
+			}
+
+			// attachment count
+			const ModelEntity::JointAttachMap& att = _entity->GetJointAttachments();
+			if(att.GetCount())
+			{
+				width = _font->GetTextWidth("Attachments: ");
+				sprintf(buf, "%d", att.GetCount());
+				_renderSystem->GetRender2D()->DrawText("Attachments: ", x, y, *_font, white);
+				_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
+				y -= height;
+			}
 		}
 
 		_renderSystem->GetRender2D()->FlushText();

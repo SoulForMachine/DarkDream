@@ -126,6 +126,7 @@ namespace EntityEditor {
 
 
 
+
 	private:
 		/// <summary>
 		/// Required designer variable.
@@ -155,10 +156,10 @@ namespace EntityEditor {
 			this->_mnuViewEntityPanel = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_mnuViewMaterialPanel = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_mnuViewPropertyPanel = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->_mnuViewSkelet = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->renderToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_mnuAnimate = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_mnuWireframe = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->_mnuViewSkelet = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_statusBar = (gcnew System::Windows::Forms::StatusStrip());
 			this->_mainToolbar = (gcnew System::Windows::Forms::ToolStrip());
 			this->_toolBtnNew = (gcnew System::Windows::Forms::ToolStripButton());
@@ -248,8 +249,8 @@ namespace EntityEditor {
 			// 
 			// _mnuView
 			// 
-			this->_mnuView->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {this->_mnuViewConsole, 
-				this->_mnuModelStats, this->_mnuViewEntityPanel, this->_mnuViewMaterialPanel, this->_mnuViewPropertyPanel, this->_mnuViewSkelet});
+			this->_mnuView->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) {this->_mnuViewConsole, 
+				this->_mnuModelStats, this->_mnuViewEntityPanel, this->_mnuViewMaterialPanel, this->_mnuViewPropertyPanel});
 			this->_mnuView->Name = L"_mnuView";
 			this->_mnuView->Size = System::Drawing::Size(41, 20);
 			this->_mnuView->Text = L"&View";
@@ -297,17 +298,10 @@ namespace EntityEditor {
 			this->_mnuViewPropertyPanel->Text = L"&Property Panel";
 			this->_mnuViewPropertyPanel->Click += gcnew System::EventHandler(this, &MainForm::_mnuViewPropertyPanel_Click);
 			// 
-			// _mnuViewSkelet
-			// 
-			this->_mnuViewSkelet->Name = L"_mnuViewSkelet";
-			this->_mnuViewSkelet->Size = System::Drawing::Size(178, 22);
-			this->_mnuViewSkelet->Text = L"Skelet";
-			this->_mnuViewSkelet->Click += gcnew System::EventHandler(this, &MainForm::_mnuViewSkelet_Click);
-			// 
 			// renderToolStripMenuItem
 			// 
-			this->renderToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {this->_mnuAnimate, 
-				this->_mnuWireframe});
+			this->renderToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(3) {this->_mnuAnimate, 
+				this->_mnuWireframe, this->_mnuViewSkelet});
 			this->renderToolStripMenuItem->Name = L"renderToolStripMenuItem";
 			this->renderToolStripMenuItem->Size = System::Drawing::Size(54, 20);
 			this->renderToolStripMenuItem->Text = L"&Render";
@@ -326,6 +320,14 @@ namespace EntityEditor {
 			this->_mnuWireframe->Size = System::Drawing::Size(177, 22);
 			this->_mnuWireframe->Text = L"&Wireframe";
 			this->_mnuWireframe->Click += gcnew System::EventHandler(this, &MainForm::_mnuWireframe_Click);
+			// 
+			// _mnuViewSkelet
+			// 
+			this->_mnuViewSkelet->Name = L"_mnuViewSkelet";
+			this->_mnuViewSkelet->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::K));
+			this->_mnuViewSkelet->Size = System::Drawing::Size(177, 22);
+			this->_mnuViewSkelet->Text = L"Skelet";
+			this->_mnuViewSkelet->Click += gcnew System::EventHandler(this, &MainForm::_mnuViewSkelet_Click);
 			// 
 			// _statusBar
 			// 
