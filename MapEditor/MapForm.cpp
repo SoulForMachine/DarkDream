@@ -4,6 +4,7 @@
 #include "EM_AddPatch.h"
 #include "EM_RemovePatch.h"
 #include "EM_PlaceObject.h"
+#include "EM_LayerEdit.h"
 #include "ToolPanel.h"
 #include "UndoManager.h"
 #include "MapForm.h"
@@ -18,7 +19,7 @@ namespace MapEditor
 		_director = director;
 		_undoManager = gcnew UndoManager;
 		_currentEditMode = nullptr;
-		_prevEditMode = nullptr;
+		_persistEditMode = nullptr;
 	}
 
 	void MapForm::RedrawAsync()
@@ -64,6 +65,7 @@ namespace MapEditor
 			_editModes[(int)EditMode::EditModeEnum::ADD_PATCH] = gcnew EM_AddPatch(this, false, _undoManager);
 			_editModes[(int)EditMode::EditModeEnum::REMOVE_PATCH] = gcnew EM_RemovePatch(this, false, _undoManager);
 			_editModes[(int)EditMode::EditModeEnum::PLACE_OBJECT] = gcnew EM_PlaceObject(this, true, _undoManager);
+			_editModes[(int)EditMode::EditModeEnum::LAYER_EDIT] = gcnew EM_LayerEdit(this, true, _undoManager);
 
 			SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
 			_renderWindow->SetViewParameters(((EM_View^)_editModes[(int)EditMode::EditModeEnum::VIEW])->GetParameters());
@@ -81,7 +83,7 @@ namespace MapEditor
 			delete em;
 		delete _editModes;
 		_currentEditMode = nullptr;
-		_prevEditMode = nullptr;
+		_persistEditMode = nullptr;
 		_renderWindow->DestroyHandle();
 		delete _renderWindow;
 	}
@@ -104,10 +106,10 @@ namespace MapEditor
 		if(_currentEditMode != nullptr && _currentEditMode->GetModeEnum() == mode)
 			return;
 
-		if(_currentEditMode != nullptr && _currentEditMode->IsPersistent())
-			_prevEditMode = _currentEditMode;
 		_currentEditMode = _editModes[(int)mode];
 		_currentEditMode->Activate();
+		if(_currentEditMode->IsPersistent())
+			_persistEditMode = _currentEditMode;
 
 		if(_renderWindow != nullptr)
 			_renderWindow->SetEditMode(_currentEditMode);
@@ -119,8 +121,8 @@ namespace MapEditor
 			ev == EditModeEventListener::EMEvent::EDIT_CANCELED ||
 			ev == EditModeEventListener::EMEvent::EDIT_ERROR )
 		{
-			if(_prevEditMode != nullptr)
-				SetCurrentEditMode(_prevEditMode->GetModeEnum());
+			if(_persistEditMode != nullptr)
+				SetCurrentEditMode(_persistEditMode->GetModeEnum());
 		}
 	}
 

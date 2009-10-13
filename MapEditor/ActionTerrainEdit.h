@@ -8,6 +8,13 @@
 namespace MapEditor
 {
 
+	struct ActionTerrainEdit_ObjUndoData
+	{
+		Engine::Entity* entity;
+		math3d::vec3f position;
+	};
+
+
 	ref class ActionTerrainEdit: public Action
 	{
 	public:
@@ -35,12 +42,14 @@ namespace MapEditor
 		void UpdateRelativePlateau(System::Drawing::Rectangle rect, float dt);
 		void MakeRamp();
 		void GetBrushRect(System::Drawing::Rectangle% rect);
+		void MoveAffectedObjects(System::Drawing::Rectangle rect);
 
 		EM_TerrainEdit::Parameters^ _parameters;
 		float* _oldElevation;
 		float* _undoElevation;
 		System::Drawing::Rectangle _undoRect;
 		float* _strengthMatrix;
+		HashMap<Engine::Entity*, ActionTerrainEdit_ObjUndoData>* _undoObjects;
 	};
 
 }

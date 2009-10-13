@@ -20,6 +20,7 @@ namespace MapEditor
 		_strengthMatrix = 0;
 		_oldElevation = 0;
 		_undoElevation = 0;
+		_undoObjects = new(mainPool) HashMap<Entity*, ActionTerrainEdit_ObjUndoData>;
 	}
 
 	ActionTerrainEdit::~ActionTerrainEdit()
@@ -27,6 +28,7 @@ namespace MapEditor
 		delete[] _oldElevation;
 		delete[] _undoElevation;
 		delete[] _strengthMatrix;
+		delete _undoObjects;
 	}
 
 	bool ActionTerrainEdit::BeginAction()
@@ -60,6 +62,7 @@ namespace MapEditor
 			_undoRect = System::Drawing::Rectangle::Union(_undoRect, rect);
 
 			MakeRamp();
+			MoveAffectedObjects(_undoRect);
 		}
 
 		// save only modified part of terrain for undo
@@ -122,6 +125,8 @@ namespace MapEditor
 				UpdateRelativePlateau(rect, dt);
 				break;
 			}
+
+			MoveAffectedObjects(rect);
 		}
 	}
 
@@ -132,6 +137,14 @@ namespace MapEditor
 		engineAPI->world->GetTerrain().SetElevation(_undoRect.X, _undoRect.Y, _undoRect.Right, _undoRect.Bottom, _undoElevation);
 		memcpy(_undoElevation, cur_elev, (_undoRect.Width + 1) * (_undoRect.Height + 1) * sizeof(float));
 		delete[] cur_elev;
+
+		// objects
+		for(HashMap<Engine::Entity*, ActionTerrainEdit_ObjUndoData>::Iterator it = _undoObjects->Begin(); it != _undoObjects->End(); ++it)
+		{
+			vec3f pos = it->entity->GetPosition();
+			it->entity->SetPosition(it->position);
+			it->position = pos;
+		}
 	}
 
 	void ActionTerrainEdit::Redo()
@@ -539,6 +552,43 @@ namespace MapEditor
 			bottom = (int)floor(t);
 		bottom = Min(bottom, Terrain::PATCH_HEIGHT);
 		rect.Height = bottom - rect.Top;
+	}
+
+	void ActionTerrainEdit::MoveAffectedObjects(System::Drawing::Rectangle rect)
+	{
+		EntityHashMap& entities = engineAPI->world->GetEntities();
+		for(EntityHashMap::Iterator it = entities.Begin(); it != entities.End(); ++it)
+		{
+			if((*it)->GetType() == ENTITY_TYPE_MODEL && !((ModelEntity*)(*it))->IsDropped())
+			{
+				continue;
+			}
+
+			vec3f pos = (*it)->GetPosition();
+			if(	pos.x >= rect.Left &&
+				pos.x <= rect.Right &&
+				pos.z >= rect.Top &&
+				pos.z <= rect.Bottom )
+			{
+				float y;
+				if(engineAPI->world->GetTerrain().ElevationFromPoint(vec2f(pos.x, pos.z), y))
+				{
+					HashMap<Engine::Entity*, ActionTerrainEdit_ObjUndoData>::Iterator f = _undoObjects->Find(*it);
+					if(f == _undoObjects->End())
+					{
+						ActionTerrainEdit_ObjUndoData data = { *it, pos };
+						(*_undoObjects)[*it] = data;
+						pos.y = y;
+						(*it)->SetPosition(pos);
+					}
+					else
+					{
+						pos.y = y;
+						(*it)->SetPosition(pos);
+					}
+				}
+			}
+		}
 	}
 
 }

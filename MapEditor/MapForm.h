@@ -51,6 +51,8 @@ namespace MapEditor {
 		void SetCurrentEditMode(EditMode::EditModeEnum mode);
 		EditMode^ GetCurrentEditMode()
 			{ return _currentEditMode; }
+		EditMode^ GetPersistentEditMode()
+			{ return _persistEditMode; }
 		UndoManager^ GetUndoManager()
 			{ return _undoManager; }
 		virtual void EditModeEvent(EditModeEventListener::EMEvent ev);
@@ -72,7 +74,7 @@ namespace MapEditor {
 		MapRenderWindow^ _renderWindow;
 		array<EditMode^>^ _editModes;
 		EditMode^ _currentEditMode;
-		EditMode^ _prevEditMode;
+		EditMode^ _persistEditMode;
 		UndoManager^ _undoManager;
 
 	private:

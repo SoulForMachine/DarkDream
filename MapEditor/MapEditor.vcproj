@@ -206,7 +206,7 @@
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\EditorCommon.dll"
-			AssemblyName="EditorCommon, Version=1.0.3564.39351, processorArchitecture=x86"
+			AssemblyName="EditorCommon, Version=1.0.3573.23511, processorArchitecture=x86"
 			MinFrameworkVersion="131072"
 		/>
 	</References>
@@ -219,6 +219,16 @@
 				Filter="h;hpp;hxx;hm;inl;inc;xsd"
 				UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 				>
+				<File
+					RelativePath=".\LayersPanel.h"
+					FileType="4"
+					>
+					<File
+						RelativePath=".\LayersPanel.resx"
+						SubType="Designer"
+						>
+					</File>
+				</File>
 				<File
 					RelativePath=".\MainForm.h"
 					FileType="3"
@@ -292,6 +302,10 @@
 				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 				UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 				>
+				<File
+					RelativePath=".\LayersPanel.cpp"
+					>
+				</File>
 				<File
 					RelativePath=".\MainForm.cpp"
 					>
@@ -417,6 +431,14 @@
 			</File>
 			<File
 				RelativePath=".\EM_AddPatch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\EM_LayerEdit.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\EM_LayerEdit.h"
 				>
 			</File>
 			<File

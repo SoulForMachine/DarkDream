@@ -190,6 +190,13 @@ namespace MapEditor
 
 	}
 
+	System::Void MainForm::_toolBtnLayers_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::LAYER_EDIT);
+		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
+		UpdateToolbarButtons();
+	}
+
 	System::Void MainForm::_menuViewWireframe_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		_wireframe = !_wireframe;
@@ -205,8 +212,9 @@ namespace MapEditor
 		_toolBtnObjectPlacement->Checked = false;
 		_toolBtnTriggers->Checked = false;
 		_toolBtnParticleSystems->Checked = false;
+		_toolBtnLayers->Checked = false;
 
-		switch(_mapForm->GetCurrentEditMode()->GetModeEnum())
+		switch(_mapForm->GetPersistentEditMode()->GetModeEnum())
 		{
 		case EditMode::EditModeEnum::VIEW:
 			_toolBtnViewMode->Checked = true;
@@ -216,6 +224,9 @@ namespace MapEditor
 			break;
 		case EditMode::EditModeEnum::PLACE_OBJECT:
 			_toolBtnObjectPlacement->Checked = true;
+			break;
+		case EditMode::EditModeEnum::LAYER_EDIT:
+			_toolBtnLayers->Checked = true;
 			break;
 		default:
 			assert(0);

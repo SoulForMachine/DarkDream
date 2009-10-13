@@ -112,6 +112,7 @@ namespace MapEditor {
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewConsole;
 	private: System::Windows::Forms::ToolStripSeparator^  toolStripMenuItem4;
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewEntityBBoxes;
+	private: System::Windows::Forms::ToolStripButton^  _toolBtnLayers;
 
 
 
@@ -148,6 +149,7 @@ namespace MapEditor {
 			this->_menuViewWireframe = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuViewStats = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuViewTerrainNormals = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->_menuViewEntityBBoxes = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->toolStripMenuItem3 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->_menuViewGameView = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->regionToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -166,7 +168,7 @@ namespace MapEditor {
 			this->_toolBtnObjectPlacement = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnTriggers = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnParticleSystems = (gcnew System::Windows::Forms::ToolStripButton());
-			this->_menuViewEntityBBoxes = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->_toolBtnLayers = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_mainMenu->SuspendLayout();
 			this->_mainToolbar->SuspendLayout();
 			this->SuspendLayout();
@@ -241,7 +243,7 @@ namespace MapEditor {
 			// 
 			this->_menuEditUndo->Name = L"_menuEditUndo";
 			this->_menuEditUndo->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Z));
-			this->_menuEditUndo->Size = System::Drawing::Size(152, 22);
+			this->_menuEditUndo->Size = System::Drawing::Size(148, 22);
 			this->_menuEditUndo->Text = L"&Undo";
 			this->_menuEditUndo->Click += gcnew System::EventHandler(this, &MainForm::_menuEditUndo_Click);
 			// 
@@ -249,7 +251,7 @@ namespace MapEditor {
 			// 
 			this->_menuEditRedo->Name = L"_menuEditRedo";
 			this->_menuEditRedo->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Y));
-			this->_menuEditRedo->Size = System::Drawing::Size(152, 22);
+			this->_menuEditRedo->Size = System::Drawing::Size(148, 22);
 			this->_menuEditRedo->Text = L"&Redo";
 			this->_menuEditRedo->Click += gcnew System::EventHandler(this, &MainForm::_menuEditRedo_Click);
 			// 
@@ -303,6 +305,13 @@ namespace MapEditor {
 			this->_menuViewTerrainNormals->Size = System::Drawing::Size(192, 22);
 			this->_menuViewTerrainNormals->Text = L"Terrain &Normals";
 			this->_menuViewTerrainNormals->Click += gcnew System::EventHandler(this, &MainForm::_menuViewTerrainNormals_Click);
+			// 
+			// _menuViewEntityBBoxes
+			// 
+			this->_menuViewEntityBBoxes->Name = L"_menuViewEntityBBoxes";
+			this->_menuViewEntityBBoxes->Size = System::Drawing::Size(192, 22);
+			this->_menuViewEntityBBoxes->Text = L"Entity &Bounding Boxes";
+			this->_menuViewEntityBBoxes->Click += gcnew System::EventHandler(this, &MainForm::_menuViewEntityBBoxes_Click);
 			// 
 			// toolStripMenuItem3
 			// 
@@ -386,8 +395,8 @@ namespace MapEditor {
 			// 
 			this->_mainToolbar->AutoSize = false;
 			this->_mainToolbar->ImageScalingSize = System::Drawing::Size(32, 32);
-			this->_mainToolbar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) {this->_toolBtnViewMode, 
-				this->_toolBtnTerrainEdit, this->_toolBtnObjectPlacement, this->_toolBtnTriggers, this->_toolBtnParticleSystems});
+			this->_mainToolbar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {this->_toolBtnViewMode, 
+				this->_toolBtnTerrainEdit, this->_toolBtnObjectPlacement, this->_toolBtnTriggers, this->_toolBtnParticleSystems, this->_toolBtnLayers});
 			this->_mainToolbar->Location = System::Drawing::Point(0, 24);
 			this->_mainToolbar->Name = L"_mainToolbar";
 			this->_mainToolbar->Size = System::Drawing::Size(860, 38);
@@ -444,12 +453,15 @@ namespace MapEditor {
 			this->_toolBtnParticleSystems->Text = L"Particle Systems";
 			this->_toolBtnParticleSystems->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnParticleSystems_Click);
 			// 
-			// _menuViewEntityBBoxes
+			// _toolBtnLayers
 			// 
-			this->_menuViewEntityBBoxes->Name = L"_menuViewEntityBBoxes";
-			this->_menuViewEntityBBoxes->Size = System::Drawing::Size(192, 22);
-			this->_menuViewEntityBBoxes->Text = L"Entity &Bounding Boxes";
-			this->_menuViewEntityBBoxes->Click += gcnew System::EventHandler(this, &MainForm::_menuViewEntityBBoxes_Click);
+			this->_toolBtnLayers->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnLayers->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnLayers.Image")));
+			this->_toolBtnLayers->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnLayers->Name = L"_toolBtnLayers";
+			this->_toolBtnLayers->Size = System::Drawing::Size(36, 35);
+			this->_toolBtnLayers->Text = L"Layers";
+			this->_toolBtnLayers->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnLayers_Click);
 			// 
 			// MainForm
 			// 
@@ -499,6 +511,7 @@ namespace MapEditor {
 	private: System::Void _menuViewToolPanel_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuViewConsole_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuViewEntityBBoxes_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _toolBtnLayers_Click(System::Object^  sender, System::EventArgs^  e);
 };
 
 }

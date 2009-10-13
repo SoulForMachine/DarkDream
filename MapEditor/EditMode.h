@@ -28,6 +28,7 @@ namespace MapEditor
 			ADD_PATCH,
 			REMOVE_PATCH,
 			PLACE_OBJECT,
+			LAYER_EDIT,
 
 			EDIT_MODE_COUNT
 		};
