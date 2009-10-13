@@ -92,7 +92,7 @@ namespace MapEditor
 			for(size_t i = 0; i < _undoData->GetCount(); ++i)
 			{
 				mat4f rot, mat;
-				rot.set_rotation_y(_parameters->rotateY);
+				rot.set_rotation_y(deg2rad(_parameters->rotateY));
 				mul(mat, rot, (*_undoData)[i].transform);
 				(*_undoData)[i].entity->SetWorldTransform(mat);
 			}

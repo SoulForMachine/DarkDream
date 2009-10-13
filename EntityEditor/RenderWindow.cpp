@@ -361,8 +361,8 @@ namespace EntityEditor
 		if(!_renderer)
 			return;
 
-		s_worldMat.set_rotation_y(_rotY);
-		s_worldMat.rotate_x(_rotX);
+		s_worldMat.set_rotation_y(deg2rad(_rotY));
+		s_worldMat.rotate_x(deg2rad(_rotX));
 
 		engineAPI->world->GetCamera().LookAt(
 			vec3f(_panX, _panY, _zoom),
@@ -394,7 +394,7 @@ namespace EntityEditor
 			_width = width;
 			_height = height;
 			_renderer->Viewport(0, 0, width, height);
-			engineAPI->world->GetCamera().Perspective(60.0f, float(width) / height, 0.1f, 10000.0f);
+			engineAPI->world->GetCamera().Perspective(deg2rad(60.0f), float(width) / height, 0.1f, 10000.0f);
 		}
 	}
 

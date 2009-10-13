@@ -127,6 +127,8 @@ public:
 	void rotate_x(_ST angle);
 	void rotate_y(_ST angle);
 	void rotate_z(_ST angle);
+	void from_euler(_ST x_angle, _ST y_angle, _ST z_angle);
+	void to_euler(_ST& x_angle, _ST& y_angle, _ST& z_angle);
 	void scale(_ST s);
 	void scale(_ST _x, _ST _y, _ST _z);
 	void scale(const vec3<_ST>& s);
@@ -517,12 +519,12 @@ void mat4<_ST>::translate(_ST _x, _ST _y, _ST _z)
 template <class _ST>
 void mat4<_ST>::rotate(_ST angle, _ST _x, _ST _y, _ST _z)
 {
-	_ST cos_a = deg_cos(angle);
+	_ST cos_a = cos(angle);
 	_ST inv_cos_a = _ST(1) - cos_a;
 	_ST inv_cos_a_xy = inv_cos_a * _x * _y;
 	_ST inv_cos_a_xz = inv_cos_a * _x * _z;
 	_ST inv_cos_a_yz = inv_cos_a * _y * _z;
-	_ST sin_a = deg_sin(angle);
+	_ST sin_a = sin(angle);
 	_ST sin_a_x = sin_a * _x;
 	_ST sin_a_y = sin_a * _y;
 	_ST sin_a_z = sin_a * _z;
@@ -572,8 +574,8 @@ void mat4<_ST>::rotate(_ST angle, const vec3<_ST>& axis)
 template <class _ST>
 void mat4<_ST>::rotate_x(_ST angle)
 {
-	_ST cos_a = deg_cos(angle);
-	_ST sin_a = deg_sin(angle);
+	_ST cos_a = cos(angle);
+	_ST sin_a = sin(angle);
 	_ST t;
 
 	t = _data[1] * cos_a - _data[2] * sin_a;
@@ -596,8 +598,8 @@ void mat4<_ST>::rotate_x(_ST angle)
 template <class _ST>
 void mat4<_ST>::rotate_y(_ST angle)
 {
-	_ST cos_a = deg_cos(angle);
-	_ST sin_a = deg_sin(angle);
+	_ST cos_a = cos(angle);
+	_ST sin_a = sin(angle);
 	_ST t;
 
 	t = _data[0] * cos_a + _data[2] * sin_a;
@@ -620,8 +622,8 @@ void mat4<_ST>::rotate_y(_ST angle)
 template <class _ST>
 void mat4<_ST>::rotate_z(_ST angle)
 {
-	_ST cos_a = deg_cos(angle);
-	_ST sin_a = deg_sin(angle);
+	_ST cos_a = cos(angle);
+	_ST sin_a = sin(angle);
 	_ST t;
 
 	t = _data[0] * cos_a - _data[1] * sin_a;
@@ -639,6 +641,71 @@ void mat4<_ST>::rotate_z(_ST angle)
 	t = _data[12] * cos_a - _data[13] * sin_a;
 	_data[13] = _data[12] * sin_a + _data[13] * cos_a;
 	_data[12] = t;
+}
+
+template <class _ST>
+void mat4<_ST>::from_euler(_ST x_angle, _ST y_angle, _ST z_angle)
+{
+	_ST cr = cos(x_angle);
+	_ST sr = sin(x_angle);
+	_ST cp = cos(y_angle);
+	_ST sp = sin(y_angle);
+	_ST cy = cos(z_angle);
+	_ST sy = sin(z_angle);
+
+	_data[0] = cp * cy;
+	_data[1] = cp * sy;
+	_data[2] = -sp;
+	_data[3] = _ST(0);
+
+	_ST srsp = sr * sp;
+	_ST crsp = cr * sp;
+
+	_data[4] = srsp * cy - cr * sy;
+	_data[5] = srsp * sy + cr * cy;
+	_data[6] = sr * cp;
+	_data[7] = _ST(0);
+
+	_data[8] = crsp * cy + sr * sy;
+	_data[9] = crsp * sy - sr * cy;
+	_data[10] = cr * cp;
+	_data[11] = _ST(0);
+
+	_data[12] = _ST(0);
+	_data[13] = _ST(0);
+	_data[14] = _ST(0);
+	_data[15] = _ST(1);
+}
+
+template <class _ST>
+void mat4<_ST>::to_euler(_ST& x_angle, _ST& y_angle, _ST& z_angle)
+{
+	y_angle = -asin(_data[2]);
+	_ST cy = cos(y_angle);
+
+	float rotx, roty;
+
+	if(fcmp_gt(fabs(cy), _ST(0)))
+	{
+		_ST inv_c = _ST(1) / cy;
+		rotx = _data[10] * inv_c;
+		roty = _data[6] * inv_c;
+		x_angle = atan2(roty, rotx);
+		rotx = _data[0] * inv_c;
+		roty = _data[1] * inv_c;
+		z_angle = atan2(roty, rotx);
+	}
+	else
+	{
+		x_angle = _ST(0);
+		rotx = _data[5];
+		roty = -_data[4];
+		z_angle = atan2(roty, rotx);
+	}
+
+	if(x_angle < 0.0) x_angle += _ST(TWO_PI);
+	if(y_angle < 0.0) y_angle += _ST(TWO_PI);
+	if(z_angle < 0.0) z_angle += _ST(TWO_PI);
 }
 
 template <class _ST>
@@ -722,12 +789,12 @@ void mat4<_ST>::set_translation(_ST _x, _ST _y, _ST _z)
 template <class _ST>
 void mat4<_ST>::set_rotation(_ST angle, _ST _x, _ST _y, _ST _z)
 {
-	_ST cos_a = deg_cos(angle);
+	_ST cos_a = cos(angle);
 	_ST inv_cos_a = _ST(1) - cos_a;
 	_ST inv_cos_a_xy = inv_cos_a * _x * _y;
 	_ST inv_cos_a_xz = inv_cos_a * _x * _z;
 	_ST inv_cos_a_yz = inv_cos_a * _y * _z;
-	_ST sin_a = deg_sin(angle);
+	_ST sin_a = sin(angle);
 	_ST sin_a_x = sin_a * _x;
 	_ST sin_a_y = sin_a * _y;
 	_ST sin_a_z = sin_a * _z;
@@ -760,8 +827,8 @@ void mat4<_ST>::set_rotation(_ST angle, const vec3<_ST>& axis)
 template <class _ST>
 void mat4<_ST>::set_rotation_x(_ST angle)
 {
-	_ST cos_a = deg_cos(angle);
-	_ST sin_a = deg_sin(angle);
+	_ST cos_a = cos(angle);
+	_ST sin_a = sin(angle);
 
 	row0.set(_ST(1), _ST(0), _ST(0), _ST(0));
 	row1.set(_ST(0), cos_a, sin_a, _ST(0));
@@ -772,8 +839,8 @@ void mat4<_ST>::set_rotation_x(_ST angle)
 template <class _ST>
 void mat4<_ST>::set_rotation_y(_ST angle)
 {
-	_ST cos_a = deg_cos(angle);
-	_ST sin_a = deg_sin(angle);
+	_ST cos_a = cos(angle);
+	_ST sin_a = sin(angle);
 
 	row0.set(cos_a, _ST(0), -sin_a, _ST(0));
 	row1.set(_ST(0), _ST(1), _ST(0), _ST(0));
@@ -784,8 +851,8 @@ void mat4<_ST>::set_rotation_y(_ST angle)
 template <class _ST>
 void mat4<_ST>::set_rotation_z(_ST angle)
 {
-	_ST cos_a = deg_cos(angle);
-	_ST sin_a = deg_sin(angle);
+	_ST cos_a = cos(angle);
+	_ST sin_a = sin(angle);
 
 	row0.set(cos_a, sin_a, _ST(0), _ST(0));
 	row1.set(-sin_a, cos_a, _ST(0), _ST(0));
@@ -866,7 +933,7 @@ template <class _ST>
 void mat4<_ST>::perspective(_ST fovy, _ST aspect, _ST znear, _ST zfar)
 {
 	fovy *= _ST(0.5);
-	_ST y_scale = deg_cos(fovy) / deg_sin(fovy);
+	_ST y_scale = cos(fovy) / sin(fovy);
 	_ST x_scale = y_scale / aspect;
 	_ST inv_delta = _ST(1.0) / (zfar - znear);
 	_ST z_scale = -(znear + zfar) * inv_delta;

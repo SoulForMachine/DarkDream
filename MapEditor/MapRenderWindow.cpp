@@ -256,7 +256,7 @@ namespace MapEditor
 			_width = width;
 			_height = height;
 			_renderer->Viewport(0, 0, width, height);
-			engineAPI->world->GetCamera().Perspective(60.0f, float(width) / height, 0.1f, 10000.0f);
+			engineAPI->world->GetCamera().Perspective(deg2rad(60.0f), float(width) / height, 0.1f, 10000.0f);
 		}
 	}
 
@@ -489,7 +489,7 @@ namespace MapEditor
 		if(_rotX != 0.0f)
 		{
 			mat3f rot;
-			rot.set_rotation(_rotX, g_camRight);
+			rot.set_rotation(deg2rad(_rotX), g_camRight);
 			vec3f result;
 			transform(result, g_camForward, rot);
 			g_camForward = result;
@@ -500,7 +500,7 @@ namespace MapEditor
 		if(_rotY != 0.0f)
 		{
 			mat3f rot;
-			rot.set_rotation(_rotY, vec3f::y_axis);
+			rot.set_rotation(deg2rad(_rotY), vec3f::y_axis);
 			vec3f result;
 			transform(result, g_camForward, rot);
 			g_camForward = result;
@@ -582,7 +582,7 @@ namespace MapEditor
 			1.0f);
 
 		engineAPI->world->GetCamera().SetViewingTransform(cam);
-		engineAPI->world->GetCamera().Perspective(cam_fov, float(_width) / _height, 0.1f, 10000.0f);
+		engineAPI->world->GetCamera().Perspective(deg2rad(cam_fov), float(_width) / _height, 0.1f, 10000.0f);
 	}
 
 	void MapRenderWindow::SetViewMode(ViewMode mode)
@@ -599,7 +599,7 @@ namespace MapEditor
 		}
 		else
 		{
-			engineAPI->world->GetCamera().Perspective(60.0f, float(_width) / _height, 0.1f, 10000.0f);
+			engineAPI->world->GetCamera().Perspective(deg2rad(60.0f), float(_width) / _height, 0.1f, 10000.0f);
 
 			engineAPI->renderSystem->SetRenderStyle(Engine::RenderSystem::RENDER_STYLE_EDITOR);
 		}

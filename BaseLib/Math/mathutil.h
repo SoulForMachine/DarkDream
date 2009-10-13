@@ -111,6 +111,8 @@ template <class _ST>
 inline _ST deg_acos(_ST t) { return rad2deg(acos(t)); }
 template <class _ST>
 inline _ST deg_atan(_ST t) { return rad2deg(atan(t)); }
+template <class _ST>
+inline _ST deg_atan2(_ST y, _ST x) { return rad2deg(atan2(y, x)); }
 
 /*
 	set t to be in range low <= t <= high;

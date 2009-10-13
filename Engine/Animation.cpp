@@ -172,43 +172,37 @@ namespace Engine
 			results[track.channels[chan_i].channel] = lerp(values[key1], values[key2], frac);
 		}
 
-		transform.set_identity();
-		/*if(valid[ANIM_CH_SCALE_X])
-			transform(0, 0) = results[ANIM_CH_SCALE_X];
-		if(valid[ANIM_CH_SCALE_Y])
-			transform(1, 1) = results[ANIM_CH_SCALE_Y];
-		if(valid[ANIM_CH_SCALE_Z])
-			transform(2, 2) = results[ANIM_CH_SCALE_X];*/
+		// build the matrix
 
-		if(valid[ANIM_CH_ROTATE_X])
-			transform.rotate_x(rad2deg(results[ANIM_CH_ROTATE_X]));
-		if(valid[ANIM_CH_ROTATE_Y])
-			transform.rotate_y(rad2deg(results[ANIM_CH_ROTATE_Y]));
-		if(valid[ANIM_CH_ROTATE_Z])
-			transform.rotate_z(rad2deg(results[ANIM_CH_ROTATE_Z]));
+		float cr = cos(results[ANIM_CH_ROTATE_X]);
+		float sr = sin(results[ANIM_CH_ROTATE_X]);
+		float cp = cos(results[ANIM_CH_ROTATE_Y]);
+		float sp = sin(results[ANIM_CH_ROTATE_Y]);
+		float cy = cos(results[ANIM_CH_ROTATE_Z]);
+		float sy = sin(results[ANIM_CH_ROTATE_Z]);
 
-		/*quatf q;
-		q.from_euler(
-			valid[ANIM_CH_ROTATE_X]? results[ANIM_CH_ROTATE_X]: 0.0f,
-			valid[ANIM_CH_ROTATE_Y]? results[ANIM_CH_ROTATE_Y]: 0.0f,
-			valid[ANIM_CH_ROTATE_Z]? results[ANIM_CH_ROTATE_Z]: 0.0f);
-		mat4f rot;
-		q.to_matrix(rot);
-		transform = rot;*/
+		transform(0) = cp * cy;
+		transform(1) = cp * sy;
+		transform(2) = -sp;
+		transform(3) = 0.0f;
 
-		if(valid[ANIM_CH_TRANSLATE_X])
-			transform.row3.x = results[ANIM_CH_TRANSLATE_X];
-		else
-			transform.row3.x = joint->jointMatrix.row3.x;
-		if(valid[ANIM_CH_TRANSLATE_Y])
-			transform.row3.y = results[ANIM_CH_TRANSLATE_Y];
-		else
-			transform.row3.y = joint->jointMatrix.row3.y;
-		if(valid[ANIM_CH_TRANSLATE_Z])
-			transform.row3.z = results[ANIM_CH_TRANSLATE_Z];
-		else
-			transform.row3.z = joint->jointMatrix.row3.z;
+		float srsp = sr * sp;
+		float crsp = cr * sp;
 
+		transform(4) = srsp * cy - cr * sy;
+		transform(5) = srsp * sy + cr * cy;
+		transform(6) = sr * cp;
+		transform(7) = 0.0f;
+
+		transform(8) = crsp * cy + sr * sy;
+		transform(9) = crsp * sy - sr * cy;
+		transform(10) = cr * cp;
+		transform(11) = 0.0f;
+
+		transform(12) = results[ANIM_CH_TRANSLATE_X];
+		transform(13) = results[ANIM_CH_TRANSLATE_Y];
+		transform(14) = results[ANIM_CH_TRANSLATE_Z];
+		transform(15) = 1.0f;
 
 		mat3f t1(transform), t2(joint->jointMatrix), t3;
 		mul(t3, t1, t2);

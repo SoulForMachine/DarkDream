@@ -68,7 +68,7 @@ namespace MapEditor
 
 		_objViewCam = new(mainPool) Camera;
 		float ratio = float(cl_width) / cl_height;
-		_objViewCam->Perspective(70.0f, ratio, 0.1f, 1000.0f);
+		_objViewCam->Perspective(deg2rad(70.0f), ratio, 0.1f, 1000.0f);
 		_objViewBmp = gcnew Bitmap(cl_width, cl_height, PixelFormat::Format32bppArgb);
 		_objRotX = 0.0f;
 		_objRotY = 0.0f;
@@ -235,8 +235,8 @@ namespace MapEditor
 				Max(abs(bbox.points[0].y - bbox.points[7].y),
 				abs(bbox.points[0].z - bbox.points[7].z)));
 			look.look_at(at + vec3f::z_axis * max_dim, at, vec3f::y_axis);
-			rot.set_rotation_y(_objRotY);
-			rot.rotate_x(_objRotX);
+			rot.set_rotation_y(deg2rad(_objRotY));
+			rot.rotate_x(deg2rad(_objRotX));
 			mul(cam, rot, look);
 			_objViewCam->SetViewingTransform(cam);
 
