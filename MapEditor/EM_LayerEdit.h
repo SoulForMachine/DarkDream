@@ -14,6 +14,11 @@ namespace MapEditor
 	public ref class EM_LayerEdit: public EditMode
 	{
 	public:
+		value struct Parameters
+		{
+			int activeLayer;
+		};
+
 		EM_LayerEdit(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager);
 		~EM_LayerEdit();
 
@@ -27,9 +32,19 @@ namespace MapEditor
 		virtual void Update(float dt) override;
 		virtual void Render() override;
 
+		int GetActiveLayer()
+			{ return _activeLayer; }
+		void SetActiveLayer(int index)
+			{ _activeLayer = index; _selectedSprite = 0; }
+		void SelectSprite(Engine::BgLayer::Sprite* sprite);
+
 	private:
 		LayersPanel^ _panel;
 		UndoManager^ _undoManager;
+		int _activeLayer;
+		math3d::vec2f* _moveStartPoint;
+		bool _moving;
+		Engine::BgLayer::Sprite* _selectedSprite;
 	};
 
 }

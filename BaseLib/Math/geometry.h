@@ -235,6 +235,14 @@ namespace math3d
 		result = point - d * line.rvec2;
 	}
 
+	template <class _ST>
+	inline
+	bool point_in_rectangle_2d(const vec2<_ST>& point, const vec4<_ST>& rect)
+	{
+		return (point.x >= rect.x && point.x <= rect.z &&
+				point.y >= rect.y && point.y <= rect.w);
+	}
+
 }
 
 

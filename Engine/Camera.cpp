@@ -140,6 +140,16 @@ namespace Engine
 		return _clipPlanes[plane];
 	}
 
+	float Camera::GetFOV() const
+	{
+		return atan(1.0f / _projectionTransform(1, 1)) * 2.0f;
+	}
+
+	float Camera::GetAspectRatio() const
+	{
+		return _projectionTransform(1, 1) / _projectionTransform(0, 0);
+	}
+
 	void Camera::UpdateViewProjectionMat() const
 	{
 		if(_viewProjDirty)

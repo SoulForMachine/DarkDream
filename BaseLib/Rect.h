@@ -45,14 +45,9 @@ struct Rect
 		y2 = y1 + height;
 	}
 
-	bool IsPointInside(const Point& pt) const
-	{
-		return pt.x >= x1 && pt.x < x2 && pt.y >= y1 && pt.y < y2;
-	}
-
 	bool IsPointInside(_T x, _T y) const
 	{
-		return x >= x1 && x < x2 && y >= y1 && y < y2;
+		return x >= x1 && x <= x2 && y >= y1 && y <= y2;
 	}
 
 	void Offset(_T x, _T y)
@@ -82,9 +77,9 @@ struct Rect
 		_T w = rect.Width();
 		_T h = rect.Height();
 
-		rect.x1 = x1 + (Width() - w) / 2;
+		rect.x1 = x1 + (Width() - w) / _T(2);
 		rect.x2 = rect.x1 + w;
-		rect.y1 = y1 + (Height() - h) / 2;
+		rect.y1 = y1 + (Height() - h) / _T(2);
 		rect.y2 = rect.y1 + h;
 	}
 };

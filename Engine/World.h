@@ -10,6 +10,7 @@
 #include "Engine/ModelEntity.h"
 #include "Engine/Camera.h"
 #include "Engine/Terrain.h"
+#include "Engine/BgLayer.h"
 #include "Engine/EntityHashMap.h"
 
 
@@ -35,17 +36,21 @@ namespace Engine
 		void RemoveAllEntities();
 		int GetVisibleEntities(ModelEntity** entities, int max_entities);
 		int GetVisibleTerrainPatches(const Terrain::TerrainPatch** patches, int max_patches);
+		int GetVisibleLayerSprites(const BgLayer::Sprite** sprites, int max_sprites);
 		Camera& GetCamera()
 			{ return _camera; }
 		Terrain& GetTerrain()
 			{ return _terrain; }
 		EntityHashMap& GetEntities()
 			{ return _entities; }
+		BgLayerManager& GetLayerManager()
+			{ return _layerManager; }
 
 	private:
 		Camera _camera;
 		EntityHashMap _entities;
 		Terrain _terrain;
+		BgLayerManager _layerManager;
 	};
 
 }

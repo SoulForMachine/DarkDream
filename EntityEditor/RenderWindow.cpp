@@ -394,7 +394,7 @@ namespace EntityEditor
 			_width = width;
 			_height = height;
 			_renderer->Viewport(0, 0, width, height);
-			engineAPI->world->GetCamera().Perspective(deg2rad(60.0f), float(width) / height, 0.1f, 10000.0f);
+			engineAPI->world->GetCamera().Perspective(deg2rad(60.0f), float(width) / height, 0.1f, 1000.0f);
 		}
 	}
 

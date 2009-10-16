@@ -219,6 +219,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Base\Programs\Sprite.fp"
+				>
+			</File>
+			<File
+				RelativePath="..\Base\Programs\Sprite.vp"
+				>
+			</File>
+			<File
 				RelativePath="..\Base\Programs\Terrain.fp"
 				>
 			</File>
@@ -241,6 +249,22 @@
 		</File>
 		<File
 			RelativePath=".\Animation.h"
+			>
+		</File>
+		<File
+			RelativePath=".\BgLayer.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\BgLayer.h"
+			>
+		</File>
+		<File
+			RelativePath=".\BgLayerRenderer.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\BgLayerRenderer.h"
 			>
 		</File>
 		<File

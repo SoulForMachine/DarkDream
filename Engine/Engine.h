@@ -11,6 +11,7 @@
 #include "ParticleSystem.h"
 #include "Camera.h"
 #include "Terrain.h"
+#include "BgLayer.h"
 #include "InputSystem.h"
 #include "FileSystem.h"
 #include "FileResource.h"

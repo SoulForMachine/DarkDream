@@ -44,6 +44,8 @@ namespace Engine
 		void MoveBy(const math3d::vec3f& transl);
 		void RotateBy(float ax, float ay, float az);
 		const math3d::vec4f& GetClipPlane(ClipPlane plane);
+		float GetFOV() const; // horizontal field of view angle
+		float GetAspectRatio() const; // width / height
 
 		virtual EntityType GetType() const
 			{ return ENTITY_TYPE_CAMERA; }

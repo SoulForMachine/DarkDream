@@ -109,5 +109,13 @@ namespace Engine
 
 		return count;
 	}
+	
+	int World::GetVisibleLayerSprites(const BgLayer::Sprite** sprites, int max_sprites)
+	{
+		if(!sprites || max_sprites <= 0)
+			return 0;
+
+		return _layerManager.GetVisibleSprites(sprites, max_sprites);
+	}
 
 }

@@ -101,6 +101,16 @@ namespace Engine
 			return false;
 		}
 
+		// layer renderer
+		_bgLayerRenderer = new(mainPool) BgLayerRenderer;
+		result = _bgLayerRenderer->Init();
+		if(!result)
+		{
+			Console::PrintError("Failed to initialize background layer rendering.");
+			Deinit();
+			return false;
+		}
+
 		// init debug rendering
 		_debugRenderer = new(mainPool) DebugRenderer;
 		result = _debugRenderer->Init();
@@ -143,6 +153,12 @@ namespace Engine
 		{
 			_terrainRenderer->Deinit();
 			delete _terrainRenderer;
+		}
+
+		if(_bgLayerRenderer)
+		{
+			_bgLayerRenderer->Deinit();
+			delete _bgLayerRenderer;
 		}
 
 		if(_debugRenderer)
@@ -346,6 +362,14 @@ namespace Engine
 			_terrainRenderer->RenderTerrainPatchNormals(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);
 	}
 
+	void RenderSystem::RenderBgLayers(int frame_time)
+	{
+		const int MAX_SPRITES = 128;
+		const BgLayer::Sprite* sprites[MAX_SPRITES];
+		int count = engineAPI.world->GetVisibleLayerSprites(sprites, MAX_SPRITES);
+		_bgLayerRenderer->Render(sprites, count);
+	}
+
 	void RenderSystem::ReloadShaders()
 	{
 		_render2D->ReloadShaders();
@@ -361,6 +385,7 @@ namespace Engine
 		_meshBuf = 0;
 		_transpMeshBuf = 0;
 		_terrainRenderer = 0;
+		_bgLayerRenderer = 0;
 		_debugRenderer = 0;
 	}
 

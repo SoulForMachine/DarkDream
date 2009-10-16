@@ -256,7 +256,7 @@ namespace MapEditor
 			_width = width;
 			_height = height;
 			_renderer->Viewport(0, 0, width, height);
-			engineAPI->world->GetCamera().Perspective(deg2rad(60.0f), float(width) / height, 0.1f, 10000.0f);
+			engineAPI->world->GetCamera().Perspective(deg2rad(60.0f), float(width) / height, 0.1f, 1000.0f);
 		}
 	}
 
@@ -582,7 +582,7 @@ namespace MapEditor
 			1.0f);
 
 		engineAPI->world->GetCamera().SetViewingTransform(cam);
-		engineAPI->world->GetCamera().Perspective(deg2rad(cam_fov), float(_width) / _height, 0.1f, 10000.0f);
+		engineAPI->world->GetCamera().Perspective(deg2rad(cam_fov), float(_width) / _height, 0.1f, 1000.0f);
 	}
 
 	void MapRenderWindow::SetViewMode(ViewMode mode)
@@ -599,7 +599,7 @@ namespace MapEditor
 		}
 		else
 		{
-			engineAPI->world->GetCamera().Perspective(deg2rad(60.0f), float(_width) / _height, 0.1f, 10000.0f);
+			engineAPI->world->GetCamera().Perspective(deg2rad(60.0f), float(_width) / _height, 0.1f, 1000.0f);
 
 			engineAPI->renderSystem->SetRenderStyle(Engine::RenderSystem::RENDER_STYLE_EDITOR);
 		}

@@ -8,6 +8,7 @@
 #include "Render2D.h"
 #include "TerrainRenderer.h"
 #include "EntityRenderer.h"
+#include "BgLayerRenderer.h"
 #include "DebugRenderer.h"
 
 
@@ -36,6 +37,7 @@ namespace Engine
 		void RenderEntities(int frame_time);
 		void RenderEntities(int frame_time, const Camera& camera, ModelEntity** entities, int ent_count);
 		void RenderTerrain(int frame_time);
+		void RenderBgLayers(int frame_time);
 		void ReloadShaders();
 
 		GL::Renderer* GetRenderer()
@@ -46,6 +48,8 @@ namespace Engine
 			{ return _terrainRenderer; }
 		EntityRenderer* GetEntityRenderer()
 			{ return _entityRenderer; }
+		BgLayerRenderer* GetBgLayerRenderer()
+			{ return _bgLayerRenderer; }
 		DebugRenderer* GetDebugRenderer()
 			{ return _debugRenderer; }
 
@@ -87,6 +91,7 @@ namespace Engine
 		EntityRenderer::MeshRenderData* _meshBuf;
 		EntityRenderer::MeshRenderData* _transpMeshBuf;
 		TerrainRenderer* _terrainRenderer;
+		BgLayerRenderer* _bgLayerRenderer;
 		DebugRenderer* _debugRenderer;
 		GL::Texture2D* _texWhite;
 		GL::Texture2D* _texBlack;

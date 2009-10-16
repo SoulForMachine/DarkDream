@@ -43,6 +43,10 @@ public:
 	void Insert(Iterator where, const _Type& val);
 	void Remove(Iterator it);
 	void Remove(size_t index);
+	void Remove(_Type& obj);
+	void Link(Iterator where, NodeType* node);
+	NodeType* Unlink(Iterator it);
+	NodeType* Unlink(_Type& obj);
 	void Clear();
 
 	// access
@@ -55,6 +59,8 @@ public:
 	_Type& GetByIndex(size_t index);
 	size_t GetCount() const { return _count; }
 	bool IsEmpty() const { return _count == 0; }
+	Iterator Find(_Type& obj);
+	ConstIterator Find(_Type& obj) const;
 
 protected:
 	Memory::Allocator& _pool;
@@ -71,6 +77,8 @@ protected:
 private:
 	void _Insert(NodeType* where, const _Type& val);
 	void _Remove(NodeType* node);
+	void _Link(NodeType* where, NodeType* node);
+	void _Unlink(NodeType* node);
 };
 
 //=======================================================
@@ -263,6 +271,49 @@ void List<_Type>::Remove(size_t index)
 }
 
 template <class _Type>
+void List<_Type>::Remove(_Type& obj)
+{
+	for(Iterator it = Begin(); it != End(); ++it)
+	{
+		if(&it._node->data == &obj)
+		{
+			_Remove(it._node);
+			break;
+		}
+	}
+}
+
+template <class _Type>
+inline
+void List<_Type>::Link(Iterator where, NodeType* node)
+{
+	_Link(where._node, node);
+}
+
+template <class _Type>
+inline
+typename List<_Type>::NodeType* List<_Type>::Unlink(Iterator it)
+{
+	_Unlink(it._node);
+	return it._node;
+}
+
+template <class _Type>
+typename List<_Type>::NodeType* List<_Type>::Unlink(_Type& obj)
+{
+	for(Iterator it = Begin(); it != End(); ++it)
+	{
+		if(it._node->data == &obj)
+		{
+			_Unlink(it._node);
+			return it._node;
+		}
+	}
+
+	return 0;
+}
+
+template <class _Type>
 void List<_Type>::Clear()
 {
 	Iterator it = Begin();
@@ -293,6 +344,34 @@ _Type& List<_Type>::GetByIndex(size_t index)
 }
 
 template <class _Type>
+typename List<_Type>::Iterator List<_Type>::Find(_Type& obj)
+{
+	for(Iterator it = Begin(); it != End(); ++it)
+	{
+		if(&it._node->data == &obj)
+		{
+			return it;
+		}
+	}
+
+	return End();
+}
+
+template <class _Type>
+typename List<_Type>::ConstIterator List<_Type>::Find(_Type& obj) const
+{
+	for(ConstIterator it = Begin(); it != End(); ++it)
+	{
+		if(it._node->data == &obj)
+		{
+			return it;
+		}
+	}
+
+	return End();
+}
+
+template <class _Type>
 void List<_Type>::_Insert(NodeType* where, const _Type& val)
 {
 	NodeType* new_node = new(_pool) NodeType(val);
@@ -317,6 +396,31 @@ void List<_Type>::_Remove(NodeType* node)
 		prev->next = next;
 
 		delete node;
+
+		--_count;
+	}
+}
+
+template <class _Type>
+void List<_Type>::_Link(NodeType* where, NodeType* node)
+{
+	node->next = where;
+	node->prev = where->prev;
+	where->prev->next = node;
+	where->prev = node;
+
+	++_count;
+}
+
+template <class _Type>
+void List<_Type>::_Unlink(NodeType* node)
+{
+	if(node != _end)
+	{
+		NodeType* next = node->next;
+		NodeType* prev = node->prev;
+		next->prev = prev;
+		prev->next = next;
 
 		--_count;
 	}
