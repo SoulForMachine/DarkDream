@@ -35,6 +35,8 @@ namespace Engine
 		GL::Buffer* _spriteVertexBuf;
 		GL::Buffer* _spriteIndexBuf;
 		GL::VertexFormat* _spriteVertFmt;
+		GL::SamplerState* _spriteSampler;
+		GL::SamplerState* _spriteSamplerTile;
 		const ASMProgRes* _spriteVertProg;
 		const ASMProgRes* _spriteFragProg;
 	};

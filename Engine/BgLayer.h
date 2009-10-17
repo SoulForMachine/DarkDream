@@ -27,6 +27,7 @@ namespace Engine
 
 			const TextureRes* texture;
 			RectFloat rect; // absolute layer-space coords: [x1, y1] - lower left, [x2, y2] upper right
+			int layerIndex;
 			uint flags;
 		};
 
@@ -53,7 +54,11 @@ namespace Engine
 			{ return _width; }
 		float GetScreenWidth() const
 			{ return _screenWidth; }
-		float LayerXFromWorldX(float x);
+		float GetCameraDistance() const
+			{ return _cameraDistance; }
+		float GetXPos() const;	// layer world-space x position
+		float WorldXToLayerX(float x);
+		float LayerXToWorldX(float x);
 
 	private:
 		List<Sprite> _sprites;
@@ -73,7 +78,7 @@ namespace Engine
 		bool Init();
 		void Deinit();
 
-		void RecalculateSizes();
+		void RecalculateSizes(); // must be called every time camera projection transform changes
 		BgLayer& GetLayer(int index)
 			{ return _layers[index]; }
 		int GetVisibleSprites(const BgLayer::Sprite** sprites_buf, int max_count);

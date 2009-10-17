@@ -193,6 +193,7 @@ namespace MapEditor
 	System::Void MainForm::_toolBtnLayers_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::LAYER_EDIT);
+		_mapForm->SetViewMode(MapRenderWindow::ViewMode::GAME);
 		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
 		UpdateToolbarButtons();
 	}
@@ -247,6 +248,7 @@ namespace MapEditor
 			_menuViewWireframe->Checked = _wireframe;
 			_menuViewStats->Checked = _viewStats;
 			_menuViewGameView->Checked = (_mapForm->GetViewMode() == MapRenderWindow::ViewMode::GAME);
+			_menuViewGameView->Enabled = (_mapForm->GetCurrentEditMode()->GetModeEnum() != EditMode::EditModeEnum::LAYER_EDIT);
 			_menuViewToolPanel->Checked = !_toolPanel->IsHidden;
 			_menuViewConsole->Checked = !_consoleForm->IsHidden;
 			_menuEditUndo->Enabled = _mapForm->GetUndoManager()->HasUndo();

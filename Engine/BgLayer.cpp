@@ -52,6 +52,7 @@ namespace Engine
 
 	void BgLayer::RemoveSprite(Sprite& sprite)
 	{
+		engineAPI.textureManager->ReleaseTexture(sprite.texture);
 		_sprites.Remove(sprite);
 	}
 
@@ -105,7 +106,7 @@ namespace Engine
 		vec4f plane(vec3f::z_axis, - (cam_pos.z - _cameraDistance));
 		if(intersect_ray_plane(pt, ray_pt, ray_dir, plane))
 		{
-			point.x = LayerXFromWorldX(pt.x);
+			point.x = WorldXToLayerX(pt.x);
 			point.y = pt.y;
 			return true;
 		}
@@ -119,7 +120,9 @@ namespace Engine
 	{
 		if(PickLayerPoint(screen_x, screen_y, point))
 		{
-			for(List<Sprite>::Iterator it = _sprites.Begin(); it != _sprites.End(); ++it)
+			List<Sprite>::Iterator it = _sprites.End();
+			--it;
+			for( ; it != _sprites.End(); --it)
 			{
 				vec4f rect(it->rect.x1, it->rect.y1, it->rect.x2, it->rect.y2);
 				if(point_in_rectangle_2d(point, rect))
@@ -130,10 +133,22 @@ namespace Engine
 		return 0;
 	}
 
-	float BgLayer::LayerXFromWorldX(float x)
+	float BgLayer::GetXPos() const
 	{
-		return x / Terrain::PATCH_WIDTH * _scrollFactor * _screenWidth + _screenWidth * 0.5f;
+		float cam_x = engineAPI.world->GetCamera().GetPosition().x;
+		return (cam_x - _screenWidth * 0.5f) - (cam_x / Terrain::PATCH_WIDTH * _scrollFactor * _screenWidth);
 	}
+
+	float BgLayer::WorldXToLayerX(float x)
+	{
+		return x - GetXPos();
+	}
+
+	float BgLayer::LayerXToWorldX(float x)
+	{
+		return x + GetXPos();
+	}
+
 
 
 	// ========== BgLayerManager ==========
@@ -208,7 +223,7 @@ namespace Engine
 
 	BgLayer::Sprite* BgLayerManager::PickSprite(int screen_x, int screen_y, vec2f& point)
 	{
-		for(int i = 0; i < 4; ++i)
+		for(int i = 3; i >= 0; --i)
 		{
 			BgLayer::Sprite* sprite = _layers[i].PickSprite(screen_x, screen_y, point);
 			if(sprite)

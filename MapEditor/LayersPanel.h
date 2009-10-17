@@ -19,6 +19,7 @@ namespace MapEditor {
 	{
 	public:
 		LayersPanel(EM_LayerEdit^ edit_mode);
+		void SelectSprite(Engine::BgLayer::Sprite* sprite);
 
 	protected:
 		/// <summary>
@@ -49,6 +50,15 @@ namespace MapEditor {
 	private: System::Windows::Forms::Button^  _btnSendToBack;
 	private: System::Windows::Forms::OpenFileDialog^  _selectTextureDialog;
 	private: System::Windows::Forms::CheckBox^  _checkTiledTex;
+	private: System::Windows::Forms::Label^  label3;
+	private: System::Windows::Forms::TrackBar^  _trackScrollFactor;
+	private: System::Windows::Forms::NumericUpDown^  _textScrollFactor;
+	private: System::Windows::Forms::NumericUpDown^  _textScale;
+
+
+	private: System::Windows::Forms::TrackBar^  _trackScale;
+
+	private: System::Windows::Forms::Label^  label4;
 
 
 	private:
@@ -82,11 +92,21 @@ namespace MapEditor {
 			this->_btnSendToBack = (gcnew System::Windows::Forms::Button());
 			this->_selectTextureDialog = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->_checkTiledTex = (gcnew System::Windows::Forms::CheckBox());
+			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->_trackScrollFactor = (gcnew System::Windows::Forms::TrackBar());
+			this->_textScrollFactor = (gcnew System::Windows::Forms::NumericUpDown());
+			this->_textScale = (gcnew System::Windows::Forms::NumericUpDown());
+			this->_trackScale = (gcnew System::Windows::Forms::TrackBar());
+			this->label4 = (gcnew System::Windows::Forms::Label());
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackScrollFactor))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_textScrollFactor))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_textScale))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackScale))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// _btnRemoveTexture
 			// 
-			this->_btnRemoveTexture->Location = System::Drawing::Point(110, 364);
+			this->_btnRemoveTexture->Location = System::Drawing::Point(110, 406);
 			this->_btnRemoveTexture->Name = L"_btnRemoveTexture";
 			this->_btnRemoveTexture->Size = System::Drawing::Size(80, 23);
 			this->_btnRemoveTexture->TabIndex = 14;
@@ -96,7 +116,7 @@ namespace MapEditor {
 			// 
 			// _btnAddTexture
 			// 
-			this->_btnAddTexture->Location = System::Drawing::Point(24, 364);
+			this->_btnAddTexture->Location = System::Drawing::Point(24, 406);
 			this->_btnAddTexture->Name = L"_btnAddTexture";
 			this->_btnAddTexture->Size = System::Drawing::Size(80, 23);
 			this->_btnAddTexture->TabIndex = 13;
@@ -107,7 +127,7 @@ namespace MapEditor {
 			// _listTextures
 			// 
 			this->_listTextures->FormattingEnabled = true;
-			this->_listTextures->Location = System::Drawing::Point(24, 133);
+			this->_listTextures->Location = System::Drawing::Point(24, 175);
 			this->_listTextures->Name = L"_listTextures";
 			this->_listTextures->Size = System::Drawing::Size(338, 225);
 			this->_listTextures->TabIndex = 12;
@@ -179,7 +199,7 @@ namespace MapEditor {
 			// label2
 			// 
 			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(21, 117);
+			this->label2->Location = System::Drawing::Point(21, 159);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(51, 13);
 			this->label2->TabIndex = 16;
@@ -187,7 +207,7 @@ namespace MapEditor {
 			// 
 			// _btnBringToFront
 			// 
-			this->_btnBringToFront->Location = System::Drawing::Point(196, 364);
+			this->_btnBringToFront->Location = System::Drawing::Point(196, 406);
 			this->_btnBringToFront->Name = L"_btnBringToFront";
 			this->_btnBringToFront->Size = System::Drawing::Size(80, 23);
 			this->_btnBringToFront->TabIndex = 17;
@@ -197,7 +217,7 @@ namespace MapEditor {
 			// 
 			// _btnSendToBack
 			// 
-			this->_btnSendToBack->Location = System::Drawing::Point(282, 364);
+			this->_btnSendToBack->Location = System::Drawing::Point(282, 406);
 			this->_btnSendToBack->Name = L"_btnSendToBack";
 			this->_btnSendToBack->Size = System::Drawing::Size(80, 23);
 			this->_btnSendToBack->TabIndex = 18;
@@ -214,7 +234,7 @@ namespace MapEditor {
 			// _checkTiledTex
 			// 
 			this->_checkTiledTex->AutoSize = true;
-			this->_checkTiledTex->Location = System::Drawing::Point(24, 418);
+			this->_checkTiledTex->Location = System::Drawing::Point(24, 460);
 			this->_checkTiledTex->Name = L"_checkTiledTex";
 			this->_checkTiledTex->Size = System::Drawing::Size(88, 17);
 			this->_checkTiledTex->TabIndex = 19;
@@ -222,10 +242,83 @@ namespace MapEditor {
 			this->_checkTiledTex->UseVisualStyleBackColor = true;
 			this->_checkTiledTex->MouseClick += gcnew System::Windows::Forms::MouseEventHandler(this, &LayersPanel::_checkTiledTex_MouseClick);
 			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Location = System::Drawing::Point(21, 126);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(69, 13);
+			this->label3->TabIndex = 20;
+			this->label3->Text = L"Scroll Factor:";
+			// 
+			// _trackScrollFactor
+			// 
+			this->_trackScrollFactor->AutoSize = false;
+			this->_trackScrollFactor->Location = System::Drawing::Point(96, 124);
+			this->_trackScrollFactor->Maximum = 100;
+			this->_trackScrollFactor->Name = L"_trackScrollFactor";
+			this->_trackScrollFactor->Size = System::Drawing::Size(200, 20);
+			this->_trackScrollFactor->TabIndex = 21;
+			this->_trackScrollFactor->TickFrequency = 5;
+			this->_trackScrollFactor->Scroll += gcnew System::EventHandler(this, &LayersPanel::_trackScrollFactor_Scroll);
+			// 
+			// _textScrollFactor
+			// 
+			this->_textScrollFactor->DecimalPlaces = 2;
+			this->_textScrollFactor->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 131072});
+			this->_textScrollFactor->Location = System::Drawing::Point(302, 124);
+			this->_textScrollFactor->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+			this->_textScrollFactor->Name = L"_textScrollFactor";
+			this->_textScrollFactor->Size = System::Drawing::Size(60, 20);
+			this->_textScrollFactor->TabIndex = 22;
+			this->_textScrollFactor->ValueChanged += gcnew System::EventHandler(this, &LayersPanel::_textScrollFactor_ValueChanged);
+			// 
+			// _textScale
+			// 
+			this->_textScale->DecimalPlaces = 2;
+			this->_textScale->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 131072});
+			this->_textScale->Location = System::Drawing::Point(302, 501);
+			this->_textScale->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {5, 0, 0, 0});
+			this->_textScale->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 65536});
+			this->_textScale->Name = L"_textScale";
+			this->_textScale->Size = System::Drawing::Size(60, 20);
+			this->_textScale->TabIndex = 25;
+			this->_textScale->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 65536});
+			this->_textScale->ValueChanged += gcnew System::EventHandler(this, &LayersPanel::_textScale_ValueChanged);
+			// 
+			// _trackScale
+			// 
+			this->_trackScale->AutoSize = false;
+			this->_trackScale->LargeChange = 25;
+			this->_trackScale->Location = System::Drawing::Point(96, 501);
+			this->_trackScale->Maximum = 500;
+			this->_trackScale->Minimum = 10;
+			this->_trackScale->Name = L"_trackScale";
+			this->_trackScale->Size = System::Drawing::Size(200, 20);
+			this->_trackScale->TabIndex = 24;
+			this->_trackScale->TickFrequency = 25;
+			this->_trackScale->Value = 10;
+			this->_trackScale->Scroll += gcnew System::EventHandler(this, &LayersPanel::_trackScale_Scroll);
+			// 
+			// label4
+			// 
+			this->label4->AutoSize = true;
+			this->label4->Location = System::Drawing::Point(21, 503);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(37, 13);
+			this->label4->TabIndex = 23;
+			this->label4->Text = L"Scale:";
+			// 
 			// LayersPanel
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->Controls->Add(this->_textScale);
+			this->Controls->Add(this->_trackScale);
+			this->Controls->Add(this->label4);
+			this->Controls->Add(this->_textScrollFactor);
+			this->Controls->Add(this->_trackScrollFactor);
+			this->Controls->Add(this->label3);
 			this->Controls->Add(this->_checkTiledTex);
 			this->Controls->Add(this->_btnSendToBack);
 			this->Controls->Add(this->_btnBringToFront);
@@ -239,7 +332,11 @@ namespace MapEditor {
 			this->Controls->Add(this->_btnLayer2);
 			this->Controls->Add(this->_btnLayer1);
 			this->Name = L"LayersPanel";
-			this->Size = System::Drawing::Size(389, 544);
+			this->Size = System::Drawing::Size(389, 605);
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackScrollFactor))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_textScrollFactor))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_textScale))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackScale))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -256,5 +353,9 @@ namespace MapEditor {
 	private: System::Void _btnBringToFront_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _btnSendToBack_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _checkTiledTex_MouseClick(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+	private: System::Void _trackScrollFactor_Scroll(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _textScrollFactor_ValueChanged(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _trackScale_Scroll(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _textScale_ValueChanged(System::Object^  sender, System::EventArgs^  e);
 };
 }

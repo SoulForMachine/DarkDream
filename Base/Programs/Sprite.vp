@@ -1,1 +1,28 @@
 !!ARBvp1.0
+
+ATTRIB		vertData = vertex.attrib[0];
+
+PARAM		viewProjMat[] = { program.local[0..3] };
+PARAM		vertices[] = { program.local[4..67] }; # 16 sprites max
+
+ADDRESS		index;
+
+OUTPUT		varPos = result.position;
+OUTPUT		varUV = result.texcoord[0];
+
+TEMP		pos;
+
+
+ARL			index.x, vertData.x;
+MOV			pos, vertices[index.x];
+
+# output position
+DP4			varPos.x, viewProjMat[0], pos;
+DP4			varPos.y, viewProjMat[1], pos;
+DP4			varPos.z, viewProjMat[2], pos;
+DP4			varPos.w, viewProjMat[3], pos;
+
+# output UV
+MOV			varUV, vertData.yzww;
+
+END

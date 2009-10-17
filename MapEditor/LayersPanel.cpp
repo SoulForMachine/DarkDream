@@ -35,6 +35,15 @@ namespace MapEditor
 	};
 
 
+	SpriteListBoxItem^ FindListItem(BgLayer::Sprite* sprite, ListBox^ list_box)
+	{
+		for each(SpriteListBoxItem^ item in list_box->Items)
+		{
+			if(item->GetSprite() == sprite)
+				return item;
+		}
+		return nullptr;
+	}
 
 	LayersPanel::LayersPanel(EM_LayerEdit^ edit_mode)
 	{
@@ -42,7 +51,26 @@ namespace MapEditor
 
 		_editMode = edit_mode;
 		_btnLayer1->Checked = true;
+		_checkTiledTex->Enabled = false;
 		RefreshTextureList();
+	}
+
+	void LayersPanel::SelectSprite(BgLayer::Sprite* sprite)
+	{
+		_listTextures->SelectedIndexChanged -= gcnew System::EventHandler(this, &LayersPanel::_listTextures_SelectedIndexChanged);
+		if(sprite)
+		{
+			SpriteListBoxItem^ item = FindListItem(sprite, _listTextures);
+			_listTextures->SelectedItem = item;
+			_checkTiledTex->Enabled = true;
+			_checkTiledTex->Checked = (sprite->flags & BgLayer::Sprite::FLAG_TILED) != 0;
+		}
+		else
+		{
+			_listTextures->SelectedItem = nullptr;
+			_checkTiledTex->Enabled = false;
+		}
+		_listTextures->SelectedIndexChanged += gcnew System::EventHandler(this, &LayersPanel::_listTextures_SelectedIndexChanged);
 	}
 
 	System::Void LayersPanel::_btnLayer1_MouseClick(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e)
@@ -75,11 +103,13 @@ namespace MapEditor
 		{
 			SpriteListBoxItem^ item = (SpriteListBoxItem^)_listTextures->SelectedItem;
 			_editMode->SelectSprite(item->GetSprite());
+			_checkTiledTex->Enabled = true;
 			_checkTiledTex->Checked = (item->GetSprite()->flags & BgLayer::Sprite::FLAG_TILED) != 0;
 		}
 		else
 		{
 			_editMode->SelectSprite(0);
+			_checkTiledTex->Enabled = false;
 			_checkTiledTex->Checked = false;
 		}
 	}
@@ -95,10 +125,11 @@ namespace MapEditor
 			if(tex_res)
 			{
 				int layer_i = _editMode->GetActiveLayer();
+				BgLayer& layer = engineAPI->world->GetLayerManager().GetLayer(layer_i);
 				int viewport[4];
 				engineAPI->renderSystem->GetRenderer()->GetViewport(viewport);
 				vec2f pos;
-				engineAPI->world->GetLayerManager().GetLayer(layer_i).PickLayerPoint(viewport[2] / 2, viewport[3], pos);
+				layer.PickLayerPoint(viewport[2] / 2, viewport[3], pos);
 				GL::Texture2D* tex = (GL::Texture2D*)tex_res->GetTexture();
 				float width = tex->GetWidth() / 4.0f;
 				float height = tex->GetHeight() / 4.0f;
@@ -107,8 +138,8 @@ namespace MapEditor
 				rect.y1 = pos.y - height,
 				rect.x2 = rect.x1 + width;
 				rect.y2 = rect.y1 + height;
-				BgLayer::Sprite ts = { tex_res, rect, 0 };
-				BgLayer::Sprite& sprite = engineAPI->world->GetLayerManager().GetLayer(layer_i).AddSprite(ts);
+				BgLayer::Sprite ts = { tex_res, rect, layer_i, 0 };
+				BgLayer::Sprite& sprite = layer.AddSprite(ts);
 				AddSpriteToList(&sprite);
 			}
 		}
@@ -134,6 +165,7 @@ namespace MapEditor
 			item = gcnew SpriteListBoxItem(item);
 			_listTextures->Items->Remove(_listTextures->SelectedItem);
 			_listTextures->Items->Insert(index, item);
+			_listTextures->SelectedIndex = index;
 		}
 	}
 
@@ -147,6 +179,7 @@ namespace MapEditor
 			item = gcnew SpriteListBoxItem(item);
 			_listTextures->Items->Remove(_listTextures->SelectedItem);
 			_listTextures->Items->Insert(index, item);
+			_listTextures->SelectedIndex = index;
 		}
 	}
 
@@ -175,6 +208,26 @@ namespace MapEditor
 		}
 	}
 
+	System::Void LayersPanel::_trackScrollFactor_Scroll(System::Object^  sender, System::EventArgs^  e)
+	{
+
+	}
+
+	System::Void LayersPanel::_textScrollFactor_ValueChanged(System::Object^  sender, System::EventArgs^  e)
+	{
+
+	}
+
+	System::Void LayersPanel::_trackScale_Scroll(System::Object^  sender, System::EventArgs^  e)
+	{
+
+	}
+
+	System::Void LayersPanel::_textScale_ValueChanged(System::Object^  sender, System::EventArgs^  e)
+	{
+
+	}
+
 	void LayersPanel::RefreshTextureList()
 	{
 		_listTextures->Items->Clear();
@@ -191,17 +244,17 @@ namespace MapEditor
 	void LayersPanel::AddSpriteToList(BgLayer::Sprite* sprite)
 	{
 		String^ text = gcnew String(sprite->texture->GetFileName());
-		int s = text->LastIndexOf('.');
-		if(s == -1)
-			s = 0;
-		int e = text->LastIndexOf('\\');
-		if(e == -1)
+		int dot = text->LastIndexOf('.');
+		if(dot == -1)
+			dot = 0;
+		int sl = text->LastIndexOf('\\');
+		if(sl == -1)
 		{
-			e = text->LastIndexOf('/');
-			if(e == -1)
-				e = text->Length;
+			sl = text->LastIndexOf('/');
+			if(sl == -1)
+				sl = text->Length;
 		}
-		text = text->Substring(s, e - s);
+		text = text->Substring(sl + 1, dot - sl - 1);
 		String^ base_text = gcnew String(text);
 		int n = 2;
 		while(_listTextures->FindStringExact(text) != ListBox::NoMatches)

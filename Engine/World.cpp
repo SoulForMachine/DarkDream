@@ -22,6 +22,11 @@ namespace Engine
 	{
 		if(!_terrain.Init())
 			return false;
+		if(!_layerManager.Init())
+		{
+			Deinit();
+			return false;
+		}
 
 		return true;
 	}
@@ -35,6 +40,8 @@ namespace Engine
 			delete *it;
 		}
 		_entities.Clear();
+
+		_layerManager.Deinit();
 	}
 
 	bool World::LoadMap(const tchar* file_name)

@@ -221,12 +221,15 @@ namespace MapEditor
 		_renderer->SwapInterval(1);
 		_renderer->ClearColorBuffer(0.5f, 0.5f, 0.5f, 1.0f);
 		_renderer->ClearDepthStencilBuffer(DEPTH_BUFFER_BIT | STENCIL_BUFFER_BIT, 1.0f, 0);
-		_renderer->EnableDepthTest(true);
 		_renderer->EnableFaceCulling(true);
 
 		if(_wireframe)
 			_renderer->RasterizationMode(GL::RASTER_LINE);
 
+		_renderer->EnableDepthTest(false);
+		if(_viewMode == ViewMode::GAME)
+			engineAPI->renderSystem->RenderBgLayers(_frameTime);
+		_renderer->EnableDepthTest(true);
 		engineAPI->renderSystem->RenderTerrain(_frameTime);
 		engineAPI->renderSystem->RenderEntities(_frameTime);
 
@@ -583,6 +586,7 @@ namespace MapEditor
 
 		engineAPI->world->GetCamera().SetViewingTransform(cam);
 		engineAPI->world->GetCamera().Perspective(deg2rad(cam_fov), float(_width) / _height, 0.1f, 1000.0f);
+		engineAPI->world->GetLayerManager().RecalculateSizes();
 	}
 
 	void MapRenderWindow::SetViewMode(ViewMode mode)
