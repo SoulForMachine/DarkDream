@@ -60,16 +60,25 @@ namespace MapEditor
 
 		if(_moving && _selectedSprite)
 		{
-			int viewport[4];
-			engineAPI->renderSystem->GetRenderer()->GetViewport(viewport);
-			y = viewport[3] - y;
-			vec2f point;
-			if(engineAPI->world->GetLayerManager().GetLayer(_activeLayer).PickLayerPoint(x, y, point))
+			if(! ((_selectedSprite->flags & BgLayer::Sprite::FLAG_TILE_U) &&
+				(_selectedSprite->flags & BgLayer::Sprite::FLAG_TILE_V)) )
 			{
-				vec2f vec = point - *_moveStartPoint;
-				_selectedSprite->rect.Offset(vec.x, vec.y);
+				int viewport[4];
+				engineAPI->renderSystem->GetRenderer()->GetViewport(viewport);
+				y = viewport[3] - y;
+				vec2f point;
+				if(engineAPI->world->GetLayerManager().GetLayer(_activeLayer).PickLayerPoint(x, y, point))
+				{
+					vec2f vec = point - *_moveStartPoint;
+					if(_selectedSprite->flags & BgLayer::Sprite::FLAG_TILE_U)
+						_selectedSprite->rect.Offset(0.0f, vec.y);
+					else if(_selectedSprite->flags & BgLayer::Sprite::FLAG_TILE_V)
+						_selectedSprite->rect.Offset(vec.x, 0.0f);
+					else
+						_selectedSprite->rect.Offset(vec.x, vec.y);
+				}
+				*_moveStartPoint = point;
 			}
-			*_moveStartPoint = point;
 		}
 	}
 

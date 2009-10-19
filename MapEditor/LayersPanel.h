@@ -49,7 +49,8 @@ namespace MapEditor {
 	private: System::Windows::Forms::Button^  _btnBringToFront;
 	private: System::Windows::Forms::Button^  _btnSendToBack;
 	private: System::Windows::Forms::OpenFileDialog^  _selectTextureDialog;
-	private: System::Windows::Forms::CheckBox^  _checkTiledTex;
+	private: System::Windows::Forms::CheckBox^  _checkTileTexU;
+
 	private: System::Windows::Forms::Label^  label3;
 	private: System::Windows::Forms::TrackBar^  _trackScrollFactor;
 	private: System::Windows::Forms::NumericUpDown^  _textScrollFactor;
@@ -59,6 +60,12 @@ namespace MapEditor {
 	private: System::Windows::Forms::TrackBar^  _trackScale;
 
 	private: System::Windows::Forms::Label^  label4;
+	private: System::Windows::Forms::CheckBox^  _checkTileTexV;
+	private: System::Windows::Forms::NumericUpDown^  _textTile;
+
+	private: System::Windows::Forms::TrackBar^  _trackTile;
+
+	private: System::Windows::Forms::Label^  label5;
 
 
 	private:
@@ -69,6 +76,11 @@ namespace MapEditor {
 
 		void RefreshTextureList();
 		void AddSpriteToList(Engine::BgLayer::Sprite* sprite);
+		void UpdateScrollFactorControls();
+		void UpdateScaleControls();
+		void UpdateControlState();
+		void SetInitialSpriteRect(Engine::BgLayer::Sprite* sprite);
+		void SetSpriteScale(Engine::BgLayer::Sprite* sprite, float scale);
 
 		EM_LayerEdit^ _editMode;
 
@@ -91,17 +103,23 @@ namespace MapEditor {
 			this->_btnBringToFront = (gcnew System::Windows::Forms::Button());
 			this->_btnSendToBack = (gcnew System::Windows::Forms::Button());
 			this->_selectTextureDialog = (gcnew System::Windows::Forms::OpenFileDialog());
-			this->_checkTiledTex = (gcnew System::Windows::Forms::CheckBox());
+			this->_checkTileTexU = (gcnew System::Windows::Forms::CheckBox());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->_trackScrollFactor = (gcnew System::Windows::Forms::TrackBar());
 			this->_textScrollFactor = (gcnew System::Windows::Forms::NumericUpDown());
 			this->_textScale = (gcnew System::Windows::Forms::NumericUpDown());
 			this->_trackScale = (gcnew System::Windows::Forms::TrackBar());
 			this->label4 = (gcnew System::Windows::Forms::Label());
+			this->_checkTileTexV = (gcnew System::Windows::Forms::CheckBox());
+			this->_textTile = (gcnew System::Windows::Forms::NumericUpDown());
+			this->_trackTile = (gcnew System::Windows::Forms::TrackBar());
+			this->label5 = (gcnew System::Windows::Forms::Label());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackScrollFactor))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_textScrollFactor))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_textScale))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackScale))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_textTile))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackTile))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// _btnRemoveTexture
@@ -231,16 +249,16 @@ namespace MapEditor {
 			this->_selectTextureDialog->Title = L"Select Texture";
 			this->_selectTextureDialog->FileOk += gcnew System::ComponentModel::CancelEventHandler(this, &LayersPanel::_selectTextureDialog_FileOk);
 			// 
-			// _checkTiledTex
+			// _checkTileTexU
 			// 
-			this->_checkTiledTex->AutoSize = true;
-			this->_checkTiledTex->Location = System::Drawing::Point(24, 460);
-			this->_checkTiledTex->Name = L"_checkTiledTex";
-			this->_checkTiledTex->Size = System::Drawing::Size(88, 17);
-			this->_checkTiledTex->TabIndex = 19;
-			this->_checkTiledTex->Text = L"Tiled Texture";
-			this->_checkTiledTex->UseVisualStyleBackColor = true;
-			this->_checkTiledTex->MouseClick += gcnew System::Windows::Forms::MouseEventHandler(this, &LayersPanel::_checkTiledTex_MouseClick);
+			this->_checkTileTexU->AutoSize = true;
+			this->_checkTileTexU->Location = System::Drawing::Point(24, 460);
+			this->_checkTileTexU->Name = L"_checkTileTexU";
+			this->_checkTileTexU->Size = System::Drawing::Size(54, 17);
+			this->_checkTileTexU->TabIndex = 19;
+			this->_checkTileTexU->Text = L"Tile U";
+			this->_checkTileTexU->UseVisualStyleBackColor = true;
+			this->_checkTileTexU->MouseClick += gcnew System::Windows::Forms::MouseEventHandler(this, &LayersPanel::_checkTileTexU_MouseClick);
 			// 
 			// label3
 			// 
@@ -277,8 +295,8 @@ namespace MapEditor {
 			// 
 			this->_textScale->DecimalPlaces = 2;
 			this->_textScale->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 131072});
-			this->_textScale->Location = System::Drawing::Point(302, 501);
-			this->_textScale->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {5, 0, 0, 0});
+			this->_textScale->Location = System::Drawing::Point(302, 529);
+			this->_textScale->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {4, 0, 0, 0});
 			this->_textScale->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 65536});
 			this->_textScale->Name = L"_textScale";
 			this->_textScale->Size = System::Drawing::Size(60, 20);
@@ -290,8 +308,8 @@ namespace MapEditor {
 			// 
 			this->_trackScale->AutoSize = false;
 			this->_trackScale->LargeChange = 25;
-			this->_trackScale->Location = System::Drawing::Point(96, 501);
-			this->_trackScale->Maximum = 500;
+			this->_trackScale->Location = System::Drawing::Point(96, 529);
+			this->_trackScale->Maximum = 400;
 			this->_trackScale->Minimum = 10;
 			this->_trackScale->Name = L"_trackScale";
 			this->_trackScale->Size = System::Drawing::Size(200, 20);
@@ -303,23 +321,74 @@ namespace MapEditor {
 			// label4
 			// 
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(21, 503);
+			this->label4->Location = System::Drawing::Point(21, 531);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(37, 13);
 			this->label4->TabIndex = 23;
 			this->label4->Text = L"Scale:";
 			// 
+			// _checkTileTexV
+			// 
+			this->_checkTileTexV->AutoSize = true;
+			this->_checkTileTexV->Location = System::Drawing::Point(110, 460);
+			this->_checkTileTexV->Name = L"_checkTileTexV";
+			this->_checkTileTexV->Size = System::Drawing::Size(53, 17);
+			this->_checkTileTexV->TabIndex = 26;
+			this->_checkTileTexV->Text = L"Tile V";
+			this->_checkTileTexV->UseVisualStyleBackColor = true;
+			this->_checkTileTexV->MouseClick += gcnew System::Windows::Forms::MouseEventHandler(this, &LayersPanel::_checkTileTexV_MouseClick);
+			// 
+			// _textTile
+			// 
+			this->_textTile->DecimalPlaces = 2;
+			this->_textTile->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 131072});
+			this->_textTile->Location = System::Drawing::Point(302, 493);
+			this->_textTile->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {10, 0, 0, 0});
+			this->_textTile->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+			this->_textTile->Name = L"_textTile";
+			this->_textTile->Size = System::Drawing::Size(60, 20);
+			this->_textTile->TabIndex = 29;
+			this->_textTile->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+			this->_textTile->ValueChanged += gcnew System::EventHandler(this, &LayersPanel::_textTile_ValueChanged);
+			// 
+			// _trackTile
+			// 
+			this->_trackTile->AutoSize = false;
+			this->_trackTile->LargeChange = 100;
+			this->_trackTile->Location = System::Drawing::Point(96, 493);
+			this->_trackTile->Maximum = 1000;
+			this->_trackTile->Minimum = 100;
+			this->_trackTile->Name = L"_trackTile";
+			this->_trackTile->Size = System::Drawing::Size(200, 20);
+			this->_trackTile->TabIndex = 28;
+			this->_trackTile->TickFrequency = 50;
+			this->_trackTile->Value = 100;
+			this->_trackTile->Scroll += gcnew System::EventHandler(this, &LayersPanel::_trackTile_Scroll);
+			// 
+			// label5
+			// 
+			this->label5->AutoSize = true;
+			this->label5->Location = System::Drawing::Point(21, 495);
+			this->label5->Name = L"label5";
+			this->label5->Size = System::Drawing::Size(27, 13);
+			this->label5->TabIndex = 27;
+			this->label5->Text = L"Tile:";
+			// 
 			// LayersPanel
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->Controls->Add(this->_textTile);
+			this->Controls->Add(this->_trackTile);
+			this->Controls->Add(this->label5);
+			this->Controls->Add(this->_checkTileTexV);
 			this->Controls->Add(this->_textScale);
 			this->Controls->Add(this->_trackScale);
 			this->Controls->Add(this->label4);
 			this->Controls->Add(this->_textScrollFactor);
 			this->Controls->Add(this->_trackScrollFactor);
 			this->Controls->Add(this->label3);
-			this->Controls->Add(this->_checkTiledTex);
+			this->Controls->Add(this->_checkTileTexU);
 			this->Controls->Add(this->_btnSendToBack);
 			this->Controls->Add(this->_btnBringToFront);
 			this->Controls->Add(this->label2);
@@ -332,11 +401,13 @@ namespace MapEditor {
 			this->Controls->Add(this->_btnLayer2);
 			this->Controls->Add(this->_btnLayer1);
 			this->Name = L"LayersPanel";
-			this->Size = System::Drawing::Size(389, 605);
+			this->Size = System::Drawing::Size(389, 617);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackScrollFactor))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_textScrollFactor))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_textScale))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackScale))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_textTile))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_trackTile))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -352,10 +423,13 @@ namespace MapEditor {
 	private: System::Void _btnRemoveTexture_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _btnBringToFront_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _btnSendToBack_Click(System::Object^  sender, System::EventArgs^  e);
-	private: System::Void _checkTiledTex_MouseClick(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+	private: System::Void _checkTileTexU_MouseClick(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+	private: System::Void _checkTileTexV_MouseClick(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
 	private: System::Void _trackScrollFactor_Scroll(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _textScrollFactor_ValueChanged(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _trackScale_Scroll(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _textScale_ValueChanged(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _trackTile_Scroll(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _textTile_ValueChanged(System::Object^  sender, System::EventArgs^  e);
 };
 }

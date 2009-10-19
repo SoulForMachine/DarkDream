@@ -21,12 +21,14 @@ namespace Engine
 		{
 			enum
 			{
-				FLAG_TILED = 1,
-				FLAG_ADDITIVE_BLEND = 2,
+				FLAG_TILE_U = 1,
+				FLAG_TILE_V = 2,
+				FLAG_ADDITIVE_BLEND = 4,
 			};
 
 			const TextureRes* texture;
 			RectFloat rect; // absolute layer-space coords: [x1, y1] - lower left, [x2, y2] upper right
+			math3d::vec2f uvScale;
 			int layerIndex;
 			uint flags;
 		};
@@ -34,10 +36,10 @@ namespace Engine
 		BgLayer();
 		~BgLayer();
 
-		bool Init();
+		bool Init(float scroll_factor);
 		void Deinit();
 
-		void SetParameters(float screen_width, float scroll_factor, float cam_dist);
+		void SetParameters(float screen_width, float cam_dist);
 		Sprite& AddSprite(const Sprite& sprite);
 		void RemoveSprite(Sprite& sprite);
 		void MoveToFront(Sprite& sprite);
@@ -50,6 +52,7 @@ namespace Engine
 			{ return _sprites.GetCount(); }
 		float GetScrollFactor() const
 			{ return _scrollFactor; }
+		void SetScrollFactor(float factor);
 		float GetWidth() const
 			{ return _width; }
 		float GetScreenWidth() const

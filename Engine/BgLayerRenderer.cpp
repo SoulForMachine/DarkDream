@@ -98,9 +98,10 @@ namespace Engine
 		_renderer->ActiveVertexASMProgram(_spriteVertProg->GetASMProgram());
 		_renderer->ActiveFragmentASMProgram(_spriteFragProg->GetASMProgram());
 
-		// first sprite doesn't need blending
+		// first sprite doesn't need blending if it's tiled
 		int start = 0;
-		if(sprites[0]->flags & BgLayer::Sprite::FLAG_TILED)
+		if(	(sprites[0]->flags & BgLayer::Sprite::FLAG_TILE_U) &&
+			(sprites[0]->flags & BgLayer::Sprite::FLAG_TILE_V) )
 		{
 			RenderSpriteBatch(&sprites[0], 1);
 			start = 1;
@@ -144,13 +145,15 @@ namespace Engine
 			float y2 = sprites[i]->rect.y2;
 			float z = - layer.GetCameraDistance() + cam_pos.z;
 
-			_spriteVertProg->GetASMProgram()->LocalParameter(4 + i * 4, vec4f(x1, y1, z, 1.0f));
-			_spriteVertProg->GetASMProgram()->LocalParameter(4 + i * 4 + 1, vec4f(x2, y1, z, 1.0f));
-			_spriteVertProg->GetASMProgram()->LocalParameter(4 + i * 4 + 2, vec4f(x2, y2, z, 1.0f));
-			_spriteVertProg->GetASMProgram()->LocalParameter(4 + i * 4 + 3, vec4f(x1, y2, z, 1.0f));
+			_spriteVertProg->GetASMProgram()->LocalParameter(4, vec4f(sprites[i]->uvScale, 0.0f, 0.0f));
+
+			_spriteVertProg->GetASMProgram()->LocalParameter(5 + i * 4, vec4f(x1, y1, z, 1.0f));
+			_spriteVertProg->GetASMProgram()->LocalParameter(5 + i * 4 + 1, vec4f(x2, y1, z, 1.0f));
+			_spriteVertProg->GetASMProgram()->LocalParameter(5 + i * 4 + 2, vec4f(x2, y2, z, 1.0f));
+			_spriteVertProg->GetASMProgram()->LocalParameter(5 + i * 4 + 3, vec4f(x1, y2, z, 1.0f));
 		}
 
-		_renderer->SetSamplerState(0, (sprites[0]->flags & BgLayer::Sprite::FLAG_TILED)? _spriteSamplerTile: _spriteSampler);
+		_renderer->SetSamplerState(0, _spriteSamplerTile);
 		_renderer->SetSamplerTexture(0, sprites[0]->texture->GetTexture());
 
 		_renderer->DrawIndexed(GL::PRIM_TRIANGLES, 0, count * 6);

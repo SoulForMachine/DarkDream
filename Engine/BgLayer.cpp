@@ -22,8 +22,9 @@ namespace Engine
 	{
 	}
 
-	bool BgLayer::Init()
+	bool BgLayer::Init(float scroll_factor)
 	{
+		_scrollFactor = scroll_factor;
 		return true;
 	}
 
@@ -35,12 +36,11 @@ namespace Engine
 		}
 	}
 
-	void BgLayer::SetParameters(float screen_width, float scroll_factor, float cam_dist)
+	void BgLayer::SetParameters(float screen_width, float cam_dist)
 	{
 		int patch_count = engineAPI.world->GetTerrain().GetPatchCount();
-		_width = scroll_factor * screen_width * patch_count + screen_width;
+		_width = _scrollFactor * screen_width * patch_count + screen_width;
 		_screenWidth = screen_width;
-		_scrollFactor = scroll_factor;
 		_cameraDistance = cam_dist;
 	}
 
@@ -136,7 +136,7 @@ namespace Engine
 	float BgLayer::GetXPos() const
 	{
 		float cam_x = engineAPI.world->GetCamera().GetPosition().x;
-		return (cam_x - _screenWidth * 0.5f) - (cam_x / Terrain::PATCH_WIDTH * _scrollFactor * _screenWidth);
+		return cam_x - (cam_x / Terrain::PATCH_WIDTH * _scrollFactor * _screenWidth);
 	}
 
 	float BgLayer::WorldXToLayerX(float x)
@@ -147,6 +147,13 @@ namespace Engine
 	float BgLayer::LayerXToWorldX(float x)
 	{
 		return x + GetXPos();
+	}
+
+	void BgLayer::SetScrollFactor(float factor)
+	{
+		_scrollFactor = factor;
+		int patch_count = engineAPI.world->GetTerrain().GetPatchCount();
+		_width = factor * _screenWidth * patch_count + _screenWidth;
 	}
 
 
@@ -163,8 +170,10 @@ namespace Engine
 
 	bool BgLayerManager::Init()
 	{
+		float scroll_factors[] = { 0.0f, 0.2f, 0.4f, 0.8f };
 		for(int i = 0; i < 4; ++i)
-			_layers[i].Init();
+			_layers[i].Init(scroll_factors[i]);
+
 		RecalculateSizes();
 		return true;
 	}
@@ -182,11 +191,10 @@ namespace Engine
 		float fov = cam.GetFOV();
 		float aspect = cam.GetAspectRatio();
 
-		float scroll_factors[] = { 0.0f, 0.2f, 0.4f, 0.8f };
 		for(int i = 0; i < 4; ++i)
 		{
 			float scr_width = tan(fov * 0.5f) * ldist * 2.0f * aspect; // width of a layer covering one screen
-			_layers[i].SetParameters(scr_width, scroll_factors[i], ldist);
+			_layers[i].SetParameters(scr_width, ldist);
 			ldist -= 1.0f;
 		}
 	}
@@ -206,10 +214,11 @@ namespace Engine
 			const List<BgLayer::Sprite>& sprites = _layers[i].GetSprites();
 			for(List<BgLayer::Sprite>::ConstIterator it = sprites.Begin(); it != sprites.End(); ++it)
 			{
-				float left = scrl * scrl_factor * scr_width;
+				float left = scrl * scrl_factor * scr_width - scr_width * 0.5f;
 				float right = left + scr_width;
 				if(	(it->rect.x1 >= left && it->rect.x1 <= right) ||
-					(it->rect.x2 >= left && it->rect.x2 <= right) )
+					(it->rect.x2 >= left && it->rect.x2 <= right) ||
+					(it->rect.x1 < left && it->rect.x2 > right) )
 				{
 					sprites_buf[count++] = &(*it);
 					if(count == max_count)

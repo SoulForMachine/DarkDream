@@ -3,7 +3,8 @@
 ATTRIB		vertData = vertex.attrib[0];
 
 PARAM		viewProjMat[] = { program.local[0..3] };
-PARAM		vertices[] = { program.local[4..67] }; # 16 sprites max
+PARAM		uvScale = program.local[4];
+PARAM		vertices[] = { program.local[5..68] }; # 16 sprites max
 
 ADDRESS		index;
 
@@ -23,6 +24,6 @@ DP4			varPos.z, viewProjMat[2], pos;
 DP4			varPos.w, viewProjMat[3], pos;
 
 # output UV
-MOV			varUV, vertData.yzww;
+MUL			varUV, vertData.yzww, uvScale;
 
 END
