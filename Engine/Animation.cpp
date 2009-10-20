@@ -1,11 +1,13 @@
 
 #include "BaseLib/FileSys.h"
+#include "BaseLib/SSE.h"
 #include "BaseLib/SmartPtr.h"
 #include "BaseLib/Console.h"
 #include "Engine/EngineInternal.h"
 #include "Engine/FileSystem.h"
 #include "Model.h"
 #include "Animation.h"
+
 
 #define FILE_MAGIC ('A' | ('N' << 8) | ('M' << 16) | ('1' << 24))
 #define FILE_VERSION	1
@@ -103,7 +105,7 @@ namespace Engine
 		JointCombinedMatrix(time, root_joint);
 		size_t count = _tracks.GetCount();
 		for(size_t i = 0; i < count; ++i)
-			mul(transforms[i], joint_array[i].offsetMatrix, _combinedTransforms[i]);
+			SSE_MultMatrices4x4(transforms[i], joint_array[i].offsetMatrix, _combinedTransforms[i]);
 	}
 
 	void Animation::JointCombinedMatrix(float time, const Joint* joint) const
@@ -116,9 +118,9 @@ namespace Engine
 		{
 			if(ptr->parent)
 			{
-				mat4f local;
+				SSE_ALIGN mat4f local;
 				EvalTime(time, local, ptr);
-				mul(_combinedTransforms[ptr->index], local, _combinedTransforms[ptr->parent->index]);
+				SSE_MultMatrices4x4(_combinedTransforms[ptr->index], local, _combinedTransforms[ptr->parent->index]);
 			}
 			else
 			{

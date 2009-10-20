@@ -6,6 +6,7 @@ ATTRIB		varLightVec = fragment.texcoord[2];
 
 PARAM		color = program.local[0];
 PARAM		lightVec = { 0.0, 1.0, 0.0, 0.0 };		#{ 0.5773, 0.5773, 0.5773, 0.0 };
+PARAM		half = { 0.5, 0.5, 0.5, 0.0 };
 
 TEMP		r0;
 
@@ -14,7 +15,9 @@ DP3			r0.x, varNormal, varNormal;
 RSQ			r0.x, r0.x;
 MUL			r0, r0.x, varNormal;
 
-DP3_SAT		r0, r0, lightVec;
+DP3			r0, r0, lightVec;
+MAD			r0, r0, half, half;
+MUL			r0, r0, r0;
 MOV			r0.w, 1.0;
 MUL			result.color, r0, color;
 

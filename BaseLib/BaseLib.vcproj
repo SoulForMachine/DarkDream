@@ -481,6 +481,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\SSE.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\SSE.h"
+			>
+		</File>
+		<File
 			RelativePath=".\String.cpp"
 			>
 		</File>

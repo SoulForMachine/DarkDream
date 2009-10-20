@@ -1,5 +1,9 @@
 #include "StdAfx.h"
+#include "Utility.h"
 #include "TerrainEditPanel.h"
+
+using namespace math3d;
+using namespace Engine;
 
 
 namespace MapEditor
@@ -9,6 +13,11 @@ namespace MapEditor
 	{
 		InitializeComponent();
 		_parameters = params;
+
+		float tile = engineAPI->world->GetTerrain().GetTexureTile();
+		int val = int(Math::Round(tile * 10.0f));
+		_trackTile->Value = val;
+		_textTile->Text = tile.ToString();
 
 		UpdateControls();
 	}
@@ -216,6 +225,49 @@ namespace MapEditor
 		_trackHeight->Value = Decimal::ToInt32(Decimal::Round(_numHeight->Value));
 		float val = Decimal::ToSingle(_numHeight->Value);
 		_parameters->height = val;
+	}
+
+	System::Void TerrainEditPanel::_buttonBrowseTexture_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(_selectTextureDialog->ShowDialog() == DialogResult::OK)
+		{
+			tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
+			_textTexture->Text = gcnew String(file_name);
+			const TextureRes* tex = engineAPI->textureManager->CreateTexture(file_name, true);
+			delete[] file_name;
+			engineAPI->world->GetTerrain().SetTexture(tex);
+		}
+	}
+
+	System::Void TerrainEditPanel::_selectTextureDialog_FileOk(System::Object^  sender, System::ComponentModel::CancelEventArgs^  e)
+	{
+		// the file must be within game's base directory
+		FileDialog^ dlg = (FileDialog^)sender;
+		if(!IsInGameBaseDir(dlg->FileName))
+		{
+			MessageBox::Show(
+				this, "File must be within game's base directory.", GetAppName(),
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+			e->Cancel = true;
+		}
+	}
+
+	System::Void TerrainEditPanel::_trackTile_Scroll(System::Object^  sender, System::EventArgs^  e)
+	{
+		float val = _trackTile->Value / 10.0f;
+		_textTile->ValueChanged -= gcnew System::EventHandler(this, &TerrainEditPanel::_textTile_ValueChanged);
+		_textTile->Text = val.ToString();
+		_textTile->ValueChanged += gcnew System::EventHandler(this, &TerrainEditPanel::_textTile_ValueChanged);
+
+		engineAPI->world->GetTerrain().SetTextureTile(val);
+	}
+
+	System::Void TerrainEditPanel::_textTile_ValueChanged(System::Object^  sender, System::EventArgs^  e)
+	{
+		_trackTile->Value = Decimal::ToInt32(Decimal::Round(_textTile->Value * 10));
+		float val = Decimal::ToSingle(_textTile->Value);
+
+		engineAPI->world->GetTerrain().SetTextureTile(val);
 	}
 
 }

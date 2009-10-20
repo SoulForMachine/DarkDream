@@ -218,7 +218,7 @@ namespace MapEditor
 		if(!_renderer->SetCurrentContext())
 			return;
 
-		_renderer->SwapInterval(1);
+		_renderer->SwapInterval(0);
 		_renderer->ClearColorBuffer(0.5f, 0.5f, 0.5f, 1.0f);
 		_renderer->ClearDepthStencilBuffer(DEPTH_BUFFER_BIT | STENCIL_BUFFER_BIT, 1.0f, 0);
 		_renderer->EnableFaceCulling(true);

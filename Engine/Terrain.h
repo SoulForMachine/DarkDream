@@ -20,6 +20,9 @@ namespace GL
 namespace Engine
 {
 
+	class TextureRes;
+
+
 	class ENGINE_API Terrain
 	{
 	public:
@@ -64,6 +67,13 @@ namespace Engine
 			{ _hlightPatch = &_patches[index]; }
 		const TerrainPatch* GetHighlightPatch() const
 			{ return _hlightPatch; }
+		void SetTexture(const TextureRes* texture);
+		const TextureRes* GetTexture() const
+			{ return _texture; }
+		void SetTextureTile(float tile)
+			{ _texTile = tile; }
+		float GetTexureTile() const
+			{ return _texTile; }
 
 	private:
 		bool IntersectPatch(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, math3d::vec3f& point);
@@ -76,6 +86,8 @@ namespace Engine
 		int _patchCount;
 		int _patchIndexCount;
 		TerrainPatch* _hlightPatch; // used by map editor
+		const TextureRes* _texture;
+		float _texTile;
 	};
 
 }

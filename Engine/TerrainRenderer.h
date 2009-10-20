@@ -42,7 +42,6 @@ namespace Engine
 		const ASMProgRes* _fpDbgLine;
 		GL::VertexFormat* _vertFmtTerrain;
 		GL::VertexFormat* _vertFmtDbgLine;
-		const TextureRes* _terrainTex;
 		const TextureRes* _gradTex;
 		GL::SamplerState* _gradSampler;
 		GL::SamplerState* _terrainSampler;

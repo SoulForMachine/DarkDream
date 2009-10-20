@@ -72,6 +72,8 @@ namespace Engine
 
 		_patchCount = 0;
 		_hlightPatch = 0;
+		_texture = 0;
+		_texTile = 32.0f;
 
 		return true;
 	}
@@ -92,6 +94,9 @@ namespace Engine
 		}
 
 		_renderer = 0;
+
+		engineAPI.textureManager->ReleaseTexture(_texture);
+		_texture = 0;
 	}
 
 	/*
@@ -953,6 +958,12 @@ namespace Engine
 
 			start_dest_x += x2 - x1 + 1;
 		}
+	}
+
+	void Terrain::SetTexture(const TextureRes* texture)
+	{
+		engineAPI.textureManager->ReleaseTexture(_texture);
+		_texture = texture;
 	}
 
 	void Terrain::UpdatePatchNormals(int patch_index, PatchVertex* vertices, int start_x, int start_y, int end_x, int end_y)

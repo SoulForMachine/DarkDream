@@ -6,6 +6,7 @@ ATTRIB		vertNormal = vertex.attrib[1];
 PARAM		transl = program.local[0];
 PARAM		viewProjMat[] = { program.local[1..4] };
 PARAM		camPos = program.local[5];
+PARAM		uvScale = program.local[6];
 
 OUTPUT		varPos = result.position;
 OUTPUT		varUV = result.texcoord[0];
@@ -27,7 +28,6 @@ MOV			varNormal, vertNormal;
 SUB			varLightVec, r0, camPos;
 MOV			varLightVec.y, 0.0;
 
-PARAM		uv_scale = { 0.25, 0.25, 0.0, 0.0 };
-MUL			varUV, vertPos.xzxx, uv_scale;
+MUL			varUV, r0.xzxx, uvScale;
 
 END

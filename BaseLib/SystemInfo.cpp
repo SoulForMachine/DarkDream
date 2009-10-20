@@ -3,6 +3,13 @@
 #include "SystemInfo.h"
 
 
+SystemInfo::CPUInfo SystemInfo::_cpuInfo;
+
+
+void SystemInfo::Init()
+{
+}
+
 bool SystemInfo::GetApplicationDirectory(tchar* dir)
 {
 	tchar fname[MAX_PATH];

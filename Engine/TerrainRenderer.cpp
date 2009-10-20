@@ -29,7 +29,6 @@ namespace Engine
 		_vpDbgLine = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
 		_fpDbgLine = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
 
-		_terrainTex = engineAPI.textureManager->CreateTexture(_t("Textures/terrain3.dds"), true);
 		_gradTex = engineAPI.textureManager->CreateTexture(_t("Textures/terrain_grad.dds"), true);
 
 		GL::SamplerStateDesc terr_sampler = GL::GLState::defaultSamplerState;
@@ -70,7 +69,6 @@ namespace Engine
 		engineAPI.asmProgManager->ReleaseASMProgram(_fpLambert);
 		engineAPI.asmProgManager->ReleaseASMProgram(_vpDbgLine);
 		engineAPI.asmProgManager->ReleaseASMProgram(_fpDbgLine);
-		engineAPI.textureManager->ReleaseTexture(_terrainTex);
 		engineAPI.textureManager->ReleaseTexture(_gradTex);
 		_renderer->DestroySamplerState(_terrainSampler);
 		_renderer->DestroySamplerState(_gradSampler);
@@ -91,13 +89,22 @@ namespace Engine
 		_renderer->ActiveVertexFormat(_vertFmtTerrain);
 		_vpTerrain->GetASMProgram()->LocalMatrix4x4(1, camera.GetViewProjectionTransform());
 		_vpTerrain->GetASMProgram()->LocalParameter(5, vec4f(camera.GetPosition()));
+		float tile = terrain->GetTexureTile();
+		_vpTerrain->GetASMProgram()->LocalParameter(6, vec4f(tile / Terrain::PATCH_WIDTH, tile / Terrain::PATCH_WIDTH, 0.0f, 0.0f));
 		const float* color = engineAPI.renderSystem->GetRenderColor();
 		frag_prog->LocalParameter(0, color);
 		const Terrain::TerrainPatch* hlight = terrain->GetHighlightPatch();
 
+		const TextureRes* tex_res = terrain->GetTexture();
+		const GL::Texture* tex;
+		if(tex_res)
+			tex = tex_res->GetTexture();
+		else
+			tex = engineAPI.renderSystem->GetWhiteTexture();
+
 		_renderer->SetSamplerState(0, _terrainSampler);
 		_renderer->SetSamplerState(1, _gradSampler);
-		_renderer->SetSamplerTexture(0, _terrainTex->GetTexture());
+		_renderer->SetSamplerTexture(0, tex);
 		_renderer->SetSamplerTexture(1, _gradTex->GetTexture());
 
 		for(int i = 0; i < count; ++i)
@@ -163,7 +170,6 @@ namespace Engine
 		_gradSampler = 0;
 		_terrainSampler = 0;
 		_gradTex = 0;
-		_terrainTex = 0;
 	}
 
 }
