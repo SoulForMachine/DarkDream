@@ -113,6 +113,8 @@ namespace MapEditor {
 	private: System::Windows::Forms::ToolStripSeparator^  toolStripMenuItem4;
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewEntityBBoxes;
 	private: System::Windows::Forms::ToolStripButton^  _toolBtnLayers;
+	private: System::Windows::Forms::ToolStripButton^  _toolBtnGrass;
+
 
 
 
@@ -169,6 +171,7 @@ namespace MapEditor {
 			this->_toolBtnTriggers = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnParticleSystems = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnLayers = (gcnew System::Windows::Forms::ToolStripButton());
+			this->_toolBtnGrass = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_mainMenu->SuspendLayout();
 			this->_mainToolbar->SuspendLayout();
 			this->SuspendLayout();
@@ -395,8 +398,9 @@ namespace MapEditor {
 			// 
 			this->_mainToolbar->AutoSize = false;
 			this->_mainToolbar->ImageScalingSize = System::Drawing::Size(32, 32);
-			this->_mainToolbar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {this->_toolBtnViewMode, 
-				this->_toolBtnTerrainEdit, this->_toolBtnObjectPlacement, this->_toolBtnTriggers, this->_toolBtnParticleSystems, this->_toolBtnLayers});
+			this->_mainToolbar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(7) {this->_toolBtnViewMode, 
+				this->_toolBtnTerrainEdit, this->_toolBtnObjectPlacement, this->_toolBtnGrass, this->_toolBtnTriggers, this->_toolBtnParticleSystems, 
+				this->_toolBtnLayers});
 			this->_mainToolbar->Location = System::Drawing::Point(0, 24);
 			this->_mainToolbar->Name = L"_mainToolbar";
 			this->_mainToolbar->Size = System::Drawing::Size(860, 38);
@@ -463,6 +467,16 @@ namespace MapEditor {
 			this->_toolBtnLayers->Text = L"Layers";
 			this->_toolBtnLayers->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnLayers_Click);
 			// 
+			// _toolBtnGrass
+			// 
+			this->_toolBtnGrass->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnGrass->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnGrass.Image")));
+			this->_toolBtnGrass->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnGrass->Name = L"_toolBtnGrass";
+			this->_toolBtnGrass->Size = System::Drawing::Size(36, 35);
+			this->_toolBtnGrass->Text = L"Grass";
+			this->_toolBtnGrass->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnGrass_Click);
+			// 
 			// MainForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -512,6 +526,7 @@ namespace MapEditor {
 	private: System::Void _menuViewConsole_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuViewEntityBBoxes_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _toolBtnLayers_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _toolBtnGrass_Click(System::Object^  sender, System::EventArgs^  e);
 };
 
 }

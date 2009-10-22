@@ -581,8 +581,8 @@ namespace Engine
 		{
 			int i = int(pts[0].x - patch.boundBox.minPt.x);
 			int j = int(pts[0].y);
-			assert(i >= 0 && i <= PATCH_WIDTH);
-			assert(j >= 0 && j <= PATCH_HEIGHT);
+			assert(i >= 0 && i < PATCH_WIDTH);
+			assert(j >= 0 && j < PATCH_HEIGHT);
 
 			return IntersectPatchCell(ray_pt, ray_dir, patch, i, j, point);
 		}

@@ -206,7 +206,7 @@
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\EditorCommon.dll"
-			AssemblyName="EditorCommon, Version=1.0.3573.23511, processorArchitecture=x86"
+			AssemblyName="EditorCommon, Version=1.0.3581.18369, processorArchitecture=x86"
 			MinFrameworkVersion="131072"
 		/>
 	</References>
@@ -219,6 +219,16 @@
 				Filter="h;hpp;hxx;hm;inl;inc;xsd"
 				UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 				>
+				<File
+					RelativePath=".\GrassPanel.h"
+					FileType="4"
+					>
+					<File
+						RelativePath=".\GrassPanel.resx"
+						SubType="Designer"
+						>
+					</File>
+				</File>
 				<File
 					RelativePath=".\LayersPanel.h"
 					FileType="4"
@@ -303,6 +313,10 @@
 				UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 				>
 				<File
+					RelativePath=".\GrassPanel.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\LayersPanel.cpp"
 					>
 				</File>
@@ -386,6 +400,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ActionPaintGrass.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionPaintGrass.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ActionPlaceObjects.cpp"
 				>
 			</File>
@@ -442,6 +464,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\EM_PaintGrass.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\EM_PaintGrass.h"
+				>
+			</File>
+			<File
 				RelativePath=".\EM_PlaceObject.cpp"
 				>
 			</File>
@@ -476,6 +506,14 @@
 		</Filter>
 		<File
 			RelativePath=".\AssemblyInfo.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\GrassBrush.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\GrassBrush.h"
 			>
 		</File>
 		<File

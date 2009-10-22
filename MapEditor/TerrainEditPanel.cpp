@@ -229,6 +229,7 @@ namespace MapEditor
 
 	System::Void TerrainEditPanel::_buttonBrowseTexture_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		_selectTextureDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Textures";
 		if(_selectTextureDialog->ShowDialog() == DialogResult::OK)
 		{
 			tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);

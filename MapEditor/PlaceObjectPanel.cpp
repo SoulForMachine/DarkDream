@@ -235,8 +235,10 @@ namespace MapEditor
 				Max(abs(bbox.points[0].y - bbox.points[7].y),
 				abs(bbox.points[0].z - bbox.points[7].z)));
 			look.look_at(at + vec3f::z_axis * max_dim, at, vec3f::y_axis);
-			rot.set_rotation_y(deg2rad(_objRotY));
+			rot.set_translation(-at);
+			rot.rotate_y(deg2rad(_objRotY));
 			rot.rotate_x(deg2rad(_objRotX));
+			rot.translate(at);
 			mul(cam, rot, look);
 			_objViewCam->SetViewingTransform(cam);
 

@@ -29,6 +29,7 @@ namespace MapEditor
 			REMOVE_PATCH,
 			PLACE_OBJECT,
 			LAYER_EDIT,
+			PAINT_GRASS,
 
 			EDIT_MODE_COUNT
 		};

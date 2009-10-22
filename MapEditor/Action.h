@@ -11,7 +11,8 @@ namespace MapEditor
 		PLACE_OBJECTS,
 		ADD_PATCH,
 		REMOVE_PATCH,
-		TERRAIN_EDIT
+		TERRAIN_EDIT,
+		PAINT_GRASS,
 	};
 
 	public ref class Action abstract

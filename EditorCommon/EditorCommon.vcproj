@@ -232,6 +232,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\TextureListView.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -259,6 +263,16 @@
 			<File
 				RelativePath=".\Stdafx.h"
 				>
+			</File>
+			<File
+				RelativePath=".\TextureListView.h"
+				FileType="3"
+				>
+				<File
+					RelativePath=".\TextureListView.resx"
+					SubType="Designer"
+					>
+				</File>
 			</File>
 		</Filter>
 		<Filter
