@@ -2,6 +2,7 @@
 #include "Utility.h"
 #include "GrassPanel.h"
 
+using namespace Memory;
 using namespace EditorCommon;
 using namespace Engine;
 
@@ -118,9 +119,9 @@ namespace MapEditor
 		{
 			tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
 			_textTexture->Text = gcnew String(file_name);
-			if(FillTextureList(_selectTextureDialog->FileName))
+			const TextureRes* tex = engineAPI->textureManager->CreateTexture(file_name, true);
+			if(FillTextureList(tex->GetTexture()))
 			{
-				//const TextureRes* tex = engineAPI->textureManager->CreateTexture(file_name, true);
 				//engineAPI->world->GetTerrain()
 			}
 			delete[] file_name;
@@ -140,34 +141,43 @@ namespace MapEditor
 		}
 	}
 
-	bool GrassPanel::FillTextureList(String^ file_name)
+	bool GrassPanel::FillTextureList(const GL::Texture* texture)
 	{
-		tchar* fn = ConvertString<tchar>(file_name);
-		::Image img;
-		if(!img.Load(fn))
+		if(!texture || texture->GetType() != GL::OBJ_TEXTURE_2D)
+			return false;
+
+		GL::Texture2D* tex2d = (GL::Texture2D*)texture;
+		int width = tex2d->GetWidth();
+		int height = tex2d->GetHeight();
+
+		int size;
+		if(tex2d->IsCompressed())
+			size = tex2d->GetCompressedSize(0);
+		else
+			size = width * height * 4;
+
+		uchar* src = new(tempPool) uchar[size];
+		GL::PixelStore pixel_store = GL::GLState::defaultPixelStore;
+		pixel_store.alignment = 1;
+		if(!tex2d->GetTexImage(0, GL::IMAGE_FORMAT_BGRA, GL::TYPE_UNSIGNED_BYTE, &pixel_store, src))
 		{
-			delete fn;
+			delete[] src;
 			return false;
 		}
-		delete fn;
-		const ImageData& img_data = img.GetImageData();
-		if(img_data.format != IMG_BGRA && img_data.format != IMG_RGBA)
-			return false;
-		const uchar* src = (uchar*)img_data.images[0].pixels;
 
-		int xcount = img_data.images[0].width / 64;
-		int ycount = img_data.images[0].height / 64;
+		int xcount = width / 64;
+		int ycount = height / 64;
 
 		_textureList->Clear();
 
-		for(int y = 0; y < img_data.images[0].height; y += 64)
+		for(int y = 0; y < height; y += 64)
 		{
-			for(int x = 0; x < img_data.images[0].width; x += 64)
+			for(int x = 0; x < width; x += 64)
 			{
 				Bitmap^ b = gcnew Bitmap(64, 64, PixelFormat::Format32bppArgb);
 				BitmapData^ dest_data = b->LockBits(Drawing::Rectangle(0, 0, 64, 64), ImageLockMode::WriteOnly, PixelFormat::Format32bppArgb);
 				uchar* dest = (uchar*)dest_data->Scan0.ToPointer();
-				const uchar* psrc = src + img_data.images[0].bytesPerScanline * y;
+				const uchar* psrc = src + width * 4 * y;
 
 				for(int j = 0; j < 64; ++j)
 				{
@@ -179,7 +189,7 @@ namespace MapEditor
 						dest[i * 4 + 3] = psrc[(i + x) * 4 + 3];
 					}
 					dest += dest_data->Stride;
-					psrc += img_data.images[0].bytesPerScanline;
+					psrc += width * 4;
 				}
 
 				b->UnlockBits(dest_data);
@@ -187,6 +197,7 @@ namespace MapEditor
 			}
 		}
 
+		delete[] src;
 		return true;
 	}
 

@@ -17,6 +17,14 @@ namespace GL
 		__gl_state->samplers[0] = _id; \
 	}
 
+#define PACK_BUFFER_STATE_MACHINE_HACK \
+	if(buffer->_id != __gl_state->pixelPackBuf) \
+	{ \
+		glBindBufferARB(OBJ_PIXEL_PACK_BUFFER, buffer->_id); \
+		OPENGL_ERROR_CHECK \
+		__gl_state->pixelPackBuf = buffer->_id; \
+	}
+
 #define UNPACK_BUFFER_STATE_MACHINE_HACK \
 	if(buffer->_id != __gl_state->pixelUnpackBuf) \
 	{ \
@@ -75,6 +83,16 @@ namespace GL
 		glGenerateMipmapEXT(_target);
 		OPENGL_ERROR_CHECK
 	}
+
+	int Texture::GetCompressedSize(int level) const
+	{
+		STATE_MACHINE_HACK
+		GLint size;
+		glGetTexLevelParameteriv(_target, level, GL_TEXTURE_COMPRESSED_IMAGE_SIZE, &size);
+		OPENGL_ERROR_CHECK
+		return size;
+	}
+
 
 	//==================== Texture1D ====================
 
@@ -220,6 +238,42 @@ namespace GL
 
 		return (glGetError() == GL_NO_ERROR);
 	}
+
+	bool Texture1D::GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		__SetPixelPackState(pixel_store);
+		glGetTexImage(OBJ_TEXTURE_1D, level, format, type, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool Texture1D::GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetTexImage(level, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
+	}
+
+	bool Texture1D::GetCompressedTexImage(int level, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		glGetCompressedTexImageARB(OBJ_TEXTURE_1D, level, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool Texture1D::GetCompressedTexImage(int level, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetCompressedTexImage(level, BUFFER_OFFSET(buffer_offset));
+	}
+
 
 	//==================== Texture2D ====================
 
@@ -371,6 +425,41 @@ namespace GL
 		return (glGetError() == GL_NO_ERROR);
 	}
 
+	bool Texture2D::GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		__SetPixelPackState(pixel_store);
+		glGetTexImage(OBJ_TEXTURE_2D, level, format, type, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool Texture2D::GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetTexImage(level, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
+	}
+
+	bool Texture2D::GetCompressedTexImage(int level, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		glGetCompressedTexImageARB(OBJ_TEXTURE_2D, level, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool Texture2D::GetCompressedTexImage(int level, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetCompressedTexImage(level, BUFFER_OFFSET(buffer_offset));
+	}
+
 	//==================== Texture3D ====================
 
 	bool Texture3D::Create()
@@ -505,6 +594,41 @@ namespace GL
 	//	glCopyTexSubImage3DEXT(OBJ_TEXTURE_3D, level, xoffset, yoffset, zoffset, x, y, width, height);
 
 		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool Texture3D::GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		__SetPixelPackState(pixel_store);
+		glGetTexImage(OBJ_TEXTURE_3D, level, format, type, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool Texture3D::GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetTexImage(level, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
+	}
+
+	bool Texture3D::GetCompressedTexImage(int level, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		glGetCompressedTexImageARB(OBJ_TEXTURE_3D, level, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool Texture3D::GetCompressedTexImage(int level, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetCompressedTexImage(level, BUFFER_OFFSET(buffer_offset));
 	}
 
 	//==================== TextureCube ====================
@@ -699,6 +823,41 @@ namespace GL
 		return (glGetError() == GL_NO_ERROR);
 	}
 
+	bool TextureCube::GetTexImage(CubeFace face, int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		__SetPixelPackState(pixel_store);
+		glGetTexImage(face, level, format, type, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool TextureCube::GetTexImage(CubeFace face, int level, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetTexImage(face, level, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
+	}
+
+	bool TextureCube::GetCompressedTexImage(CubeFace face, int level, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		glGetCompressedTexImageARB(face, level, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool TextureCube::GetCompressedTexImage(CubeFace face, int level, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetCompressedTexImage(face, level, BUFFER_OFFSET(buffer_offset));
+	}
+
 	//==================== Texture1DArray ====================
 
 	bool Texture1DArray::Create()
@@ -848,6 +1007,41 @@ namespace GL
 		return (glGetError() == GL_NO_ERROR);
 	}
 
+	bool Texture1DArray::GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		__SetPixelPackState(pixel_store);
+		glGetTexImage(OBJ_TEXTURE_1D_ARRAY, level, format, type, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool Texture1DArray::GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetTexImage(level, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
+	}
+
+	bool Texture1DArray::GetCompressedTexImage(int level, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		glGetCompressedTexImageARB(OBJ_TEXTURE_1D_ARRAY, level, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool Texture1DArray::GetCompressedTexImage(int level, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetCompressedTexImage(level, BUFFER_OFFSET(buffer_offset));
+	}
+
 	//==================== Texture2DArray ====================
 
 	bool Texture2DArray::Create()
@@ -983,6 +1177,41 @@ namespace GL
 		return (glGetError() == GL_NO_ERROR);
 	}
 
+	bool Texture2DArray::GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		__SetPixelPackState(pixel_store);
+		glGetTexImage(OBJ_TEXTURE_2D_ARRAY, level, format, type, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool Texture2DArray::GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetTexImage(level, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
+	}
+
+	bool Texture2DArray::GetCompressedTexImage(int level, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		glGetCompressedTexImageARB(OBJ_TEXTURE_2D_ARRAY, level, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool Texture2DArray::GetCompressedTexImage(int level, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetCompressedTexImage(level, BUFFER_OFFSET(buffer_offset));
+	}
+
 	//==================== TextureBuffer ====================
 
 	bool TextureBuffer::Create()
@@ -1035,8 +1264,10 @@ namespace GL
 	}
 
 	//==================== TextureRectangle ====================
-	// REPEAT AND MIRRORED_REPEAT not alowed for texture wrap mode
-	// minification filter must be NEAREST or LINEAR
+	// - REPEAT AND MIRRORED_REPEAT not alowed for texture wrap mode
+	// - minification filter must be NEAREST or LINEAR
+	// - compressed formats not allowed
+	// - mipmaps not allowed
 
 	bool TextureRectangle::Create()
 	{
@@ -1148,6 +1379,24 @@ namespace GL
 		glCopyTexSubImage2D(OBJ_TEXTURE_RECTANGLE, 0, xoffset, yoffset, x, y, width, height);
 
 		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool TextureRectangle::GetTexImage(ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const
+	{
+		assert(_id);
+		STATE_MACHINE_HACK
+
+		__SetPixelPackState(pixel_store);
+		glGetTexImage(OBJ_TEXTURE_RECTANGLE, 0, format, type, pixels);
+
+		return (glGetError() == GL_NO_ERROR);
+	}
+
+	bool TextureRectangle::GetTexImage(ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const
+	{
+		PACK_BUFFER_STATE_MACHINE_HACK
+
+		return GetTexImage(format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
 }

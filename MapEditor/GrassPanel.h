@@ -71,7 +71,7 @@ namespace MapEditor {
 		System::ComponentModel::Container ^components;
 	private: System::Windows::Forms::Panel^  _panelDummy;
 
-		bool FillTextureList(String^ file_name);
+		bool FillTextureList(const GL::Texture* texture);
 
 		EditorCommon::TextureListView^ _textureList;
 		EM_PaintGrass::Parameters^ _parameters;

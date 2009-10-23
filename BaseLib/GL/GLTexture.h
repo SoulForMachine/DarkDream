@@ -27,6 +27,7 @@ namespace GL
 			{ return _format; }
 		bool IsCompressed() const
 			{ return IsCompressedFormat(_format); }
+		int GetCompressedSize(int level) const;
 
 	protected:
 		virtual bool Create() = 0;
@@ -55,6 +56,11 @@ namespace GL
 		bool CopyTexImage(int level, PixelFormat internal_format, int x, int y, int width);
 		bool CopyTexSubImage(int level, int xoffset, int x, int y, int width);
 
+		bool GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const;
+		bool GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const;
+		bool GetCompressedTexImage(int level, void* pixels) const;
+		bool GetCompressedTexImage(int level, const Buffer* buffer, size_t buffer_offset) const;
+
 		int GetWidth() const
 			{ return _width; }
 
@@ -82,6 +88,11 @@ namespace GL
 		bool CompressedTexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, size_t size, void* pixels);
 		bool CopyTexImage(int level, PixelFormat internal_format, int x, int y, int width, int height);
 		bool CopyTexSubImage(int level, int xoffset, int yoffset, int x, int y, int width, int height);
+
+		bool GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const;
+		bool GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const;
+		bool GetCompressedTexImage(int level, void* pixels) const;
+		bool GetCompressedTexImage(int level, const Buffer* buffer, size_t buffer_offset) const;
 
 		int GetWidth() const
 			{ return _width; }
@@ -112,6 +123,11 @@ namespace GL
 		bool TexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
 		bool CompressedTexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, size_t size, void* pixels);
 		bool CopyTexSubImage(int level, int xoffset, int yoffset, int zoffset, int x, int y, int width, int height);
+
+		bool GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const;
+		bool GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const;
+		bool GetCompressedTexImage(int level, void* pixels) const;
+		bool GetCompressedTexImage(int level, const Buffer* buffer, size_t buffer_offset) const;
 
 		int GetWidth() const
 			{ return _width; }
@@ -149,6 +165,11 @@ namespace GL
 		bool CopyTexImage(CubeFace face, int level, PixelFormat internal_format, int x, int y, int width);
 		bool CopyTexSubImage(CubeFace face, int level, int xoffset, int yoffset, int x, int y, int width, int height);
 
+		bool GetTexImage(CubeFace face, int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const;
+		bool GetTexImage(CubeFace face, int level, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const;
+		bool GetCompressedTexImage(CubeFace face, int level, void* pixels) const;
+		bool GetCompressedTexImage(CubeFace face, int level, const Buffer* buffer, size_t buffer_offset) const;
+
 		int GetWidth() const
 			{ return _width; }
 
@@ -176,6 +197,11 @@ namespace GL
 		bool CompressedTexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, size_t size, void* pixels);
 		bool CopyTexImage(int level, PixelFormat internal_format, int x, int y, int width, int height);
 		bool CopyTexSubImage(int level, int xoffset, int yoffset, int x, int y, int width, int height);
+
+		bool GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const;
+		bool GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const;
+		bool GetCompressedTexImage(int level, void* pixels) const;
+		bool GetCompressedTexImage(int level, const Buffer* buffer, size_t buffer_offset) const;
 
 		int GetWidth() const
 			{ return _width; }
@@ -206,6 +232,11 @@ namespace GL
 		bool TexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
 		bool CompressedTexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, size_t size, void* pixels);
 		bool CopyTexSubImage(int level, int xoffset, int yoffset, int zoffset, int x, int y, int width, int height);
+
+		bool GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const;
+		bool GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const;
+		bool GetCompressedTexImage(int level, void* pixels) const;
+		bool GetCompressedTexImage(int level, const Buffer* buffer, size_t buffer_offset) const;
 
 		int GetWidth() const
 			{ return _width; }
@@ -264,6 +295,9 @@ namespace GL
 		bool CopyTexImage(PixelFormat internal_format, int x, int y, int width, int height);
 		bool CopyTexSubImage(int xoffset, int yoffset, int x, int y, int width, int height);
 
+		bool GetTexImage(ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const;
+		bool GetTexImage(ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset) const;
+
 		int GetWidth() const
 			{ return _width; }
 		int GetHeight() const
@@ -275,6 +309,10 @@ namespace GL
 
 	private:
 		friend class Renderer;
+
+		// these are not applicable to buffer textures
+		using Texture::GenerateMipmap;
+		using Texture::IsCompressed;
 
 		TextureRectangle() {}
 		~TextureRectangle() {}
