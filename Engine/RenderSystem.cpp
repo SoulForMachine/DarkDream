@@ -362,6 +362,13 @@ namespace Engine
 			_terrainRenderer->RenderTerrainPatchNormals(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);
 	}
 
+	void RenderSystem::RenderGrass(int frame_time)
+	{
+		const Terrain::TerrainPatch* patches[Terrain::MAX_PATCHES];
+		int count = engineAPI.world->GetVisibleTerrainPatches(patches, Terrain::MAX_PATCHES);
+		_terrainRenderer->RenderTerrainPatchGrass(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);
+	}
+
 	void RenderSystem::RenderBgLayers(int frame_time)
 	{
 		const int MAX_SPRITES = 128;

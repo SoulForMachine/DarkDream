@@ -40,11 +40,12 @@ namespace MapEditor
 		_oldElevation = new(tempPool) float[(patch_count * Terrain::PATCH_WIDTH + 1) * (Terrain::PATCH_HEIGHT + 1)];
 		terrain.GetElevation(0, 0, patch_count * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _oldElevation);
 
+		GetBrushRect(_undoRect);
+
 		// for ramp brush type, save starting point
 		if(_parameters->editType == EM_TerrainEdit::EditType::RAMP)
 		{
 			g_rampStart.set(_parameters->posX, _parameters->posY, _parameters->posZ);
-			GetBrushRect(_undoRect);
 		}
 
 		return true;

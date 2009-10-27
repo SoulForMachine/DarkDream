@@ -179,6 +179,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Base\Programs\Grass.fp"
+				>
+			</File>
+			<File
+				RelativePath="..\Base\Programs\Grass.vp"
+				>
+			</File>
+			<File
 				RelativePath="..\Base\Programs\Lambert.fp"
 				>
 			</File>

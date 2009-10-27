@@ -32,6 +32,7 @@ namespace Engine
 
 		void RenderTerrainPatches(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count);
 		void RenderTerrainPatchNormals(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count);
+		void RenderTerrainPatchGrass(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count);
 
 	private:
 		GL::Renderer* _renderer;
@@ -40,11 +41,15 @@ namespace Engine
 		const ASMProgRes* _fpLambert;
 		const ASMProgRes* _vpDbgLine;
 		const ASMProgRes* _fpDbgLine;
+		const ASMProgRes* _vpGrass;
+		const ASMProgRes* _fpGrass;
 		GL::VertexFormat* _vertFmtTerrain;
 		GL::VertexFormat* _vertFmtDbgLine;
+		GL::VertexFormat* _vertFmtGrass;
 		const TextureRes* _gradTex;
 		GL::SamplerState* _gradSampler;
 		GL::SamplerState* _terrainSampler;
+		GL::SamplerState* _grassSampler;
 
 		void Clear();
 	};

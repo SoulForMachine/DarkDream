@@ -26,6 +26,9 @@ namespace Engine
 		_fpTerrain = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Terrain.fp"), true);
 		_fpLambert = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Lambert.fp"), true);
 
+		_vpGrass = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Grass.vp"), true);
+		_fpGrass = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Grass.fp"), true);
+
 		_vpDbgLine = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
 		_fpDbgLine = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
 
@@ -46,18 +49,38 @@ namespace Engine
 		grad_sampler.magFilter = GL::TEX_FILTER_LINEAR;
 		_gradSampler = _renderer->CreateSamplerState(grad_sampler);
 
-		GL::VertexAttribDesc vert_desc[] =
-		{
-			{ 0, 0, 4, GL::TYPE_FLOAT, false, false, 0 },
-			{ 0, 1, 4, GL::TYPE_FLOAT, false, false, 16 },
-		};
-		_vertFmtTerrain = _renderer->CreateVertexFormat(vert_desc, COUNTOF(vert_desc));
+		GL::SamplerStateDesc grass_sampler = GL::GLState::defaultSamplerState;
+		grass_sampler.addressU = GL::TEX_ADDRESS_CLAMP_TO_EDGE;
+		grass_sampler.addressV = GL::TEX_ADDRESS_CLAMP_TO_EDGE;
+		grass_sampler.minFilter = GL::TEX_FILTER_LINEAR_MIPMAP_LINEAR;
+		grass_sampler.magFilter = GL::TEX_FILTER_LINEAR;
+		_grassSampler = _renderer->CreateSamplerState(grass_sampler);
 
-		GL::VertexAttribDesc vert_desc2[] =
 		{
-			{ 0, 0, 3, GL::TYPE_FLOAT, false, false, 0 },
-		};
-		_vertFmtDbgLine = _renderer->CreateVertexFormat(vert_desc2, COUNTOF(vert_desc2));
+			GL::VertexAttribDesc vert_desc[] =
+			{
+				{ 0, 0, 4, GL::TYPE_FLOAT, false, false, 0 },
+				{ 0, 1, 4, GL::TYPE_FLOAT, false, false, 16 },
+			};
+			_vertFmtTerrain = _renderer->CreateVertexFormat(vert_desc, COUNTOF(vert_desc));
+		}
+
+		{
+			GL::VertexAttribDesc vert_desc[] =
+			{
+				{ 0, 0, 3, GL::TYPE_FLOAT, false, false, 0 },
+			};
+			_vertFmtDbgLine = _renderer->CreateVertexFormat(vert_desc, COUNTOF(vert_desc));
+		}
+
+		{
+			GL::VertexAttribDesc vert_desc[] =
+			{
+				{ 0, 0, 4, GL::TYPE_FLOAT, false, false, 0 },
+				{ 0, 1, 2, GL::TYPE_FLOAT, false, false, 16 },
+			};
+			_vertFmtGrass = _renderer->CreateVertexFormat(vert_desc, COUNTOF(vert_desc));
+		}
 
 		return true;
 	}
@@ -67,22 +90,27 @@ namespace Engine
 		engineAPI.asmProgManager->ReleaseASMProgram(_vpTerrain);
 		engineAPI.asmProgManager->ReleaseASMProgram(_fpTerrain);
 		engineAPI.asmProgManager->ReleaseASMProgram(_fpLambert);
+		engineAPI.asmProgManager->ReleaseASMProgram(_vpGrass);
+		engineAPI.asmProgManager->ReleaseASMProgram(_fpGrass);
 		engineAPI.asmProgManager->ReleaseASMProgram(_vpDbgLine);
 		engineAPI.asmProgManager->ReleaseASMProgram(_fpDbgLine);
 		engineAPI.textureManager->ReleaseTexture(_gradTex);
 		_renderer->DestroySamplerState(_terrainSampler);
 		_renderer->DestroySamplerState(_gradSampler);
+		_renderer->DestroySamplerState(_grassSampler);
 		_renderer->DestroyVertexFormat(_vertFmtTerrain);
 		_renderer->DestroyVertexFormat(_vertFmtDbgLine);
+		_renderer->DestroyVertexFormat(_vertFmtGrass);
 
 		Clear();
 	}
 
 	void TerrainRenderer::RenderTerrainPatches(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count)
 	{
-		const GL::ASMProgram* frag_prog = 
-			(engineAPI.renderSystem->GetRenderStyle() == RenderSystem::RENDER_STYLE_GAME)?
-			_fpTerrain->GetASMProgram(): _fpLambert->GetASMProgram();
+	//	const GL::ASMProgram* frag_prog = 
+	//		(engineAPI.renderSystem->GetRenderStyle() == RenderSystem::RENDER_STYLE_GAME)?
+	//		_fpTerrain->GetASMProgram(): _fpLambert->GetASMProgram();
+		const GL::ASMProgram* frag_prog = _fpTerrain->GetASMProgram();
 		_renderer->IndexSource(terrain->GetPatchIndexBuffer(), GL::TYPE_UNSIGNED_SHORT);
 		_renderer->ActiveVertexASMProgram(_vpTerrain->GetASMProgram());
 		_renderer->ActiveFragmentASMProgram(frag_prog);
@@ -91,7 +119,7 @@ namespace Engine
 		_vpTerrain->GetASMProgram()->LocalParameter(5, vec4f(camera.GetPosition()));
 		float tile = terrain->GetTexureTile();
 		_vpTerrain->GetASMProgram()->LocalParameter(6, vec4f(tile / Terrain::PATCH_WIDTH, tile / Terrain::PATCH_WIDTH, 0.0f, 0.0f));
-		const float* color = engineAPI.renderSystem->GetRenderColor();
+		const float* color = engineAPI.renderSystem->GetMainColor();
 		frag_prog->LocalParameter(0, color);
 		const Terrain::TerrainPatch* hlight = terrain->GetHighlightPatch();
 
@@ -158,6 +186,43 @@ namespace Engine
 		}
 	}
 
+	void TerrainRenderer::RenderTerrainPatchGrass(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count)
+	{
+		_renderer->IndexSource(terrain->GetGrassIndexBuffer(), GL::TYPE_UNSIGNED_SHORT);
+		_renderer->ActiveVertexASMProgram(_vpGrass->GetASMProgram());
+		_renderer->ActiveFragmentASMProgram(_fpGrass->GetASMProgram());
+		_renderer->ActiveVertexFormat(_vertFmtGrass);
+
+		_vpGrass->GetASMProgram()->LocalMatrix4x4(1, camera.GetViewProjectionTransform());
+
+		_renderer->SetSamplerState(0, _grassSampler);
+		_renderer->SetSamplerTexture(0, terrain->GetGrassTexture()? terrain->GetGrassTexture()->GetTexture(): 0);
+
+		_renderer->EnableBlending(true);
+		_renderer->BlendingFunc(GL::BLEND_FUNC_SRC_ALPHA, GL::BLEND_FUNC_ONE_MINUS_SRC_ALPHA);
+		_renderer->EnableFaceCulling(false);
+
+		for(int i = 0; i < count; ++i)
+		{
+			vec4f transl(patches[i]->boundBox.minPt.x, 0.0f, 0.0f, 0.0f);
+			_vpGrass->GetASMProgram()->LocalParameter(0, transl);
+
+			for(int j = 0; j < Terrain::GRASS_SEGMENTS; ++j)
+			{
+				if(patches[i]->grassSegments[j].grassVertBuf)
+				{
+					_renderer->VertexSource(0, patches[i]->grassSegments[j].grassVertBuf, sizeof(Terrain::GrassVertex), 0);
+
+					_renderer->DrawIndexed(GL::PRIM_TRIANGLES, 0, patches[i]->grassSegments[j].grassIndexCount);
+				}
+			}
+		}
+
+		_renderer->SetSamplerTexture(0, 0);
+		_renderer->EnableBlending(false);
+		_renderer->EnableFaceCulling(true);
+	}
+
 	void TerrainRenderer::Clear()
 	{
 		_renderer = 0;
@@ -166,9 +231,14 @@ namespace Engine
 		_fpLambert = 0;
 		_vpDbgLine = 0;
 		_fpDbgLine = 0;
+		_vpGrass = 0;
+		_fpGrass = 0;
 		_vertFmtTerrain = 0;
+		_vertFmtDbgLine = 0;
+		_vertFmtGrass = 0;
 		_gradSampler = 0;
 		_terrainSampler = 0;
+		_grassSampler = 0;
 		_gradTex = 0;
 	}
 

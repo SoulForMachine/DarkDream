@@ -26,12 +26,32 @@ namespace Engine
 	class ENGINE_API Terrain
 	{
 	public:
+		static const int PATCH_WIDTH = 128;
+		static const int PATCH_HEIGHT = 64;
+		static const int MAX_PATCHES = 32;
+		static const int GRASS_SEGMENTS = 2;
+
+		struct GrassBlade
+		{
+			float size;
+			ushort texIndex;
+		};
+
+		struct GrassSegment
+		{
+			GL::Buffer* grassVertBuf;
+			int grassVertCount;
+			int grassIndexCount;
+		};
+
 		struct TerrainPatch
 		{
 			GL::Buffer* vertBuf;
 			float* elevation;
 			AABBox boundBox;
 			GL::Buffer* normalBuf;
+			GrassSegment grassSegments[GRASS_SEGMENTS];
+			GrassBlade* grassData;
 		};
 
 		struct PatchVertex
@@ -40,9 +60,12 @@ namespace Engine
 			math3d::vec4f normal;
 		};
 
-		static const int PATCH_WIDTH = 128;
-		static const int PATCH_HEIGHT = 64;
-		static const int MAX_PATCHES = 32;
+		struct GrassVertex
+		{
+			math3d::vec4f position;
+			math3d::vec2f uv;
+		};
+
 
 		Terrain();
 
@@ -74,20 +97,33 @@ namespace Engine
 			{ _texTile = tile; }
 		float GetTexureTile() const
 			{ return _texTile; }
+		void SetGrassTexture(const TextureRes* texture);
+		const TextureRes* GetGrassTexture() const
+			{ return _grassTexture; }
+		void SetGrassBlades(int start_x, int start_y, int end_x, int end_y, const GrassBlade* grass_data);
+		void GetGrassBlades(int start_x, int start_y, int end_x, int end_y, GrassBlade* grass_data);
+		void OptimizeGrassEdit(bool on)
+			{ _optimizeGrassEdit = on; }
+		const GL::Buffer* GetGrassIndexBuffer() const
+			{ return _grassIndexBuf; }
 
 	private:
 		bool IntersectPatch(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, math3d::vec3f& point);
 		bool IntersectPatchCell(const math3d::vec3f& ray_pt, const math3d::vec3f& ray_dir, const TerrainPatch& patch, int cell_x, int cell_y, math3d::vec3f& point);
 		void UpdatePatchNormals(int patch_index, PatchVertex* vertices, int start_x, int start_y, int end_x, int end_y);
+		void UpdatePatchGrassGeometry(int patch_index);
 
 		GL::Renderer* _renderer;
 		GL::Buffer* _patchIndexBuf;
+		GL::Buffer* _grassIndexBuf;
 		TerrainPatch _patches[MAX_PATCHES];
 		int _patchCount;
 		int _patchIndexCount;
 		TerrainPatch* _hlightPatch; // used by map editor
 		const TextureRes* _texture;
 		float _texTile;
+		const TextureRes* _grassTexture;
+		bool _optimizeGrassEdit;
 	};
 
 }

@@ -47,8 +47,13 @@ namespace EditorCommon
 
 	System::Void TextureListView::TextureListView_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e)
 	{
-		_selectedIndex = GetTexIndexFromPoint(e->Location);
-		Invalidate();
+		int index = GetTexIndexFromPoint(e->Location);
+		if(index != _selectedIndex)
+		{
+			_selectedIndex = index;
+			OnTextureIndexChanged(gcnew EventArgs());
+			Invalidate();
+		}
 	}
 
 	int TextureListView::GetTexIndexFromPoint(Point point)

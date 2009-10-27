@@ -39,6 +39,8 @@ namespace EditorCommon {
 				{ return _selectedIndex; }
 		}
 
+		event EventHandler^ TextureIndexChanged;
+
 	protected:
 		/// <summary>
 		/// Clean up any resources being used.
@@ -49,6 +51,11 @@ namespace EditorCommon {
 			{
 				delete components;
 			}
+		}
+
+		virtual void OnTextureIndexChanged(EventArgs^ e)
+		{
+			TextureIndexChanged(this, e);
 		}
 
 	private:

@@ -351,5 +351,6 @@ namespace MapEditor {
 	private: System::Void _numScale_ValueChanged(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _buttonBrowse_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _selectTextureDialog_FileOk(System::Object^  sender, System::ComponentModel::CancelEventArgs^  e);
+	private: System::Void _textureList_TextureIndexChanged(System::Object^  sender, System::EventArgs^  e);
 };
 }

@@ -22,6 +22,7 @@ namespace MapEditor
 			float hardness;
 			float strength; // strength with which brush raises grass
 			float scale;
+			int texIndex;
 			// world-space position of brush center
 			float posX;
 			float posY;

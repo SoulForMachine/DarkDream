@@ -17,6 +17,7 @@ namespace MapEditor
 		_textureList = gcnew EditorCommon::TextureListView;
 		_textureList->Location = _panelDummy->Location;
 		_textureList->Size = _panelDummy->Size;
+		_textureList->TextureIndexChanged += gcnew EventHandler(this, &GrassPanel::_textureList_TextureIndexChanged);
 		Controls->Remove(_panelDummy);
 		delete _panelDummy;
 		Controls->Add(_textureList);
@@ -122,7 +123,7 @@ namespace MapEditor
 			const TextureRes* tex = engineAPI->textureManager->CreateTexture(file_name, true);
 			if(FillTextureList(tex->GetTexture()))
 			{
-				//engineAPI->world->GetTerrain()
+				engineAPI->world->GetTerrain().SetGrassTexture(tex);
 			}
 			delete[] file_name;
 		}
@@ -139,6 +140,11 @@ namespace MapEditor
 				MessageBoxButtons::OK, MessageBoxIcon::Error);
 			e->Cancel = true;
 		}
+	}
+
+	System::Void GrassPanel::_textureList_TextureIndexChanged(System::Object^  sender, System::EventArgs^  e)
+	{
+		_parameters->texIndex = _textureList->SelectedIndex;
 	}
 
 	bool GrassPanel::FillTextureList(const GL::Texture* texture)

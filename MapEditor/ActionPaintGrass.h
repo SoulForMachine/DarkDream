@@ -23,7 +23,12 @@ namespace MapEditor
 		virtual ActionType GetActionType() override;
 
 	private:
+		void GetBrushRect(System::Drawing::Rectangle% rect);
+
 		EM_PaintGrass::Parameters^ _parameters;
+		System::Drawing::Rectangle _undoRect;
+		Engine::Terrain::GrassBlade* _undoGrassData;
+		Engine::Terrain::GrassBlade* _oldGrassData;
 	};
 
 }

@@ -144,16 +144,16 @@ namespace Engine
 		bool nrm = (mesh_data->material->HasNormalMap() && (mesh_data->mesh->flags & Mesh::FLAG_TANGENTS));
 		const GL::ASMProgram* vert_prog;
 		const GL::ASMProgram* frag_prog;
-		if(engineAPI.renderSystem->GetRenderStyle() == RenderSystem::RENDER_STYLE_GAME)
+	//	if(engineAPI.renderSystem->GetRenderStyle() == RenderSystem::RENDER_STYLE_GAME)
 		{
 			vert_prog = _shaders[mesh_data->shaderIndex].vertProg;
 			frag_prog = _shaders[mesh_data->shaderIndex].fragProg;
 		}
-		else
+	/*	else
 		{
 			vert_prog = _editorShaders[mesh_data->shaderIndex].vertProg;
 			frag_prog = _editorShaders[mesh_data->shaderIndex].fragProg;
-		}
+		}*/
 
 		_renderer->ActiveVertexASMProgram(vert_prog);
 		vert_prog->LocalMatrix4x4(0, *mesh_data->worldMat);
@@ -172,16 +172,16 @@ namespace Engine
 		}
 
 		_renderer->ActiveFragmentASMProgram(frag_prog);
-		if(engineAPI.renderSystem->GetRenderStyle() == RenderSystem::RENDER_STYLE_GAME)
+	//	if(engineAPI.renderSystem->GetRenderStyle() == RenderSystem::RENDER_STYLE_GAME)
 		{
 			vec4f color(mesh_data->material->GetDiffuseColor(), mesh_data->material->GetOpacity());
 			frag_prog->LocalParameter(0, color);
 		}
-		else
+	/*	else
 		{
 			const vec4f& color = engineAPI.renderSystem->GetEditorColor();
 			frag_prog->LocalParameter(0, color);
-		}
+		}*/
 
 		// set textures
 		_renderer->SetSamplerState(0, _diffuseSampler);
