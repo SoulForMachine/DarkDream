@@ -76,11 +76,11 @@ namespace MapEditor
 
 			_renderer->EnableDepthTest(false);
 			_renderer->Draw(GL::PRIM_LINES, 0, 4);
-			_renderer->EnableDepthTest(true);
 			if(_parameters->hardness < 1.0f)
 				_renderer->Draw(GL::PRIM_LINE_LOOP, 4, CIRCLE_VERTEX_COUNT);
 			_fragpBrush->GetASMProgram()->LocalParameter(0, orange);
 			_renderer->Draw(GL::PRIM_LINE_LOOP, 4 + CIRCLE_VERTEX_COUNT, CIRCLE_VERTEX_COUNT);
+			_renderer->EnableDepthTest(true);
 
 			if( _parameters->editType == EM_TerrainEdit::EditType::RAMP &&
 				_parameters->executing)

@@ -18,12 +18,16 @@ namespace MapEditor
 		_elevation = new(mainPool) float[(Terrain::PATCH_WIDTH + 1) * (Terrain::PATCH_HEIGHT + 1)];
 		engineAPI->world->GetTerrain().GetElevation(index * Terrain::PATCH_WIDTH, 0, (index + 1) * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _elevation);
 
+		_grassData = new(mainPool) Terrain::GrassBlade[Terrain::PATCH_WIDTH * 2 * Terrain::PATCH_HEIGHT];
+		engineAPI->world->GetTerrain().GetGrassBlades(index * Terrain::PATCH_WIDTH, 0, (index + 1) * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _grassData);
+
 		_entities = new(mainPool) List<Engine::Entity*>;
 	}
 
 	ActionRemovePatch::~ActionRemovePatch()
 	{
 		delete[] _elevation;
+		delete[] _grassData;
 
 		for(List<Entity*>::Iterator it = _entities->Begin(); it != _entities->End(); ++it)
 			delete *it;
@@ -43,6 +47,8 @@ namespace MapEditor
 	void ActionRemovePatch::Undo()
 	{
 		engineAPI->world->GetTerrain().AddPatch(_patchIndex, _elevation);
+
+		engineAPI->world->GetTerrain().SetGrassBlades(_patchIndex * Terrain::PATCH_WIDTH, 0, (_patchIndex + 1) * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _grassData);
 
 		for(List<Entity*>::ConstIterator it = _entities->Begin(); it != _entities->End(); ++it)
 		{

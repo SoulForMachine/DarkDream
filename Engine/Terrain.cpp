@@ -1457,11 +1457,13 @@ namespace Engine
 
 							float angle = rand_rot[x % 32][y % 16];
 							vec2f p(szx * cos(angle), szx * sin(angle));
+							float alpha = patch.grassData[y * X_COUNT + x].size;
+							clamp(alpha, 0.0f, 1.0f);
 
-							vertices[0].position.set(pos.x - p.x, pos.y, pos.z - p.y);
-							vertices[1].position.set(pos.x + p.x, pos.y, pos.z + p.y);
-							vertices[2].position.set(pos.x + p.x, pos.y + szy, pos.z + p.y);
-							vertices[3].position.set(pos.x - p.x, pos.y + szy, pos.z - p.y);
+							vertices[0].position.set(pos.x - p.x, pos.y, pos.z - p.y, alpha);
+							vertices[1].position.set(pos.x + p.x, pos.y, pos.z + p.y, alpha);
+							vertices[2].position.set(pos.x + p.x, pos.y + szy, pos.z + p.y, alpha);
+							vertices[3].position.set(pos.x - p.x, pos.y + szy, pos.z - p.y, alpha);
 
 							if(!_grassTexture || !_grassTexture->GetTexture())
 							{
@@ -1473,13 +1475,13 @@ namespace Engine
 							else
 							{
 								GL::Texture2D* tex = (GL::Texture2D*)_grassTexture->GetTexture();
-								int tex_per_row = tex->GetWidth() / 64;
+								int tex_per_row = tex->GetWidth() / GRASS_TEX_SIZE;
 								int texx = patch.grassData[y * X_COUNT + x].texIndex % tex_per_row;
 								int texy = patch.grassData[y * X_COUNT + x].texIndex / tex_per_row;
-								float u1 = float(texx * 64 + 1) / tex->GetWidth();
-								float u2 = float(texx * 64 + 63) / tex->GetWidth();
-								float v1 = float(texy * 64 + 63) / tex->GetHeight();
-								float v2 = float(texy * 64 + 1) / tex->GetHeight();
+								float u1 = float(texx * GRASS_TEX_SIZE + 1) / tex->GetWidth();
+								float u2 = float(texx * GRASS_TEX_SIZE + GRASS_TEX_SIZE - 1) / tex->GetWidth();
+								float v1 = float(texy * GRASS_TEX_SIZE + GRASS_TEX_SIZE - 1) / tex->GetHeight();
+								float v2 = float(texy * GRASS_TEX_SIZE + 1) / tex->GetHeight();
 								vertices[0].uv.set(u1, v1);
 								vertices[1].uv.set(u2, v1);
 								vertices[2].uv.set(u2, v2);

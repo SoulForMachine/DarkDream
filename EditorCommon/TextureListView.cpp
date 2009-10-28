@@ -18,11 +18,11 @@ namespace EditorCommon
 			{
 				Drawing::Rectangle rect(
 					point - Drawing::Size(TEX_SPACING / 2, TEX_SPACING / 2),
-					Drawing::Size(TEX_SIZE + TEX_SPACING, TEX_SIZE + TEX_SPACING));
+					Drawing::Size(_texSize + TEX_SPACING, _texSize + TEX_SPACING));
 				e->Graphics->FillRectangle(Brushes::DarkBlue, rect);
 			}
 
-			e->Graphics->DrawImageUnscaled(item->Texture, point);
+			e->Graphics->DrawImage(item->Texture, point.X, point.Y, _texSize, _texSize);
 			++i;
 		}
 	}
@@ -31,7 +31,7 @@ namespace EditorCommon
 	{
 		int index = _texList->Add(item);
 		Point point = GetTexPosFromIndex(index);
-		AutoScrollMinSize = Drawing::Size(0, point.Y + TEX_SIZE + TEX_SPACING);
+		AutoScrollMinSize = Drawing::Size(0, point.Y + _texSize + TEX_SPACING);
 		AdjustFormScrollbars(true);
 		Invalidate();
 		return index;
@@ -47,7 +47,8 @@ namespace EditorCommon
 
 	System::Void TextureListView::TextureListView_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e)
 	{
-		int index = GetTexIndexFromPoint(e->Location);
+		Point pt(e->Location.X - AutoScrollPosition.X, e->Location.Y - AutoScrollPosition.Y);
+		int index = GetTexIndexFromPoint(pt);
 		if(index != _selectedIndex)
 		{
 			_selectedIndex = index;
@@ -58,10 +59,10 @@ namespace EditorCommon
 
 	int TextureListView::GetTexIndexFromPoint(Point point)
 	{
-		int x = (point.X - TEX_SPACING) / (TEX_SIZE + TEX_SPACING);
+		int x = (point.X - TEX_SPACING) / (_texSize + TEX_SPACING);
 		if(x >= _texPerRow)
 			return -1;
-		int y = (point.Y - TEX_SPACING) / (TEX_SIZE + TEX_SPACING);
+		int y = (point.Y - TEX_SPACING) / (_texSize + TEX_SPACING);
 		int index = y * _texPerRow + x;
 		if(index >= 0 && index < _texList->Count)
 			return index;
@@ -71,14 +72,19 @@ namespace EditorCommon
 
 	Point TextureListView::GetTexPosFromIndex(int index)
 	{
-		int x = (index % _texPerRow) * (TEX_SIZE + TEX_SPACING) + TEX_SPACING;
-		int y = (index / _texPerRow) * (TEX_SIZE + TEX_SPACING) + TEX_SPACING;
+		int x = (index % _texPerRow) * (_texSize + TEX_SPACING) + TEX_SPACING;
+		int y = (index / _texPerRow) * (_texSize + TEX_SPACING) + TEX_SPACING;
 		return Point(x, y);
 	}
 
 	System::Void TextureListView::TextureListView_Resize(System::Object^  sender, System::EventArgs^  e)
 	{
-		_texPerRow = Max((ClientRectangle.Width - TEX_SPACING) / (TEX_SIZE + TEX_SPACING), 1);
+		CalcTexPerRow();
+	}
+
+	void TextureListView::CalcTexPerRow()
+	{
+		_texPerRow = Max((ClientRectangle.Width - TEX_SPACING) / (_texSize + TEX_SPACING), 1);
 	}
 
 }

@@ -27,7 +27,8 @@ namespace EditorCommon {
 
 			_texList = gcnew ArrayList;
 			_selectedIndex = -1;
-			_texPerRow = Max((ClientRectangle.Width - TEX_SPACING) / (TEX_SIZE + TEX_SPACING), 1);
+			_texSize = 128;
+			CalcTexPerRow();
 		}
 
 		int Add(TextureListViewItem^ item);
@@ -37,6 +38,23 @@ namespace EditorCommon {
 		{
 			int get()
 				{ return _selectedIndex; }
+		}
+
+		property int TextureSize
+		{
+			int get()
+				{ return _texSize; }
+			void set(int val)
+			{
+				_texSize = val;
+				CalcTexPerRow();
+			}
+		}
+
+		property int TextureCount
+		{
+			int get()
+				{ return _texList->Count; }
 		}
 
 		event EventHandler^ TextureIndexChanged;
@@ -66,13 +84,14 @@ namespace EditorCommon {
 
 		int GetTexIndexFromPoint(Point point);
 		Point GetTexPosFromIndex(int index);
+		void CalcTexPerRow();
 
-		static const int TEX_SIZE = 64;
 		static const int TEX_SPACING = 10;
 
 		ArrayList^ _texList;
 		int _selectedIndex;
 		int _texPerRow;
+		int _texSize;
 
 #pragma region Windows Form Designer generated code
 		/// <summary>

@@ -69,6 +69,7 @@ namespace MapEditor {
 		/// Required designer variable.
 		/// </summary>
 		System::ComponentModel::Container ^components;
+	private: System::Windows::Forms::CheckBox^  _checkRandomTex;
 	private: System::Windows::Forms::Panel^  _panelDummy;
 
 		bool FillTextureList(const GL::Texture* texture);
@@ -103,6 +104,7 @@ namespace MapEditor {
 			this->_trackStrength = (gcnew System::Windows::Forms::TrackBar());
 			this->_selectTextureDialog = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->_panelDummy = (gcnew System::Windows::Forms::Panel());
+			this->_checkRandomTex = (gcnew System::Windows::Forms::CheckBox());
 			this->groupBox1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numRadius))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numScale))->BeginInit();
@@ -315,10 +317,22 @@ namespace MapEditor {
 			this->_panelDummy->Size = System::Drawing::Size(348, 428);
 			this->_panelDummy->TabIndex = 10;
 			// 
+			// _checkRandomTex
+			// 
+			this->_checkRandomTex->AutoSize = true;
+			this->_checkRandomTex->Location = System::Drawing::Point(24, 740);
+			this->_checkRandomTex->Name = L"_checkRandomTex";
+			this->_checkRandomTex->Size = System::Drawing::Size(101, 17);
+			this->_checkRandomTex->TabIndex = 11;
+			this->_checkRandomTex->Text = L"Random texture";
+			this->_checkRandomTex->UseVisualStyleBackColor = true;
+			this->_checkRandomTex->CheckedChanged += gcnew System::EventHandler(this, &GrassPanel::_checkRandomTex_CheckedChanged);
+			// 
 			// GrassPanel
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->Controls->Add(this->_checkRandomTex);
 			this->Controls->Add(this->_panelDummy);
 			this->Controls->Add(this->groupBox1);
 			this->Controls->Add(this->_buttonBrowse);
@@ -352,5 +366,6 @@ namespace MapEditor {
 	private: System::Void _buttonBrowse_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _selectTextureDialog_FileOk(System::Object^  sender, System::ComponentModel::CancelEventArgs^  e);
 	private: System::Void _textureList_TextureIndexChanged(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _checkRandomTex_CheckedChanged(System::Object^  sender, System::EventArgs^  e);
 };
 }

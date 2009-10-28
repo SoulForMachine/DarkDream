@@ -8,10 +8,12 @@ PARAM		viewProjMat[] = { program.local[1..4] };
 
 OUTPUT		varPos = result.position;
 OUTPUT		varUV = result.texcoord[0];
+OUTPUT		varAlpha = result.texcoord[1];
 
 TEMP		r0;
 
 ADD			r0, vertPos, transl;
+MOV			r0.w, 1.0;
 
 DP4			varPos.x, viewProjMat[0], r0;
 DP4			varPos.y, viewProjMat[1], r0;
@@ -19,5 +21,6 @@ DP4			varPos.z, viewProjMat[2], r0;
 DP4			varPos.w, viewProjMat[3], r0;
 
 MOV			varUV, vertUV;
+MOV			varAlpha, vertPos.wwww;
 
 END

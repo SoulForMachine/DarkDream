@@ -23,6 +23,8 @@ namespace MapEditor
 			float strength; // strength with which brush raises grass
 			float scale;
 			int texIndex;
+			bool randomTex;
+			int texCount;
 			// world-space position of brush center
 			float posX;
 			float posY;

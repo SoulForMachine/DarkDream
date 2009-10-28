@@ -25,6 +25,7 @@ namespace MapEditor
 		int _patchIndex;
 		float* _elevation;
 		List<Engine::Entity*>* _entities;
+		Engine::Terrain::GrassBlade* _grassData;
 	};
 
 }

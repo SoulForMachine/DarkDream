@@ -20,7 +20,9 @@ namespace MapEditor
 		_parameters->hardness = 0.6f;
 		_parameters->strength = 5.0f;
 		_parameters->scale = 1.0f;
-		_parameters->texIndex = 0;
+		_parameters->texIndex = -1;
+		_parameters->randomTex = false;
+		_parameters->texCount = 0;
 		_parameters->posX = 0.0f;
 		_parameters->posY = 0.0f;
 		_parameters->posZ = 0.0f;

@@ -30,6 +30,7 @@ namespace Engine
 		static const int PATCH_HEIGHT = 64;
 		static const int MAX_PATCHES = 32;
 		static const int GRASS_SEGMENTS = 2;
+		static const int GRASS_TEX_SIZE = 128;
 
 		struct GrassBlade
 		{
