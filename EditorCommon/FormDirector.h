@@ -9,6 +9,9 @@ namespace EditorCommon
 		AttachmentChanged,
 		AnimationChanged,
 		MaterialChanged,
+		PatchAdded,
+		PatchRemoved,
+		CameraMoved,
 	};
 
 	public interface class FormDirector

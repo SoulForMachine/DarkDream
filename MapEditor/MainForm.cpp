@@ -50,14 +50,29 @@ namespace MapEditor
 
 		_wireframe = false;
 		_viewStats = true;
+		_movingCam = false;
 
 		Application::Idle += gcnew EventHandler(this, &MainForm::OnIdle);
 
 		engineAPI->world->GetTerrain().AddPatch();
+
+		System::Reflection::MethodInfo^ method = Control::typeid->GetMethod(
+               "SetStyle",
+			   Reflection::BindingFlags::NonPublic | 
+			   Reflection::BindingFlags::Instance);
+		array<Object^, 1>^ params = gcnew array<Object^, 1>(2);
+		params[0] = ControlStyles::AllPaintingInWmPaint | ControlStyles::OptimizedDoubleBuffer;
+		params[1] = true;
+		method->Invoke(_panelCamPosBar, params);
+		_panelCamPosBar->Hide();
 	}
 
 	void MainForm::FormNotify(Form^ form, EditorCommon::NotifyMessage msg)
 	{
+		if(form == _mapForm)
+		{
+			_panelCamPosBar->Refresh();
+		}
 	}
 
 	WeifenLuo::WinFormsUI::Docking::IDockContent^ MainForm::GetContentFromPersistString(String^ persistString)
@@ -144,7 +159,7 @@ namespace MapEditor
 		}
 		else
 		{
-			_mapForm->GetUndoManager()->Clear();
+			_panelCamPosBar->Refresh();
 		}
 	}
 
@@ -195,6 +210,7 @@ namespace MapEditor
 		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::LAYER_EDIT);
 		_mapForm->SetViewMode(MapRenderWindow::ViewMode::GAME);
 		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
+		_panelCamPosBar->Show();
 		UpdateToolbarButtons();
 	}
 
@@ -298,9 +314,15 @@ namespace MapEditor
 	System::Void MainForm::_menuViewGameView_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_mapForm->GetViewMode() == MapRenderWindow::ViewMode::EDITOR)
+		{
 			_mapForm->SetViewMode(MapRenderWindow::ViewMode::GAME);
+			_panelCamPosBar->Show();
+		}
 		else
+		{
 			_mapForm->SetViewMode(MapRenderWindow::ViewMode::EDITOR);
+			_panelCamPosBar->Hide();
+		}
 	}
 
 	System::Void MainForm::_menuViewToolPanel_Click(System::Object^  sender, System::EventArgs^  e)
@@ -319,6 +341,73 @@ namespace MapEditor
 			form->Show(_dockPanel);
 		else
 			form->Hide();
+	}
+
+	System::Void MainForm::_panelCamPosBar_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e)
+	{
+		e->Graphics->Clear(Color::Gray);
+		Drawing::Rectangle cl_rect = _panelCamPosBar->ClientRectangle;
+		cl_rect.Width -= 1;
+		cl_rect.Height -= 1;
+		e->Graphics->DrawRectangle(Pens::Black, cl_rect);
+
+		int count = engineAPI->world->GetTerrain().GetPatchCount();
+		float y1 = (float)_panelCamPosBar->ClientRectangle.Bottom;
+		float y2 = (float)_panelCamPosBar->ClientRectangle.Height / 2;
+		float step = _panelCamPosBar->ClientRectangle.Width / float(count);
+		float x = step;
+		Drawing::Font^ font = gcnew Drawing::Font("Verdana", 11);
+		for(int i = 0; i < count; ++i)
+		{
+			e->Graphics->DrawString((i + 1).ToString(), font, Brushes::Black, x - step / 2.0f, (y1 - font->Height) / 2.0f);
+
+			if(i < count - 1)
+			{
+				e->Graphics->DrawLine(Pens::Black, x, y1, x, y2);
+			}
+			x += step;
+		}
+
+		float cam_x = _mapForm->GetCamX() / (engineAPI->world->GetTerrain().GetPatchCount() * Engine::Terrain::PATCH_WIDTH) *  _panelCamPosBar->ClientRectangle.Width;
+		Drawing::Rectangle rect((int)cam_x - 5, 1, 10, (int)y1 - 3);
+		SolidBrush^ brush = gcnew SolidBrush(Color::FromArgb(50, 0, 0, 0));
+		e->Graphics->FillRectangle(brush, rect);
+		e->Graphics->DrawRectangle(Pens::Black, rect);
+	}
+
+	System::Void MainForm::_panelCamPosBar_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e)
+	{
+		if(_mapForm->GetViewMode() == MapRenderWindow::ViewMode::GAME)
+		{
+			_panelCamPosBar->Capture = true;
+			_movingCam = true;
+			float x = float(e->X) / _panelCamPosBar->ClientRectangle.Width * engineAPI->world->GetTerrain().GetPatchCount() * Engine::Terrain::PATCH_WIDTH;
+			_mapForm->SetCamX(x);
+			_panelCamPosBar->Refresh();
+		}
+	}
+
+	System::Void MainForm::_panelCamPosBar_MouseUp(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e)
+	{
+		_panelCamPosBar->Capture = false;
+		_movingCam = false;
+	}
+
+	System::Void MainForm::_panelCamPosBar_MouseMove(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e)
+	{
+		if(_movingCam)
+		{
+			float terr_w = (float)engineAPI->world->GetTerrain().GetPatchCount() * Engine::Terrain::PATCH_WIDTH;
+			float x = float(e->X) / _panelCamPosBar->ClientRectangle.Width * terr_w;
+			math3d::clamp(x, 0.0f, terr_w);
+			_mapForm->SetCamX(x);
+			_panelCamPosBar->Refresh();
+		}
+	}
+
+	System::Void MainForm::_panelCamPosBar_Resize(System::Object^  sender, System::EventArgs^  e)
+	{
+		_panelCamPosBar->Invalidate();
 	}
 
 }

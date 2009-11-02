@@ -22,7 +22,7 @@ namespace MapEditor
 			EDITOR,
 		};
 
-		MapRenderWindow(Form^ parent);
+		MapRenderWindow(Form^ parent, EditorCommon::FormDirector^ director);
 
 		void SetEditMode(EditMode^ mode)
 			{ _editMode = mode; }
@@ -40,6 +40,8 @@ namespace MapEditor
 			{ return _viewMode; }
 		void SetViewParameters(EM_View::Parameters^ params)
 			{ _parameters = params; }
+		void SetCamX(float x);
+		float GetCamX();
 
 	protected:
 		virtual void WndProc(Message% msg) override;
@@ -96,6 +98,8 @@ namespace MapEditor
 		bool _stats;
 		ViewMode _viewMode;
 		EM_View::Parameters^ _parameters;
+		EditorCommon::FormDirector^ _director;
+		Form^ _parent;
 	};
 
 }

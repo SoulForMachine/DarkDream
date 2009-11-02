@@ -27,7 +27,7 @@ namespace MapEditor
 	vec3f g_camForward;
 
 
-	MapRenderWindow::MapRenderWindow(Form^ parent)
+	MapRenderWindow::MapRenderWindow(Form^ parent, EditorCommon::FormDirector^ director)
 	{
 		_renderSystem = 0;
 		_renderer = 0;
@@ -107,6 +107,8 @@ namespace MapEditor
 		CreateResources();
 
 		_editMode = nullptr;
+		_director = director;
+		_parent = parent;
 	}
 
 	bool MapRenderWindow::CreateResources()
@@ -568,6 +570,8 @@ namespace MapEditor
 		engineAPI->world->GetTerrain().ElevationFromPoint(vec2f(g_camPos.x, Terrain::PATCH_HEIGHT * 4.0f / 5.0f), elev);
 		g_camForward = vec3f(g_camPos.x, elev + 1.0f, Terrain::PATCH_HEIGHT * 4.0f / 5.0f) - g_camPos;
 
+		if(_panX != 0.0f)
+			_director->FormNotify(_parent, EditorCommon::NotifyMessage::CameraMoved);
 		g_camPos.x += _panX;
 		_panX = 0.0f;
 
@@ -617,6 +621,16 @@ namespace MapEditor
 		_zoom = 0.0f;
 
 		_viewMode = mode;
+	}
+
+	void MapRenderWindow::SetCamX(float x)
+	{
+		g_camPos.x = x;
+	}
+
+	float MapRenderWindow::GetCamX()
+	{
+		return g_camPos.x;
 	}
 
 }

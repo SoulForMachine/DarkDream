@@ -54,6 +54,7 @@ namespace MapEditor {
 		ToolPanel^ _toolPanel;
 		bool _wireframe;
 		bool _viewStats;
+		bool _movingCam;
 
 	private: System::Windows::Forms::MenuStrip^  _mainMenu;
 	protected: 
@@ -114,6 +115,7 @@ namespace MapEditor {
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewEntityBBoxes;
 	private: System::Windows::Forms::ToolStripButton^  _toolBtnLayers;
 	private: System::Windows::Forms::ToolStripButton^  _toolBtnGrass;
+	private: System::Windows::Forms::Panel^  _panelCamPosBar;
 
 
 
@@ -132,6 +134,21 @@ namespace MapEditor {
 		/// </summary>
 		void InitializeComponent(void)
 		{
+			WeifenLuo::WinFormsUI::Docking::DockPanelSkin^  dockPanelSkin1 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanelSkin());
+			WeifenLuo::WinFormsUI::Docking::AutoHideStripSkin^  autoHideStripSkin1 = (gcnew WeifenLuo::WinFormsUI::Docking::AutoHideStripSkin());
+			WeifenLuo::WinFormsUI::Docking::DockPanelGradient^  dockPanelGradient1 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanelGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient1 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			WeifenLuo::WinFormsUI::Docking::DockPaneStripSkin^  dockPaneStripSkin1 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPaneStripSkin());
+			WeifenLuo::WinFormsUI::Docking::DockPaneStripGradient^  dockPaneStripGradient1 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPaneStripGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient2 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			WeifenLuo::WinFormsUI::Docking::DockPanelGradient^  dockPanelGradient2 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanelGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient3 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			WeifenLuo::WinFormsUI::Docking::DockPaneStripToolWindowGradient^  dockPaneStripToolWindowGradient1 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPaneStripToolWindowGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient4 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient5 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			WeifenLuo::WinFormsUI::Docking::DockPanelGradient^  dockPanelGradient3 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanelGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient6 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient7 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
 			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(MainForm::typeid));
 			this->_mainMenu = (gcnew System::Windows::Forms::MenuStrip());
 			this->fileToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -168,10 +185,11 @@ namespace MapEditor {
 			this->_toolBtnViewMode = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnTerrainEdit = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnObjectPlacement = (gcnew System::Windows::Forms::ToolStripButton());
+			this->_toolBtnGrass = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnTriggers = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnParticleSystems = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnLayers = (gcnew System::Windows::Forms::ToolStripButton());
-			this->_toolBtnGrass = (gcnew System::Windows::Forms::ToolStripButton());
+			this->_panelCamPosBar = (gcnew System::Windows::Forms::Panel());
 			this->_mainMenu->SuspendLayout();
 			this->_mainToolbar->SuspendLayout();
 			this->SuspendLayout();
@@ -384,10 +402,55 @@ namespace MapEditor {
 			// 
 			this->_dockPanel->ActiveAutoHideContent = nullptr;
 			this->_dockPanel->Dock = System::Windows::Forms::DockStyle::Fill;
+			this->_dockPanel->DockBackColor = System::Drawing::SystemColors::Control;
 			this->_dockPanel->DocumentStyle = WeifenLuo::WinFormsUI::Docking::DocumentStyle::DockingWindow;
 			this->_dockPanel->Location = System::Drawing::Point(0, 62);
 			this->_dockPanel->Name = L"_dockPanel";
-			this->_dockPanel->Size = System::Drawing::Size(860, 538);
+			this->_dockPanel->Size = System::Drawing::Size(860, 504);
+			dockPanelGradient1->EndColor = System::Drawing::SystemColors::ControlLight;
+			dockPanelGradient1->StartColor = System::Drawing::SystemColors::ControlLight;
+			autoHideStripSkin1->DockStripGradient = dockPanelGradient1;
+			tabGradient1->EndColor = System::Drawing::SystemColors::Control;
+			tabGradient1->StartColor = System::Drawing::SystemColors::Control;
+			tabGradient1->TextColor = System::Drawing::SystemColors::ControlDarkDark;
+			autoHideStripSkin1->TabGradient = tabGradient1;
+			dockPanelSkin1->AutoHideStripSkin = autoHideStripSkin1;
+			tabGradient2->EndColor = System::Drawing::SystemColors::ControlLightLight;
+			tabGradient2->StartColor = System::Drawing::SystemColors::ControlLightLight;
+			tabGradient2->TextColor = System::Drawing::SystemColors::ControlText;
+			dockPaneStripGradient1->ActiveTabGradient = tabGradient2;
+			dockPanelGradient2->EndColor = System::Drawing::SystemColors::Control;
+			dockPanelGradient2->StartColor = System::Drawing::SystemColors::Control;
+			dockPaneStripGradient1->DockStripGradient = dockPanelGradient2;
+			tabGradient3->EndColor = System::Drawing::SystemColors::ControlLight;
+			tabGradient3->StartColor = System::Drawing::SystemColors::ControlLight;
+			tabGradient3->TextColor = System::Drawing::SystemColors::ControlText;
+			dockPaneStripGradient1->InactiveTabGradient = tabGradient3;
+			dockPaneStripSkin1->DocumentGradient = dockPaneStripGradient1;
+			tabGradient4->EndColor = System::Drawing::SystemColors::ActiveCaption;
+			tabGradient4->LinearGradientMode = System::Drawing::Drawing2D::LinearGradientMode::Vertical;
+			tabGradient4->StartColor = System::Drawing::SystemColors::GradientActiveCaption;
+			tabGradient4->TextColor = System::Drawing::SystemColors::ActiveCaptionText;
+			dockPaneStripToolWindowGradient1->ActiveCaptionGradient = tabGradient4;
+			tabGradient5->EndColor = System::Drawing::SystemColors::Control;
+			tabGradient5->StartColor = System::Drawing::SystemColors::Control;
+			tabGradient5->TextColor = System::Drawing::SystemColors::ControlText;
+			dockPaneStripToolWindowGradient1->ActiveTabGradient = tabGradient5;
+			dockPanelGradient3->EndColor = System::Drawing::SystemColors::ControlLight;
+			dockPanelGradient3->StartColor = System::Drawing::SystemColors::ControlLight;
+			dockPaneStripToolWindowGradient1->DockStripGradient = dockPanelGradient3;
+			tabGradient6->EndColor = System::Drawing::SystemColors::GradientInactiveCaption;
+			tabGradient6->LinearGradientMode = System::Drawing::Drawing2D::LinearGradientMode::Vertical;
+			tabGradient6->StartColor = System::Drawing::SystemColors::GradientInactiveCaption;
+			tabGradient6->TextColor = System::Drawing::SystemColors::ControlText;
+			dockPaneStripToolWindowGradient1->InactiveCaptionGradient = tabGradient6;
+			tabGradient7->EndColor = System::Drawing::Color::Transparent;
+			tabGradient7->StartColor = System::Drawing::Color::Transparent;
+			tabGradient7->TextColor = System::Drawing::SystemColors::ControlDarkDark;
+			dockPaneStripToolWindowGradient1->InactiveTabGradient = tabGradient7;
+			dockPaneStripSkin1->ToolWindowGradient = dockPaneStripToolWindowGradient1;
+			dockPanelSkin1->DockPaneStripSkin = dockPaneStripSkin1;
+			this->_dockPanel->Skin = dockPanelSkin1;
 			this->_dockPanel->TabIndex = 3;
 			// 
 			// _openFileDialog
@@ -437,6 +500,16 @@ namespace MapEditor {
 			this->_toolBtnObjectPlacement->Text = L"Place Objects";
 			this->_toolBtnObjectPlacement->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnObjectPlacement_Click);
 			// 
+			// _toolBtnGrass
+			// 
+			this->_toolBtnGrass->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnGrass->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnGrass.Image")));
+			this->_toolBtnGrass->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnGrass->Name = L"_toolBtnGrass";
+			this->_toolBtnGrass->Size = System::Drawing::Size(36, 35);
+			this->_toolBtnGrass->Text = L"Grass";
+			this->_toolBtnGrass->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnGrass_Click);
+			// 
 			// _toolBtnTriggers
 			// 
 			this->_toolBtnTriggers->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
@@ -467,15 +540,18 @@ namespace MapEditor {
 			this->_toolBtnLayers->Text = L"Layers";
 			this->_toolBtnLayers->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnLayers_Click);
 			// 
-			// _toolBtnGrass
+			// _panelCamPosBar
 			// 
-			this->_toolBtnGrass->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
-			this->_toolBtnGrass->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnGrass.Image")));
-			this->_toolBtnGrass->ImageTransparentColor = System::Drawing::Color::Magenta;
-			this->_toolBtnGrass->Name = L"_toolBtnGrass";
-			this->_toolBtnGrass->Size = System::Drawing::Size(36, 35);
-			this->_toolBtnGrass->Text = L"Grass";
-			this->_toolBtnGrass->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnGrass_Click);
+			this->_panelCamPosBar->Dock = System::Windows::Forms::DockStyle::Bottom;
+			this->_panelCamPosBar->Location = System::Drawing::Point(0, 566);
+			this->_panelCamPosBar->Name = L"_panelCamPosBar";
+			this->_panelCamPosBar->Size = System::Drawing::Size(860, 34);
+			this->_panelCamPosBar->TabIndex = 5;
+			this->_panelCamPosBar->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &MainForm::_panelCamPosBar_Paint);
+			this->_panelCamPosBar->MouseMove += gcnew System::Windows::Forms::MouseEventHandler(this, &MainForm::_panelCamPosBar_MouseMove);
+			this->_panelCamPosBar->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &MainForm::_panelCamPosBar_MouseDown);
+			this->_panelCamPosBar->Resize += gcnew System::EventHandler(this, &MainForm::_panelCamPosBar_Resize);
+			this->_panelCamPosBar->MouseUp += gcnew System::Windows::Forms::MouseEventHandler(this, &MainForm::_panelCamPosBar_MouseUp);
 			// 
 			// MainForm
 			// 
@@ -484,8 +560,9 @@ namespace MapEditor {
 			this->ClientSize = System::Drawing::Size(860, 622);
 			this->Controls->Add(this->_dockPanel);
 			this->Controls->Add(this->_mainToolbar);
-			this->Controls->Add(this->_statusBar);
 			this->Controls->Add(this->_mainMenu);
+			this->Controls->Add(this->_panelCamPosBar);
+			this->Controls->Add(this->_statusBar);
 			this->MainMenuStrip = this->_mainMenu;
 			this->Name = L"MainForm";
 			this->Text = L"Dark Dream Map Editor";
@@ -527,6 +604,11 @@ namespace MapEditor {
 	private: System::Void _menuViewEntityBBoxes_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _toolBtnLayers_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _toolBtnGrass_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void _panelCamPosBar_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e);
+	private: System::Void _panelCamPosBar_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+	private: System::Void _panelCamPosBar_MouseUp(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+	private: System::Void _panelCamPosBar_MouseMove(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+	private: System::Void _panelCamPosBar_Resize(System::Object^  sender, System::EventArgs^  e);
 };
 
 }

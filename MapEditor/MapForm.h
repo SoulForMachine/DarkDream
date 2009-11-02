@@ -55,6 +55,10 @@ namespace MapEditor {
 			{ return _persistEditMode; }
 		UndoManager^ GetUndoManager()
 			{ return _undoManager; }
+		void SetCamX(float x)
+			{ _renderWindow->SetCamX(x); }
+		float GetCamX()
+			{ return _renderWindow->GetCamX(); }
 		virtual void EditModeEvent(EditModeEventListener::EMEvent ev);
 
 	protected:

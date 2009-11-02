@@ -58,7 +58,7 @@ namespace MapEditor
 	{
 		try
 		{
-			_renderWindow = gcnew MapRenderWindow(this);
+			_renderWindow = gcnew MapRenderWindow(this, _director);
 
 			_editModes = gcnew array<EditMode^>((int)EditMode::EditModeEnum::EDIT_MODE_COUNT);
 			_editModes[(int)EditMode::EditModeEnum::VIEW] = gcnew EM_View(this, true);
@@ -119,6 +119,17 @@ namespace MapEditor
 
 	void MapForm::EditModeEvent(EditModeEventListener::EMEvent ev)
 	{
+		if(	_currentEditMode->GetModeEnum() == EditMode::EditModeEnum::ADD_PATCH &&
+			ev == EditModeEventListener::EMEvent::EDIT_COMPLETE)
+		{
+			_director->FormNotify(this, EditorCommon::NotifyMessage::PatchAdded);
+		}
+		else if(_currentEditMode->GetModeEnum() == EditMode::EditModeEnum::REMOVE_PATCH &&
+			ev == EditModeEventListener::EMEvent::EDIT_COMPLETE)
+		{
+			_director->FormNotify(this, EditorCommon::NotifyMessage::PatchRemoved);
+		}
+
 		if(	ev == EditModeEventListener::EMEvent::EDIT_COMPLETE ||
 			ev == EditModeEventListener::EMEvent::EDIT_CANCELED ||
 			ev == EditModeEventListener::EMEvent::EDIT_ERROR )
