@@ -1,7 +1,7 @@
 #pragma once
 
 
-namespace EntityEditor
+namespace ParticleEditor
 {
 
 	using namespace System;
@@ -14,17 +14,11 @@ namespace EntityEditor
 	public:
 		RenderWindow(Form^ parent);
 
-		void SetEntity(Engine::ModelEntity* entity);
-		void Wireframe(bool wireframe)
-			{ _wireframe = wireframe; }
 		void ShowStats(bool stats)
-			{ _modelStats = stats; }
-		void ShowSkelet(bool show)
-			{ _skelet = show; }
+			{ _stats = stats; }
 		void Draw()
 			{ OnPaint(); }
 		void UpdateFrame();
-		void ModelChanged();
 
 	protected:
 		virtual void WndProc(Message% msg) override;
@@ -41,31 +35,21 @@ namespace EntityEditor
 		void OnMButtonUp(int x, int y);
 		void OnRButtonUp(int x, int y);
 		void OnMouseWheel(int delta, int x, int y);
-		void RenderGrid();
-		void RenderEntity();
+		void RenderParticleSystem();
 		void RenderStats();
-		void RenderSkelet(const math3d::vec3f& color);
-		void RenderBone(const Engine::Joint* joint, const math3d::mat4f& matrix);
+		void RenderCoordSys();
 		bool CreateResources();
 		void DestroyResources();
 
 		Engine::RenderSystem* _renderSystem;
-		Engine::ModelEntity* _entity;
 		GL::Renderer* _renderer;
+		GL::Buffer* _axisVertBuf;
+		GL::VertexFormat* _lineVertFmt;
+		const Engine::ASMProgRes* _vertProgSimple;
+		const Engine::ASMProgRes* _fragProgConst;
 
 		// drawing stuff
 		Engine::Font* _font;
-		GL::Buffer* _gridVertBuf;
-		GL::Buffer* _lightVertBuf;
-		GL::Buffer* _jointVertBuf;
-		GL::VertexFormat* _lineVertFmt;
-		const Engine::ASMProgRes* _vpSimple;
-		const Engine::ASMProgRes* _fpConstClr;
-		int _gridVertCount;
-		int _gridHorizCount;
-		float _gridVertSpacing;
-		float _gridHorizSpacing;
-		float _jointRadius;
 
 		int _width;
 		int _height;
@@ -79,16 +63,12 @@ namespace EntityEditor
 		float _panX;
 		float _panY;
 		float _zoom;
-		float _rotLightX;
-		float _rotLightY;
 		uint _prevTime;
 		int _frameTime;
 		int _fpsTime;
 		int _frameCount;
 		float _fps;
-		bool _wireframe;
-		bool _modelStats;
-		bool _skelet;
+		bool _stats;
 	};
 
 }

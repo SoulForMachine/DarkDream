@@ -61,7 +61,6 @@ namespace EntityEditor
 		_fpsTime = 0;
 		_frameCount = 0;
 		_fps = 0;
-		_animate = false;
 		_wireframe = false;
 		_modelStats = false;
 		_skelet = false;
@@ -115,6 +114,21 @@ namespace EntityEditor
 		_entity = entity;
 		ModelChanged();
 		InvalidateRect((HWND)Handle.ToPointer(), 0, FALSE);
+	}
+
+	void RenderWindow::UpdateFrame()
+	{
+		uint cur_time = ::Timer::GetTime();
+		_frameTime = cur_time - _prevTime;
+		_prevTime = cur_time;
+		_fpsTime += _frameTime;
+		_frameCount++;
+		if(_fpsTime > 200)
+		{
+			_fps = _frameCount / (_fpsTime * 0.001f);
+			_fpsTime = 0;
+			_frameCount = 0;
+		}
 	}
 
 	void RenderWindow::ModelChanged()
@@ -337,26 +351,9 @@ namespace EntityEditor
 	void RenderWindow::OnPaint()
 	{
 		// prevent OnPaint re-entry
-		static int in_during = 0;
-		if(++in_during > 1)
-		{
-			in_during = 1;
+		if(!System::Threading::Monitor::TryEnter(this))
 			return;
-		}
 		//------------------------
-
-		uint cur_time = ::Timer::GetTime();
-		_frameTime = cur_time - _prevTime;
-		_prevTime = cur_time;
-		_fpsTime += _frameTime;
-		_frameCount++;
-		if(_fpsTime > 200)
-		{
-			_fps = _frameCount / (_fpsTime * 0.001f);
-			_fpsTime = 0;
-			_frameCount = 0;
-		}
-
 
 		if(!_renderer)
 			return;
@@ -384,7 +381,7 @@ namespace EntityEditor
 		_renderer->Finish();
 		_renderer->SwapBuffers();
 
-		in_during = 0;
+		System::Threading::Monitor::Exit(this);
 	}
 
 	void RenderWindow::OnSize(int width, int height)
@@ -442,15 +439,11 @@ namespace EntityEditor
 				if(_rotY > 360.0f)
 					_rotY -= 360.0f;
 			}
-
-			OnPaint();
 		}
 		else if(_middleBtnDown && (modifiers & MK_MBUTTON))
 		{
 			_panX -= (x - _prevX) * 0.001f * _zoom;
 			_panY += (y - _prevY) * 0.001f * _zoom;
-
-			OnPaint();
 		}
 		else if(_rightBtnDown && (modifiers & MK_RBUTTON))
 		{
@@ -458,8 +451,6 @@ namespace EntityEditor
 			float z = _zoom;
 			clamp(z, 1.0f, 100.0f);
 			_zoom = z;
-
-			OnPaint();
 		}
 
 		_prevX = x;
@@ -514,8 +505,6 @@ namespace EntityEditor
 		float z = _zoom;
 		clamp(z, 1.0f, 100.0f);
 		_zoom = z;
-
-		OnPaint();
 	}
 
 	void RenderWindow::RenderGrid()
@@ -550,7 +539,7 @@ namespace EntityEditor
 			_renderer->CullFace(GL::FACE_BACK);
 			_renderer->EnableFaceCulling(true);
 			_entity->SetWorldTransform(s_worldMat);
-			_renderSystem->RenderEntities(_animate? _frameTime: 0);
+			_renderSystem->RenderEntities(_frameTime);
 
 			if(_wireframe)
 				_renderer->RasterizationMode(GL::RASTER_FILL);

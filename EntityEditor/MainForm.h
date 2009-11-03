@@ -65,7 +65,6 @@ namespace EntityEditor {
 		MaterialForm^ _materialForm;
 		PropertyForm^ _propertyForm;
 		Entity^ _entity;
-		bool _animate;
 		bool _wireframe;
 		bool _modelStats;
 		bool _skelet;
@@ -311,7 +310,6 @@ namespace EntityEditor {
 			this->_mnuAnimate->Name = L"_mnuAnimate";
 			this->_mnuAnimate->Size = System::Drawing::Size(177, 22);
 			this->_mnuAnimate->Text = L"&Animate";
-			this->_mnuAnimate->Click += gcnew System::EventHandler(this, &MainForm::_mnuAnimate_Click);
 			// 
 			// _mnuWireframe
 			// 
@@ -440,7 +438,6 @@ namespace EntityEditor {
 	private: System::Void _mnuEntitySaveAs_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _mnuEntityExit_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void fileDialog_FileOk(System::Object^  sender, System::ComponentModel::CancelEventArgs^  e);
-	private: System::Void _mnuAnimate_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _mnuWireframe_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _mnuViewSkelet_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _mnuViewMaterialPanel_Click(System::Object^  sender, System::EventArgs^  e);

@@ -28,9 +28,16 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MapEditor", "MapEditor\MapE
 		{269CECE1-C8C3-4655-8C21-64DEAC906742} = {269CECE1-C8C3-4655-8C21-64DEAC906742}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParticleEditor", "ParticleEditor\ParticleEditor.vcproj", "{1752478B-DABC-4926-BF49-7D959872A574}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7E6C94E-9411-4ADA-9BD5-18CA86910803} = {D7E6C94E-9411-4ADA-9BD5-18CA86910803}
+		{F58C7E90-D832-4A9E-9FA7-020FBB802F33} = {F58C7E90-D832-4A9E-9FA7-020FBB802F33}
+		{269CECE1-C8C3-4655-8C21-64DEAC906742} = {269CECE1-C8C3-4655-8C21-64DEAC906742}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SourceCodeControl) = preSolution
-		SccNumberOfProjects = 6
+		SccNumberOfProjects = 7
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = BaseLib\\BaseLib.vcproj
 		SccLocalPath1 = .
@@ -47,6 +54,9 @@ Global
 		SccProjectUniqueName5 = MapEditor\\MapEditor.vcproj
 		SccLocalPath5 = .
 		SccProjectFilePathRelativizedFromConnection5 = MapEditor\\
+		SccProjectUniqueName6 = ParticleEditor\\ParticleEditor.vcproj
+		SccLocalPath6 = .
+		SccProjectFilePathRelativizedFromConnection6 = ParticleEditor\\
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -73,6 +83,10 @@ Global
 		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Debug|Win32.Build.0 = Debug|Win32
 		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Release|Win32.ActiveCfg = Release|Win32
 		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Release|Win32.Build.0 = Release|Win32
+		{1752478B-DABC-4926-BF49-7D959872A574}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1752478B-DABC-4926-BF49-7D959872A574}.Debug|Win32.Build.0 = Debug|Win32
+		{1752478B-DABC-4926-BF49-7D959872A574}.Release|Win32.ActiveCfg = Release|Win32
+		{1752478B-DABC-4926-BF49-7D959872A574}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

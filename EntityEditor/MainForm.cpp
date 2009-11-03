@@ -52,8 +52,6 @@ namespace EntityEditor
 		_modelForm->Focus();
 		_dockPanel->ResumeLayout(true, true);
 
-		_animate = true;
-		_modelForm->Animate(true);
 		_wireframe = false;
 		_modelStats = true;
 		_skelet = false;
@@ -186,12 +184,6 @@ namespace EntityEditor
 	System::Void MainForm::_mnuViewMaterialPanel_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		ToggleForm(_materialForm);
-	}
-
-	System::Void MainForm::_mnuAnimate_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-		_animate = !_animate;
-		_modelForm->Animate(_animate);
 	}
 
 	System::Void MainForm::_mnuWireframe_Click(System::Object^  sender, System::EventArgs^  e)
@@ -342,20 +334,31 @@ namespace EntityEditor
 		this->Text = GetAppName() + " - " + file_name;
 	}
 
+	bool AppIsIdle()
+	{
+		MSG msg;
+		return !PeekMessage(&msg, 0, 0, 0, 0);
+	}
+
 	void MainForm::OnIdle(System::Object^  sender, System::EventArgs^  e)
 	{
-		_mnuViewConsole->Checked = !_consoleForm->IsHidden;
-		_mnuViewEntityPanel->Checked = !_entityForm->IsHidden;
-		_mnuViewMaterialPanel->Checked = !_materialForm->IsHidden;
-		_mnuViewPropertyPanel->Checked = !_propertyForm->IsHidden;
-		_mnuAnimate->Checked = _animate;
-		_mnuWireframe->Checked = _wireframe;
-		_mnuViewSkelet->Checked = _skelet;
-		_mnuModelStats->Checked = _modelStats;
-		_toolBtnConsole->Checked = !_consoleForm->IsHidden;
+		if(GetForegroundWindow() == (HWND)Handle.ToPointer())
+		{
+			_mnuViewConsole->Checked = !_consoleForm->IsHidden;
+			_mnuViewEntityPanel->Checked = !_entityForm->IsHidden;
+			_mnuViewMaterialPanel->Checked = !_materialForm->IsHidden;
+			_mnuViewPropertyPanel->Checked = !_propertyForm->IsHidden;
+			_mnuWireframe->Checked = _wireframe;
+			_mnuViewSkelet->Checked = _skelet;
+			_mnuModelStats->Checked = _modelStats;
+			_toolBtnConsole->Checked = !_consoleForm->IsHidden;
 
-		if(_animate)
-			_modelForm->RedrawAsync();
+			while(AppIsIdle())
+			{
+				_modelForm->UpdateFrame();
+				_modelForm->Redraw();
+			}
+		}
 	}
 
 	System::Void MainForm::fileDialog_FileOk(System::Object^  sender, System::ComponentModel::CancelEventArgs^  e)

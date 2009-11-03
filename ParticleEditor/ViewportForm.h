@@ -2,13 +2,8 @@
 
 #include "RenderWindow.h"
 
-namespace Engine
-{
-	class ModelEntity;
-}
 
-
-namespace EntityEditor {
+namespace ParticleEditor {
 
 	using namespace System;
 	using namespace System::ComponentModel;
@@ -19,7 +14,7 @@ namespace EntityEditor {
 
 
 	/// <summary>
-	/// Summary for ModelForm
+	/// Summary for ViewportForm
 	///
 	/// WARNING: If you change the name of this class, you will need to change the
 	///          'Resource File Name' property for the managed resource compiler tool
@@ -27,31 +22,25 @@ namespace EntityEditor {
 	///          the designers will not be able to interact properly with localized
 	///          resources associated with this form.
 	/// </summary>
-	public ref class ModelForm : public WeifenLuo::WinFormsUI::Docking::DockContent
+	public ref class ViewportForm : public WeifenLuo::WinFormsUI::Docking::DockContent
 	{
 	public:
-		ModelForm(void);
+		ViewportForm(void);
 
-		void SetEntity(Engine::ModelEntity* entity);
+		//void SetParticleSystem(Engine::ParticleSystem* entity);
 		void Redraw()
 			{ _renderWindow->Draw(); }
 		void RedrawAsync();
 		void UpdateFrame()
 			{ _renderWindow->UpdateFrame(); }
-		void Wireframe(bool wireframe)
-			{ _renderWindow->Wireframe(wireframe); }
 		void ShowStats(bool stats)
 			{ _renderWindow->ShowStats(stats); }
-		void ShowSkelet(bool show)
-			{ _renderWindow->ShowSkelet(show); }
-		void ModelChanged()
-			{ _renderWindow->ModelChanged(); }
 
 	protected:
 		/// <summary>
 		/// Clean up any resources being used.
 		/// </summary>
-		~ModelForm()
+		~ViewportForm()
 		{
 			if (components)
 			{
@@ -77,7 +66,7 @@ namespace EntityEditor {
 		{
 			this->SuspendLayout();
 			// 
-			// ModelForm
+			// ViewportForm
 			// 
 			this->AllowEndUserDocking = false;
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -86,25 +75,27 @@ namespace EntityEditor {
 			this->ClientSize = System::Drawing::Size(292, 273);
 			this->CloseButton = false;
 			this->DockAreas = WeifenLuo::WinFormsUI::Docking::DockAreas::Document;
-			this->Name = L"ModelForm";
+			this->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->Name = L"ViewportForm";
 			this->ShowHint = WeifenLuo::WinFormsUI::Docking::DockState::Document;
 			this->ShowInTaskbar = false;
-			this->TabText = L"Model";
-			this->Text = L"Model";
+			this->TabText = L"Particle System";
+			this->Text = L"Particle System";
 			this->WindowState = System::Windows::Forms::FormWindowState::Maximized;
-			this->HandleCreated += gcnew System::EventHandler(this, &ModelForm::ModelForm_HandleCreated);
-			this->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &ModelForm::ModelForm_Paint);
-			this->HandleDestroyed += gcnew System::EventHandler(this, &ModelForm::ModelForm_HandleDestroyed);
-			this->Resize += gcnew System::EventHandler(this, &ModelForm::ModelForm_Resize);
-			this->MouseWheel += gcnew System::Windows::Forms::MouseEventHandler(this, &ModelForm::ModelForm_MouseWheel);
+			this->HandleCreated += gcnew System::EventHandler(this, &ViewportForm::ViewportForm_HandleCreated);
+			this->MouseWheel += gcnew System::Windows::Forms::MouseEventHandler(this, &ViewportForm::ViewportForm_MouseWheel);
+			this->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &ViewportForm::ViewportForm_Paint);
+			this->HandleDestroyed += gcnew System::EventHandler(this, &ViewportForm::ViewportForm_HandleDestroyed);
+			this->Resize += gcnew System::EventHandler(this, &ViewportForm::ViewportForm_Resize);
 			this->ResumeLayout(false);
 
 		}
 #pragma endregion
-		private: System::Void ModelForm_HandleCreated(System::Object^ sender, System::EventArgs^ e);
-		private: System::Void ModelForm_HandleDestroyed(System::Object^ sender, System::EventArgs^ e);
-		private: System::Void ModelForm_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e);
-		private: System::Void ModelForm_Resize(System::Object^  sender, System::EventArgs^  e);
-		private: System::Void ModelForm_MouseWheel(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+		private: System::Void ViewportForm_HandleCreated(System::Object^ sender, System::EventArgs^ e);
+		private: System::Void ViewportForm_HandleDestroyed(System::Object^ sender, System::EventArgs^ e);
+		private: System::Void ViewportForm_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e);
+		private: System::Void ViewportForm_Resize(System::Object^  sender, System::EventArgs^  e);
+		private: System::Void ViewportForm_MouseWheel(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
 	};
 }
