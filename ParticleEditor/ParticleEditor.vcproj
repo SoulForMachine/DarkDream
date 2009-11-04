@@ -240,6 +240,16 @@
 					</File>
 				</File>
 				<File
+					RelativePath=".\PropertiesPanel.h"
+					FileType="3"
+					>
+					<File
+						RelativePath=".\PropertiesPanel.resx"
+						SubType="Designer"
+						>
+					</File>
+				</File>
+				<File
 					RelativePath=".\RenderWindow.h"
 					>
 				</File>
@@ -283,6 +293,10 @@
 				</File>
 				<File
 					RelativePath=".\MainForm.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PropertiesPanel.cpp"
 					>
 				</File>
 				<File
