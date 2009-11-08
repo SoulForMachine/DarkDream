@@ -52,13 +52,17 @@ namespace Engine
 
 	void BgLayer::RemoveSprite(Sprite& sprite)
 	{
-		engineAPI.textureManager->ReleaseTexture(sprite.texture);
-		_sprites.Remove(sprite);
+		List<Sprite>::Iterator it = FindSprite(&sprite);
+		if(it != _sprites.End())
+		{
+			engineAPI.textureManager->ReleaseTexture(sprite.texture);
+			_sprites.Remove(it);
+		}
 	}
 
 	void BgLayer::MoveToFront(Sprite& sprite)
 	{
-		List<Sprite>::Iterator it = _sprites.Find(sprite);
+		List<Sprite>::Iterator it = FindSprite(&sprite);
 		if(it != _sprites.End())
 		{
 			List<Sprite>::Iterator next_it = it;
@@ -74,7 +78,7 @@ namespace Engine
 
 	void BgLayer::MoveToBack(Sprite& sprite)
 	{
-		List<Sprite>::Iterator it = _sprites.Find(sprite);
+		List<Sprite>::Iterator it = FindSprite(&sprite);
 		if(it != _sprites.End())
 		{
 			List<Sprite>::Iterator prev_it = it;
@@ -156,6 +160,16 @@ namespace Engine
 		_width = factor * _screenWidth * patch_count + _screenWidth;
 	}
 
+	List<BgLayer::Sprite>::Iterator BgLayer::FindSprite(Sprite* sprite)
+	{
+		for(List<Sprite>::Iterator it = _sprites.Begin(); it != _sprites.End(); ++it)
+		{
+			if(&(*it) == sprite)
+				return it;
+		}
+
+		return _sprites.End();
+	}
 
 
 	// ========== BgLayerManager ==========

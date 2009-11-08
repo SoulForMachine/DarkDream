@@ -64,6 +64,8 @@ namespace Engine
 		float LayerXToWorldX(float x);
 
 	private:
+		List<Sprite>::Iterator FindSprite(Sprite* sprite);
+
 		List<Sprite> _sprites;
 		float _width;
 		float _screenWidth; // width of a visible portion

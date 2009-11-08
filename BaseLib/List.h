@@ -43,7 +43,6 @@ public:
 	void Insert(Iterator where, const _Type& val);
 	void Remove(Iterator it);
 	void Remove(size_t index);
-	void Remove(_Type& obj);
 	void Link(Iterator where, NodeType* node);
 	NodeType* Unlink(Iterator it);
 	NodeType* Unlink(_Type& obj);
@@ -59,8 +58,6 @@ public:
 	_Type& GetByIndex(size_t index);
 	size_t GetCount() const { return _count; }
 	bool IsEmpty() const { return _count == 0; }
-	Iterator Find(_Type& obj);
-	ConstIterator Find(_Type& obj) const;
 
 protected:
 	Memory::Allocator& _pool;
@@ -271,19 +268,6 @@ void List<_Type>::Remove(size_t index)
 }
 
 template <class _Type>
-void List<_Type>::Remove(_Type& obj)
-{
-	for(Iterator it = Begin(); it != End(); ++it)
-	{
-		if(&it._node->data == &obj)
-		{
-			_Remove(it._node);
-			break;
-		}
-	}
-}
-
-template <class _Type>
 inline
 void List<_Type>::Link(Iterator where, NodeType* node)
 {
@@ -341,34 +325,6 @@ _Type& List<_Type>::GetByIndex(size_t index)
 		node = node->next;
 
 	return node->data;
-}
-
-template <class _Type>
-typename List<_Type>::Iterator List<_Type>::Find(_Type& obj)
-{
-	for(Iterator it = Begin(); it != End(); ++it)
-	{
-		if(&it._node->data == &obj)
-		{
-			return it;
-		}
-	}
-
-	return End();
-}
-
-template <class _Type>
-typename List<_Type>::ConstIterator List<_Type>::Find(_Type& obj) const
-{
-	for(ConstIterator it = Begin(); it != End(); ++it)
-	{
-		if(it._node->data == &obj)
-		{
-			return it;
-		}
-	}
-
-	return End();
 }
 
 template <class _Type>
