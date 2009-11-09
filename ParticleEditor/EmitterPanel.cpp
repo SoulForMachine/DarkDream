@@ -32,6 +32,26 @@ namespace ParticleEditor
 
 		_textName->MaxLength = ParticleSystem::Emitter::EMITTER_NAME_MAX_LEN;
 
+		_cmbEmitterType->Items->Clear();
+		for(int i = 0; i < ParticleSystem::Emitter::EMITTER_TYPE_COUNT; ++i)
+		{
+			String^ name = gcnew String(ParticleSystem::Emitter::GetEmitterTypeString((ParticleSystem::Emitter::EmitterType)i));
+			_cmbEmitterType->Items->Add(name);
+		}
+
+		_cmbShader->Items->Clear();
+		for(int i = 0; i < ParticleSystem::Emitter::EMITTER_SHADER_COUNT; ++i)
+		{
+			String^ name = gcnew String(ParticleSystem::Emitter::GetEmitterShaderString((ParticleSystem::Emitter::EmitterShader)i));
+			_cmbShader->Items->Add(name);
+		}
+
+		_listEmitterProperties->Items->Clear();
+		for(int i = 0; i < ParticleSystem::Emitter::ATTRIB_COUNT; ++i)
+		{
+			_listEmitterProperties->Items->Add(gcnew String(ParticleSystem::Emitter::GetAttributeName(i)));
+		}
+
 		_particleSys = 0;
 		_selectedEmitter = 0;
 		UpdateControls();
@@ -57,9 +77,6 @@ namespace ParticleEditor
 		if(_particleSys && _selectedEmitter)
 		{
 			for each(Control^ ctrl in _groupEmitterProp->Controls)
-				ctrl->Enabled = true;
-
-			for each(Control^ ctrl in _groupPartProp->Controls)
 				ctrl->Enabled = true;
 
 			_btnRemove->Enabled = true;
@@ -96,14 +113,10 @@ namespace ParticleEditor
 
 			_numParticleLife->Text = _selectedEmitter->GetParticleLife().ToString();
 			_checkRandomOrient->Checked = _selectedEmitter->GetParticleRandomOrient();
-			_listParticleProperties->SelectedIndex = -1;
 		}
 		else
 		{
 			for each(Control^ ctrl in _groupEmitterProp->Controls)
-				ctrl->Enabled = false;
-
-			for each(Control^ ctrl in _groupPartProp->Controls)
 				ctrl->Enabled = false;
 
 			_btnRemove->Enabled = false;
@@ -127,7 +140,6 @@ namespace ParticleEditor
 
 			_numParticleLife->Text = "0.0";
 			_checkRandomOrient->Checked = false;
-			_listParticleProperties->SelectedIndex = -1;
 		}
 	}
 
@@ -424,11 +436,6 @@ namespace ParticleEditor
 	{
 		if(_selectedEmitter)
 			_selectedEmitter->SetParticleRandomOrient(_checkRandomOrient->Checked);
-	}
-
-	System::Void EmitterPanel::_listParticleProperties_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e)
-	{
-
 	}
 
 	System::Void EmitterPanel::_listEmitters_ItemChecked(System::Object^  sender, System::Windows::Forms::ItemCheckedEventArgs^  e) 

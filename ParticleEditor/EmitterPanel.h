@@ -46,7 +46,7 @@ namespace ParticleEditor {
 	private: System::Windows::Forms::TextBox^  _textName;
 
 	private: System::Windows::Forms::Label^  label3;
-	private: System::Windows::Forms::GroupBox^  _groupPartProp;
+
 
 	private: System::Windows::Forms::NumericUpDown^  _numEmitterLife;
 
@@ -78,7 +78,7 @@ namespace ParticleEditor {
 
 	private: System::Windows::Forms::RadioButton^  _radioTexture;
 	private: System::Windows::Forms::ListBox^  _listEmitterProperties;
-	private: System::Windows::Forms::ListBox^  _listParticleProperties;
+
 
 
 
@@ -119,8 +119,11 @@ namespace ParticleEditor {
 			this->_btnRemove = (gcnew System::Windows::Forms::Button());
 			this->_btnEnableAll = (gcnew System::Windows::Forms::Button());
 			this->_groupEmitterProp = (gcnew System::Windows::Forms::GroupBox());
+			this->_checkRandomOrient = (gcnew System::Windows::Forms::CheckBox());
 			this->_checkAnimTex = (gcnew System::Windows::Forms::CheckBox());
+			this->_numParticleLife = (gcnew System::Windows::Forms::NumericUpDown());
 			this->_listEmitterProperties = (gcnew System::Windows::Forms::ListBox());
+			this->label5 = (gcnew System::Windows::Forms::Label());
 			this->_btnBrowseResource = (gcnew System::Windows::Forms::Button());
 			this->_textResource = (gcnew System::Windows::Forms::TextBox());
 			this->_radioModel = (gcnew System::Windows::Forms::RadioButton());
@@ -138,21 +141,15 @@ namespace ParticleEditor {
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->_cmbEmitterType = (gcnew System::Windows::Forms::ComboBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
-			this->_groupPartProp = (gcnew System::Windows::Forms::GroupBox());
-			this->_listParticleProperties = (gcnew System::Windows::Forms::ListBox());
-			this->_checkRandomOrient = (gcnew System::Windows::Forms::CheckBox());
-			this->_numParticleLife = (gcnew System::Windows::Forms::NumericUpDown());
-			this->label5 = (gcnew System::Windows::Forms::Label());
 			this->_listEmitters = (gcnew System::Windows::Forms::ListView());
 			this->_columnName = (gcnew System::Windows::Forms::ColumnHeader());
 			this->_btnUp = (gcnew System::Windows::Forms::Button());
 			this->_btnDown = (gcnew System::Windows::Forms::Button());
 			this->_openFileDialog = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->_groupEmitterProp->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numParticleLife))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numEmitterLifeStart))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numEmitterLife))->BeginInit();
-			this->_groupPartProp->SuspendLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numParticleLife))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// _btnAdd
@@ -187,8 +184,11 @@ namespace ParticleEditor {
 			// 
 			// _groupEmitterProp
 			// 
+			this->_groupEmitterProp->Controls->Add(this->_checkRandomOrient);
 			this->_groupEmitterProp->Controls->Add(this->_checkAnimTex);
+			this->_groupEmitterProp->Controls->Add(this->_numParticleLife);
 			this->_groupEmitterProp->Controls->Add(this->_listEmitterProperties);
+			this->_groupEmitterProp->Controls->Add(this->label5);
 			this->_groupEmitterProp->Controls->Add(this->_btnBrowseResource);
 			this->_groupEmitterProp->Controls->Add(this->_textResource);
 			this->_groupEmitterProp->Controls->Add(this->_radioModel);
@@ -208,10 +208,21 @@ namespace ParticleEditor {
 			this->_groupEmitterProp->Controls->Add(this->label1);
 			this->_groupEmitterProp->Location = System::Drawing::Point(12, 274);
 			this->_groupEmitterProp->Name = L"_groupEmitterProp";
-			this->_groupEmitterProp->Size = System::Drawing::Size(370, 363);
+			this->_groupEmitterProp->Size = System::Drawing::Size(370, 504);
 			this->_groupEmitterProp->TabIndex = 6;
 			this->_groupEmitterProp->TabStop = false;
 			this->_groupEmitterProp->Text = L"Emitter properties";
+			// 
+			// _checkRandomOrient
+			// 
+			this->_checkRandomOrient->AutoSize = true;
+			this->_checkRandomOrient->Location = System::Drawing::Point(153, 223);
+			this->_checkRandomOrient->Name = L"_checkRandomOrient";
+			this->_checkRandomOrient->Size = System::Drawing::Size(151, 17);
+			this->_checkRandomOrient->TabIndex = 2;
+			this->_checkRandomOrient->Text = L"Particle random orientation";
+			this->_checkRandomOrient->UseVisualStyleBackColor = true;
+			this->_checkRandomOrient->Click += gcnew System::EventHandler(this, &EmitterPanel::_checkRandomOrient_Click);
 			// 
 			// _checkAnimTex
 			// 
@@ -224,16 +235,31 @@ namespace ParticleEditor {
 			this->_checkAnimTex->UseVisualStyleBackColor = true;
 			this->_checkAnimTex->Click += gcnew System::EventHandler(this, &EmitterPanel::_checkAnimTex_Click);
 			// 
+			// _numParticleLife
+			// 
+			this->_numParticleLife->Location = System::Drawing::Point(83, 222);
+			this->_numParticleLife->Name = L"_numParticleLife";
+			this->_numParticleLife->Size = System::Drawing::Size(45, 20);
+			this->_numParticleLife->TabIndex = 1;
+			this->_numParticleLife->ValueChanged += gcnew System::EventHandler(this, &EmitterPanel::_numParticleLife_ValueChanged);
+			// 
 			// _listEmitterProperties
 			// 
 			this->_listEmitterProperties->FormattingEnabled = true;
-			this->_listEmitterProperties->Items->AddRange(gcnew cli::array< System::Object^  >(10) {L"Velocity", L"Emitter Size", L"Emit Angle", 
-				L"Emit Rate", L"X Offset", L"Y Offset", L"Z Offset", L"X Rotation", L"Y Rotation", L"Z Rotation"});
-			this->_listEmitterProperties->Location = System::Drawing::Point(19, 211);
+			this->_listEmitterProperties->Location = System::Drawing::Point(19, 261);
 			this->_listEmitterProperties->Name = L"_listEmitterProperties";
-			this->_listEmitterProperties->Size = System::Drawing::Size(295, 134);
+			this->_listEmitterProperties->Size = System::Drawing::Size(295, 225);
 			this->_listEmitterProperties->TabIndex = 20;
 			this->_listEmitterProperties->SelectedIndexChanged += gcnew System::EventHandler(this, &EmitterPanel::_listEmitterProperties_SelectedIndexChanged);
+			// 
+			// label5
+			// 
+			this->label5->AutoSize = true;
+			this->label5->Location = System::Drawing::Point(16, 224);
+			this->label5->Name = L"label5";
+			this->label5->Size = System::Drawing::Size(61, 13);
+			this->label5->TabIndex = 0;
+			this->label5->Text = L"Particle life:";
 			// 
 			// _btnBrowseResource
 			// 
@@ -365,7 +391,6 @@ namespace ParticleEditor {
 			// 
 			this->_cmbShader->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->_cmbShader->FormattingEnabled = true;
-			this->_cmbShader->Items->AddRange(gcnew cli::array< System::Object^  >(2) {L"Blend", L"Additive"});
 			this->_cmbShader->Location = System::Drawing::Point(244, 53);
 			this->_cmbShader->Name = L"_cmbShader";
 			this->_cmbShader->Size = System::Drawing::Size(92, 21);
@@ -385,7 +410,6 @@ namespace ParticleEditor {
 			// 
 			this->_cmbEmitterType->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->_cmbEmitterType->FormattingEnabled = true;
-			this->_cmbEmitterType->Items->AddRange(gcnew cli::array< System::Object^  >(4) {L"Sphere", L"Plane", L"Circle", L"Line"});
 			this->_cmbEmitterType->Location = System::Drawing::Point(60, 53);
 			this->_cmbEmitterType->Name = L"_cmbEmitterType";
 			this->_cmbEmitterType->Size = System::Drawing::Size(92, 21);
@@ -400,58 +424,6 @@ namespace ParticleEditor {
 			this->label1->Size = System::Drawing::Size(34, 13);
 			this->label1->TabIndex = 2;
 			this->label1->Text = L"Type:";
-			// 
-			// _groupPartProp
-			// 
-			this->_groupPartProp->Controls->Add(this->_listParticleProperties);
-			this->_groupPartProp->Controls->Add(this->_checkRandomOrient);
-			this->_groupPartProp->Controls->Add(this->_numParticleLife);
-			this->_groupPartProp->Controls->Add(this->label5);
-			this->_groupPartProp->Location = System::Drawing::Point(12, 643);
-			this->_groupPartProp->Name = L"_groupPartProp";
-			this->_groupPartProp->Size = System::Drawing::Size(370, 197);
-			this->_groupPartProp->TabIndex = 7;
-			this->_groupPartProp->TabStop = false;
-			this->_groupPartProp->Text = L"Particle properties";
-			// 
-			// _listParticleProperties
-			// 
-			this->_listParticleProperties->FormattingEnabled = true;
-			this->_listParticleProperties->Items->AddRange(gcnew cli::array< System::Object^  >(5) {L"Size", L"Rotation Speed", L"Alpha", 
-				L"Gravity", L"Friction"});
-			this->_listParticleProperties->Location = System::Drawing::Point(19, 60);
-			this->_listParticleProperties->Name = L"_listParticleProperties";
-			this->_listParticleProperties->Size = System::Drawing::Size(295, 108);
-			this->_listParticleProperties->TabIndex = 3;
-			this->_listParticleProperties->SelectedIndexChanged += gcnew System::EventHandler(this, &EmitterPanel::_listParticleProperties_SelectedIndexChanged);
-			// 
-			// _checkRandomOrient
-			// 
-			this->_checkRandomOrient->AutoSize = true;
-			this->_checkRandomOrient->Location = System::Drawing::Point(153, 35);
-			this->_checkRandomOrient->Name = L"_checkRandomOrient";
-			this->_checkRandomOrient->Size = System::Drawing::Size(120, 17);
-			this->_checkRandomOrient->TabIndex = 2;
-			this->_checkRandomOrient->Text = L"Random Orientation";
-			this->_checkRandomOrient->UseVisualStyleBackColor = true;
-			this->_checkRandomOrient->Click += gcnew System::EventHandler(this, &EmitterPanel::_checkRandomOrient_Click);
-			// 
-			// _numParticleLife
-			// 
-			this->_numParticleLife->Location = System::Drawing::Point(49, 34);
-			this->_numParticleLife->Name = L"_numParticleLife";
-			this->_numParticleLife->Size = System::Drawing::Size(45, 20);
-			this->_numParticleLife->TabIndex = 1;
-			this->_numParticleLife->ValueChanged += gcnew System::EventHandler(this, &EmitterPanel::_numParticleLife_ValueChanged);
-			// 
-			// label5
-			// 
-			this->label5->AutoSize = true;
-			this->label5->Location = System::Drawing::Point(16, 36);
-			this->label5->Name = L"label5";
-			this->label5->Size = System::Drawing::Size(27, 13);
-			this->label5->TabIndex = 0;
-			this->label5->Text = L"Life:";
 			// 
 			// _listEmitters
 			// 
@@ -506,11 +478,10 @@ namespace ParticleEditor {
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->AutoScroll = true;
 			this->AutoScrollMargin = System::Drawing::Size(20, 20);
-			this->ClientSize = System::Drawing::Size(402, 875);
+			this->ClientSize = System::Drawing::Size(402, 821);
 			this->Controls->Add(this->_btnDown);
 			this->Controls->Add(this->_btnUp);
 			this->Controls->Add(this->_listEmitters);
-			this->Controls->Add(this->_groupPartProp);
 			this->Controls->Add(this->_groupEmitterProp);
 			this->Controls->Add(this->_btnEnableAll);
 			this->Controls->Add(this->_btnRemove);
@@ -524,11 +495,9 @@ namespace ParticleEditor {
 			this->Text = L"Emitters";
 			this->_groupEmitterProp->ResumeLayout(false);
 			this->_groupEmitterProp->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numParticleLife))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numEmitterLifeStart))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numEmitterLife))->EndInit();
-			this->_groupPartProp->ResumeLayout(false);
-			this->_groupPartProp->PerformLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numParticleLife))->EndInit();
 			this->ResumeLayout(false);
 
 		}
@@ -554,7 +523,6 @@ namespace ParticleEditor {
 	private: System::Void _listEmitterProperties_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _numParticleLife_ValueChanged(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _checkRandomOrient_Click(System::Object^  sender, System::EventArgs^  e);
-	private: System::Void _listParticleProperties_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _listEmitters_ItemChecked(System::Object^  sender, System::Windows::Forms::ItemCheckedEventArgs^  e);
 	private: System::Void _openFileDialog_FileOk(System::Object^  sender, System::ComponentModel::CancelEventArgs^  e);
 };

@@ -8,6 +8,9 @@
 #include "Engine/RenderableEntity.h"
 
 
+class Parser;
+
+
 namespace Engine
 {
 
@@ -45,6 +48,7 @@ namespace Engine
 
 	private:
 		List<Emitter*>::Iterator FindEmitter(Emitter* emitter);
+		bool ReadAttribute(Parser& parser, Attribute& attrib, const char* attr_name);
 
 		List<Emitter*> _emitters;
 	};
@@ -95,6 +99,7 @@ namespace Engine
 	public:
 		static const int EMITTER_NAME_MAX_LEN = 32;
 		static const int MAX_PARTICLES = 512;
+		static const int ATTRIB_COUNT = 15;
 
 		enum EmitterType
 		{
@@ -102,12 +107,16 @@ namespace Engine
 			EMITTER_TYPE_PLANE,
 			EMITTER_TYPE_CIRCLE,
 			EMITTER_TYPE_LINE,
+
+			EMITTER_TYPE_COUNT
 		};
 
 		enum EmitterShader
 		{
 			EMITTER_SHADER_BLEND,
 			EMITTER_SHADER_ADDITIVE,
+
+			EMITTER_SHADER_COUNT
 		};
 
 		enum ParticleType
@@ -115,6 +124,8 @@ namespace Engine
 			PARTICLE_TYPE_NONE,
 			PARTICLE_TYPE_TEXTURE,
 			PARTICLE_TYPE_MODEL,
+
+			PARTICLE_TYPE_COUNT
 		};
 
 		Emitter();
@@ -145,11 +156,11 @@ namespace Engine
 			{ _shader = shader; }
 		const TextureRes* GetTexture() const
 			{ return _texture; }
-		void SetTexture(const tchar* file_name);
+		void SetTexture(const tchar* file_name, bool immediate = true);
 		void ClearTexture();
 		const ModelRes* GetModel() const
 			{ return _model; }
-		void SetModel(const tchar* file_name);
+		void SetModel(const tchar* file_name, bool immediate = true);
 		void ClearModel();
 		float GetLifeStart() const
 			{ return _lifeStart; }
@@ -186,6 +197,24 @@ namespace Engine
 			{ _partRandomOrient = val; }
 		ParticleType GetParticleType() const;
 
+		Attribute** GetAttributeArray()
+			{ return _attributes; }
+		static const char* GetAttributeName(int index)
+			{ return _attribNames[index]; }
+
+		static EmitterType GetEmitterTypeByString(const char* name);
+		static const char* GetEmitterTypeString(EmitterType type);
+		static EmitterShader GetEmitterShaderByString(const char* name);
+		static const char* GetEmitterShaderString(EmitterShader shader);
+		static ParticleType GetParticleTypeByString(const char* name);
+		static const char* GetParticleTypeString(ParticleType type);
+
+		/*
+			When adding new attribute, don't forget to update:
+			ATTRIB_COUNT
+			_attributes
+			_attribNames
+		*/
 		Attribute Velocity;
 		Attribute Size;
 		Attribute EmitAngle;
@@ -204,8 +233,14 @@ namespace Engine
 		Attribute ParticleFriction;
 
 	private:
+		static const char* _emitterTypeStrings[EMITTER_TYPE_COUNT];
+		static const char* _emitterShaderStrings[EMITTER_SHADER_COUNT];
+		static const char* _particleTypeStrings[PARTICLE_TYPE_COUNT];
+		static const char* _attribNames[ATTRIB_COUNT];
+
 		FreePool<Particle> _particlePool;
 		Particle** _liveParticles;
+		Attribute* _attributes[ATTRIB_COUNT];
 		int _liveCount;
 		bool _enabled;
 

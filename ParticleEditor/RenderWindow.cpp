@@ -26,7 +26,7 @@ namespace ParticleEditor
 		_fragProgConst = 0;
 
 		_rotX = 45.0f;
-		_rotY = 45.0f;
+		_rotY = -45.0f;
 		_panX = 0.0f;
 		_panY = 0.0f;
 		_zoom = 5.0f;

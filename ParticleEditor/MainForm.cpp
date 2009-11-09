@@ -83,6 +83,41 @@ namespace ParticleEditor
 		_dockPanel->SaveAsXml(Application::StartupPath + "\\" + DOCK_PANEL_XML_FILE);
 	}
 
+	System::Void MainForm::_menuFileNew_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+
+	}
+
+	System::Void MainForm::_menuFileOpen_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+
+	}
+
+	System::Void MainForm::_menuFileSave_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+
+	}
+
+	System::Void MainForm::_menuFileSaveAs_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+
+	}
+
+	System::Void MainForm::_menuFileExit_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		Application::Exit();
+	}
+
+	System::Void MainForm::_menuViewConsole_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+
+	}
+
+	System::Void MainForm::_menuViewStats_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+
+	}
+
 	bool AppIsIdle()
 	{
 		MSG msg;
@@ -94,7 +129,6 @@ namespace ParticleEditor
 		if(GetForegroundWindow() == (HWND)Handle.ToPointer())
 		{
 			_menuViewStats->Checked = _viewStats;
-			_menuViewEmitterPanel->Checked = !_emitterPanel->IsHidden;
 			_menuViewConsole->Checked = !_consoleForm->IsHidden;
 
 			while(AppIsIdle())
