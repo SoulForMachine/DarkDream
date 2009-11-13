@@ -72,6 +72,8 @@ namespace Engine
 		void SetValue(int index, float variable, float value);
 		const Value* GetValues() const
 			{ return _values; }
+		Value* GetValues()
+			{ return _values; }
 		int GetValueCount() const
 			{ return _valueCount; }
 		float Evaluate(float variable) const;
@@ -98,7 +100,7 @@ namespace Engine
 	{
 	public:
 		static const int EMITTER_NAME_MAX_LEN = 32;
-		static const int MAX_PARTICLES = 512;
+		static const int MAX_PARTICLES = 1024;
 		static const int ATTRIB_COUNT = 15;
 
 		enum EmitterType

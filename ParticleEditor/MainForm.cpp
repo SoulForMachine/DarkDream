@@ -3,11 +3,14 @@
 #include "ViewportForm.h"
 #include "EmitterPanel.h"
 #include "PropertiesPanel.h"
+#include "Utility.h"
 #include "MainForm.h"
 
 #define DOCK_PANEL_XML_FILE		"ParticleEditorDocking.xml"
 
 using namespace EditorCommon;
+using namespace Engine;
+using namespace Memory;
 
 
 namespace ParticleEditor
@@ -21,8 +24,8 @@ namespace ParticleEditor
 		_consoleForm = gcnew ConsoleForm(this);
 		_consoleForm->DockAreas &= ~WeifenLuo::WinFormsUI::Docking::DockAreas::Document;
 		_viewportForm = gcnew ViewportForm;
-		_emitterPanel = gcnew EmitterPanel;
 		_propertyPanel = gcnew PropertiesPanel;
+		_emitterPanel = gcnew EmitterPanel(_propertyPanel);
 
 		// load layout for dock panels from an xml
 		_dockPanel->SuspendLayout(true);
@@ -50,7 +53,11 @@ namespace ParticleEditor
 
 		Application::Idle += gcnew EventHandler(this, &MainForm::OnIdle);
 
-		_viewStats = true;
+		_particleSystem = 0;
+		_fileName = nullptr;
+		_modified = false;
+
+		NewParticleSystem();
 	}
 
 	void MainForm::FormNotify(System::Windows::Forms::Form^ form, NotifyMessage msg)
@@ -79,28 +86,39 @@ namespace ParticleEditor
 
 	System::Void MainForm::MainForm_FormClosing(System::Object^  sender, System::Windows::Forms::FormClosingEventArgs^  e)
 	{
-		 // save layout for dock panels to xml
-		_dockPanel->SaveAsXml(Application::StartupPath + "\\" + DOCK_PANEL_XML_FILE);
+		if(PromptSave())
+		{
+			_emitterPanel->SetParticleSystem(0);
+			_particleSystem->ParticleSystem::~ParticleSystem();
+			::operator delete(_particleSystem);
+			engineAPI->partSysManager->ReleaseAll();
+			// save layout for dock panels to xml
+			_dockPanel->SaveAsXml(Application::StartupPath + "\\" + DOCK_PANEL_XML_FILE);
+		}
+		else
+		{
+			e->Cancel = true;
+		}
 	}
 
 	System::Void MainForm::_menuFileNew_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		NewParticleSystem();
 	}
 
 	System::Void MainForm::_menuFileOpen_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		LoadParticleSystem();
 	}
 
 	System::Void MainForm::_menuFileSave_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		SaveParticleSystem();
 	}
 
 	System::Void MainForm::_menuFileSaveAs_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		SaveParticleSystemAs();
 	}
 
 	System::Void MainForm::_menuFileExit_Click(System::Object^  sender, System::EventArgs^  e)
@@ -110,12 +128,12 @@ namespace ParticleEditor
 
 	System::Void MainForm::_menuViewConsole_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		ToggleForm(_consoleForm);
 	}
 
 	System::Void MainForm::_menuViewStats_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		_viewportForm->ShowStats(!_viewportForm->StatsVisible());
 	}
 
 	bool AppIsIdle()
@@ -128,7 +146,8 @@ namespace ParticleEditor
 	{
 		if(GetForegroundWindow() == (HWND)Handle.ToPointer())
 		{
-			_menuViewStats->Checked = _viewStats;
+			_menuViewStats->Checked = _viewportForm->StatsVisible();
+			_toolBtnViewConsole->Checked = _viewportForm->StatsVisible();
 			_menuViewConsole->Checked = !_consoleForm->IsHidden;
 
 			while(AppIsIdle())
@@ -137,6 +156,149 @@ namespace ParticleEditor
 				_viewportForm->Redraw();
 			}
 		}
+	}
+
+	void MainForm::NewParticleSystem()
+	{
+		if(PromptSave())
+		{
+			if(_particleSystem)
+			{
+				_particleSystem->Unload();
+				delete _particleSystem;
+			}
+
+			_particleSystem = new(mainPool) ParticleSystem;
+			_emitterPanel->SetParticleSystem(_particleSystem);
+			_consoleForm->RedrawAsync();
+			UpdateTitleBar();
+		}
+	}
+
+	bool MainForm::LoadParticleSystem()
+	{
+		if(PromptSave())
+		{
+			_openPartSysDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Particles";
+			Forms::DialogResult dlg_result = _openPartSysDialog->ShowDialog(this);
+			if(dlg_result == Forms::DialogResult::OK)
+			{
+				_particleSystem->Unload();
+				tchar* fn = GetRelativePath(_openPartSysDialog->FileName);
+				::Console::PrintLn("Loading particle system: %ls", fn);
+				bool result = _particleSystem->Load(fn);
+
+				if(result)
+				{
+					engineAPI->textureManager->LoadAll();
+					engineAPI->modelManager->LoadAll();
+					_modified = false;
+					_fileName = _openPartSysDialog->FileName;
+					_emitterPanel->SetParticleSystem(_particleSystem);
+					UpdateTitleBar();
+				}
+				else
+					::Console::PrintError("Failed to load particle system: %ls", fn);
+				delete[] fn;
+
+				_consoleForm->RedrawAsync();
+				if(!result)
+				{
+					Forms::MessageBox::Show(
+						this, "Failed to open " + _openPartSysDialog->FileName, GetAppName(),
+						MessageBoxButtons::OK, MessageBoxIcon::Error);
+				}
+				return result;
+			}
+		}
+		return false;
+	}
+
+	bool MainForm::SaveParticleSystem()
+	{
+		if(_fileName == nullptr)
+			return SaveParticleSystemAs();
+		else
+			return SaveParticleSystem(_fileName);
+	}
+
+	bool MainForm::SaveParticleSystemAs()
+	{
+		_savePartSysDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Particles";
+		Forms::DialogResult dlg_result = _savePartSysDialog->ShowDialog(this);
+		if(dlg_result != Forms::DialogResult::OK)
+			return false;
+
+		return SaveParticleSystem(_savePartSysDialog->FileName);
+	}
+
+	bool MainForm::SaveParticleSystem(String^ file_name)
+	{
+		if(!_particleSystem)
+			return false;
+
+		tchar* fn = GetRelativePath(file_name);
+		::Console::PrintLn("Saving particle system: %ls", fn);
+		bool result = _particleSystem->Save(fn);
+		if(result)
+		{
+			_modified = false;
+			_fileName = file_name;
+			UpdateTitleBar();
+		}
+		else
+		{
+			::Console::PrintError("Failed to save particle system: %ls", fn);
+		}
+		delete[] fn;
+
+		_consoleForm->RedrawAsync();
+		if(!result)
+		{
+			Forms::MessageBox::Show(
+				this, "Failed to save " + file_name, GetAppName(),
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+		}
+		return result;
+	}
+
+	// returns true to notify the caller to proceed with intended operation
+	bool MainForm::PromptSave()
+	{
+		if(_particleSystem != nullptr && _modified)
+		{
+			Forms::DialogResult result = MessageBox::Show(
+				this, "Particle system modified. Do you want to save changes?", GetAppName(),
+				MessageBoxButtons::YesNoCancel, MessageBoxIcon::Warning);
+
+			switch(result)
+			{
+			case Forms::DialogResult::Cancel:
+				return false;
+			case Forms::DialogResult::Yes:
+				return SaveParticleSystem();
+			default:
+				return true;
+			}
+		}
+
+		return true;
+	}
+
+	void MainForm::UpdateTitleBar()
+	{
+		String^ file_name = _fileName;
+		if(file_name == nullptr)
+			file_name = "<Untitled>";
+		this->Text = GetAppName() + " - " + file_name;
+	}
+
+	void MainForm::ToggleForm(WeifenLuo::WinFormsUI::Docking::DockContent^ form)
+	{
+		if(form->IsHidden)
+			form->Show(_dockPanel);
+		else
+			form->Hide();
 	}
 
 }

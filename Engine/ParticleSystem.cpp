@@ -274,10 +274,6 @@ namespace Engine
 			}
 		}
 
-		// particle system closing brace
-		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_CLOSE_BRACE))
-			{ Unload(); return false; }
-
 		return true;
 	}
 
@@ -299,7 +295,7 @@ namespace Engine
 		for(List<Emitter*>::ConstIterator it = _emitters.Begin(); it != _emitters.End(); ++it)
 		{
 			Emitter& emitter = **it;
-			file->Printf("\temitter\t%s\n{\n", emitter.GetName());
+			file->Printf("\n\temitter\t%s\n\t{\n", emitter.GetName());
 			file->Printf("\t\temitterType\t\t%s\n", Emitter::GetEmitterTypeString(emitter.GetEmitterType()));
 			file->Printf("\t\temitterShader\t\t%s\n", Emitter::GetEmitterShaderString(emitter.GetShader()));
 			file->Printf("\t\tparticleType\t\t%s\n", Emitter::GetParticleTypeString(emitter.GetParticleType()));
@@ -313,7 +309,7 @@ namespace Engine
 			file->Printf("\t\tresource\t\t\"%ls\"\n", tstr);
 
 			file->Printf("\t\tlifeStart\t\t%f\n", emitter.GetLifeStart());
-			file->Printf("\t\tlifeStart\t\t%f\n", emitter.GetLife());
+			file->Printf("\t\tlife\t\t%f\n", emitter.GetLife());
 			file->Printf("\t\tloop\t\t%s\n", emitter.GetLoop()? "True": "False");
 			file->Printf("\t\timplode\t\t%s\n", emitter.GetImplode()? "True": "False");
 			file->Printf("\t\temitFromEdge\t\t%s\n", emitter.EmitFromEdge()? "True": "False");
@@ -321,13 +317,13 @@ namespace Engine
 			file->Printf("\t\tparticleLife\t\t%f\n", emitter.GetParticleLife());
 			file->Printf("\t\tparticleRandomOrient\t\t%s\n", emitter.GetParticleRandomOrient()? "True": "False");
 
-			file->Printf("\n\t\tattributes\n{\n");
+			file->Printf("\n\t\tattributes\n\t\t{\n");
 			Attribute** attribs = emitter.GetAttributeArray();
 			for(int i = 0; i < Emitter::ATTRIB_COUNT; ++i)
 			{
 				int val_count = attribs[i]->GetValueCount();
 				const Attribute::Value* values = attribs[i]->GetValues();
-				file->Printf("\t\t%s\t%d\t{ ", Emitter::GetAttributeName(i), val_count);
+				file->Printf("\t\t\t%s\t\t%d\t\t{ ", Emitter::GetAttributeName(i), val_count);
 				for(int j = 0; j < val_count; ++j)
 				{
 					file->Printf("[%f %f]", values[j].variable, values[j].value);
@@ -451,7 +447,7 @@ namespace Engine
 				{ delete[] values; return false; }
 
 			if(	token.type != Parser::TOK_PUNCTUATION ||
-				(token.subTypePunct != Parser::PUNCT_COMMA || token.subTypePunct != Parser::PUNCT_CLOSE_BRACE) )
+				(token.subTypePunct != Parser::PUNCT_COMMA && token.subTypePunct != Parser::PUNCT_CLOSE_BRACE) )
 			{
 				delete[] values;
 				return false;
@@ -566,7 +562,7 @@ namespace Engine
 	const char* ParticleSystem::Emitter::_attribNames[] =
 	{
 		"Velocity",
-		"Size",
+		"EmitterSize",
 		"EmitAngle",
 		"EmitRate",
 		"OffsetX",
@@ -653,6 +649,8 @@ namespace Engine
 
 		if(_model)
 			engineAPI.modelManager->ReleaseModel(_model);
+
+		delete[] _liveParticles;
 	}
 
 	ParticleSystem::Emitter& ParticleSystem::Emitter::operator = (const Emitter& emitter)

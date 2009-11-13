@@ -16,6 +16,8 @@ namespace ParticleEditor
 
 		void ShowStats(bool stats)
 			{ _stats = stats; }
+		bool StatsVisible()
+			{ return _stats; }
 		void Draw()
 			{ OnPaint(); }
 		void UpdateFrame();

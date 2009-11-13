@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Utility.h"
+#include "PropertiesPanel.h"
 #include "EmitterPanel.h"
 
 using namespace Engine;
@@ -26,7 +27,27 @@ namespace ParticleEditor
 	};
 
 
-	EmitterPanel::EmitterPanel(void)
+	static float g_attribValueRanges[ParticleSystem::Emitter::ATTRIB_COUNT][2] =
+	{
+		{ -10.0f, 10.0f },
+		{ 0.0f, 100.0f },
+		{ 0.0f, 360.0f },
+		{ 0.0f, 200.0f },
+		{ 0.0f, 10.0f },
+		{ 0.0f, 10.0f },
+		{ 0.0f, 10.0f },
+		{ -360.0f, 360.0f },
+		{ -360.0f, 360.0f },
+		{ -360.0f, 360.0f },
+		{ 0.0f, 1.0f },
+		{ -360.0f, 360.0f },
+		{ 0.0f, 1.0f },
+		{ -10.0f, 10.0f },
+		{ 0.0f, 1.0f },
+	};
+
+
+	EmitterPanel::EmitterPanel(PropertiesPanel^ properties_panel)
 	{
 		InitializeComponent();
 
@@ -54,6 +75,7 @@ namespace ParticleEditor
 
 		_particleSys = 0;
 		_selectedEmitter = 0;
+		_propertiesPanel = properties_panel;
 		UpdateControls();
 	}
 
@@ -318,6 +340,8 @@ namespace ParticleEditor
 			char* name = ConvertString<char>(_textName->Text);
 			_selectedEmitter->SetName(name);
 			delete[] name;
+
+			_listEmitters->SelectedItems[0]->Text = _textName->Text;
 		}
 	}
 
@@ -423,7 +447,18 @@ namespace ParticleEditor
 
 	System::Void EmitterPanel::_listEmitterProperties_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		if(_selectedEmitter && _listEmitterProperties->SelectedIndex != -1)
+		{
+			ParticleSystem::Attribute** attribs = _selectedEmitter->GetAttributeArray();
+			int attr_index = _listEmitterProperties->SelectedIndex;
+			String^ name = gcnew String(ParticleSystem::Emitter::GetAttributeName(attr_index));
+			float time = (attr_index > 9)? _selectedEmitter->GetParticleLife(): _selectedEmitter->GetLife();
+			_propertiesPanel->SetGraphAttribute(attribs[attr_index], name, time, g_attribValueRanges[attr_index][0], g_attribValueRanges[attr_index][1]);
+		}
+		else
+		{
+			_propertiesPanel->SetGraphAttribute(0, "", 0.0f, 0.0f, 0.0f);
+		}
 	}
 
 	System::Void EmitterPanel::_numParticleLife_ValueChanged(System::Object^  sender, System::EventArgs^  e)

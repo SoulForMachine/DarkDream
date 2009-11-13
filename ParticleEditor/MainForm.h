@@ -69,6 +69,11 @@ namespace ParticleEditor {
 
 	private: System::Windows::Forms::OpenFileDialog^  _openPartSysDialog;
 	private: System::Windows::Forms::SaveFileDialog^  _savePartSysDialog;
+	private: System::Windows::Forms::ToolStripButton^  _toolBtnNew;
+	private: System::Windows::Forms::ToolStripButton^  _toolBtnOpen;
+	private: System::Windows::Forms::ToolStripButton^  _toolBtnSave;
+	private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
+	private: System::Windows::Forms::ToolStripButton^  _toolBtnViewConsole;
 
 
 
@@ -79,13 +84,23 @@ namespace ParticleEditor {
 		System::ComponentModel::Container ^components;
 
 		WeifenLuo::WinFormsUI::Docking::IDockContent^ GetContentFromPersistString(String^ persistString);
+		void NewParticleSystem();
+		bool LoadParticleSystem();
+		bool SaveParticleSystem();
+		bool SaveParticleSystemAs();
+		bool SaveParticleSystem(String^ file_name);
+		bool PromptSave();
+		void UpdateTitleBar();
+		void ToggleForm(WeifenLuo::WinFormsUI::Docking::DockContent^ form);
 
 		WeifenLuo::WinFormsUI::Docking::DeserializeDockContent^ _deserializeDockContent;
 		EditorCommon::ConsoleForm^ _consoleForm;
 		ViewportForm^ _viewportForm;
 		EmitterPanel^ _emitterPanel;
 		PropertiesPanel^ _propertyPanel;
-		bool _viewStats;
+		Engine::ParticleSystem* _particleSystem;
+		String^ _fileName;
+		bool _modified;
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -94,21 +109,22 @@ namespace ParticleEditor {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			WeifenLuo::WinFormsUI::Docking::DockPanelSkin^  dockPanelSkin9 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanelSkin());
-			WeifenLuo::WinFormsUI::Docking::AutoHideStripSkin^  autoHideStripSkin9 = (gcnew WeifenLuo::WinFormsUI::Docking::AutoHideStripSkin());
-			WeifenLuo::WinFormsUI::Docking::DockPanelGradient^  dockPanelGradient25 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanelGradient());
-			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient57 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
-			WeifenLuo::WinFormsUI::Docking::DockPaneStripSkin^  dockPaneStripSkin9 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPaneStripSkin());
-			WeifenLuo::WinFormsUI::Docking::DockPaneStripGradient^  dockPaneStripGradient9 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPaneStripGradient());
-			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient58 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
-			WeifenLuo::WinFormsUI::Docking::DockPanelGradient^  dockPanelGradient26 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanelGradient());
-			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient59 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
-			WeifenLuo::WinFormsUI::Docking::DockPaneStripToolWindowGradient^  dockPaneStripToolWindowGradient9 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPaneStripToolWindowGradient());
-			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient60 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
-			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient61 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
-			WeifenLuo::WinFormsUI::Docking::DockPanelGradient^  dockPanelGradient27 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanelGradient());
-			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient62 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
-			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient63 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(MainForm::typeid));
+			WeifenLuo::WinFormsUI::Docking::DockPanelSkin^  dockPanelSkin1 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanelSkin());
+			WeifenLuo::WinFormsUI::Docking::AutoHideStripSkin^  autoHideStripSkin1 = (gcnew WeifenLuo::WinFormsUI::Docking::AutoHideStripSkin());
+			WeifenLuo::WinFormsUI::Docking::DockPanelGradient^  dockPanelGradient1 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanelGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient1 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			WeifenLuo::WinFormsUI::Docking::DockPaneStripSkin^  dockPaneStripSkin1 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPaneStripSkin());
+			WeifenLuo::WinFormsUI::Docking::DockPaneStripGradient^  dockPaneStripGradient1 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPaneStripGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient2 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			WeifenLuo::WinFormsUI::Docking::DockPanelGradient^  dockPanelGradient2 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanelGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient3 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			WeifenLuo::WinFormsUI::Docking::DockPaneStripToolWindowGradient^  dockPaneStripToolWindowGradient1 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPaneStripToolWindowGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient4 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient5 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			WeifenLuo::WinFormsUI::Docking::DockPanelGradient^  dockPanelGradient3 = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanelGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient6 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
+			WeifenLuo::WinFormsUI::Docking::TabGradient^  tabGradient7 = (gcnew WeifenLuo::WinFormsUI::Docking::TabGradient());
 			this->_mainMenu = (gcnew System::Windows::Forms::MenuStrip());
 			this->fileToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_menuFileNew = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -125,7 +141,13 @@ namespace ParticleEditor {
 			this->_dockPanel = (gcnew WeifenLuo::WinFormsUI::Docking::DockPanel());
 			this->_openPartSysDialog = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->_savePartSysDialog = (gcnew System::Windows::Forms::SaveFileDialog());
+			this->_toolBtnNew = (gcnew System::Windows::Forms::ToolStripButton());
+			this->_toolBtnOpen = (gcnew System::Windows::Forms::ToolStripButton());
+			this->_toolBtnSave = (gcnew System::Windows::Forms::ToolStripButton());
+			this->toolStripSeparator1 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->_toolBtnViewConsole = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_mainMenu->SuspendLayout();
+			this->_mainToolbar->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// _mainMenu
@@ -148,6 +170,7 @@ namespace ParticleEditor {
 			// 
 			// _menuFileNew
 			// 
+			this->_menuFileNew->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_menuFileNew.Image")));
 			this->_menuFileNew->Name = L"_menuFileNew";
 			this->_menuFileNew->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::N));
 			this->_menuFileNew->Size = System::Drawing::Size(152, 22);
@@ -156,6 +179,7 @@ namespace ParticleEditor {
 			// 
 			// _menuFileOpen
 			// 
+			this->_menuFileOpen->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_menuFileOpen.Image")));
 			this->_menuFileOpen->Name = L"_menuFileOpen";
 			this->_menuFileOpen->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::O));
 			this->_menuFileOpen->Size = System::Drawing::Size(152, 22);
@@ -164,6 +188,7 @@ namespace ParticleEditor {
 			// 
 			// _menuFileSave
 			// 
+			this->_menuFileSave->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_menuFileSave.Image")));
 			this->_menuFileSave->Name = L"_menuFileSave";
 			this->_menuFileSave->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::S));
 			this->_menuFileSave->Size = System::Drawing::Size(152, 22);
@@ -200,6 +225,7 @@ namespace ParticleEditor {
 			// 
 			// _menuViewConsole
 			// 
+			this->_menuViewConsole->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_menuViewConsole.Image")));
 			this->_menuViewConsole->Name = L"_menuViewConsole";
 			this->_menuViewConsole->Size = System::Drawing::Size(152, 22);
 			this->_menuViewConsole->Text = L"&Console";
@@ -222,6 +248,8 @@ namespace ParticleEditor {
 			// 
 			// _mainToolbar
 			// 
+			this->_mainToolbar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) {this->_toolBtnNew, this->_toolBtnOpen, 
+				this->_toolBtnSave, this->toolStripSeparator1, this->_toolBtnViewConsole});
 			this->_mainToolbar->Location = System::Drawing::Point(0, 24);
 			this->_mainToolbar->Name = L"_mainToolbar";
 			this->_mainToolbar->Size = System::Drawing::Size(875, 25);
@@ -237,50 +265,50 @@ namespace ParticleEditor {
 			this->_dockPanel->Location = System::Drawing::Point(0, 49);
 			this->_dockPanel->Name = L"_dockPanel";
 			this->_dockPanel->Size = System::Drawing::Size(875, 513);
-			dockPanelGradient25->EndColor = System::Drawing::SystemColors::ControlLight;
-			dockPanelGradient25->StartColor = System::Drawing::SystemColors::ControlLight;
-			autoHideStripSkin9->DockStripGradient = dockPanelGradient25;
-			tabGradient57->EndColor = System::Drawing::SystemColors::Control;
-			tabGradient57->StartColor = System::Drawing::SystemColors::Control;
-			tabGradient57->TextColor = System::Drawing::SystemColors::ControlDarkDark;
-			autoHideStripSkin9->TabGradient = tabGradient57;
-			dockPanelSkin9->AutoHideStripSkin = autoHideStripSkin9;
-			tabGradient58->EndColor = System::Drawing::SystemColors::ControlLightLight;
-			tabGradient58->StartColor = System::Drawing::SystemColors::ControlLightLight;
-			tabGradient58->TextColor = System::Drawing::SystemColors::ControlText;
-			dockPaneStripGradient9->ActiveTabGradient = tabGradient58;
-			dockPanelGradient26->EndColor = System::Drawing::SystemColors::Control;
-			dockPanelGradient26->StartColor = System::Drawing::SystemColors::Control;
-			dockPaneStripGradient9->DockStripGradient = dockPanelGradient26;
-			tabGradient59->EndColor = System::Drawing::SystemColors::ControlLight;
-			tabGradient59->StartColor = System::Drawing::SystemColors::ControlLight;
-			tabGradient59->TextColor = System::Drawing::SystemColors::ControlText;
-			dockPaneStripGradient9->InactiveTabGradient = tabGradient59;
-			dockPaneStripSkin9->DocumentGradient = dockPaneStripGradient9;
-			tabGradient60->EndColor = System::Drawing::SystemColors::ActiveCaption;
-			tabGradient60->LinearGradientMode = System::Drawing::Drawing2D::LinearGradientMode::Vertical;
-			tabGradient60->StartColor = System::Drawing::SystemColors::GradientActiveCaption;
-			tabGradient60->TextColor = System::Drawing::SystemColors::ActiveCaptionText;
-			dockPaneStripToolWindowGradient9->ActiveCaptionGradient = tabGradient60;
-			tabGradient61->EndColor = System::Drawing::SystemColors::Control;
-			tabGradient61->StartColor = System::Drawing::SystemColors::Control;
-			tabGradient61->TextColor = System::Drawing::SystemColors::ControlText;
-			dockPaneStripToolWindowGradient9->ActiveTabGradient = tabGradient61;
-			dockPanelGradient27->EndColor = System::Drawing::SystemColors::ControlLight;
-			dockPanelGradient27->StartColor = System::Drawing::SystemColors::ControlLight;
-			dockPaneStripToolWindowGradient9->DockStripGradient = dockPanelGradient27;
-			tabGradient62->EndColor = System::Drawing::SystemColors::GradientInactiveCaption;
-			tabGradient62->LinearGradientMode = System::Drawing::Drawing2D::LinearGradientMode::Vertical;
-			tabGradient62->StartColor = System::Drawing::SystemColors::GradientInactiveCaption;
-			tabGradient62->TextColor = System::Drawing::SystemColors::ControlText;
-			dockPaneStripToolWindowGradient9->InactiveCaptionGradient = tabGradient62;
-			tabGradient63->EndColor = System::Drawing::Color::Transparent;
-			tabGradient63->StartColor = System::Drawing::Color::Transparent;
-			tabGradient63->TextColor = System::Drawing::SystemColors::ControlDarkDark;
-			dockPaneStripToolWindowGradient9->InactiveTabGradient = tabGradient63;
-			dockPaneStripSkin9->ToolWindowGradient = dockPaneStripToolWindowGradient9;
-			dockPanelSkin9->DockPaneStripSkin = dockPaneStripSkin9;
-			this->_dockPanel->Skin = dockPanelSkin9;
+			dockPanelGradient1->EndColor = System::Drawing::SystemColors::ControlLight;
+			dockPanelGradient1->StartColor = System::Drawing::SystemColors::ControlLight;
+			autoHideStripSkin1->DockStripGradient = dockPanelGradient1;
+			tabGradient1->EndColor = System::Drawing::SystemColors::Control;
+			tabGradient1->StartColor = System::Drawing::SystemColors::Control;
+			tabGradient1->TextColor = System::Drawing::SystemColors::ControlDarkDark;
+			autoHideStripSkin1->TabGradient = tabGradient1;
+			dockPanelSkin1->AutoHideStripSkin = autoHideStripSkin1;
+			tabGradient2->EndColor = System::Drawing::SystemColors::ControlLightLight;
+			tabGradient2->StartColor = System::Drawing::SystemColors::ControlLightLight;
+			tabGradient2->TextColor = System::Drawing::SystemColors::ControlText;
+			dockPaneStripGradient1->ActiveTabGradient = tabGradient2;
+			dockPanelGradient2->EndColor = System::Drawing::SystemColors::Control;
+			dockPanelGradient2->StartColor = System::Drawing::SystemColors::Control;
+			dockPaneStripGradient1->DockStripGradient = dockPanelGradient2;
+			tabGradient3->EndColor = System::Drawing::SystemColors::ControlLight;
+			tabGradient3->StartColor = System::Drawing::SystemColors::ControlLight;
+			tabGradient3->TextColor = System::Drawing::SystemColors::ControlText;
+			dockPaneStripGradient1->InactiveTabGradient = tabGradient3;
+			dockPaneStripSkin1->DocumentGradient = dockPaneStripGradient1;
+			tabGradient4->EndColor = System::Drawing::SystemColors::ActiveCaption;
+			tabGradient4->LinearGradientMode = System::Drawing::Drawing2D::LinearGradientMode::Vertical;
+			tabGradient4->StartColor = System::Drawing::SystemColors::GradientActiveCaption;
+			tabGradient4->TextColor = System::Drawing::SystemColors::ActiveCaptionText;
+			dockPaneStripToolWindowGradient1->ActiveCaptionGradient = tabGradient4;
+			tabGradient5->EndColor = System::Drawing::SystemColors::Control;
+			tabGradient5->StartColor = System::Drawing::SystemColors::Control;
+			tabGradient5->TextColor = System::Drawing::SystemColors::ControlText;
+			dockPaneStripToolWindowGradient1->ActiveTabGradient = tabGradient5;
+			dockPanelGradient3->EndColor = System::Drawing::SystemColors::ControlLight;
+			dockPanelGradient3->StartColor = System::Drawing::SystemColors::ControlLight;
+			dockPaneStripToolWindowGradient1->DockStripGradient = dockPanelGradient3;
+			tabGradient6->EndColor = System::Drawing::SystemColors::GradientInactiveCaption;
+			tabGradient6->LinearGradientMode = System::Drawing::Drawing2D::LinearGradientMode::Vertical;
+			tabGradient6->StartColor = System::Drawing::SystemColors::GradientInactiveCaption;
+			tabGradient6->TextColor = System::Drawing::SystemColors::ControlText;
+			dockPaneStripToolWindowGradient1->InactiveCaptionGradient = tabGradient6;
+			tabGradient7->EndColor = System::Drawing::Color::Transparent;
+			tabGradient7->StartColor = System::Drawing::Color::Transparent;
+			tabGradient7->TextColor = System::Drawing::SystemColors::ControlDarkDark;
+			dockPaneStripToolWindowGradient1->InactiveTabGradient = tabGradient7;
+			dockPaneStripSkin1->ToolWindowGradient = dockPaneStripToolWindowGradient1;
+			dockPanelSkin1->DockPaneStripSkin = dockPaneStripSkin1;
+			this->_dockPanel->Skin = dockPanelSkin1;
 			this->_dockPanel->TabIndex = 3;
 			// 
 			// _openPartSysDialog
@@ -293,6 +321,52 @@ namespace ParticleEditor {
 			this->_savePartSysDialog->DefaultExt = L"part";
 			this->_savePartSysDialog->Filter = L"Particle System Files (*.part)|*.part|All Files (*.*)|*.*";
 			this->_savePartSysDialog->Title = L"Save Particle System";
+			// 
+			// _toolBtnNew
+			// 
+			this->_toolBtnNew->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnNew->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnNew.Image")));
+			this->_toolBtnNew->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnNew->Name = L"_toolBtnNew";
+			this->_toolBtnNew->Size = System::Drawing::Size(23, 22);
+			this->_toolBtnNew->Text = L"New";
+			this->_toolBtnNew->Click += gcnew System::EventHandler(this, &MainForm::_menuFileNew_Click);
+			// 
+			// _toolBtnOpen
+			// 
+			this->_toolBtnOpen->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnOpen->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnOpen.Image")));
+			this->_toolBtnOpen->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnOpen->Name = L"_toolBtnOpen";
+			this->_toolBtnOpen->Size = System::Drawing::Size(23, 22);
+			this->_toolBtnOpen->Text = L"Open";
+			this->_toolBtnOpen->Click += gcnew System::EventHandler(this, &MainForm::_menuFileOpen_Click);
+			// 
+			// _toolBtnSave
+			// 
+			this->_toolBtnSave->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnSave->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnSave.Image")));
+			this->_toolBtnSave->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnSave->Name = L"_toolBtnSave";
+			this->_toolBtnSave->Size = System::Drawing::Size(23, 22);
+			this->_toolBtnSave->Text = L"Save";
+			this->_toolBtnSave->Click += gcnew System::EventHandler(this, &MainForm::_menuFileSave_Click);
+			// 
+			// toolStripSeparator1
+			// 
+			this->toolStripSeparator1->Name = L"toolStripSeparator1";
+			this->toolStripSeparator1->Size = System::Drawing::Size(6, 25);
+			// 
+			// _toolBtnViewConsole
+			// 
+			this->_toolBtnViewConsole->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnViewConsole->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnViewConsole.Image")));
+			this->_toolBtnViewConsole->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnViewConsole->Name = L"_toolBtnViewConsole";
+			this->_toolBtnViewConsole->Size = System::Drawing::Size(23, 22);
+			this->_toolBtnViewConsole->Text = L"Console";
+			this->_toolBtnViewConsole->ToolTipText = L"Show/Hide Console";
+			this->_toolBtnViewConsole->Click += gcnew System::EventHandler(this, &MainForm::_menuViewConsole_Click);
 			// 
 			// MainForm
 			// 
@@ -310,6 +384,8 @@ namespace ParticleEditor {
 			this->FormClosing += gcnew System::Windows::Forms::FormClosingEventHandler(this, &MainForm::MainForm_FormClosing);
 			this->_mainMenu->ResumeLayout(false);
 			this->_mainMenu->PerformLayout();
+			this->_mainToolbar->ResumeLayout(false);
+			this->_mainToolbar->PerformLayout();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 

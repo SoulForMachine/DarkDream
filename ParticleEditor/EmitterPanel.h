@@ -10,6 +10,9 @@ using namespace System::Drawing;
 
 namespace ParticleEditor {
 
+	ref class PropertiesPanel;
+
+
 	/// <summary>
 	/// Summary for EmitterPanel
 	///
@@ -22,7 +25,7 @@ namespace ParticleEditor {
 	public ref class EmitterPanel : public WeifenLuo::WinFormsUI::Docking::DockContent
 	{
 	public:
-		EmitterPanel(void);
+		EmitterPanel(PropertiesPanel^ properties_panel);
 
 		void SetParticleSystem(Engine::ParticleSystem* part_sys);
 
@@ -107,6 +110,7 @@ namespace ParticleEditor {
 
 		Engine::ParticleSystem* _particleSys;
 		Engine::ParticleSystem::Emitter* _selectedEmitter;
+		PropertiesPanel^ _propertiesPanel;
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -432,6 +436,7 @@ namespace ParticleEditor {
 			this->_listEmitters->FullRowSelect = true;
 			this->_listEmitters->GridLines = true;
 			this->_listEmitters->HeaderStyle = System::Windows::Forms::ColumnHeaderStyle::None;
+			this->_listEmitters->HideSelection = false;
 			this->_listEmitters->Location = System::Drawing::Point(12, 12);
 			this->_listEmitters->MultiSelect = false;
 			this->_listEmitters->Name = L"_listEmitters";

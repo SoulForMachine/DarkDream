@@ -35,6 +35,8 @@ namespace ParticleEditor {
 			{ _renderWindow->UpdateFrame(); }
 		void ShowStats(bool stats)
 			{ _renderWindow->ShowStats(stats); }
+		bool StatsVisible()
+			{ return _renderWindow->StatsVisible(); }
 
 	protected:
 		/// <summary>
