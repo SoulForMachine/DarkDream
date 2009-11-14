@@ -237,7 +237,7 @@ namespace ParticleEditor
 			emitter->Velocity.SetValues(vel, COUNTOF(vel));
 
 			ParticleSystem::Attribute::Value size[] = { { 0.0f, 0.25f }, { 1.0f, 0.25f } };
-			emitter->Size.SetValues(size, COUNTOF(size));
+			emitter->EmitterSize.SetValues(size, COUNTOF(size));
 
 			ParticleSystem::Attribute::Value angle[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f } };
 			emitter->EmitAngle.SetValues(angle, COUNTOF(angle));
@@ -442,7 +442,10 @@ namespace ParticleEditor
 	System::Void EmitterPanel::_numEmitterLife_ValueChanged(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_selectedEmitter)
+		{
 			_selectedEmitter->SetLife(Decimal::ToSingle(_numEmitterLife->Value));
+			_listEmitterProperties->SelectedIndex = -1;
+		}
 	}
 
 	System::Void EmitterPanel::_listEmitterProperties_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e)
@@ -464,7 +467,10 @@ namespace ParticleEditor
 	System::Void EmitterPanel::_numParticleLife_ValueChanged(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_selectedEmitter)
+		{
 			_selectedEmitter->SetParticleLife(Decimal::ToSingle(_numParticleLife->Value));
+			_listEmitterProperties->SelectedIndex = -1;
+		}
 	}
 
 	System::Void EmitterPanel::_checkRandomOrient_Click(System::Object^  sender, System::EventArgs^  e)

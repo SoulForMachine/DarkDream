@@ -243,6 +243,24 @@ namespace math3d
 				point.y >= rect.y && point.y <= rect.w);
 	}
 
+	template <class _ST>
+	inline
+	void rotate_90_ccw_2d(vec2<_ST>& vector)
+	{
+		_ST t = vector.x;
+		vector.x = -vector.y;
+		vector.y = t;
+	}
+
+	template <class _ST>
+	inline
+	void rotate_90_cw_2d(vec2<_ST>& vector)
+	{
+		_ST t = vector.x;
+		vector.x = vector.y;
+		vector.y = -t;
+	}
+
 }
 
 

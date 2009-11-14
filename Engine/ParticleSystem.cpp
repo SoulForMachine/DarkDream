@@ -357,6 +357,10 @@ namespace Engine
 
 	void ParticleSystem::Update(float frame_time)
 	{
+		for(List<Emitter*>::Iterator it = _emitters.Begin(); it != _emitters.End(); ++it)
+		{
+			(*it)->Update(frame_time);
+		}
 	}
 
 	int ParticleSystem::AddEmitter(Emitter& emitter)
@@ -489,6 +493,7 @@ namespace Engine
 	void ParticleSystem::Attribute::SetValues(const Value* values, int value_count)
 	{
 		delete[] _values;
+		_values = 0;
 		_valueCount = 0;
 		if(value_count)
 		{
@@ -582,12 +587,16 @@ namespace Engine
 	ParticleSystem::Emitter::Emitter()
 		: _particlePool(MAX_PARTICLES)
 	{
-		_liveParticles = new(mapPool) Particle*[MAX_PARTICLES];
+		_liveParticles[0] = new(mapPool) Particle*[MAX_PARTICLES];
+		_liveParticles[1] = new(mapPool) Particle*[MAX_PARTICLES];
+		_partBufInd = 0;
 		_liveCount = 0;
+		_age = 0.0f;
 		_enabled = true;
+		_alive = true;
 
 		_attributes[0] = &Velocity;
-		_attributes[1] = &Size;
+		_attributes[1] = &EmitterSize;
 		_attributes[2] = &EmitAngle;
 		_attributes[3] = &EmitRate;
 		_attributes[4] = &OffsetX;
@@ -621,10 +630,12 @@ namespace Engine
 	ParticleSystem::Emitter::Emitter(const Emitter& emitter)
 		: _particlePool(MAX_PARTICLES)
 	{
-		_liveParticles = new(mapPool) Particle*[MAX_PARTICLES];
+		_liveParticles[0] = new(mapPool) Particle*[MAX_PARTICLES];
+		_liveParticles[1] = new(mapPool) Particle*[MAX_PARTICLES];
+		_partBufInd = 0;
 
 		_attributes[0] = &Velocity;
-		_attributes[1] = &Size;
+		_attributes[1] = &EmitterSize;
 		_attributes[2] = &EmitAngle;
 		_attributes[3] = &EmitRate;
 		_attributes[4] = &OffsetX;
@@ -650,13 +661,16 @@ namespace Engine
 		if(_model)
 			engineAPI.modelManager->ReleaseModel(_model);
 
-		delete[] _liveParticles;
+		delete[] _liveParticles[0];
+		delete[] _liveParticles[1];
 	}
 
 	ParticleSystem::Emitter& ParticleSystem::Emitter::operator = (const Emitter& emitter)
 	{
 		_liveCount = 0;
+		_age = 0.0f;
 		_enabled = emitter._enabled;
+		_alive = true;
 
 		strcpy(_name, emitter._name);
 		_type = emitter._type;
@@ -679,7 +693,7 @@ namespace Engine
 		_emitFromEdge = emitter._emitFromEdge;
 		_animatedTex = emitter._animatedTex;
 		Velocity = emitter.Velocity;
-		Size = emitter.Size;
+		EmitterSize = emitter.EmitterSize;
 		EmitAngle = emitter.EmitAngle;
 		EmitRate = emitter.EmitRate;
 		OffsetX = emitter.OffsetX;
@@ -702,6 +716,87 @@ namespace Engine
 
 	void ParticleSystem::Emitter::Update(float frame_time)
 	{
+		if(!_enabled)
+			return;
+
+		// update emitter age
+		float emitter_dt = frame_time;
+		float new_age = _age + frame_time;
+		if(new_age > _life)
+		{
+			if(_loop)
+			{
+				_age = new_age - _life;
+			}
+			else
+			{
+				emitter_dt = _life - _age;
+				_alive = false;
+				_age = _life;
+			}
+		}
+		else
+		{
+			_age = new_age;
+		}
+
+		// update emitter attributes
+		float t = _age / _life;
+
+		float velocity = Velocity.Evaluate(t);
+		float em_size = EmitterSize.Evaluate(t);
+		float em_angle = EmitAngle.Evaluate(t);
+		float em_rate = EmitRate.Evaluate(t);
+		float offs_x = OffsetX.Evaluate(t);
+		float offs_y = OffsetY.Evaluate(t);
+		float offs_z = OffsetZ.Evaluate(t);
+		float rot_x = RotationX.Evaluate(t);
+		float rot_y = RotationY.Evaluate(t);
+		float rot_z = RotationZ.Evaluate(t);
+
+		// update emitter position
+
+
+		// update existing particles
+		int buf_ind = (_partBufInd + 1) & 1;
+		int count = 0;
+		for(int i = 0; i < _liveCount; ++i)
+		{
+			_liveParticles[_partBufInd][i]->age += frame_time;
+			if(_liveParticles[_partBufInd][i]->age <= _partLife)
+			{
+				_liveParticles[buf_ind][count] = _liveParticles[_partBufInd][i];
+				Particle* part = _liveParticles[buf_ind][count];
+				count++;
+
+				float t = part->age / _partLife;
+
+				float part_size = ParticleSize.Evaluate(t);
+				float part_rot_speed = ParticleRotationSpeed.Evaluate(t);
+				float part_alpha = ParticleAlpha.Evaluate(t);
+				float part_grav = ParticleGravity.Evaluate(t);
+				float part_frict = ParticleFriction.Evaluate(t);
+
+				part->size = part_size;
+				vec3f part_offs = part->direction * velocity * frame_time - 0.5f * vec3f::y_axis * part_grav * frame_time * frame_time;
+				part->position += part_offs * (1.0f - part_frict);
+				part->rotation += part_rot_speed * frame_time;
+				if(part->rotation > 360.0f)
+					part->rotation -= 360.0f;
+				else if(part->rotation < 0.0f)
+					part->rotation = 360.0f - part->rotation;
+				part->alpha = part_alpha;
+			}
+			else
+			{
+				_particlePool.Delete(_liveParticles[_partBufInd][i]);
+			}
+		}
+		_partBufInd = buf_ind;
+		_liveCount = count;
+
+		// generate new particles
+
 	}
 
 	void ParticleSystem::Emitter::SetTexture(const tchar* file_name, bool immediate)

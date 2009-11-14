@@ -87,6 +87,11 @@ namespace ParticleEditor
 
 		if(_attribute)
 		{
+			// zero line
+			float range = _maxValue - _minValue;
+			float ny = GRAPH_MARGIN + (- _minValue) / range * _graphHeight;
+			e->Graphics->DrawLine(Pens::Red, GRAPH_LEFT_MARGIN + 1, (int)ny, GRAPH_LEFT_MARGIN + _graphWidth - 1, (int)ny);
+
 			GraphicsState^ state = e->Graphics->Save();
 			e->Graphics->ResetTransform();
 
@@ -101,8 +106,12 @@ namespace ParticleEditor
 				x += step;
 			}*/
 
-			String^ text = _graphTime.ToString("f1");
+			String^ text = "0";
 			SizeF size = e->Graphics->MeasureString(text, _panelGraph->Font);
+			e->Graphics->DrawString(text, _panelGraph->Font, Brushes::Black, (float)GRAPH_LEFT_MARGIN - size.Width / 2, (float)GRAPH_MARGIN + _graphHeight + 2);
+
+			text = _graphTime.ToString("f1");
+			size = e->Graphics->MeasureString(text, _panelGraph->Font);
 			e->Graphics->DrawString(text, _panelGraph->Font, Brushes::Black, (float)GRAPH_LEFT_MARGIN + _graphWidth - size.Width / 2, (float)GRAPH_MARGIN + _graphHeight + 2);
 
 			text = _minValue.ToString("f1");
@@ -125,7 +134,6 @@ namespace ParticleEditor
 
 			int count = _attribute->GetValueCount() - 1;
 			const ParticleSystem::Attribute::Value* values = _attribute->GetValues();
-			float range = _maxValue - _minValue;
 			for(int i = 0; i < count; ++i)
 			{
 				float x1 = GRAPH_LEFT_MARGIN + values[i].variable * _graphWidth;
@@ -428,37 +436,67 @@ namespace ParticleEditor
 			int count = _attribute->GetValueCount();
 			const ParticleSystem::Attribute::Value* values = _attribute->GetValues();
 			float range = _maxValue - _minValue;
-			float x1 = float(x - GRAPH_LEFT_MARGIN) / _graphWidth;
-			float y1 = float(y - GRAPH_MARGIN) / _graphHeight * range + _minValue;
+
+			vec2f new_pt;
+			int index = -1;
 			for(int i = 0; i < count - 1; ++i)
 			{
-				vec2f pt1(values[i].variable, values[i].value);
-				vec2f pt2(values[i + 1].variable, values[i + 1].value);
+				float x1 = GRAPH_LEFT_MARGIN + values[i].variable * _graphWidth;
+				float y1 = GRAPH_MARGIN + (values[i].value - _minValue) / range * _graphHeight;
+				float x2 = GRAPH_LEFT_MARGIN + values[i + 1].variable * _graphWidth;
+				float y2 = GRAPH_MARGIN + (values[i + 1].value - _minValue) / range * _graphHeight;
+
+				vec2f pt1(x1, y1);
+				vec2f pt2(x2, y2);
 				vec2f dir = pt1 - pt2;
 				float len = dir.length();
-				float t = dir.x;
-				dir.x = dir.y;
-				dir.y = t;
+				rotate_90_ccw_2d(dir);
 				dir.normalize();
 				vec3f line(dir, -dot(dir, pt1));
 
-				vec2f new_pt;
-				vec2f point(x1, y1);
+				vec2f point((float)x, (float)y);
 				nearest_point_on_line_2d(new_pt, point, line);
-				if(	(point - new_pt).length() < 0.2f &&
+				if(	(point - new_pt).length() < 5.0f &&
 					(pt1 - new_pt).length() <= len &&
 					(pt2 - new_pt).length() <= len )
 				{
+					index = i;
+					break;
 				}
 			}
 
+			if(index != -1)
+			{
+				ParticleSystem::Attribute::Value* new_values = new(tempPool) ParticleSystem::Attribute::Value[count + 1];
+				memcpy(new_values, values, (index + 1) * sizeof(ParticleSystem::Attribute::Value));
+				new_values[index + 1].variable = float(new_pt.x - GRAPH_LEFT_MARGIN) / _graphWidth;
+				new_values[index + 1].value = float(new_pt.y - GRAPH_MARGIN) / _graphHeight * range + _minValue;
+				assert(count - index - 1 > 0);
+				memcpy(&new_values[index + 2], &values[index + 1], (count - index - 1) * sizeof(ParticleSystem::Attribute::Value));
+				_attribute->SetValues(new_values, count + 1);
+				delete[] new_values;
 
-			// new(tempPool) ParticleSystem::Attribute::Value[count];
+				_selectedPoints->Clear();
+				_panelGraph->Invalidate();
+			}
 		}
 	}
 
 	void PropertiesPanel::RemovePoint(int index)
 	{
+		if(_attribute && index > 0 && index < _attribute->GetValueCount() - 1)
+		{
+			int count = _attribute->GetValueCount();
+			const ParticleSystem::Attribute::Value* values = _attribute->GetValues();
+			ParticleSystem::Attribute::Value* new_values = new(tempPool) ParticleSystem::Attribute::Value[count - 1];
+			memcpy(new_values, values, index * sizeof(ParticleSystem::Attribute::Value));
+			memcpy(&new_values[index], &values[index + 1], (count - index - 1) * sizeof(ParticleSystem::Attribute::Value));
+			_attribute->SetValues(new_values, count - 1);
+			delete[] new_values;
+
+			_selectedPoints->Clear();
+			_panelGraph->Invalidate();
+		}
 	}
 
 }

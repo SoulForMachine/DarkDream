@@ -86,13 +86,12 @@ namespace Engine
 
 	struct ParticleSystem::Particle
 	{
-		float _age;
-		math3d::vec3f _position;
-		float _rotation;
-		float _size;
-		float _alpha;
-		float _gravity;
-		float _friction;
+		float age;
+		math3d::vec3f position;
+		math3d::vec3f direction;
+		float rotation;
+		float size;
+		float alpha;
 	};
 
 
@@ -218,7 +217,7 @@ namespace Engine
 			_attribNames
 		*/
 		Attribute Velocity;
-		Attribute Size;
+		Attribute EmitterSize;
 		Attribute EmitAngle;
 		Attribute EmitRate;
 		Attribute OffsetX;
@@ -241,10 +240,13 @@ namespace Engine
 		static const char* _attribNames[ATTRIB_COUNT];
 
 		FreePool<Particle> _particlePool;
-		Particle** _liveParticles;
+		Particle** _liveParticles[2];
+		int _partBufInd;
 		Attribute* _attributes[ATTRIB_COUNT];
 		int _liveCount;
+		float _age;
 		bool _enabled;
+		bool _alive;
 
 		char _name[EMITTER_NAME_MAX_LEN];
 		EmitterType _type;
