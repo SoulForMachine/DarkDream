@@ -88,10 +88,11 @@ namespace Engine
 	{
 		float age;
 		math3d::vec3f position;
-		math3d::vec3f direction;
+		math3d::vec3f velocity;
 		float rotation;
 		float size;
 		float alpha;
+		float frame; // animated texture frame
 	};
 
 
@@ -245,8 +246,11 @@ namespace Engine
 		Attribute* _attributes[ATTRIB_COUNT];
 		int _liveCount;
 		float _age;
+		float _emitCount;
 		bool _enabled;
 		bool _alive;
+		math3d::vec3f _emitterPos;
+		math3d::mat3f _rotMatrix;
 
 		char _name[EMITTER_NAME_MAX_LEN];
 		EmitterType _type;
@@ -259,6 +263,7 @@ namespace Engine
 		bool _implode;
 		bool _emitFromEdge;
 		bool _animatedTex;
+		int _texFrameCount;
 
 		float _partLife;
 		bool _partRandomOrient;

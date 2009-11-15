@@ -400,6 +400,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\RenderableEntity.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\RenderableEntity.h"
 			>
 		</File>

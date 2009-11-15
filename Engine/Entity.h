@@ -34,7 +34,7 @@ namespace Engine
 			{ return _position; }
 		virtual EntityType GetType() const = 0;
 
-	protected:
+	private:
 		math3d::vec3f _position;
 	};
 

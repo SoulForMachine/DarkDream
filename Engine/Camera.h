@@ -41,8 +41,6 @@ namespace Engine
 			{ return _projectionTransform; }
 		const math3d::mat4f& GetViewProjectionTransform() const;
 		virtual void SetPosition(const math3d::vec3f& pos);
-		void MoveBy(const math3d::vec3f& transl);
-		void RotateBy(float ax, float ay, float az);
 		const math3d::vec4f& GetClipPlane(ClipPlane plane);
 		float GetFOV() const; // horizontal field of view angle
 		float GetAspectRatio() const; // width / height

@@ -13,7 +13,7 @@ namespace Engine
 		_viewTransform.set_identity();
 		_projectionTransform.set_identity();
 		_viewProjectionTransform.set_identity();
-		_position.set_null();
+		SetPosition(vec3f::null);
 		_viewProjDirty = false;
 	}
 
@@ -66,9 +66,11 @@ namespace Engine
 	void Camera::LookAt(const math3d::vec3f& eye, const math3d::vec3f& at, const math3d::vec3f& up)
 	{
 		_viewTransform.look_at(eye, at, up);
-		_position.x = -dot(_viewTransform.transl_vec.rvec3, _viewTransform.x_axis.rvec3);
-		_position.y = -dot(_viewTransform.transl_vec.rvec3, _viewTransform.y_axis.rvec3);
-		_position.z = -dot(_viewTransform.transl_vec.rvec3, _viewTransform.z_axis.rvec3);
+		vec3f pos;
+		pos.x = -dot(_viewTransform.transl_vec.rvec3, _viewTransform.x_axis.rvec3);
+		pos.y = -dot(_viewTransform.transl_vec.rvec3, _viewTransform.y_axis.rvec3);
+		pos.z = -dot(_viewTransform.transl_vec.rvec3, _viewTransform.z_axis.rvec3);
+		SetPosition(pos);
 		_viewProjDirty = true;
 	}
 	
@@ -81,9 +83,11 @@ namespace Engine
 	void Camera::SetViewingTransform(const math3d::mat4f& mat)
 	{
 		_viewTransform = mat;
-		_position.x = -dot(_viewTransform.transl_vec.rvec3, _viewTransform.x_axis.rvec3);
-		_position.y = -dot(_viewTransform.transl_vec.rvec3, _viewTransform.y_axis.rvec3);
-		_position.z = -dot(_viewTransform.transl_vec.rvec3, _viewTransform.z_axis.rvec3);
+		vec3f pos;
+		pos.x = -dot(_viewTransform.transl_vec.rvec3, _viewTransform.x_axis.rvec3);
+		pos.y = -dot(_viewTransform.transl_vec.rvec3, _viewTransform.y_axis.rvec3);
+		pos.z = -dot(_viewTransform.transl_vec.rvec3, _viewTransform.z_axis.rvec3);
+		SetPosition(pos);
 		_viewProjDirty = true;
 	}
 
@@ -101,36 +105,13 @@ namespace Engine
 
 	void Camera::SetPosition(const math3d::vec3f& pos)
 	{
-		_position = pos;
+		Entity::SetPosition(pos);
 		vec3f right(_viewTransform.x_axis.x, _viewTransform.y_axis.x, _viewTransform.z_axis.x);
 		vec3f up(_viewTransform.x_axis.y, _viewTransform.y_axis.y, _viewTransform.z_axis.y);
 		vec3f forward(_viewTransform.x_axis.z, _viewTransform.y_axis.z, _viewTransform.z_axis.z);
 		_viewTransform.transl_vec.x = - dot(right, pos);
 		_viewTransform.transl_vec.y = - dot(up, pos);
 		_viewTransform.transl_vec.z = - dot(forward, pos);
-		_viewProjDirty = true;
-	}
-
-	void Camera::MoveBy(const math3d::vec3f& transl)
-	{
-		vec3f right(_viewTransform.x_axis.x, _viewTransform.y_axis.x, _viewTransform.z_axis.x);
-		vec3f up(_viewTransform.x_axis.y, _viewTransform.y_axis.y, _viewTransform.z_axis.y);
-		vec3f forward(_viewTransform.x_axis.z, _viewTransform.y_axis.z, _viewTransform.z_axis.z);
-		_position += right * transl.x + up * transl.y + forward * transl.z;
-		_viewTransform.transl_vec.x = - dot(right, _position);
-		_viewTransform.transl_vec.y = - dot(up, _position);
-		_viewTransform.transl_vec.z = - dot(forward, _position);
-		_viewProjDirty = true;
-	}
-
-	void Camera::RotateBy(float ax, float ay, float az)
-	{
-		mat3f rot, prev_rot(_viewTransform), result;
-		rot.set_rotation_z(az);
-		rot.rotate_y(ay);
-		rot.rotate_x(ax);
-		mul(result, prev_rot, rot);
-		_viewTransform.set3x3(result);
 		_viewProjDirty = true;
 	}
 

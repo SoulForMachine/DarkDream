@@ -277,6 +277,7 @@ namespace EntityEditor
 				{
 					_listMaterials->SelectedItems[0]->SubItems[1]->Text = gcnew String(file_name);
 					_listMaterials->SelectedItems[0]->Tag = false;
+					UpdateControls();
 				}
 				else
 				{
@@ -337,6 +338,7 @@ namespace EntityEditor
 						{
 							item->SubItems[1]->Text = gcnew String(file_name);
 							item->Tag = false;
+							UpdateControls();
 						}
 						else
 						{

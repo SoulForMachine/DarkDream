@@ -102,13 +102,8 @@ namespace Engine
 		bool Save(const tchar* file_name);
 		void Unload();
 
-		const math3d::mat4f& GetWorldTransform() const
-			{ return _worldMat; }
-		void SetWorldTransform(const math3d::mat4f& transform);
 		const StaticArray<math3d::mat4f>& GetJointTransforms() const
 			{ return _jointMatPalette; }
-		const OBBox& GetWorldBoundingBox() const
-			{ return _worldBBox; }
 		void MaterialChanged(const Material* material);
 		void UpdateGraphics(int frame_time);
 		bool SetActiveAnimation(const char* anim_name);
@@ -118,7 +113,6 @@ namespace Engine
 			{ _animPlaying = false; }
 		bool IsAnimationPlaying() const
 			{ return _animPlaying; }
-		virtual void SetPosition(const math3d::vec3f& pos);
 
 		const ModelRes* GetModelRes() const
 			{ return _model; }
@@ -180,8 +174,6 @@ namespace Engine
 		void BindPoseTransforms();
 		int GetShaderIndex(uint vert_flags, const Material* material);
 
-		OBBox _worldBBox; // model's world space bounding box
-		math3d::mat4f _worldMat;
 		StaticArray<math3d::mat4f> _jointMatPalette;
 		float _animTime;
 		AnimData* _curAnim;

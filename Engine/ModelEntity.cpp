@@ -31,7 +31,7 @@ namespace Engine
 
 	ModelEntity::ModelEntity()
 	{
-		_worldMat.set_identity();
+		SetWorldTransform(mat4f::identity);
 		_animTime = 0.0f;
 		_curAnim = 0;
 		_dropped = true;
@@ -63,7 +63,7 @@ namespace Engine
 	{
 		Unload();
 
-		_worldMat = entity._worldMat;
+		SetWorldTransform(entity.GetWorldTransform());
 		_dropped = entity._dropped;
 		_animPlaying = entity._animPlaying;
 
@@ -524,13 +524,6 @@ namespace Engine
 		ClearModelData();
 	}
 
-	void ModelEntity::SetWorldTransform(const mat4f& transform)
-	{
-		_worldMat = transform;
-		_position = _worldMat.transl_vec.rvec3;
-		CalcWorldBBox();
-	}
-
 	void ModelEntity::MaterialChanged(const Material* material)
 	{
 		if(_meshDataArray.GetCount())
@@ -578,7 +571,7 @@ namespace Engine
 					if(entity)
 					{
 						mat4f ent_mat;
-						mul(ent_mat, cmb_xforms[it->jointIndex], _worldMat);
+						mul(ent_mat, cmb_xforms[it->jointIndex], GetWorldTransform());
 						entity->SetWorldTransform(ent_mat);
 					}
 				}
@@ -595,7 +588,7 @@ namespace Engine
 					{
 						mat4f ent_mat;
 						const Joint* joints = _model->GetModel()->GetJoints().GetData();
-						mul(ent_mat, joints[it->jointIndex].invOffsetMatrix, _worldMat);
+						mul(ent_mat, joints[it->jointIndex].invOffsetMatrix, GetWorldTransform());
 						entity->SetWorldTransform(ent_mat);
 					}
 				}
@@ -622,13 +615,6 @@ namespace Engine
 		}
 		_animTime = 0.0f;
 		return result;
-	}
-
-	void ModelEntity::SetPosition(const vec3f& pos)
-	{
-		_position = pos;
-		_worldMat.transl_vec.rvec3 = pos;
-		CalcWorldBBox();
 	}
 
 	void ModelEntity::ClearModelData()
@@ -664,15 +650,6 @@ namespace Engine
 		_meshDataArray.Clear();
 		_jointMatPalette.Clear();
 		_jointAttachArray.Clear();
-	}
-
-	/*
-		World space bounding box
-	*/
-	void ModelEntity::CalcWorldBBox()
-	{
-		const Model* model = _model->GetModel();
-		model->GetBoundingBox().GetOrientedBBox(_worldBBox, _worldMat);
 	}
 
 	/*
@@ -733,7 +710,7 @@ namespace Engine
 			}
 		}
 
-		CalcWorldBBox();
+		SetObjectBoundingBox(model->GetBoundingBox());
 
 		_animTime = 0.0f;
 		_curAnim = 0;
@@ -1018,7 +995,7 @@ namespace Engine
 				{
 					mat4f ent_mat;
 					const Joint* joints = _model->GetModel()->GetJoints().GetData();
-					mul(ent_mat, joints[it->jointIndex].invOffsetMatrix, _worldMat);
+					mul(ent_mat, joints[it->jointIndex].invOffsetMatrix, GetWorldTransform());
 					entity->SetWorldTransform(ent_mat);
 				}
 			}

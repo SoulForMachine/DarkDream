@@ -20,6 +20,9 @@ namespace Engine
 	ParticleSystem::ParticleSystem()
 		: _emitters(mapPool)
 	{
+		SetWorldTransform(mat4f::identity);
+		AABBox bbox(vec3f(-1.0f, -1.0f, -1.0f), vec3f(1.0f, 1.0f, 1.0f));
+		SetObjectBoundingBox(bbox);
 	}
 
 	ParticleSystem::ParticleSystem(const ParticleSystem& psys)
@@ -39,6 +42,9 @@ namespace Engine
 		{
 			_emitters.PushBack(new(mapPool) Emitter(**it));
 		}
+
+		SetObjectBoundingBox(psys.GetObjectBoundingBox());
+
 		return *this;
 	}
 
@@ -62,6 +68,17 @@ namespace Engine
 			return false;
 		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
 			return false;
+
+		if(!parser.ExpectTokenString("boundingBox"))
+			return false;
+		AABBox bbox;
+		if(!parser.ReadVec3f(bbox.minPt))
+			return false;
+		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_COMMA))
+			return false;
+		if(!parser.ReadVec3f(bbox.maxPt))
+			return false;
+		SetObjectBoundingBox(bbox);
 
 		const int MAX_IDENT_LEN = 64;
 		char buf[MAX_IDENT_LEN];
@@ -291,6 +308,11 @@ namespace Engine
 
 		file->Printf("// Daemonium engine particle system file\n\n");
 		file->Printf("particleSystem\n{\n");
+
+		const AABBox& bbox = GetObjectBoundingBox();
+		file->Printf("\tboundingBox\t\t[%f %f %f], [%f %f %f]\n",
+			bbox.minPt.x, bbox.minPt.y, bbox.minPt.z,
+			bbox.maxPt.x, bbox.maxPt.y, bbox.maxPt.z);
 
 		for(List<Emitter*>::ConstIterator it = _emitters.Begin(); it != _emitters.End(); ++it)
 		{
@@ -592,8 +614,11 @@ namespace Engine
 		_partBufInd = 0;
 		_liveCount = 0;
 		_age = 0.0f;
+		_emitCount = 0.0f;
 		_enabled = true;
 		_alive = true;
+		_emitterPos.set_null();
+		_rotMatrix.set_identity();
 
 		_attributes[0] = &Velocity;
 		_attributes[1] = &EmitterSize;
@@ -622,6 +647,7 @@ namespace Engine
 		_implode = false;
 		_emitFromEdge = false;
 		_animatedTex = false;
+		_texFrameCount = 0;
 
 		_partLife = 10.0f;
 		_partRandomOrient = false;
@@ -669,8 +695,11 @@ namespace Engine
 	{
 		_liveCount = 0;
 		_age = 0.0f;
+		_emitCount = 0.0f;
 		_enabled = emitter._enabled;
 		_alive = true;
+		_emitterPos = emitter._emitterPos;
+		_rotMatrix = emitter._rotMatrix;
 
 		strcpy(_name, emitter._name);
 		_type = emitter._type;
@@ -692,6 +721,8 @@ namespace Engine
 		_implode = emitter._implode;
 		_emitFromEdge = emitter._emitFromEdge;
 		_animatedTex = emitter._animatedTex;
+		_texFrameCount = emitter._texFrameCount;
+
 		Velocity = emitter.Velocity;
 		EmitterSize = emitter.EmitterSize;
 		EmitAngle = emitter.EmitAngle;
@@ -719,44 +750,6 @@ namespace Engine
 		if(!_enabled)
 			return;
 
-		// update emitter age
-		float emitter_dt = frame_time;
-		float new_age = _age + frame_time;
-		if(new_age > _life)
-		{
-			if(_loop)
-			{
-				_age = new_age - _life;
-			}
-			else
-			{
-				emitter_dt = _life - _age;
-				_alive = false;
-				_age = _life;
-			}
-		}
-		else
-		{
-			_age = new_age;
-		}
-
-		// update emitter attributes
-		float t = _age / _life;
-
-		float velocity = Velocity.Evaluate(t);
-		float em_size = EmitterSize.Evaluate(t);
-		float em_angle = EmitAngle.Evaluate(t);
-		float em_rate = EmitRate.Evaluate(t);
-		float offs_x = OffsetX.Evaluate(t);
-		float offs_y = OffsetY.Evaluate(t);
-		float offs_z = OffsetZ.Evaluate(t);
-		float rot_x = RotationX.Evaluate(t);
-		float rot_y = RotationY.Evaluate(t);
-		float rot_z = RotationZ.Evaluate(t);
-
-		// update emitter position
-
-
 		// update existing particles
 		int buf_ind = (_partBufInd + 1) & 1;
 		int count = 0;
@@ -778,14 +771,38 @@ namespace Engine
 				float part_frict = ParticleFriction.Evaluate(t);
 
 				part->size = part_size;
-				vec3f part_offs = part->direction * velocity * frame_time - 0.5f * vec3f::y_axis * part_grav * frame_time * frame_time;
-				part->position += part_offs * (1.0f - part_frict);
+				if(_implode)
+				{
+					// check if particle is at emitter center
+					vec3f old_pos = part->position;
+					part->position += part->velocity * frame_time;
+					vec3f v1 = part->position - _emitterPos;
+					vec3f v2 = old_pos - _emitterPos;
+					if(dot(v1, v2) < 0.0f)
+					{
+						_particlePool.Delete(part);
+						count--;
+						continue;
+					}
+				}
+				else
+				{
+					vec3f part_offs = part->velocity * frame_time - 0.5f * vec3f::y_axis * part_grav * frame_time * frame_time;
+					part->position += part_offs * (1.0f - part_frict);
+				}
 				part->rotation += part_rot_speed * frame_time;
 				if(part->rotation > 360.0f)
 					part->rotation -= 360.0f;
 				else if(part->rotation < 0.0f)
 					part->rotation = 360.0f - part->rotation;
 				part->alpha = part_alpha;
+
+				if(_animatedTex)
+				{
+					part->frame += 15 * frame_time;
+					if(part->frame > (float)_texFrameCount)
+						part->frame -= _texFrameCount;
+				}
 			}
 			else
 			{
@@ -795,8 +812,122 @@ namespace Engine
 		_partBufInd = buf_ind;
 		_liveCount = count;
 
-		// generate new particles
+		if(_alive)
+		{
+			// update emitter age
+			float emitter_dt = frame_time;
+			float new_age = _age + frame_time;
+			if(new_age > _life)
+			{
+				if(_loop)
+				{
+					_age = new_age - _life;
+				}
+				else
+				{
+					emitter_dt = _life - _age;
+					_alive = false;
+					_age = _life;
+				}
+			}
+			else
+			{
+				_age = new_age;
+			}
 
+			// update emitter attributes
+			float t = _age / _life;
+
+			float velocity = Velocity.Evaluate(t);
+			float em_size = EmitterSize.Evaluate(t);
+			float em_angle = EmitAngle.Evaluate(t);
+			float em_rate = EmitRate.Evaluate(t);
+			float offs_x = OffsetX.Evaluate(t);
+			float offs_y = OffsetY.Evaluate(t);
+			float offs_z = OffsetZ.Evaluate(t);
+			float rot_x = RotationX.Evaluate(t);
+			float rot_y = RotationY.Evaluate(t);
+			float rot_z = RotationZ.Evaluate(t);
+
+			// update emitter position and direction
+			vec3f emit_dir;
+			_rotMatrix.from_euler(deg2rad(rot_x), deg2rad(rot_y), deg2rad(rot_z));
+			transform(_emitterPos, vec3f(offs_x, offs_y, offs_z), _rotMatrix);
+			emit_dir = _rotMatrix.row1;
+
+			// generate new particles
+			_emitCount += em_rate * emitter_dt;
+			int emit_count = Min((int)_emitCount, MAX_PARTICLES - _liveCount);
+			_emitCount = frac(_emitCount);
+
+			switch(_type)
+			{
+			case EMITTER_TYPE_SPHERE:
+				for(int i = 0; i < emit_count; ++i)
+				{
+					Particle* part = _liveParticles[_partBufInd][_liveCount++];
+					part->age = 0.0f;
+					part->alpha = ParticleAlpha.Evaluate(0.0f);
+					part->size = ParticleSize.Evaluate(0.0f);
+
+					{
+						vec3f dir;
+						dir.z = 2.0f * frand<float>() - 1.0f;
+						float t = 2.0f * PI * frand<float>();
+						float w = sqrt(1.0f - dir.z * dir.z);
+						dir.x = w * cos(t);
+						dir.y = w * sin(t);
+
+						part->position = _emitterPos + dir * (frand<float>() * em_size);
+					}
+
+					if(_partRandomOrient)
+						part->rotation = TWO_PI * frand<float>();
+					else
+						part->rotation = 0.0f;
+
+					if(_implode)
+					{
+						part->velocity = _emitterPos - part->position;
+						part->velocity.normalize();
+						part->velocity *= velocity;
+					}
+					else
+					{
+						vec3f dir;
+						float r = em_angle / 360.0f;
+						dir.y = 2.0f * ((1.0f - r) + frand<float>() * r) - 1.0f;
+						float t = 2.0f * PI * frand<float>();
+						float w = sqrt(1.0f - dir.y * dir.y);
+						dir.x = w * sin(t);
+						dir.z = w * cos(t);
+
+						part->velocity = dir * velocity;
+					}
+
+					part->frame = 0.0f;
+				}
+				break;
+			case EMITTER_TYPE_PLANE:
+				for(int i = 0; i < emit_count; ++i)
+				{
+
+				}
+				break;
+			case EMITTER_TYPE_CIRCLE:
+				for(int i = 0; i < emit_count; ++i)
+				{
+
+				}
+				break;
+			case EMITTER_TYPE_LINE:
+				for(int i = 0; i < emit_count; ++i)
+				{
+
+				}
+				break;
+			}
+		}
 	}
 
 	void ParticleSystem::Emitter::SetTexture(const tchar* file_name, bool immediate)

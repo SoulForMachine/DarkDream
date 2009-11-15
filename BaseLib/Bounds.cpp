@@ -4,6 +4,12 @@
 using namespace math3d;
 
 
+AABBox::AABBox(const math3d::vec3f& min_pt, const math3d::vec3f& max_pt)
+{
+	minPt = min_pt;
+	maxPt = max_pt;
+}
+
 math3d::vec3f AABBox::GetCenterPoint() const
 {
 	return (minPt + maxPt) * 0.5f;

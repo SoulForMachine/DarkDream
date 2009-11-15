@@ -126,12 +126,9 @@ inline void clamp(_ST& t, _ST low, _ST high)
 }
 
 template <class _ST>
-_ST frand(int min, int max)
+_ST frand()
 {
-	if(min >= max) return _ST(0);
-	int integ = min + rand() % (max - min);
-	_ST fract = _ST(rand() % 10001) / _ST(9999);
-	return integ + fract;
+	return _ST(rand()) / _ST(RAND_MAX);
 }
 
 template <class _ST>
