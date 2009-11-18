@@ -88,7 +88,9 @@ namespace ParticleEditor
 	{
 		if(PromptSave())
 		{
+			_viewportForm->SetParticleSystem(0);
 			_emitterPanel->SetParticleSystem(0);
+			_propertyPanel->SetParticleSystem(0);
 			_particleSystem->ParticleSystem::~ParticleSystem();
 			::operator delete(_particleSystem);
 			engineAPI->partSysManager->ReleaseAll();
@@ -169,7 +171,9 @@ namespace ParticleEditor
 			}
 
 			_particleSystem = new(mainPool) ParticleSystem;
+			_viewportForm->SetParticleSystem(_particleSystem);
 			_emitterPanel->SetParticleSystem(_particleSystem);
+			_propertyPanel->SetParticleSystem(_particleSystem);
 			_consoleForm->RedrawAsync();
 			UpdateTitleBar();
 		}
@@ -194,7 +198,9 @@ namespace ParticleEditor
 					engineAPI->modelManager->LoadAll();
 					_modified = false;
 					_fileName = _openPartSysDialog->FileName;
+					_viewportForm->SetParticleSystem(_particleSystem);
 					_emitterPanel->SetParticleSystem(_particleSystem);
+					_propertyPanel->SetParticleSystem(_particleSystem);
 					UpdateTitleBar();
 				}
 				else

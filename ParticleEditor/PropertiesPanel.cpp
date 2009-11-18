@@ -20,6 +20,7 @@ namespace ParticleEditor
 	{
 		InitializeComponent();
 
+		_particleSystem = 0;
 		_attribute = 0;
 		_graphTime = 15.0f;
 		_minValue = 0.0f;
@@ -42,6 +43,11 @@ namespace ParticleEditor
 		method->Invoke(_panelGraph, params);
 
 		UpdateValueFields();
+	}
+
+	void PropertiesPanel::SetParticleSystem(Engine::ParticleSystem* part_sys)
+	{
+		_particleSystem = part_sys;
 	}
 
 	void PropertiesPanel::SetGraphAttribute(ParticleSystem::Attribute* attrib, String^ name, float time, float min_val, float max_val)
@@ -301,7 +307,8 @@ namespace ParticleEditor
 
 	System::Void PropertiesPanel::_btnRun_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		if(_particleSystem)
+			_particleSystem->Reset();
 	}
 
 	System::Void PropertiesPanel::_checkPause_Click(System::Object^  sender, System::EventArgs^  e)

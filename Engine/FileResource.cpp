@@ -1012,16 +1012,42 @@ namespace Engine
 
 	bool PartSysRes::Load()
 	{
-		return true;
+		if(!_particleSys && _fileName && *_fileName)
+		{
+			Console::PrintLn("Loading particle system: %ls", _fileName);
+			_particleSys = new(mapPool) ParticleSystem;
+			bool result = _particleSys->Load(_fileName);
+			if(!result)
+			{
+				delete _particleSys;
+				_particleSys = 0;
+				Console::PrintError("Failed to load particle system: %ls", _fileName);
+			}
+			return result;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	bool PartSysRes::LoadDefault()
 	{
-		return false;
+		if(_particleSys)
+			return false;
+
+		_particleSys = new(mapPool) ParticleSystem;
+		return (_particleSys != 0);
 	}
 
 	void PartSysRes::Unload()
 	{
+		if(_particleSys)
+		{
+			_particleSys->Unload();
+			delete _particleSys;
+			_particleSys = 0;
+		}
 	}
 
 }

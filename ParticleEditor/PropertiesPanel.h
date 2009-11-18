@@ -25,6 +25,7 @@ namespace ParticleEditor {
 	public:
 		PropertiesPanel(void);
 
+		void SetParticleSystem(Engine::ParticleSystem* part_sys);
 		void SetGraphAttribute(Engine::ParticleSystem::Attribute* attrib, String^ name, float time, float min_val, float max_val);
 
 	protected:
@@ -84,6 +85,7 @@ namespace ParticleEditor {
 		void AddNewPoint(int x, int y);
 		void RemovePoint(int index);
 
+		Engine::ParticleSystem* _particleSystem;
 		Engine::ParticleSystem::Attribute* _attribute;
 		float _graphTime;
 		float _minValue;

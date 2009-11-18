@@ -105,7 +105,7 @@ namespace Engine
 		const StaticArray<math3d::mat4f>& GetJointTransforms() const
 			{ return _jointMatPalette; }
 		void MaterialChanged(const Material* material);
-		void UpdateGraphics(int frame_time);
+		virtual void UpdateGraphics(int frame_time);
 		bool SetActiveAnimation(const char* anim_name);
 		void PlayAnimation()
 			{ _animPlaying = true; }

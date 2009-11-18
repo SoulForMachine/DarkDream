@@ -119,13 +119,15 @@ inline _ST deg_atan2(_ST y, _ST x) { return rad2deg(atan2(y, x)); }
 	assumes that low < high 
 */
 template <class _ST>
-inline void clamp(_ST& t, _ST low, _ST high)
+inline
+void clamp(_ST& t, _ST low, _ST high)
 {
 	if(t < low) t = low;
 	else if(t > high) t = high;
 }
 
 template <class _ST>
+inline
 _ST frand()
 {
 	return _ST(rand()) / _ST(RAND_MAX);

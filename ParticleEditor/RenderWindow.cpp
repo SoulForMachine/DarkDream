@@ -25,6 +25,8 @@ namespace ParticleEditor
 		_vertProgSimple = 0;
 		_fragProgConst = 0;
 
+		_particleSystem = 0;
+
 		_rotX = 45.0f;
 		_rotY = -45.0f;
 		_panX = 0.0f;
@@ -171,6 +173,15 @@ namespace ParticleEditor
 		};
 
 		NativeWindow::WndProc(msg);
+	}
+
+	void RenderWindow::SetParticleSystem(ParticleSystem* part_sys)
+	{
+		engineAPI->world->RemoveAllEntities();
+		if(part_sys)
+			engineAPI->world->AddEntity(part_sys);
+		_particleSystem = part_sys;
+		InvalidateRect((HWND)Handle.ToPointer(), 0, FALSE);
 	}
 
 	void RenderWindow::UpdateFrame()
@@ -336,7 +347,7 @@ namespace ParticleEditor
 
 	void RenderWindow::RenderParticleSystem()
 	{
-		
+		_renderSystem->RenderParticles(_frameTime);
 	}
 
 	void RenderWindow::RenderStats()

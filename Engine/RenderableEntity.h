@@ -22,6 +22,7 @@ namespace Engine
 			{ return _worldMat; }
 		void SetWorldTransform(const math3d::mat4f& transform);
 		virtual void SetPosition(const math3d::vec3f& pos);
+		virtual void UpdateGraphics(int frame_time) = 0;
 
 	private:
 		void CalcWorldBBox();

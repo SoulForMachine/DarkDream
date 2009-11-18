@@ -125,4 +125,27 @@ namespace Engine
 		return _layerManager.GetVisibleSprites(sprites, max_sprites);
 	}
 
+	int World::GetVisibleParticleSystems(ParticleSystem** part_sys, int max_ps)
+	{
+		if(!part_sys || max_ps <= 0)
+			return 0;
+
+		int count = 0;
+		for(EntityHashMap::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
+		{
+			if((*it)->GetType() == ENTITY_TYPE_PARTICLE_SYS)
+			{
+				ParticleSystem* ps = (ParticleSystem*)*it;
+				if(_camera.IsInsideFrustum(ps->GetWorldBoundingBox()))
+				{
+					part_sys[count++] = ps;
+					if(count == max_ps)
+						break;
+				}
+			}
+		}
+
+		return count;
+	}
+
 }

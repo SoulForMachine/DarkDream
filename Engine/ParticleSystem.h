@@ -36,7 +36,7 @@ namespace Engine
 		bool Load(const tchar* file_name);
 		bool Save(const tchar* file_name) const;
 		void Unload();
-		void Update(float frame_time);
+		virtual void UpdateGraphics(int frame_time);
 
 		int AddEmitter(Emitter& emitter);
 		Emitter* AddEmitter();
@@ -45,6 +45,9 @@ namespace Engine
 		void MoveEmitterDown(Emitter& emitter);
 		List<Emitter*>& GetEmitterList()
 			{ return _emitters; }
+		const List<Emitter*>& GetEmitterList() const
+			{ return _emitters; }
+		void Reset();
 
 	private:
 		List<Emitter*>::Iterator FindEmitter(Emitter* emitter);
@@ -135,7 +138,8 @@ namespace Engine
 		~Emitter();
 		Emitter& operator = (const Emitter& emitter);
 
-		void Update(float frame_time);
+		void Update(float frame_time, const math3d::mat4f& psys_world_mat);
+		void Reset();
 
 		bool IsEnabled() const
 			{ return _enabled; }
@@ -188,6 +192,8 @@ namespace Engine
 			{ return _animatedTex; }
 		void SetAnimatedTex(bool val)
 			{ _animatedTex = val; }
+		int GetTextureFrameCount() const
+			{ return _texFrameCount; }
 
 		float GetParticleLife() const
 			{ return _partLife; }
@@ -203,6 +209,13 @@ namespace Engine
 			{ return _attributes; }
 		static const char* GetAttributeName(int index)
 			{ return _attribNames[index]; }
+
+		const Particle* const * GetParticles() const
+			{ return _liveParticles[_partBufInd]; }
+		int GetParticleCount() const
+			{ return _liveCount; }
+		const math3d::vec3f& GetPosition() const
+			{ return _emitterPos; }
 
 		static EmitterType GetEmitterTypeByString(const char* name);
 		static const char* GetEmitterTypeString(EmitterType type);
@@ -235,6 +248,11 @@ namespace Engine
 		Attribute ParticleFriction;
 
 	private:
+		void EmitSphere(int count, float em_size, float em_angle, float velocity);
+		void EmitPlane(int count, float em_size, float em_angle, float velocity);
+		void EmitCircle(int count, float em_size, float em_angle, float velocity);
+		void EmitLine(int count, float em_size, float em_angle, float velocity);
+
 		static const char* _emitterTypeStrings[EMITTER_TYPE_COUNT];
 		static const char* _emitterShaderStrings[EMITTER_SHADER_COUNT];
 		static const char* _particleTypeStrings[PARTICLE_TYPE_COUNT];

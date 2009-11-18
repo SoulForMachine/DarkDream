@@ -21,6 +21,7 @@ namespace ParticleEditor
 		void Draw()
 			{ OnPaint(); }
 		void UpdateFrame();
+		void SetParticleSystem(Engine::ParticleSystem* part_sys);
 
 	protected:
 		virtual void WndProc(Message% msg) override;
@@ -49,6 +50,7 @@ namespace ParticleEditor
 		GL::VertexFormat* _lineVertFmt;
 		const Engine::ASMProgRes* _vertProgSimple;
 		const Engine::ASMProgRes* _fragProgConst;
+		Engine::ParticleSystem* _particleSystem;
 
 		// drawing stuff
 		Engine::Font* _font;

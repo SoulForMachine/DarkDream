@@ -3,7 +3,6 @@
 #include "BaseLib/Console.h"
 #include "Engine/World.h"
 #include "Engine/EngineInternal.h"
-#include "Engine/TerrainRenderer.h"
 #include "Model.h"
 #include "Material.h"
 #include "RenderSystem.h"
@@ -101,6 +100,16 @@ namespace Engine
 			return false;
 		}
 
+		// particle system renderer
+		_particleRenderer = new(mainPool) ParticleRenderer;
+		result = _particleRenderer->Init();
+		if(!result)
+		{
+			Console::PrintError("Failed to initialize particle system rendering.");
+			Deinit();
+			return false;
+		}
+
 		// layer renderer
 		_bgLayerRenderer = new(mainPool) BgLayerRenderer;
 		result = _bgLayerRenderer->Init();
@@ -159,6 +168,12 @@ namespace Engine
 		{
 			_bgLayerRenderer->Deinit();
 			delete _bgLayerRenderer;
+		}
+
+		if(_particleRenderer)
+		{
+			_particleRenderer->Deinit();
+			delete _particleRenderer;
 		}
 
 		if(_debugRenderer)
@@ -264,6 +279,17 @@ namespace Engine
 		}
 	}
 
+	static
+	int EmitterCmpFunc(const void* el1, const void* el2)
+	{
+		const ParticleSystem::Emitter* em1 = *(ParticleSystem::Emitter**)el1;
+		const ParticleSystem::Emitter* em2 = *(ParticleSystem::Emitter**)el2;
+
+		const vec3f& cam_pos = engineAPI.world->GetCamera().GetPosition();
+		float dif = (em1->GetPosition() - cam_pos).length_sq() - (em2->GetPosition() - cam_pos).length_sq();
+		return (dif > 0.0f)? -1: 1;
+	}
+
 	void RenderSystem::RenderEntities(int frame_time)
 	{
 		int ent_count = engineAPI.world->GetVisibleEntities(_entityBuf, MAX_NUM_ENTITIES);
@@ -310,7 +336,8 @@ namespace Engine
 
 		for(size_t mesh_i = 0; mesh_i < meshes.GetCount(); ++mesh_i)
 		{
-			if(mesh_data[mesh_i].materialData->materialRes->GetMaterial()->HasTransparency())
+			if(	mesh_data[mesh_i].materialData->materialRes->GetMaterial()->HasTransparency() &&
+				_transpMeshCount < MAX_NUM_TRANSP_MESHES )
 			{
 				_transpMeshBuf[_transpMeshCount].mesh = &meshes[mesh_i];
 				_transpMeshBuf[_transpMeshCount].worldMat = &world_mat;
@@ -326,7 +353,7 @@ namespace Engine
 
 				_transpMeshCount++;
 			}
-			else
+			else if(_meshCount < MAX_NUM_MESHES)
 			{
 				_meshBuf[_meshCount].mesh = &meshes[mesh_i];
 				_meshBuf[_meshCount].worldMat = &world_mat;
@@ -336,6 +363,10 @@ namespace Engine
 				_meshBuf[_meshCount].shaderIndex = mesh_data[mesh_i].shaderIndex;
 				_meshBuf[_meshCount].eyeDistSq = 0.0f;
 				_meshCount++;
+			}
+			else
+			{
+				break;
 			}
 		}
 
@@ -377,6 +408,35 @@ namespace Engine
 		_bgLayerRenderer->Render(sprites, count);
 	}
 
+	void RenderSystem::RenderParticles(int frame_time)
+	{
+		const int MAX_PARTICLE_SYSTEMS = 128;
+		ParticleSystem* part_sys[MAX_PARTICLE_SYSTEMS];
+		ParticleSystem::Emitter* emitters[MAX_PARTICLE_SYSTEMS * 8];
+		int count = engineAPI.world->GetVisibleParticleSystems(part_sys, MAX_PARTICLE_SYSTEMS);
+		int em_count = 0;
+
+		for(int i = 0; i < count; ++i)
+		{
+			part_sys[i]->UpdateGraphics(frame_time);
+			const List<ParticleSystem::Emitter*>& em_list = part_sys[i]->GetEmitterList();
+
+			for(List<ParticleSystem::Emitter*>::ConstIterator it = em_list.Begin(); it != em_list.End(); ++it)
+			{
+				emitters[em_count++] = *it;
+				if(em_count == MAX_PARTICLE_SYSTEMS * 8)
+					break;
+			}
+
+			if(em_count == MAX_PARTICLE_SYSTEMS * 8)
+				break;
+		}
+
+		qsort(emitters, em_count, sizeof(ParticleSystem::Emitter*), EmitterCmpFunc);
+
+		_particleRenderer->Render(engineAPI.world->GetCamera(), emitters, em_count);
+	}
+
 	void RenderSystem::ReloadShaders()
 	{
 		_render2D->ReloadShaders();
@@ -393,6 +453,7 @@ namespace Engine
 		_transpMeshBuf = 0;
 		_terrainRenderer = 0;
 		_bgLayerRenderer = 0;
+		_particleRenderer = 0;
 		_debugRenderer = 0;
 	}
 

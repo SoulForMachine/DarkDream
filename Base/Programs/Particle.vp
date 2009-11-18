@@ -1,0 +1,22 @@
+!!ARBvp1.0
+
+ATTRIB		vertPos = vertex.attrib[0];
+ATTRIB		vertUV = vertex.attrib[1];
+ATTRIB		vertAlpha = vertex.attrib[2];
+
+OUTPUT		varPos = result.position;
+OUTPUT		varUV = result.texcoord[0];
+OUTPUT		varAlpha = result.texcoord[1];
+
+PARAM		viewProjMat[] = { program.local[0..3] };
+
+
+DP4			varPos.x, viewProjMat[0], vertPos;
+DP4			varPos.y, viewProjMat[1], vertPos;
+DP4			varPos.z, viewProjMat[2], vertPos;
+DP4			varPos.w, viewProjMat[3], vertPos;
+
+MOV			varUV, vertUV;
+MOV			varAlpha, vertAlpha;
+
+END

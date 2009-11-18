@@ -27,7 +27,8 @@ namespace ParticleEditor {
 	public:
 		ViewportForm(void);
 
-		//void SetParticleSystem(Engine::ParticleSystem* entity);
+		void SetParticleSystem(Engine::ParticleSystem* part_sys)
+			{ _renderWindow->SetParticleSystem(part_sys); }
 		void Redraw()
 			{ _renderWindow->Draw(); }
 		void RedrawAsync();

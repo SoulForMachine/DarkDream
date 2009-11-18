@@ -11,6 +11,7 @@
 #include "Engine/Camera.h"
 #include "Engine/Terrain.h"
 #include "Engine/BgLayer.h"
+#include "Engine/ParticleSystem.h"
 #include "Engine/EntityHashMap.h"
 
 
@@ -37,6 +38,7 @@ namespace Engine
 		int GetVisibleEntities(ModelEntity** entities, int max_entities);
 		int GetVisibleTerrainPatches(const Terrain::TerrainPatch** patches, int max_patches);
 		int GetVisibleLayerSprites(const BgLayer::Sprite** sprites, int max_sprites);
+		int GetVisibleParticleSystems(ParticleSystem** part_sys, int max_ps);
 		Camera& GetCamera()
 			{ return _camera; }
 		Terrain& GetTerrain()

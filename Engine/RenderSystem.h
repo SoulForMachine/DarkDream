@@ -9,6 +9,7 @@
 #include "TerrainRenderer.h"
 #include "EntityRenderer.h"
 #include "BgLayerRenderer.h"
+#include "ParticleRenderer.h"
 #include "DebugRenderer.h"
 
 
@@ -39,6 +40,7 @@ namespace Engine
 		void RenderTerrain(int frame_time);
 		void RenderGrass(int frame_time);
 		void RenderBgLayers(int frame_time);
+		void RenderParticles(int frame_time);
 		void ReloadShaders();
 
 		GL::Renderer* GetRenderer()
@@ -51,6 +53,8 @@ namespace Engine
 			{ return _entityRenderer; }
 		BgLayerRenderer* GetBgLayerRenderer()
 			{ return _bgLayerRenderer; }
+		ParticleRenderer* GetParticleRenderer()
+			{ return _particleRenderer; }
 		DebugRenderer* GetDebugRenderer()
 			{ return _debugRenderer; }
 
@@ -93,6 +97,7 @@ namespace Engine
 		EntityRenderer::MeshRenderData* _transpMeshBuf;
 		TerrainRenderer* _terrainRenderer;
 		BgLayerRenderer* _bgLayerRenderer;
+		ParticleRenderer* _particleRenderer;
 		DebugRenderer* _debugRenderer;
 		GL::Texture2D* _texWhite;
 		GL::Texture2D* _texBlack;

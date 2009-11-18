@@ -2,7 +2,10 @@
 #include "BaseLib/SmartPtr.h"
 #include "BaseLib/Console.h"
 #include "BaseLib/Parser.h"
+#include "BaseLib/GL/GLTexture.h"
 #include "EngineInternal.h"
+#include "Camera.h"
+#include "World.h"
 #include "FileSystem.h"
 #include "FileResource.h"
 #include "ResourceManager.h"
@@ -377,11 +380,12 @@ namespace Engine
 		_emitters.Clear();
 	}
 
-	void ParticleSystem::Update(float frame_time)
+	void ParticleSystem::UpdateGraphics(int frame_time)
 	{
+		float dt = frame_time * 0.001f;
 		for(List<Emitter*>::Iterator it = _emitters.Begin(); it != _emitters.End(); ++it)
 		{
-			(*it)->Update(frame_time);
+			(*it)->Update(dt, GetWorldTransform());
 		}
 	}
 
@@ -433,6 +437,14 @@ namespace Engine
 				List<Emitter*>::NodeType* node = _emitters.Unlink(it);
 				_emitters.Link(next_it, node);
 			}
+		}
+	}
+
+	void ParticleSystem::Reset()
+	{
+		for(List<Emitter*>::Iterator it = _emitters.Begin(); it != _emitters.End(); ++it)
+		{
+			(*it)->Reset();
 		}
 	}
 
@@ -745,10 +757,27 @@ namespace Engine
 		return *this;
 	}
 
-	void ParticleSystem::Emitter::Update(float frame_time)
+	static
+	int ParticleCompareFunc(const void* el1, const void* el2)
+	{
+		const ParticleSystem::Particle* part1 = *(ParticleSystem::Particle**)el1;
+		const ParticleSystem::Particle* part2 = *(ParticleSystem::Particle**)el2;
+
+		const vec3f& cam_pos = engineAPI.world->GetCamera().GetPosition();
+		float dif = (part1->position - cam_pos).length_sq() - (part2->position - cam_pos).length_sq();
+		return (dif > 0.0f)? -1: 1;
+	}
+
+	void ParticleSystem::Emitter::Update(float frame_time, const mat4f& psys_world_mat)
 	{
 		if(!_enabled)
 			return;
+
+		if(_animatedTex && _texture && _texture->GetTexture())
+		{
+			GL::Texture2D* tex = (GL::Texture2D*)_texture->GetTexture();
+			_texFrameCount = tex->GetWidth() / tex->GetHeight();
+		}
 
 		// update existing particles
 		int buf_ind = (_partBufInd + 1) & 1;
@@ -787,7 +816,7 @@ namespace Engine
 				}
 				else
 				{
-					vec3f part_offs = part->velocity * frame_time - 0.5f * vec3f::y_axis * part_grav * frame_time * frame_time;
+					vec3f part_offs = part->velocity * frame_time - 0.5f * part_grav * /*frame_time * */sqrt(frame_time) * vec3f::y_axis;
 					part->position += part_offs * (1.0f - part_frict);
 				}
 				part->rotation += part_rot_speed * frame_time;
@@ -850,83 +879,252 @@ namespace Engine
 			float rot_z = RotationZ.Evaluate(t);
 
 			// update emitter position and direction
-			vec3f emit_dir;
 			_rotMatrix.from_euler(deg2rad(rot_x), deg2rad(rot_y), deg2rad(rot_z));
-			transform(_emitterPos, vec3f(offs_x, offs_y, offs_z), _rotMatrix);
-			emit_dir = _rotMatrix.row1;
+			vec3f em_pos;
+			transform(em_pos, vec3f(offs_x, offs_y, offs_z), _rotMatrix);
+			transform(_emitterPos, em_pos, psys_world_mat);
 
 			// generate new particles
 			_emitCount += em_rate * emitter_dt;
 			int emit_count = Min((int)_emitCount, MAX_PARTICLES - _liveCount);
 			_emitCount = frac(_emitCount);
 
-			switch(_type)
+			if(emit_count)
 			{
-			case EMITTER_TYPE_SPHERE:
-				for(int i = 0; i < emit_count; ++i)
+				switch(_type)
 				{
-					Particle* part = _liveParticles[_partBufInd][_liveCount++];
-					part->age = 0.0f;
-					part->alpha = ParticleAlpha.Evaluate(0.0f);
-					part->size = ParticleSize.Evaluate(0.0f);
-
-					{
-						vec3f dir;
-						dir.z = 2.0f * frand<float>() - 1.0f;
-						float t = 2.0f * PI * frand<float>();
-						float w = sqrt(1.0f - dir.z * dir.z);
-						dir.x = w * cos(t);
-						dir.y = w * sin(t);
-
-						part->position = _emitterPos + dir * (frand<float>() * em_size);
-					}
-
-					if(_partRandomOrient)
-						part->rotation = TWO_PI * frand<float>();
-					else
-						part->rotation = 0.0f;
-
-					if(_implode)
-					{
-						part->velocity = _emitterPos - part->position;
-						part->velocity.normalize();
-						part->velocity *= velocity;
-					}
-					else
-					{
-						vec3f dir;
-						float r = em_angle / 360.0f;
-						dir.y = 2.0f * ((1.0f - r) + frand<float>() * r) - 1.0f;
-						float t = 2.0f * PI * frand<float>();
-						float w = sqrt(1.0f - dir.y * dir.y);
-						dir.x = w * sin(t);
-						dir.z = w * cos(t);
-
-						part->velocity = dir * velocity;
-					}
-
-					part->frame = 0.0f;
+				case EMITTER_TYPE_SPHERE:
+					EmitSphere(emit_count, em_size, em_angle, velocity);
+					break;
+				case EMITTER_TYPE_PLANE:
+					EmitPlane(emit_count, em_size, em_angle, velocity);
+					break;
+				case EMITTER_TYPE_CIRCLE:
+					EmitCircle(emit_count, em_size, em_angle, velocity);
+					break;
+				case EMITTER_TYPE_LINE:
+					EmitLine(emit_count, em_size, em_angle, velocity);
+					break;
 				}
-				break;
-			case EMITTER_TYPE_PLANE:
-				for(int i = 0; i < emit_count; ++i)
-				{
-
-				}
-				break;
-			case EMITTER_TYPE_CIRCLE:
-				for(int i = 0; i < emit_count; ++i)
-				{
-
-				}
-				break;
-			case EMITTER_TYPE_LINE:
-				for(int i = 0; i < emit_count; ++i)
-				{
-
-				}
-				break;
 			}
+		}
+
+		if(_liveCount)
+			qsort(_liveParticles[_partBufInd], _liveCount, sizeof(Particle*), ParticleCompareFunc);
+	}
+
+	void ParticleSystem::Emitter::Reset()
+	{
+		_particlePool.Reset();
+		_partBufInd = 0;
+		_liveCount = 0;
+		_age = 0.0f;
+		_alive = true;
+		_emitCount = 0.0f;
+	}
+
+	void ParticleSystem::Emitter::EmitSphere(int count, float em_size, float em_angle, float velocity)
+	{
+		for(int i = 0; i < count; ++i)
+		{
+			Particle* part = _particlePool.New();
+			_liveParticles[_partBufInd][_liveCount++] = part;
+			part->age = 0.0f;
+			part->alpha = ParticleAlpha.Evaluate(0.0f);
+			part->size = ParticleSize.Evaluate(0.0f);
+
+			{
+				vec3f dir;
+				dir.z = 2.0f * frand<float>() - 1.0f;
+				float t = TWO_PI * frand<float>();
+				float w = sqrt(1.0f - dir.z * dir.z);
+				dir.x = w * cos(t);
+				dir.y = w * sin(t);
+
+				if(_emitFromEdge)
+					part->position = _emitterPos + dir * (em_size * 0.5f);
+				else
+					part->position = _emitterPos + dir * (frand<float>() * em_size * 0.5f);
+			}
+
+			if(_partRandomOrient)
+				part->rotation = TWO_PI * frand<float>();
+			else
+				part->rotation = 0.0f;
+
+			if(_implode)
+			{
+				part->velocity = _emitterPos - part->position;
+				part->velocity.normalize();
+				part->velocity *= velocity;
+			}
+			else
+			{
+				vec3f dir, rdir;
+				float r = em_angle / 360.0f;
+				dir.y = 2.0f * ((1.0f - r) + frand<float>() * r) - 1.0f;
+				float t = TWO_PI * frand<float>();
+				float w = sqrt(1.0f - dir.y * dir.y);
+				dir.x = w * sin(t);
+				dir.z = w * cos(t);
+				transform(rdir, dir, _rotMatrix);
+
+				part->velocity = rdir * velocity;
+			}
+
+			part->frame = 0.0f;
+		}
+	}
+
+	void ParticleSystem::Emitter::EmitPlane(int count, float em_size, float em_angle, float velocity)
+	{
+		for(int i = 0; i < count; ++i)
+		{
+			Particle* part = _particlePool.New();
+			_liveParticles[_partBufInd][_liveCount++] = part;
+			part->age = 0.0f;
+			part->alpha = ParticleAlpha.Evaluate(0.0f);
+			part->size = ParticleSize.Evaluate(0.0f);
+
+			if(_emitFromEdge)
+			{
+				vec3f dir_x, dir_z;
+				if(rand() % 2)
+				{
+					dir_x = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _rotMatrix.row0;
+					dir_z = (em_size * 0.5f * ((rand() % 2)? -1.0f: 1.0f)) * _rotMatrix.row2;
+				}
+				else
+				{
+					dir_x = (em_size * 0.5f * ((rand() % 2)? -1.0f: 1.0f)) * _rotMatrix.row0;
+					dir_z = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _rotMatrix.row2;
+				}
+				part->position = _emitterPos + dir_x + dir_z;
+			}
+			else
+			{
+				vec3f dir_x = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _rotMatrix.row0;
+				vec3f dir_z = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _rotMatrix.row2;
+				part->position = _emitterPos + dir_x + dir_z;
+			}
+
+			if(_partRandomOrient)
+				part->rotation = TWO_PI * frand<float>();
+			else
+				part->rotation = 0.0f;
+
+			if(_implode)
+			{
+				part->velocity = _emitterPos - part->position;
+				part->velocity.normalize();
+				part->velocity *= velocity;
+			}
+			else
+			{
+				vec3f dir, rdir;
+				float r = em_angle / 360.0f;
+				dir.y = 2.0f * ((1.0f - r) + frand<float>() * r) - 1.0f;
+				float t = TWO_PI * frand<float>();
+				float w = sqrt(1.0f - dir.y * dir.y);
+				dir.x = w * sin(t);
+				dir.z = w * cos(t);
+				transform(rdir, dir, _rotMatrix);
+
+				part->velocity = dir * velocity;
+			}
+
+			part->frame = 0.0f;
+		}
+	}
+
+	void ParticleSystem::Emitter::EmitCircle(int count, float em_size, float em_angle, float velocity)
+	{
+		for(int i = 0; i < count; ++i)
+		{
+			Particle* part = _particlePool.New();
+			_liveParticles[_partBufInd][_liveCount++] = part;
+			part->age = 0.0f;
+			part->alpha = ParticleAlpha.Evaluate(0.0f);
+			part->size = ParticleSize.Evaluate(0.0f);
+
+			{
+				float t = TWO_PI * frand<float>();
+				vec3f dir_x = _rotMatrix.row0 * cos(t);
+				vec3f dir_z = _rotMatrix.row2 * sin(t);
+
+				if(_emitFromEdge)
+					part->position = _emitterPos + (dir_x + dir_z) * (em_size * 0.5f);
+				else
+					part->position = _emitterPos + (dir_x + dir_z) * (frand<float>() * em_size * 0.5f);
+			}
+
+			if(_partRandomOrient)
+				part->rotation = TWO_PI * frand<float>();
+			else
+				part->rotation = 0.0f;
+
+			if(_implode)
+			{
+				part->velocity = _emitterPos - part->position;
+				part->velocity.normalize();
+				part->velocity *= velocity;
+			}
+			else
+			{
+				vec3f dir, rdir;
+				float r = em_angle / 360.0f;
+				dir.y = 2.0f * ((1.0f - r) + frand<float>() * r) - 1.0f;
+				float t = TWO_PI * frand<float>();
+				float w = sqrt(1.0f - dir.y * dir.y);
+				dir.x = w * sin(t);
+				dir.z = w * cos(t);
+				transform(rdir, dir, _rotMatrix);
+
+				part->velocity = dir * velocity;
+			}
+
+			part->frame = 0.0f;
+		}
+	}
+
+	void ParticleSystem::Emitter::EmitLine(int count, float em_size, float em_angle, float velocity)
+	{
+		for(int i = 0; i < count; ++i)
+		{
+			Particle* part = _particlePool.New();
+			_liveParticles[_partBufInd][_liveCount++] = part;
+			part->age = 0.0f;
+			part->alpha = ParticleAlpha.Evaluate(0.0f);
+			part->size = ParticleSize.Evaluate(0.0f);
+
+			part->position = _emitterPos + (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _rotMatrix.row0;
+
+			if(_partRandomOrient)
+				part->rotation = TWO_PI * frand<float>();
+			else
+				part->rotation = 0.0f;
+
+			if(_implode)
+			{
+				part->velocity = _emitterPos - part->position;
+				part->velocity.normalize();
+				part->velocity *= velocity;
+			}
+			else
+			{
+				vec3f dir, rdir;
+				float r = em_angle / 360.0f;
+				dir.y = 2.0f * ((1.0f - r) + frand<float>() * r) - 1.0f;
+				float t = TWO_PI * frand<float>();
+				float w = sqrt(1.0f - dir.y * dir.y);
+				dir.x = w * sin(t);
+				dir.z = w * cos(t);
+				transform(rdir, dir, _rotMatrix);
+
+				part->velocity = dir * velocity;
+			}
+
+			part->frame = 0.0f;
 		}
 	}
 

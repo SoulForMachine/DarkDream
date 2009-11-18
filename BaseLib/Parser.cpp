@@ -641,7 +641,7 @@ Parser::Error Parser::GetToken(Token& token)
 				break;
 		}
 	}
-	else if(isdigit(*p) || (*p == '.' && isdigit(*(p+1))))
+	else if(isdigit(*p) || (*p == '.' && isdigit(*(p+1))) || (*p == '-' && isdigit(*(p+1))) || (*p == '-' && *(p+1) == '.'))
 	{
 		token.type = TOK_LITERAL;
 		token.subTypeLiteral = LIT_INTEGER;
