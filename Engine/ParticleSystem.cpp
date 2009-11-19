@@ -160,15 +160,7 @@ namespace Engine
 
 				if(part_type == Emitter::PARTICLE_TYPE_TEXTURE)
 					emitter->SetTexture(tpath, false);
-				else if(part_type == Emitter::PARTICLE_TYPE_MODEL)
-					emitter->SetModel(tpath, false);
 				delete[] tpath;
-
-				if(!parser.ExpectTokenString("lifeStart"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadFloat(ftmp))
-					{ delete emitter; Unload(); return false; }
-				emitter->SetLifeStart(ftmp);
 
 				if(!parser.ExpectTokenString("life"))
 					{ delete emitter; Unload(); return false; }
@@ -294,6 +286,7 @@ namespace Engine
 			}
 		}
 
+		Reset();
 		return true;
 	}
 
@@ -327,13 +320,10 @@ namespace Engine
 
 			if(emitter.GetParticleType() == Emitter::PARTICLE_TYPE_TEXTURE)
 				tstr = emitter.GetTexture()? emitter.GetTexture()->GetFileName(): _t("");
-			else if(emitter.GetParticleType() == Emitter::PARTICLE_TYPE_MODEL)
-				tstr = emitter.GetModel()? emitter.GetModel()->GetFileName(): _t("");
 			else
 				tstr = _t("");
 			file->Printf("\t\tresource\t\t\"%ls\"\n", tstr);
 
-			file->Printf("\t\tlifeStart\t\t%f\n", emitter.GetLifeStart());
 			file->Printf("\t\tlife\t\t%f\n", emitter.GetLife());
 			file->Printf("\t\tloop\t\t%s\n", emitter.GetLoop()? "True": "False");
 			file->Printf("\t\timplode\t\t%s\n", emitter.GetImplode()? "True": "False");
@@ -595,7 +585,6 @@ namespace Engine
 	{
 		"None",
 		"Texture",
-		"Model"
 	};
 
 	const char* ParticleSystem::Emitter::_attribNames[] =
@@ -631,6 +620,9 @@ namespace Engine
 		_alive = true;
 		_emitterPos.set_null();
 		_rotMatrix.set_identity();
+		_rotX = 0.0f;
+		_rotY = 0.0f;
+		_rotZ = 0.0f;
 
 		_attributes[0] = &Velocity;
 		_attributes[1] = &EmitterSize;
@@ -652,8 +644,6 @@ namespace Engine
 		_type = EMITTER_TYPE_SPHERE;
 		_shader = EMITTER_SHADER_ADDITIVE;
 		_texture = 0;
-		_model = 0;
-		_lifeStart = 0.0f;
 		_life = 10.0f;
 		_loop = false;
 		_implode = false;
@@ -696,9 +686,6 @@ namespace Engine
 		if(_texture)
 			engineAPI.textureManager->ReleaseTexture(_texture);
 
-		if(_model)
-			engineAPI.modelManager->ReleaseModel(_model);
-
 		delete[] _liveParticles[0];
 		delete[] _liveParticles[1];
 	}
@@ -712,6 +699,9 @@ namespace Engine
 		_alive = true;
 		_emitterPos = emitter._emitterPos;
 		_rotMatrix = emitter._rotMatrix;
+		_rotX = emitter._rotX;
+		_rotY = emitter._rotY;
+		_rotZ = emitter._rotZ;
 
 		strcpy(_name, emitter._name);
 		_type = emitter._type;
@@ -722,12 +712,6 @@ namespace Engine
 		else
 			_texture = 0;
 
-		if(_model)
-			_model = engineAPI.modelManager->CreateModel(emitter._model->GetFileName(), true);
-		else
-			_model = 0;
-
-		_lifeStart = emitter._lifeStart;
 		_life = emitter._life;
 		_loop = emitter._loop;
 		_implode = emitter._implode;
@@ -816,14 +800,15 @@ namespace Engine
 				}
 				else
 				{
-					vec3f part_offs = part->velocity * frame_time - 0.5f * part_grav * /*frame_time * */sqrt(frame_time) * vec3f::y_axis;
-					part->position += part_offs * (1.0f - part_frict);
+					part->position += part->velocity * frame_time;
+					part->velocity -= part->velocity * part_frict;
+					part->velocity.y -= part_grav * frame_time;
 				}
 				part->rotation += part_rot_speed * frame_time;
 				if(part->rotation > 360.0f)
 					part->rotation -= 360.0f;
 				else if(part->rotation < 0.0f)
-					part->rotation = 360.0f - part->rotation;
+					part->rotation = 360.0f + part->rotation;
 				part->alpha = part_alpha;
 
 				if(_animatedTex)
@@ -879,7 +864,26 @@ namespace Engine
 			float rot_z = RotationZ.Evaluate(t);
 
 			// update emitter position and direction
-			_rotMatrix.from_euler(deg2rad(rot_x), deg2rad(rot_y), deg2rad(rot_z));
+			mat3f rot, temp;
+			_rotX += deg2rad(rot_x * emitter_dt);
+			if(_rotX > TWO_PI)
+				_rotX -= TWO_PI;
+			else if(_rotX < 0.0f)
+				_rotX = TWO_PI + _rotX;
+
+			_rotY += deg2rad(rot_y * emitter_dt);
+			if(_rotY > TWO_PI)
+				_rotY -= TWO_PI;
+			else if(_rotY < 0.0f)
+				_rotY = TWO_PI + _rotY;
+
+			_rotZ += deg2rad(rot_z * emitter_dt);
+			if(_rotZ > TWO_PI)
+				_rotZ -= TWO_PI;
+			else if(_rotZ < 0.0f)
+				_rotZ = TWO_PI + _rotZ;
+
+			_rotMatrix.from_euler(_rotX, _rotY, _rotZ);
 			vec3f em_pos;
 			transform(em_pos, vec3f(offs_x, offs_y, offs_z), _rotMatrix);
 			transform(_emitterPos, em_pos, psys_world_mat);
@@ -921,6 +925,11 @@ namespace Engine
 		_age = 0.0f;
 		_alive = true;
 		_emitCount = 0.0f;
+		_emitterPos.set_null();
+		_rotMatrix.set_identity();
+		_rotX = 0.0f;
+		_rotY = 0.0f;
+		_rotZ = 0.0f;
 	}
 
 	void ParticleSystem::Emitter::EmitSphere(int count, float em_size, float em_angle, float velocity)
@@ -928,6 +937,9 @@ namespace Engine
 		for(int i = 0; i < count; ++i)
 		{
 			Particle* part = _particlePool.New();
+			if(!part)
+				return;
+
 			_liveParticles[_partBufInd][_liveCount++] = part;
 			part->age = 0.0f;
 			part->alpha = ParticleAlpha.Evaluate(0.0f);
@@ -945,10 +957,11 @@ namespace Engine
 					part->position = _emitterPos + dir * (em_size * 0.5f);
 				else
 					part->position = _emitterPos + dir * (frand<float>() * em_size * 0.5f);
+				part->initPosition = part->position;
 			}
 
 			if(_partRandomOrient)
-				part->rotation = TWO_PI * frand<float>();
+				part->rotation = 360.0f * frand<float>();
 			else
 				part->rotation = 0.0f;
 
@@ -981,6 +994,9 @@ namespace Engine
 		for(int i = 0; i < count; ++i)
 		{
 			Particle* part = _particlePool.New();
+			if(!part)
+				return;
+
 			_liveParticles[_partBufInd][_liveCount++] = part;
 			part->age = 0.0f;
 			part->alpha = ParticleAlpha.Evaluate(0.0f);
@@ -1007,9 +1023,10 @@ namespace Engine
 				vec3f dir_z = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _rotMatrix.row2;
 				part->position = _emitterPos + dir_x + dir_z;
 			}
+			part->initPosition = part->position;
 
 			if(_partRandomOrient)
-				part->rotation = TWO_PI * frand<float>();
+				part->rotation = 360.0f * frand<float>();
 			else
 				part->rotation = 0.0f;
 
@@ -1042,6 +1059,9 @@ namespace Engine
 		for(int i = 0; i < count; ++i)
 		{
 			Particle* part = _particlePool.New();
+			if(!part)
+				return;
+
 			_liveParticles[_partBufInd][_liveCount++] = part;
 			part->age = 0.0f;
 			part->alpha = ParticleAlpha.Evaluate(0.0f);
@@ -1057,9 +1077,10 @@ namespace Engine
 				else
 					part->position = _emitterPos + (dir_x + dir_z) * (frand<float>() * em_size * 0.5f);
 			}
+			part->initPosition = part->position;
 
 			if(_partRandomOrient)
-				part->rotation = TWO_PI * frand<float>();
+				part->rotation = 360.0f * frand<float>();
 			else
 				part->rotation = 0.0f;
 
@@ -1092,15 +1113,19 @@ namespace Engine
 		for(int i = 0; i < count; ++i)
 		{
 			Particle* part = _particlePool.New();
+			if(!part)
+				return;
+
 			_liveParticles[_partBufInd][_liveCount++] = part;
 			part->age = 0.0f;
 			part->alpha = ParticleAlpha.Evaluate(0.0f);
 			part->size = ParticleSize.Evaluate(0.0f);
 
 			part->position = _emitterPos + (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _rotMatrix.row0;
+			part->initPosition = part->position;
 
 			if(_partRandomOrient)
-				part->rotation = TWO_PI * frand<float>();
+				part->rotation = 360.0f * frand<float>();
 			else
 				part->rotation = 0.0f;
 
@@ -1130,12 +1155,9 @@ namespace Engine
 
 	void ParticleSystem::Emitter::SetTexture(const tchar* file_name, bool immediate)
 	{
-		_texture = engineAPI.textureManager->CreateTexture(file_name, immediate);
 		if(_texture)
-		{
-			engineAPI.modelManager->ReleaseModel(_model);
-			_model = 0;
-		}
+			engineAPI.textureManager->ReleaseTexture(_texture);
+		_texture = engineAPI.textureManager->CreateTexture(file_name, immediate);
 	}
 
 	void ParticleSystem::Emitter::ClearTexture()
@@ -1147,32 +1169,11 @@ namespace Engine
 		}
 	}
 
-	void ParticleSystem::Emitter::SetModel(const tchar* file_name, bool immediate)
-	{
-		_model = engineAPI.modelManager->CreateModel(file_name, immediate);
-		if(_model)
-		{
-			engineAPI.textureManager->ReleaseTexture(_texture);
-			_texture = 0;
-		}
-	}
-
-	void ParticleSystem::Emitter::ClearModel()
-	{
-		if(_model)
-		{
-			engineAPI.modelManager->ReleaseModel(_model);
-			_model = 0;
-		}
-	}
-
 	ParticleSystem::Emitter::ParticleType
 		ParticleSystem::Emitter::GetParticleType() const
 	{
 		if(_texture)
 			return PARTICLE_TYPE_TEXTURE;
-		else if(_model)
-			return PARTICLE_TYPE_MODEL;
 		else
 			return PARTICLE_TYPE_NONE;
 	}

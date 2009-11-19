@@ -15,7 +15,6 @@ namespace Engine
 {
 
 	class TextureRes;
-	class ModelRes;
 
 
 	class ENGINE_API ParticleSystem: public RenderableEntity
@@ -90,6 +89,7 @@ namespace Engine
 	struct ParticleSystem::Particle
 	{
 		float age;
+		math3d::vec3f initPosition;
 		math3d::vec3f position;
 		math3d::vec3f velocity;
 		float rotation;
@@ -128,7 +128,6 @@ namespace Engine
 		{
 			PARTICLE_TYPE_NONE,
 			PARTICLE_TYPE_TEXTURE,
-			PARTICLE_TYPE_MODEL,
 
 			PARTICLE_TYPE_COUNT
 		};
@@ -164,14 +163,6 @@ namespace Engine
 			{ return _texture; }
 		void SetTexture(const tchar* file_name, bool immediate = true);
 		void ClearTexture();
-		const ModelRes* GetModel() const
-			{ return _model; }
-		void SetModel(const tchar* file_name, bool immediate = true);
-		void ClearModel();
-		float GetLifeStart() const
-			{ return _lifeStart; }
-		void SetLifeStart(float life_start)
-			{ _lifeStart = life_start; }
 		float GetLife() const
 			{ return _life; }
 		void SetLife(float life)
@@ -269,13 +260,14 @@ namespace Engine
 		bool _alive;
 		math3d::vec3f _emitterPos;
 		math3d::mat3f _rotMatrix;
+		float _rotX;
+		float _rotY;
+		float _rotZ;
 
 		char _name[EMITTER_NAME_MAX_LEN];
 		EmitterType _type;
 		EmitterShader _shader;
 		const TextureRes* _texture;
-		const ModelRes* _model;
-		float _lifeStart;
 		float _life;
 		bool _loop;
 		bool _implode;

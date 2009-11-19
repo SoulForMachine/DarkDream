@@ -20,6 +20,12 @@ public:
 	math3d::vec3f GetCenterPoint() const;
 	void GetOrientedBBox(OBBox& bbox, const math3d::mat4f& mat) const;
 	void GetPoints(math3d::vec3f points[8]) const;
+	float GetWidth() const
+		{ return maxPt.x - minPt.x; }
+	float GetHeight() const
+		{ return maxPt.y - minPt.y; }
+	float GetDepth() const
+		{ return maxPt.z - minPt.z; }
 
 	math3d::vec3f minPt;
 	math3d::vec3f maxPt;

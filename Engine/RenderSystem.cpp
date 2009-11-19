@@ -423,9 +423,12 @@ namespace Engine
 
 			for(List<ParticleSystem::Emitter*>::ConstIterator it = em_list.Begin(); it != em_list.End(); ++it)
 			{
-				emitters[em_count++] = *it;
-				if(em_count == MAX_PARTICLE_SYSTEMS * 8)
-					break;
+				if((*it)->IsEnabled())
+				{
+					emitters[em_count++] = *it;
+					if(em_count == MAX_PARTICLE_SYSTEMS * 8)
+						break;
+				}
 			}
 
 			if(em_count == MAX_PARTICLE_SYSTEMS * 8)

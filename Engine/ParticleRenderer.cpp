@@ -140,26 +140,24 @@ namespace Engine
 			const TextureRes* last_tex = emitters[i]->GetTexture();
 			ParticleSystem::Emitter::EmitterShader last_shader = emitters[i]->GetShader();
 
-			uint vert_count = emitters[i]->GetParticleCount() * 4;
-			start = i++;
+			uint vert_count = 0;
+			start = i;
 			while(i < count &&
 				emitters[i]->GetTexture() == last_tex &&
 				emitters[i]->GetShader() == last_shader)
 			{
-				++i;
-
 				uint vc = vert_count + emitters[i]->GetParticleCount() * 4;
 				if(_vertexCount + vc > MAX_VERTICES)
 				{
-					--i;
 					full_buf = true;
 					break;
 				}
 
 				vert_count = vc;
+				++i;
 			}
 
-			if(i - start > 0)
+			if(i - start > 0 && vert_count)
 			{
 				ParticleBatch pb =
 				{
@@ -192,8 +190,6 @@ namespace Engine
 
 			for(int j = 0; j < part_count; ++j)
 			{
-				vec3f vec_x = cam_mat.get_col(0).rvec3 * particles[j]->size;
-				vec3f vec_y = cam_mat.get_col(1).rvec3 * particles[j]->size;
 				float u1, u2;
 				if(emitters[i]->IsAnimatedTex())
 				{
@@ -205,6 +201,22 @@ namespace Engine
 				{
 					u1 = 0.0f;
 					u2 = 1.0f;
+				}
+
+				vec3f vec_x, vec_y;
+				if(particles[j]->rotation != 0.0f)
+				{
+					const vec3f& right = cam_mat.get_col(0).rvec3;
+					const vec3f& up = cam_mat.get_col(1).rvec3;
+					float c = deg_cos(particles[j]->rotation);
+					float s = deg_sin(particles[j]->rotation);
+					vec_x = (particles[j]->size * c) * right + (particles[j]->size * s) * up;
+					vec_y = (- particles[j]->size * s) * right + (particles[j]->size * c) * up;
+				}
+				else
+				{
+					vec_x = cam_mat.get_col(0).rvec3 * particles[j]->size;
+					vec_y = cam_mat.get_col(1).rvec3 * particles[j]->size;
 				}
 
 				vertices[0].position = particles[j]->position + (- vec_x - vec_y);
@@ -239,7 +251,7 @@ namespace Engine
 				if(batch.shader == ParticleSystem::Emitter::EMITTER_SHADER_BLEND)
 					_renderer->BlendingFunc(GL::BLEND_FUNC_SRC_ALPHA, GL::BLEND_FUNC_ONE_MINUS_SRC_ALPHA);
 				else
-					_renderer->BlendingFunc(GL::BLEND_FUNC_ONE, GL::BLEND_FUNC_ONE);
+					_renderer->BlendingFunc(GL::BLEND_FUNC_SRC_ALPHA, GL::BLEND_FUNC_ONE);
 
 				_renderer->SetSamplerState(0, _partTexState);
 				_renderer->SetSamplerTexture(0, batch.texture->GetTexture());

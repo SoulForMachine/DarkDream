@@ -48,6 +48,14 @@ namespace ParticleEditor
 	void PropertiesPanel::SetParticleSystem(Engine::ParticleSystem* part_sys)
 	{
 		_particleSystem = part_sys;
+
+		if(part_sys)
+		{
+			const AABBox& bbox = part_sys->GetObjectBoundingBox();
+			_numBBoxWidth->Text = bbox.GetWidth().ToString();
+			_numBBoxHeight->Text = bbox.GetHeight().ToString();
+			_numBBoxDepth->Text = bbox.GetDepth().ToString();
+		}
 	}
 
 	void PropertiesPanel::SetGraphAttribute(ParticleSystem::Attribute* attrib, String^ name, float time, float min_val, float max_val)
@@ -318,20 +326,43 @@ namespace ParticleEditor
 
 	System::Void PropertiesPanel::_numBBoxWidth_ValueChanged(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		if(_particleSystem)
+		{
+			AABBox bbox = _particleSystem->GetObjectBoundingBox();
+			bbox.minPt.x = -Decimal::ToSingle(_numBBoxWidth->Value) * 0.5f;
+			bbox.maxPt.x = Decimal::ToSingle(_numBBoxWidth->Value) * 0.5f;
+			_particleSystem->SetObjectBoundingBox(bbox);
+		}
 	}
 
 	System::Void PropertiesPanel::_numBBoxHeight_ValueChanged(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		if(_particleSystem)
+		{
+			AABBox bbox = _particleSystem->GetObjectBoundingBox();
+			bbox.minPt.y = -Decimal::ToSingle(_numBBoxHeight->Value) * 0.5f;
+			bbox.maxPt.y = Decimal::ToSingle(_numBBoxHeight->Value) * 0.5f;
+			_particleSystem->SetObjectBoundingBox(bbox);
+		}
 	}
 
 	System::Void PropertiesPanel::_numBBoxDepth_ValueChanged(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		if(_particleSystem)
+		{
+			AABBox bbox = _particleSystem->GetObjectBoundingBox();
+			bbox.minPt.z = -Decimal::ToSingle(_numBBoxDepth->Value) * 0.5f;
+			bbox.maxPt.z = Decimal::ToSingle(_numBBoxDepth->Value) * 0.5f;
+			_particleSystem->SetObjectBoundingBox(bbox);
+		}
 	}
 
 	System::Void PropertiesPanel::_checkShowBBox_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+
+	}
+
+	System::Void PropertiesPanel::_checkShowEmitter_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 
 	}

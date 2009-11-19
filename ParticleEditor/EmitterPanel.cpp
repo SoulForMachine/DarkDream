@@ -30,7 +30,7 @@ namespace ParticleEditor
 	static float g_attribValueRanges[ParticleSystem::Emitter::ATTRIB_COUNT][2] =
 	{
 		{ -10.0f, 10.0f },
-		{ 0.0f, 100.0f },
+		{ 0.0f, 10.0f },
 		{ 0.0f, 360.0f },
 		{ 0.0f, 200.0f },
 		{ 0.0f, 10.0f },
@@ -70,7 +70,16 @@ namespace ParticleEditor
 		_listEmitterProperties->Items->Clear();
 		for(int i = 0; i < ParticleSystem::Emitter::ATTRIB_COUNT; ++i)
 		{
-			_listEmitterProperties->Items->Add(gcnew String(ParticleSystem::Emitter::GetAttributeName(i)));
+			String^ name = gcnew String(ParticleSystem::Emitter::GetAttributeName(i));
+			for(int i = 1; i < name->Length; ++i)
+			{
+				if(Char::IsUpper(name[i]))
+				{
+					name = name->Insert(i, " ");
+					i += 2;
+				}
+			}
+			_listEmitterProperties->Items->Add(name);
 		}
 
 		_particleSys = 0;
@@ -111,17 +120,10 @@ namespace ParticleEditor
 			
 			if(_selectedEmitter->GetTexture())
 			{
-				_radioTexture->Checked = true;
 				_textResource->Text = gcnew String(_selectedEmitter->GetTexture()->GetFileName());
-			}
-			else if(_selectedEmitter->GetModel())
-			{
-				_radioModel->Checked = true;
-				_textResource->Text = gcnew String(_selectedEmitter->GetModel()->GetFileName());
 			}
 			else
 			{
-				_radioTexture->Checked = true;
 				_textResource->Text = "";
 			}
 
@@ -129,7 +131,6 @@ namespace ParticleEditor
 			_checkImplode->Checked = _selectedEmitter->GetImplode();
 			_checkEmitFromEdge->Checked = _selectedEmitter->EmitFromEdge();
 			_checkAnimTex->Checked = _selectedEmitter->IsAnimatedTex();
-			_numEmitterLifeStart->Text = _selectedEmitter->GetLifeStart().ToString();
 			_numEmitterLife->Text = _selectedEmitter->GetLife().ToString();
 			_listEmitterProperties->SelectedIndex = -1;
 
@@ -149,14 +150,12 @@ namespace ParticleEditor
 			_cmbEmitterType->SelectedIndex = -1;
 			_cmbShader->SelectedIndex = -1;
 			
-			_radioTexture->Checked = true;
 			_textResource->Text = "";
 
 			_checkLoop->Checked = false;
 			_checkImplode->Checked = false;
 			_checkEmitFromEdge->Checked = false;
 			_checkAnimTex->Checked = false;
-			_numEmitterLifeStart->Text = "0.0";
 			_numEmitterLife->Text = "0.0";
 			_listEmitterProperties->SelectedIndex = -1;
 
@@ -180,6 +179,7 @@ namespace ParticleEditor
 		}
 
 		_selectedEmitter = 0;
+		UpdateControls();
 	}
 
 	String^ EmitterPanel::MakeEmitterName()
@@ -361,48 +361,19 @@ namespace ParticleEditor
 		}
 	}
 
-	System::Void EmitterPanel::_radioTexture_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-		if(_selectedEmitter && _selectedEmitter->GetParticleType() == ParticleSystem::Emitter::PARTICLE_TYPE_MODEL)
-		{
-			_selectedEmitter->ClearModel();
-		}
-	}
-
-	System::Void EmitterPanel::_radioModel_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-		if(_selectedEmitter && _selectedEmitter->GetParticleType() == ParticleSystem::Emitter::PARTICLE_TYPE_TEXTURE)
-		{
-			_selectedEmitter->ClearTexture();
-		}
-	}
-
 	System::Void EmitterPanel::_btnBrowseResource_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_selectedEmitter)
 		{
 			_openFileDialog->Reset();
-			if(_radioTexture->Checked)
-			{
-				_openFileDialog->Title = "Select Texture";
-				_openFileDialog->Filter = "Texture Files (*.dds;*.tga;*.bmp)|*.dds;*.tga;*.bmp|All Files (*.*)|*.*";
-				_openFileDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Textures";
-			}
-			else
-			{
-				_openFileDialog->Title = "Select Model";
-				_openFileDialog->Filter = "Model Files (*.model)|*.model|All Files (*.*)|*.*";
-				_openFileDialog->DefaultExt = "model";
-				_openFileDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Models";
-			}
+			_openFileDialog->Title = "Select Texture";
+			_openFileDialog->Filter = "Texture Files (*.dds;*.tga;*.bmp)|*.dds;*.tga;*.bmp|All Files (*.*)|*.*";
+			_openFileDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Textures";
 
 			if(_openFileDialog->ShowDialog(this) == Windows::Forms::DialogResult::OK)
 			{
 				tchar* file_name = GetRelativePath(_openFileDialog->FileName);
-				if(_radioTexture->Checked)
-					_selectedEmitter->SetTexture(file_name);
-				else
-					_selectedEmitter->SetModel(file_name);
+				_selectedEmitter->SetTexture(file_name);
 				_textResource->Text = gcnew String(file_name);
 				delete[] file_name;
 			}
@@ -433,12 +404,6 @@ namespace ParticleEditor
 			_selectedEmitter->SetAnimatedTex(_checkAnimTex->Checked);
 	}
 
-	System::Void EmitterPanel::_numEmitterLifeStart_ValueChanged(System::Object^  sender, System::EventArgs^  e)
-	{
-		if(_selectedEmitter)
-			_selectedEmitter->SetLifeStart(Decimal::ToSingle(_numEmitterLifeStart->Value));
-	}
-
 	System::Void EmitterPanel::_numEmitterLife_ValueChanged(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_selectedEmitter)
@@ -454,7 +419,7 @@ namespace ParticleEditor
 		{
 			ParticleSystem::Attribute** attribs = _selectedEmitter->GetAttributeArray();
 			int attr_index = _listEmitterProperties->SelectedIndex;
-			String^ name = gcnew String(ParticleSystem::Emitter::GetAttributeName(attr_index));
+			String^ name = _listEmitterProperties->SelectedItem->ToString();
 			float time = (attr_index > 9)? _selectedEmitter->GetParticleLife(): _selectedEmitter->GetLife();
 			_propertiesPanel->SetGraphAttribute(attribs[attr_index], name, time, g_attribValueRanges[attr_index][0], g_attribValueRanges[attr_index][1]);
 		}

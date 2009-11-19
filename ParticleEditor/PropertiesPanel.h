@@ -64,6 +64,7 @@ namespace ParticleEditor {
 	private: System::Windows::Forms::Label^  label1;
 	private: System::Windows::Forms::CheckBox^  _checkShowBBox;
 	private: System::Windows::Forms::Button^  _btnRun;
+	private: System::Windows::Forms::CheckBox^  _checkShowEmitter;
 
 	private:
 		/// <summary>
@@ -122,6 +123,7 @@ namespace ParticleEditor {
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->_btnRun = (gcnew System::Windows::Forms::Button());
+			this->_checkShowEmitter = (gcnew System::Windows::Forms::CheckBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numTime))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numValue))->BeginInit();
 			this->groupBox1->SuspendLayout();
@@ -227,14 +229,15 @@ namespace ParticleEditor {
 			this->_checkShowBBox->AutoSize = true;
 			this->_checkShowBBox->Location = System::Drawing::Point(34, 118);
 			this->_checkShowBBox->Name = L"_checkShowBBox";
-			this->_checkShowBBox->Size = System::Drawing::Size(53, 17);
+			this->_checkShowBBox->Size = System::Drawing::Size(80, 17);
 			this->_checkShowBBox->TabIndex = 8;
-			this->_checkShowBBox->Text = L"Show";
+			this->_checkShowBBox->Text = L"Show Bbox";
 			this->_checkShowBBox->UseVisualStyleBackColor = true;
 			this->_checkShowBBox->Click += gcnew System::EventHandler(this, &PropertiesPanel::_checkShowBBox_Click);
 			// 
 			// _numBBoxDepth
 			// 
+			this->_numBBoxDepth->DecimalPlaces = 2;
 			this->_numBBoxDepth->Location = System::Drawing::Point(85, 82);
 			this->_numBBoxDepth->Name = L"_numBBoxDepth";
 			this->_numBBoxDepth->Size = System::Drawing::Size(65, 20);
@@ -243,6 +246,7 @@ namespace ParticleEditor {
 			// 
 			// _numBBoxHeight
 			// 
+			this->_numBBoxHeight->DecimalPlaces = 2;
 			this->_numBBoxHeight->Location = System::Drawing::Point(85, 56);
 			this->_numBBoxHeight->Name = L"_numBBoxHeight";
 			this->_numBBoxHeight->Size = System::Drawing::Size(65, 20);
@@ -251,6 +255,7 @@ namespace ParticleEditor {
 			// 
 			// _numBBoxWidth
 			// 
+			this->_numBBoxWidth->DecimalPlaces = 2;
 			this->_numBBoxWidth->Location = System::Drawing::Point(85, 30);
 			this->_numBBoxWidth->Name = L"_numBBoxWidth";
 			this->_numBBoxWidth->Size = System::Drawing::Size(65, 20);
@@ -294,12 +299,24 @@ namespace ParticleEditor {
 			this->_btnRun->UseVisualStyleBackColor = true;
 			this->_btnRun->Click += gcnew System::EventHandler(this, &PropertiesPanel::_btnRun_Click);
 			// 
+			// _checkShowEmitter
+			// 
+			this->_checkShowEmitter->AutoSize = true;
+			this->_checkShowEmitter->Location = System::Drawing::Point(36, 151);
+			this->_checkShowEmitter->Name = L"_checkShowEmitter";
+			this->_checkShowEmitter->Size = System::Drawing::Size(88, 17);
+			this->_checkShowEmitter->TabIndex = 9;
+			this->_checkShowEmitter->Text = L"Show Emitter";
+			this->_checkShowEmitter->UseVisualStyleBackColor = true;
+			this->_checkShowEmitter->Click += gcnew System::EventHandler(this, &PropertiesPanel::_checkShowEmitter_Click);
+			// 
 			// PropertiesPanel
 			// 
 			this->AllowEndUserDocking = false;
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(953, 344);
+			this->Controls->Add(this->_checkShowEmitter);
 			this->Controls->Add(this->_btnRun);
 			this->Controls->Add(this->groupBox1);
 			this->Controls->Add(this->_numValue);
@@ -340,5 +357,6 @@ namespace ParticleEditor {
 	private: System::Void _checkPause_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _numTime_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e);
 	private: System::Void _numValue_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e);
+	private: System::Void _checkShowEmitter_Click(System::Object^  sender, System::EventArgs^  e);
 };
 }

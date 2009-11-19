@@ -59,10 +59,10 @@ namespace ParticleEditor {
 
 	private: System::Windows::Forms::Label^  label5;
 	private: System::Windows::Forms::CheckBox^  _checkLoop;
-	private: System::Windows::Forms::NumericUpDown^  _numEmitterLifeStart;
 
 
-	private: System::Windows::Forms::Label^  label6;
+
+
 	private: System::Windows::Forms::CheckBox^  _checkImplode;
 
 
@@ -77,9 +77,9 @@ namespace ParticleEditor {
 
 
 
-	private: System::Windows::Forms::RadioButton^  _radioModel;
 
-	private: System::Windows::Forms::RadioButton^  _radioTexture;
+
+
 	private: System::Windows::Forms::ListBox^  _listEmitterProperties;
 
 
@@ -92,6 +92,7 @@ namespace ParticleEditor {
 	private: System::Windows::Forms::Button^  _btnDown;
 	private: System::Windows::Forms::CheckBox^  _checkAnimTex;
 	private: System::Windows::Forms::OpenFileDialog^  _openFileDialog;
+	private: System::Windows::Forms::Label^  label6;
 
 
 
@@ -130,12 +131,8 @@ namespace ParticleEditor {
 			this->label5 = (gcnew System::Windows::Forms::Label());
 			this->_btnBrowseResource = (gcnew System::Windows::Forms::Button());
 			this->_textResource = (gcnew System::Windows::Forms::TextBox());
-			this->_radioModel = (gcnew System::Windows::Forms::RadioButton());
-			this->_radioTexture = (gcnew System::Windows::Forms::RadioButton());
 			this->_checkEmitFromEdge = (gcnew System::Windows::Forms::CheckBox());
 			this->_checkImplode = (gcnew System::Windows::Forms::CheckBox());
-			this->_numEmitterLifeStart = (gcnew System::Windows::Forms::NumericUpDown());
-			this->label6 = (gcnew System::Windows::Forms::Label());
 			this->_checkLoop = (gcnew System::Windows::Forms::CheckBox());
 			this->_numEmitterLife = (gcnew System::Windows::Forms::NumericUpDown());
 			this->label4 = (gcnew System::Windows::Forms::Label());
@@ -150,9 +147,9 @@ namespace ParticleEditor {
 			this->_btnUp = (gcnew System::Windows::Forms::Button());
 			this->_btnDown = (gcnew System::Windows::Forms::Button());
 			this->_openFileDialog = (gcnew System::Windows::Forms::OpenFileDialog());
+			this->label6 = (gcnew System::Windows::Forms::Label());
 			this->_groupEmitterProp->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numParticleLife))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numEmitterLifeStart))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numEmitterLife))->BeginInit();
 			this->SuspendLayout();
 			// 
@@ -188,6 +185,7 @@ namespace ParticleEditor {
 			// 
 			// _groupEmitterProp
 			// 
+			this->_groupEmitterProp->Controls->Add(this->label6);
 			this->_groupEmitterProp->Controls->Add(this->_checkRandomOrient);
 			this->_groupEmitterProp->Controls->Add(this->_checkAnimTex);
 			this->_groupEmitterProp->Controls->Add(this->_numParticleLife);
@@ -195,12 +193,8 @@ namespace ParticleEditor {
 			this->_groupEmitterProp->Controls->Add(this->label5);
 			this->_groupEmitterProp->Controls->Add(this->_btnBrowseResource);
 			this->_groupEmitterProp->Controls->Add(this->_textResource);
-			this->_groupEmitterProp->Controls->Add(this->_radioModel);
-			this->_groupEmitterProp->Controls->Add(this->_radioTexture);
 			this->_groupEmitterProp->Controls->Add(this->_checkEmitFromEdge);
 			this->_groupEmitterProp->Controls->Add(this->_checkImplode);
-			this->_groupEmitterProp->Controls->Add(this->_numEmitterLifeStart);
-			this->_groupEmitterProp->Controls->Add(this->label6);
 			this->_groupEmitterProp->Controls->Add(this->_checkLoop);
 			this->_groupEmitterProp->Controls->Add(this->_numEmitterLife);
 			this->_groupEmitterProp->Controls->Add(this->label4);
@@ -241,6 +235,7 @@ namespace ParticleEditor {
 			// 
 			// _numParticleLife
 			// 
+			this->_numParticleLife->DecimalPlaces = 1;
 			this->_numParticleLife->Location = System::Drawing::Point(83, 222);
 			this->_numParticleLife->Name = L"_numParticleLife";
 			this->_numParticleLife->Size = System::Drawing::Size(45, 20);
@@ -283,30 +278,6 @@ namespace ParticleEditor {
 			this->_textResource->Size = System::Drawing::Size(249, 20);
 			this->_textResource->TabIndex = 7;
 			// 
-			// _radioModel
-			// 
-			this->_radioModel->AutoSize = true;
-			this->_radioModel->Location = System::Drawing::Point(98, 81);
-			this->_radioModel->Name = L"_radioModel";
-			this->_radioModel->Size = System::Drawing::Size(54, 17);
-			this->_radioModel->TabIndex = 9;
-			this->_radioModel->TabStop = true;
-			this->_radioModel->Text = L"Model";
-			this->_radioModel->UseVisualStyleBackColor = true;
-			this->_radioModel->Click += gcnew System::EventHandler(this, &EmitterPanel::_radioModel_Click);
-			// 
-			// _radioTexture
-			// 
-			this->_radioTexture->AutoSize = true;
-			this->_radioTexture->Location = System::Drawing::Point(19, 81);
-			this->_radioTexture->Name = L"_radioTexture";
-			this->_radioTexture->Size = System::Drawing::Size(61, 17);
-			this->_radioTexture->TabIndex = 6;
-			this->_radioTexture->TabStop = true;
-			this->_radioTexture->Text = L"Texture";
-			this->_radioTexture->UseVisualStyleBackColor = true;
-			this->_radioTexture->Click += gcnew System::EventHandler(this, &EmitterPanel::_radioTexture_Click);
-			// 
 			// _checkEmitFromEdge
 			// 
 			this->_checkEmitFromEdge->AutoSize = true;
@@ -329,23 +300,6 @@ namespace ParticleEditor {
 			this->_checkImplode->UseVisualStyleBackColor = true;
 			this->_checkImplode->Click += gcnew System::EventHandler(this, &EmitterPanel::_checkImplode_Click);
 			// 
-			// _numEmitterLifeStart
-			// 
-			this->_numEmitterLifeStart->Location = System::Drawing::Point(206, 144);
-			this->_numEmitterLifeStart->Name = L"_numEmitterLifeStart";
-			this->_numEmitterLifeStart->Size = System::Drawing::Size(51, 20);
-			this->_numEmitterLifeStart->TabIndex = 17;
-			this->_numEmitterLifeStart->ValueChanged += gcnew System::EventHandler(this, &EmitterPanel::_numEmitterLifeStart_ValueChanged);
-			// 
-			// label6
-			// 
-			this->label6->AutoSize = true;
-			this->label6->Location = System::Drawing::Point(150, 146);
-			this->label6->Name = L"label6";
-			this->label6->Size = System::Drawing::Size(50, 13);
-			this->label6->TabIndex = 16;
-			this->label6->Text = L"Life start:";
-			// 
 			// _checkLoop
 			// 
 			this->_checkLoop->AutoSize = true;
@@ -359,7 +313,8 @@ namespace ParticleEditor {
 			// 
 			// _numEmitterLife
 			// 
-			this->_numEmitterLife->Location = System::Drawing::Point(305, 144);
+			this->_numEmitterLife->DecimalPlaces = 1;
+			this->_numEmitterLife->Location = System::Drawing::Point(183, 144);
 			this->_numEmitterLife->Name = L"_numEmitterLife";
 			this->_numEmitterLife->Size = System::Drawing::Size(48, 20);
 			this->_numEmitterLife->TabIndex = 19;
@@ -368,7 +323,7 @@ namespace ParticleEditor {
 			// label4
 			// 
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(272, 146);
+			this->label4->Location = System::Drawing::Point(150, 146);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(27, 13);
 			this->label4->TabIndex = 18;
@@ -476,6 +431,15 @@ namespace ParticleEditor {
 			// 
 			this->_openFileDialog->FileOk += gcnew System::ComponentModel::CancelEventHandler(this, &EmitterPanel::_openFileDialog_FileOk);
 			// 
+			// label6
+			// 
+			this->label6->AutoSize = true;
+			this->label6->Location = System::Drawing::Point(20, 88);
+			this->label6->Name = L"label6";
+			this->label6->Size = System::Drawing::Size(46, 13);
+			this->label6->TabIndex = 21;
+			this->label6->Text = L"Texture:";
+			// 
 			// EmitterPanel
 			// 
 			this->AllowEndUserDocking = false;
@@ -501,7 +465,6 @@ namespace ParticleEditor {
 			this->_groupEmitterProp->ResumeLayout(false);
 			this->_groupEmitterProp->PerformLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numParticleLife))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numEmitterLifeStart))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_numEmitterLife))->EndInit();
 			this->ResumeLayout(false);
 
@@ -516,14 +479,11 @@ namespace ParticleEditor {
 	private: System::Void _textName_TextChanged(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _cmbEmitterType_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _cmbShader_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e);
-	private: System::Void _radioTexture_Click(System::Object^  sender, System::EventArgs^  e);
-	private: System::Void _radioModel_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _btnBrowseResource_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _checkLoop_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _checkImplode_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _checkEmitFromEdge_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _checkAnimTex_Click(System::Object^  sender, System::EventArgs^  e);
-	private: System::Void _numEmitterLifeStart_ValueChanged(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _numEmitterLife_ValueChanged(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _listEmitterProperties_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _numParticleLife_ValueChanged(System::Object^  sender, System::EventArgs^  e);
