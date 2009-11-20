@@ -167,7 +167,8 @@ namespace ParticleEditor
 			if(_particleSystem)
 			{
 				_particleSystem->Unload();
-				delete _particleSystem;
+				_particleSystem->ParticleSystem::~ParticleSystem();
+				::operator delete(_particleSystem);
 			}
 
 			_particleSystem = new(mainPool) ParticleSystem;

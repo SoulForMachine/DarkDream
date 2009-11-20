@@ -17,6 +17,7 @@ namespace Engine
 {
 
 	Console::BoolVar g_cvarDrawEntityBBoxes("r_drawEntityBBoxes", false);
+	Console::BoolVar g_cvarDrawParticleEmitter("r_drawParticleEmitter", false);
 
 
 	RenderSystem::RenderSystem()
@@ -438,6 +439,29 @@ namespace Engine
 		qsort(emitters, em_count, sizeof(ParticleSystem::Emitter*), EmitterCmpFunc);
 
 		_particleRenderer->Render(engineAPI.world->GetCamera(), emitters, em_count);
+
+		if(g_cvarDrawEntityBBoxes)
+		{
+			for(int i = 0; i < count; ++i)
+			{
+				_debugRenderer->RenderBoundingBox(part_sys[i]->GetWorldBoundingBox());
+			}
+		}
+
+		if(g_cvarDrawParticleEmitter)
+		{
+			for(int i = 0; i < count; ++i)
+			{
+				const List<ParticleSystem::Emitter*>& em_list = part_sys[i]->GetEmitterList();
+				for(List<ParticleSystem::Emitter*>::ConstIterator it = em_list.Begin(); it != em_list.End(); ++it)
+				{
+					if((*it)->IsEnabled())
+					{
+						_debugRenderer->RenderParticleEmitter(**it);
+					}
+				}
+			}
+		}
 	}
 
 	void RenderSystem::ReloadShaders()

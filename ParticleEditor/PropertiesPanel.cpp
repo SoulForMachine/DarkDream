@@ -32,6 +32,8 @@ namespace ParticleEditor
 		_penThickBlack = gcnew Pen(Color::Black, 2.0f);
 
 		_labelAttribName->Text = "";
+		_checkShowEmitter->Checked = true;
+		_checkShowEmitter_Click(_checkShowEmitter, nullptr);
 
 		System::Reflection::MethodInfo^ method = Control::typeid->GetMethod(
                "SetStyle",
@@ -359,12 +361,16 @@ namespace ParticleEditor
 
 	System::Void PropertiesPanel::_checkShowBBox_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		char buf[128];
+		sprintf(buf, "r_drawEntityBBoxes %d", _checkShowBBox->Checked? 1: 0);
+		::Console::ExecuteStatement(buf);
 	}
 
 	System::Void PropertiesPanel::_checkShowEmitter_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-
+		char buf[128];
+		sprintf(buf, "r_drawParticleEmitter %d", _checkShowEmitter->Checked? 1: 0);
+		::Console::ExecuteStatement(buf);
 	}
 
 	System::Void PropertiesPanel::_numTime_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e)

@@ -360,7 +360,7 @@ namespace ParticleEditor
 		int x = 5, y = _height - height - 5;
 		vec4f white(1.0f, 1.0f, 1.0f, 1.0f);
 		vec4f green(0.0f, 1.0f, 0.0f, 1.0f);
-		char buf[64];
+		char buf[128];
 
 		// FPS
 		width = _font->GetTextWidth("FPS: ");
@@ -369,15 +369,40 @@ namespace ParticleEditor
 		_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
 		y -= height * 2;
 
-		//if()
-		//{
-		//	// particle count
-		//	width = _font->GetTextWidth("Particles: ");
-		//	sprintf(buf, "%d", );
-		//	_renderSystem->GetRender2D()->DrawText("Particles: ", x, y, *_font, white);
-		//	_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
-		//	y -= height;
-		//}
+		if(_particleSystem)
+		{
+			List<ParticleSystem::Emitter*>& em_list = _particleSystem->GetEmitterList();
+			int em_count = em_list.GetCount();
+
+			// emitter count
+			width = _font->GetTextWidth("Emitters: ");
+			sprintf(buf, "%d", em_count);
+			_renderSystem->GetRender2D()->DrawText("Emitters: ", x, y, *_font, white);
+			_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
+			y -= height * 2;
+
+			x += 25;
+			for(List<ParticleSystem::Emitter*>::ConstIterator it = em_list.Begin(); it != em_list.End(); ++it)
+			{
+				// emitter name
+				_renderSystem->GetRender2D()->DrawText((*it)->GetName(), x, y, *_font, green);
+				y -= height;
+
+				// particle count
+				width = _font->GetTextWidth("Particles: ");
+				sprintf(buf, "%d", (*it)->GetParticleCount());
+				_renderSystem->GetRender2D()->DrawText("Particles: ", x, y, *_font, white);
+				_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
+				y -= height;
+
+				// max particle count
+				width = _font->GetTextWidth("Max particles: ");
+				sprintf(buf, "%d", (*it)->GetPeakParticleCount());
+				_renderSystem->GetRender2D()->DrawText("Max particles: ", x, y, *_font, white);
+				_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
+				y -= height * 2;
+			}
+		}
 
 		_renderSystem->GetRender2D()->FlushText();
 		_renderer->EnableDepthTest(true);

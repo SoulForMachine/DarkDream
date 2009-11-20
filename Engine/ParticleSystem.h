@@ -89,10 +89,10 @@ namespace Engine
 	struct ParticleSystem::Particle
 	{
 		float age;
-		math3d::vec3f initPosition;
 		math3d::vec3f position;
 		math3d::vec3f velocity;
 		float rotation;
+		float rotDir;
 		float size;
 		float alpha;
 		float frame; // animated texture frame
@@ -185,6 +185,10 @@ namespace Engine
 			{ _animatedTex = val; }
 		int GetTextureFrameCount() const
 			{ return _texFrameCount; }
+		int GetAnimatedTexFPS() const
+			{ return _animTexFPS; }
+		void SetAnimatedTexFPS(int fps)
+			{ _animTexFPS = fps; }
 
 		float GetParticleLife() const
 			{ return _partLife; }
@@ -194,6 +198,10 @@ namespace Engine
 			{ return _partRandomOrient; }
 		void SetParticleRandomOrient(bool val)
 			{ _partRandomOrient = val; }
+		bool GetParticleRandomRotDir() const
+			{ return _partRandomRotDir; }
+		void SetParticleRandomRotDir(bool val)
+			{ _partRandomRotDir = val; }
 		ParticleType GetParticleType() const;
 
 		Attribute** GetAttributeArray()
@@ -205,8 +213,18 @@ namespace Engine
 			{ return _liveParticles[_partBufInd]; }
 		int GetParticleCount() const
 			{ return _liveCount; }
+		int GetPeakParticleCount() const
+			{ return _peakCount; }
 		const math3d::vec3f& GetPosition() const
 			{ return _emitterPos; }
+		const math3d::mat4f& GetWorldTransform() const
+			{ return _worldMatrix; }
+		float GetCurrentSize() const
+			{ return _curSize; }
+		const math3d::vec3f& GetInitialRotation() const
+			{ return _initialRotation; }
+		void SetInitialRotation(const math3d::vec3f& rot)
+			{ _initialRotation = rot; _rotation = rot; }
 
 		static EmitterType GetEmitterTypeByString(const char* name);
 		static const char* GetEmitterTypeString(EmitterType type);
@@ -254,15 +272,16 @@ namespace Engine
 		int _partBufInd;
 		Attribute* _attributes[ATTRIB_COUNT];
 		int _liveCount;
+		int _peakCount;
 		float _age;
 		float _emitCount;
 		bool _enabled;
 		bool _alive;
 		math3d::vec3f _emitterPos;
-		math3d::mat3f _rotMatrix;
-		float _rotX;
-		float _rotY;
-		float _rotZ;
+		math3d::mat4f _worldMatrix;
+		math3d::vec3f _initialRotation;
+		math3d::vec3f _rotation;
+		float _curSize;
 
 		char _name[EMITTER_NAME_MAX_LEN];
 		EmitterType _type;
@@ -274,9 +293,11 @@ namespace Engine
 		bool _emitFromEdge;
 		bool _animatedTex;
 		int _texFrameCount;
+		int _animTexFPS;
 
 		float _partLife;
 		bool _partRandomOrient;
+		bool _partRandomRotDir;
 	};
 
 

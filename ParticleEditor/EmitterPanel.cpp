@@ -131,11 +131,16 @@ namespace ParticleEditor
 			_checkImplode->Checked = _selectedEmitter->GetImplode();
 			_checkEmitFromEdge->Checked = _selectedEmitter->EmitFromEdge();
 			_checkAnimTex->Checked = _selectedEmitter->IsAnimatedTex();
+			_numAnimTexFPS->Text = _selectedEmitter->GetAnimatedTexFPS().ToString();
 			_numEmitterLife->Text = _selectedEmitter->GetLife().ToString();
 			_listEmitterProperties->SelectedIndex = -1;
+			_numInitRotX->Text = _selectedEmitter->GetInitialRotation().x.ToString();
+			_numInitRotY->Text = _selectedEmitter->GetInitialRotation().y.ToString();
+			_numInitRotZ->Text = _selectedEmitter->GetInitialRotation().z.ToString();
 
 			_numParticleLife->Text = _selectedEmitter->GetParticleLife().ToString();
 			_checkRandomOrient->Checked = _selectedEmitter->GetParticleRandomOrient();
+			_checkRandomRotDir->Checked = _selectedEmitter->GetParticleRandomRotDir();
 		}
 		else
 		{
@@ -156,11 +161,16 @@ namespace ParticleEditor
 			_checkImplode->Checked = false;
 			_checkEmitFromEdge->Checked = false;
 			_checkAnimTex->Checked = false;
+			_numAnimTexFPS->Text = "1";
 			_numEmitterLife->Text = "0.0";
 			_listEmitterProperties->SelectedIndex = -1;
+			_numInitRotX->Text = "0.0";
+			_numInitRotY->Text = "0.0";
+			_numInitRotZ->Text = "0.0";
 
 			_numParticleLife->Text = "0.0";
 			_checkRandomOrient->Checked = false;
+			_checkRandomRotDir->Checked = false;
 		}
 	}
 
@@ -459,6 +469,50 @@ namespace ParticleEditor
 				this, "File must be within game's base directory.", GetAppName(),
 				MessageBoxButtons::OK, MessageBoxIcon::Error);
 			e->Cancel = true;
+		}
+	}
+
+	System::Void EmitterPanel::_checkRandomRotDir_Click(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(_selectedEmitter)
+			_selectedEmitter->SetParticleRandomRotDir(_checkRandomRotDir->Checked);
+	}
+
+	System::Void EmitterPanel::_numInitRotX_ValueChanged(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(_selectedEmitter)
+		{
+			math3d::vec3f rot = _selectedEmitter->GetInitialRotation();
+			rot.x = Decimal::ToSingle(_numInitRotX->Value);
+			_selectedEmitter->SetInitialRotation(rot);
+		}
+	}
+
+	System::Void EmitterPanel::_numInitRotY_ValueChanged(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(_selectedEmitter)
+		{
+			math3d::vec3f rot = _selectedEmitter->GetInitialRotation();
+			rot.y = Decimal::ToSingle(_numInitRotY->Value);
+			_selectedEmitter->SetInitialRotation(rot);
+		}
+	}
+
+	System::Void EmitterPanel::_numInitRotZ_ValueChanged(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(_selectedEmitter)
+		{
+			math3d::vec3f rot = _selectedEmitter->GetInitialRotation();
+			rot.z = Decimal::ToSingle(_numInitRotZ->Value);
+			_selectedEmitter->SetInitialRotation(rot);
+		}
+	}
+
+	System::Void EmitterPanel::_numAnimTexFPS_ValueChanged(System::Object^  sender, System::EventArgs^  e)
+	{
+		if(_selectedEmitter)
+		{
+			_selectedEmitter->SetAnimatedTexFPS(Decimal::ToInt32(_numAnimTexFPS->Value));
 		}
 	}
 

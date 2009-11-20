@@ -87,6 +87,7 @@ namespace Engine
 		char buf[MAX_IDENT_LEN];
 		char path[MAX_PATH];
 		float ftmp;
+		int itmp;
 
 		Parser::Token token;
 		while(1)
@@ -232,6 +233,19 @@ namespace Engine
 					return false;
 				}
 
+				if(!parser.ExpectTokenString("animatedTextureFPS"))
+					{ delete emitter; Unload(); return false; }
+				if(!parser.ReadInt(itmp))
+					{ delete emitter; Unload(); return false; }
+				emitter->SetAnimatedTexFPS(itmp);
+
+				if(!parser.ExpectTokenString("initialRotation"))
+					{ delete emitter; Unload(); return false; }
+				vec3f init_rot;
+				if(!parser.ReadVec3f(init_rot))
+					{ delete emitter; Unload(); return false; }
+				emitter->SetInitialRotation(init_rot);
+
 				if(!parser.ExpectTokenString("particleLife"))
 					{ delete emitter; Unload(); return false; }
 				if(!parser.ReadFloat(ftmp))
@@ -249,6 +263,22 @@ namespace Engine
 				else
 				{
 					Console::PrintError("Invalid value for \'particleRandomOrient\': %s", buf);
+					delete emitter;
+					Unload();
+					return false;
+				}
+
+				if(!parser.ExpectTokenString("particleRandomRotDir"))
+					{ delete emitter; Unload(); return false; }
+				if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
+					return false;
+				if(!strcmp(buf, "True"))
+					emitter->SetParticleRandomRotDir(true);
+				else if(!strcmp(buf, "False"))
+					emitter->SetParticleRandomRotDir(false);
+				else
+				{
+					Console::PrintError("Invalid value for \'particleRandomRotDir\': %s", buf);
 					delete emitter;
 					Unload();
 					return false;
@@ -329,8 +359,11 @@ namespace Engine
 			file->Printf("\t\timplode\t\t%s\n", emitter.GetImplode()? "True": "False");
 			file->Printf("\t\temitFromEdge\t\t%s\n", emitter.EmitFromEdge()? "True": "False");
 			file->Printf("\t\tanimatedTexture\t\t%s\n", emitter.IsAnimatedTex()? "True": "False");
+			file->Printf("\t\tanimatedTextureFPS\t\t%d\n", emitter.GetAnimatedTexFPS());
+			file->Printf("\t\tinitialRotation\t\t[%f %f %f]\n", emitter.GetInitialRotation().x, emitter.GetInitialRotation().y, emitter.GetInitialRotation().z);
 			file->Printf("\t\tparticleLife\t\t%f\n", emitter.GetParticleLife());
 			file->Printf("\t\tparticleRandomOrient\t\t%s\n", emitter.GetParticleRandomOrient()? "True": "False");
+			file->Printf("\t\tparticleRandomRotDir\t\t%s\n", emitter.GetParticleRandomRotDir()? "True": "False");
 
 			file->Printf("\n\t\tattributes\n\t\t{\n");
 			Attribute** attribs = emitter.GetAttributeArray();
@@ -614,15 +647,16 @@ namespace Engine
 		_liveParticles[1] = new(mapPool) Particle*[MAX_PARTICLES];
 		_partBufInd = 0;
 		_liveCount = 0;
+		_peakCount = 0;
 		_age = 0.0f;
 		_emitCount = 0.0f;
 		_enabled = true;
 		_alive = true;
 		_emitterPos.set_null();
-		_rotMatrix.set_identity();
-		_rotX = 0.0f;
-		_rotY = 0.0f;
-		_rotZ = 0.0f;
+		_worldMatrix.set_identity();
+		_rotation.set_null();
+		_initialRotation.set_null();
+		_curSize = EmitterSize.Evaluate(0.0f);
 
 		_attributes[0] = &Velocity;
 		_attributes[1] = &EmitterSize;
@@ -650,9 +684,11 @@ namespace Engine
 		_emitFromEdge = false;
 		_animatedTex = false;
 		_texFrameCount = 0;
+		_animTexFPS = 15;
 
 		_partLife = 10.0f;
 		_partRandomOrient = false;
+		_partRandomRotDir = false;
 	}
 
 	ParticleSystem::Emitter::Emitter(const Emitter& emitter)
@@ -693,15 +729,16 @@ namespace Engine
 	ParticleSystem::Emitter& ParticleSystem::Emitter::operator = (const Emitter& emitter)
 	{
 		_liveCount = 0;
+		_peakCount = 0;
 		_age = 0.0f;
 		_emitCount = 0.0f;
 		_enabled = emitter._enabled;
 		_alive = true;
 		_emitterPos = emitter._emitterPos;
-		_rotMatrix = emitter._rotMatrix;
-		_rotX = emitter._rotX;
-		_rotY = emitter._rotY;
-		_rotZ = emitter._rotZ;
+		_worldMatrix = emitter._worldMatrix;
+		_rotation = emitter._rotation;
+		_initialRotation = emitter._initialRotation;
+		_curSize = emitter.EmitterSize.Evaluate(0.0f);
 
 		strcpy(_name, emitter._name);
 		_type = emitter._type;
@@ -718,6 +755,7 @@ namespace Engine
 		_emitFromEdge = emitter._emitFromEdge;
 		_animatedTex = emitter._animatedTex;
 		_texFrameCount = emitter._texFrameCount;
+		_animTexFPS = emitter._animTexFPS;
 
 		Velocity = emitter.Velocity;
 		EmitterSize = emitter.EmitterSize;
@@ -732,6 +770,7 @@ namespace Engine
 
 		_partLife = emitter._partLife;
 		_partRandomOrient = emitter._partRandomOrient;
+		_partRandomRotDir = emitter._partRandomRotDir;
 		ParticleSize = emitter.ParticleSize;
 		ParticleRotationSpeed = emitter.ParticleRotationSpeed;
 		ParticleAlpha = emitter.ParticleAlpha;
@@ -804,7 +843,7 @@ namespace Engine
 					part->velocity -= part->velocity * part_frict;
 					part->velocity.y -= part_grav * frame_time;
 				}
-				part->rotation += part_rot_speed * frame_time;
+				part->rotation += part->rotDir * part_rot_speed * frame_time;
 				if(part->rotation > 360.0f)
 					part->rotation -= 360.0f;
 				else if(part->rotation < 0.0f)
@@ -813,7 +852,7 @@ namespace Engine
 
 				if(_animatedTex)
 				{
-					part->frame += 15 * frame_time;
+					part->frame += _animTexFPS * frame_time;
 					if(part->frame > (float)_texFrameCount)
 						part->frame -= _texFrameCount;
 				}
@@ -865,28 +904,33 @@ namespace Engine
 
 			// update emitter position and direction
 			mat3f rot, temp;
-			_rotX += deg2rad(rot_x * emitter_dt);
-			if(_rotX > TWO_PI)
-				_rotX -= TWO_PI;
-			else if(_rotX < 0.0f)
-				_rotX = TWO_PI + _rotX;
+			_rotation.x += rot_x * emitter_dt;
+			if(_rotation.x > 360.0f)
+				_rotation.x -= 360.0f;
+			else if(_rotation.x < 0.0f)
+				_rotation.x = 360.0f + _rotation.x;
 
-			_rotY += deg2rad(rot_y * emitter_dt);
-			if(_rotY > TWO_PI)
-				_rotY -= TWO_PI;
-			else if(_rotY < 0.0f)
-				_rotY = TWO_PI + _rotY;
+			_rotation.y += rot_y * emitter_dt;
+			if(_rotation.y > 360.0f)
+				_rotation.y -= 360.0f;
+			else if(_rotation.y < 0.0f)
+				_rotation.y = 360.0f + _rotation.y;
 
-			_rotZ += deg2rad(rot_z * emitter_dt);
-			if(_rotZ > TWO_PI)
-				_rotZ -= TWO_PI;
-			else if(_rotZ < 0.0f)
-				_rotZ = TWO_PI + _rotZ;
+			_rotation.z += rot_z * emitter_dt;
+			if(_rotation.z > 360.0f)
+				_rotation.z -= 360.0f;
+			else if(_rotation.z < 0.0f)
+				_rotation.z = 360.0f + _rotation.z;
 
-			_rotMatrix.from_euler(_rotX, _rotY, _rotZ);
+			mat4f local_mat;
+			local_mat.from_euler(deg2rad(_rotation.x), deg2rad(_rotation.y), deg2rad(_rotation.z));
 			vec3f em_pos;
-			transform(em_pos, vec3f(offs_x, offs_y, offs_z), _rotMatrix);
-			transform(_emitterPos, em_pos, psys_world_mat);
+			transform(em_pos, vec3f(offs_x, offs_y, offs_z), local_mat);
+			local_mat.row3.rvec3 = em_pos;
+			mul(_worldMatrix, local_mat, psys_world_mat);
+			_emitterPos = _worldMatrix.row3.rvec3;
+
+			_curSize = em_size;
 
 			// generate new particles
 			_emitCount += em_rate * emitter_dt;
@@ -913,6 +957,9 @@ namespace Engine
 			}
 		}
 
+		if(_liveCount > _peakCount)
+			_peakCount = _liveCount;
+
 		if(_liveCount)
 			qsort(_liveParticles[_partBufInd], _liveCount, sizeof(Particle*), ParticleCompareFunc);
 	}
@@ -922,14 +969,14 @@ namespace Engine
 		_particlePool.Reset();
 		_partBufInd = 0;
 		_liveCount = 0;
+		_peakCount = 0;
 		_age = 0.0f;
 		_alive = true;
 		_emitCount = 0.0f;
 		_emitterPos.set_null();
-		_rotMatrix.set_identity();
-		_rotX = 0.0f;
-		_rotY = 0.0f;
-		_rotZ = 0.0f;
+		_worldMatrix.set_identity();
+		_rotation = _initialRotation;
+		_curSize = EmitterSize.Evaluate(0.0f);
 	}
 
 	void ParticleSystem::Emitter::EmitSphere(int count, float em_size, float em_angle, float velocity)
@@ -957,13 +1004,17 @@ namespace Engine
 					part->position = _emitterPos + dir * (em_size * 0.5f);
 				else
 					part->position = _emitterPos + dir * (frand<float>() * em_size * 0.5f);
-				part->initPosition = part->position;
 			}
 
 			if(_partRandomOrient)
 				part->rotation = 360.0f * frand<float>();
 			else
 				part->rotation = 0.0f;
+
+			if(_partRandomRotDir)
+				part->rotDir = (rand() % 2)? 1.0f: -1.0f;
+			else
+				part->rotDir = 1.0f;
 
 			if(_implode)
 			{
@@ -980,7 +1031,7 @@ namespace Engine
 				float w = sqrt(1.0f - dir.y * dir.y);
 				dir.x = w * sin(t);
 				dir.z = w * cos(t);
-				transform(rdir, dir, _rotMatrix);
+				transform_dir(rdir, dir, _worldMatrix);
 
 				part->velocity = rdir * velocity;
 			}
@@ -1007,28 +1058,32 @@ namespace Engine
 				vec3f dir_x, dir_z;
 				if(rand() % 2)
 				{
-					dir_x = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _rotMatrix.row0;
-					dir_z = (em_size * 0.5f * ((rand() % 2)? -1.0f: 1.0f)) * _rotMatrix.row2;
+					dir_x = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _worldMatrix.row0.rvec3;
+					dir_z = (em_size * 0.5f * ((rand() % 2)? -1.0f: 1.0f)) * _worldMatrix.row2.rvec3;
 				}
 				else
 				{
-					dir_x = (em_size * 0.5f * ((rand() % 2)? -1.0f: 1.0f)) * _rotMatrix.row0;
-					dir_z = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _rotMatrix.row2;
+					dir_x = (em_size * 0.5f * ((rand() % 2)? -1.0f: 1.0f)) * _worldMatrix.row0.rvec3;
+					dir_z = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _worldMatrix.row2.rvec3;
 				}
 				part->position = _emitterPos + dir_x + dir_z;
 			}
 			else
 			{
-				vec3f dir_x = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _rotMatrix.row0;
-				vec3f dir_z = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _rotMatrix.row2;
+				vec3f dir_x = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _worldMatrix.row0.rvec3;
+				vec3f dir_z = (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _worldMatrix.row2.rvec3;
 				part->position = _emitterPos + dir_x + dir_z;
 			}
-			part->initPosition = part->position;
 
 			if(_partRandomOrient)
 				part->rotation = 360.0f * frand<float>();
 			else
 				part->rotation = 0.0f;
+
+			if(_partRandomRotDir)
+				part->rotDir = (rand() % 2)? 1.0f: -1.0f;
+			else
+				part->rotDir = 1.0f;
 
 			if(_implode)
 			{
@@ -1045,9 +1100,9 @@ namespace Engine
 				float w = sqrt(1.0f - dir.y * dir.y);
 				dir.x = w * sin(t);
 				dir.z = w * cos(t);
-				transform(rdir, dir, _rotMatrix);
+				transform_dir(rdir, dir, _worldMatrix);
 
-				part->velocity = dir * velocity;
+				part->velocity = rdir * velocity;
 			}
 
 			part->frame = 0.0f;
@@ -1069,20 +1124,24 @@ namespace Engine
 
 			{
 				float t = TWO_PI * frand<float>();
-				vec3f dir_x = _rotMatrix.row0 * cos(t);
-				vec3f dir_z = _rotMatrix.row2 * sin(t);
+				vec3f dir_x = _worldMatrix.row0.rvec3 * cos(t);
+				vec3f dir_z = _worldMatrix.row2.rvec3 * sin(t);
 
 				if(_emitFromEdge)
 					part->position = _emitterPos + (dir_x + dir_z) * (em_size * 0.5f);
 				else
 					part->position = _emitterPos + (dir_x + dir_z) * (frand<float>() * em_size * 0.5f);
 			}
-			part->initPosition = part->position;
 
 			if(_partRandomOrient)
 				part->rotation = 360.0f * frand<float>();
 			else
 				part->rotation = 0.0f;
+
+			if(_partRandomRotDir)
+				part->rotDir = (rand() % 2)? 1.0f: -1.0f;
+			else
+				part->rotDir = 1.0f;
 
 			if(_implode)
 			{
@@ -1099,9 +1158,9 @@ namespace Engine
 				float w = sqrt(1.0f - dir.y * dir.y);
 				dir.x = w * sin(t);
 				dir.z = w * cos(t);
-				transform(rdir, dir, _rotMatrix);
+				transform_dir(rdir, dir, _worldMatrix);
 
-				part->velocity = dir * velocity;
+				part->velocity = rdir * velocity;
 			}
 
 			part->frame = 0.0f;
@@ -1121,13 +1180,17 @@ namespace Engine
 			part->alpha = ParticleAlpha.Evaluate(0.0f);
 			part->size = ParticleSize.Evaluate(0.0f);
 
-			part->position = _emitterPos + (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _rotMatrix.row0;
-			part->initPosition = part->position;
+			part->position = _emitterPos + (2.0f * frand<float>() - 1.0f) * em_size * 0.5f * _worldMatrix.row0.rvec3;
 
 			if(_partRandomOrient)
 				part->rotation = 360.0f * frand<float>();
 			else
 				part->rotation = 0.0f;
+
+			if(_partRandomRotDir)
+				part->rotDir = (rand() % 2)? 1.0f: -1.0f;
+			else
+				part->rotDir = 1.0f;
 
 			if(_implode)
 			{
@@ -1144,9 +1207,9 @@ namespace Engine
 				float w = sqrt(1.0f - dir.y * dir.y);
 				dir.x = w * sin(t);
 				dir.z = w * cos(t);
-				transform(rdir, dir, _rotMatrix);
+				transform_dir(rdir, dir, _worldMatrix);
 
-				part->velocity = dir * velocity;
+				part->velocity = rdir * velocity;
 			}
 
 			part->frame = 0.0f;

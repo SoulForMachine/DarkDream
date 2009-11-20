@@ -102,7 +102,7 @@ namespace Engine
 		_renderer->ActiveVertexASMProgram(_partVertProg->GetASMProgram());
 		_renderer->ActiveFragmentASMProgram(_partFragProg->GetASMProgram());
 		_renderer->EnableBlending(true);
-		_renderer->EnableDepthTest(false);
+		_renderer->EnableDepthWrite(false);
 
 		_partVertProg->GetASMProgram()->LocalMatrix4x4(0, camera.GetViewProjectionTransform());
 
@@ -120,7 +120,7 @@ namespace Engine
 		while(count);
 
 		_renderer->EnableBlending(false);
-		_renderer->EnableDepthTest(true);
+		_renderer->EnableDepthWrite(true);
 	}
 
 	int ParticleRenderer::BatchEmitters(ParticleSystem::Emitter** emitters, int count)
