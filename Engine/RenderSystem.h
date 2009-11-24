@@ -3,6 +3,7 @@
 #define _ENGINE_RENDER_SYSTEM_H_
 
 #include "BaseLib/GL/GLRenderer.h"
+#include "BaseLib/FreeStackPool.h"
 #include "Engine/Common.h"
 #include "Engine/ResourceManager.h"
 #include "Render2D.h"
@@ -34,13 +35,14 @@ namespace Engine
 		bool Init(void* instance_handle, void* window_handle);
 		void Deinit();
 
-		void RenderFrame(int frame_time);
-		void RenderEntities(int frame_time);
+		void Update(int frame_time);
+		void RenderFrame();
+		void RenderEntities();
 		void RenderEntities(int frame_time, const Camera& camera, ModelEntity** entities, int ent_count);
-		void RenderTerrain(int frame_time);
-		void RenderGrass(int frame_time);
-		void RenderBgLayers(int frame_time);
-		void RenderParticles(int frame_time);
+		void RenderTerrain();
+		void RenderGrass();
+		void RenderBgLayers();
+		void RenderParticles();
 		void ReloadShaders();
 
 		GL::Renderer* GetRenderer()
@@ -58,10 +60,6 @@ namespace Engine
 		DebugRenderer* GetDebugRenderer()
 			{ return _debugRenderer; }
 
-		int GetFrameTime() const
-			{ return _frameTime; }
-		float GetFrameTimeSec() const
-			{ return _frameTime * 0.001f; }
 		const math3d::vec4f& GetMainColor() const
 			{ return _mainColor; }
 		void SetMainColor(const math3d::vec4f& color)
@@ -85,29 +83,45 @@ namespace Engine
 		static const int MAX_NUM_ENTITIES = 4 * 1024;
 		static const int MAX_NUM_MESHES = 16 * 1024;
 		static const int MAX_NUM_TRANSP_MESHES = 8 * 1024;
+		static const int MAX_SPRITES = 128;
+		static const int MAX_PARTICLE_SYSTEMS = 128;
+		static const int MAX_EMITTERS = MAX_PARTICLE_SYSTEMS * 8;
 
 		void Clear();
 		void AddEntityToDrawArray(ModelEntity* entity, const Camera& camera);
+		void AddPartSysToDrawArray(ParticleSystem* part_sys);
+		void UpdateEntityTime(Entity* entity);
 
 		GL::Renderer* _renderer;
 		Render2D* _render2D;
 		EntityRenderer* _entityRenderer;
 		ModelEntity** _entityBuf;
-		EntityRenderer::MeshRenderData* _meshBuf;
-		EntityRenderer::MeshRenderData* _transpMeshBuf;
+		EntityRenderer::MeshRenderData** _meshBuf;
+		EntityRenderer::MeshRenderData** _transpMeshBuf;
+		const Terrain::TerrainPatch* _terrainPatches[Terrain::MAX_PATCHES];
+		const BgLayer::Sprite* _sprites[MAX_SPRITES];
+		ParticleSystem* _particleSystems[MAX_PARTICLE_SYSTEMS];
+		ParticleSystem::Emitter* _emitters[MAX_EMITTERS];
 		TerrainRenderer* _terrainRenderer;
 		BgLayerRenderer* _bgLayerRenderer;
 		ParticleRenderer* _particleRenderer;
 		DebugRenderer* _debugRenderer;
 		GL::Texture2D* _texWhite;
 		GL::Texture2D* _texBlack;
-		int _frameTime;
+		float _frameTime;
+		int _frameTimeMsec;
 		math3d::vec4f _mainColor;
 		math3d::vec4f _editorColor;
 		RenderStyle _renderStyle;
+		FreeStackPool<EntityRenderer::MeshRenderData> _meshDataPool;
 
 		int _smapWidth;
 		int _smapHeight;
+		int _visEntityCount;
+		int _visTerrPatchesCount;
+		int _visSpriteCount;
+		int _visPartSysCount;
+		int _visEmitterCount;
 		int _meshCount;
 		int _transpMeshCount;
 	};

@@ -7,6 +7,12 @@ using namespace math3d;
 namespace Engine
 {
 
+	RenderableEntity::RenderableEntity()
+	{
+		_worldMat.set_identity();
+		_dropped = true;
+	}
+
 	void RenderableEntity::SetObjectBoundingBox(const AABBox& bbox)
 	{
 		_objectBBox = bbox;

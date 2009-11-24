@@ -255,7 +255,7 @@ namespace Engine
 		void Unload();
 		bool IsLoaded() const
 			{ return false; }
-		const ParticleSystem* GetParticleSystem() const
+		ParticleSystem* GetParticleSystem()
 			{ return _particleSys; }
 
 	private:

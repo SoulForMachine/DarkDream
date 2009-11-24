@@ -109,6 +109,7 @@ namespace Engine
 
 		_renderer->EnableBlending(true);
 		_renderer->BlendingFunc(GL::BLEND_FUNC_SRC_ALPHA, GL::BLEND_FUNC_ONE_MINUS_SRC_ALPHA);
+		_renderer->EnableDepthTest(false);
 
 		int i = start;
 		while(i < count)
@@ -128,6 +129,7 @@ namespace Engine
 		}
 
 		_renderer->EnableBlending(false);
+		_renderer->EnableDepthTest(true);
 	}
 
 	void BgLayerRenderer::RenderSpriteBatch(const BgLayer::Sprite** sprites, int count)

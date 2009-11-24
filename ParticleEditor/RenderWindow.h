@@ -38,7 +38,6 @@ namespace ParticleEditor
 		void OnMButtonUp(int x, int y);
 		void OnRButtonUp(int x, int y);
 		void OnMouseWheel(int delta, int x, int y);
-		void RenderParticleSystem();
 		void RenderStats();
 		void RenderCoordSys();
 		bool CreateResources();

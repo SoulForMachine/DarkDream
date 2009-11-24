@@ -107,11 +107,11 @@ namespace Engine
 		Clear();
 	}
 
-	void EntityRenderer::Render(const Camera& camera, const MeshRenderData* meshes, int count)
+	void EntityRenderer::Render(const Camera& camera, MeshRenderData** meshes, int count)
 	{
 		if(count > 0)
 		{
-			bool transp = meshes[0].material->HasTransparency();
+			bool transp = meshes[0]->material->HasTransparency();
 
 			if(transp)
 			{
@@ -121,7 +121,7 @@ namespace Engine
 
 			for(int i = 0; i < count; ++i)
 			{
-				RenderMesh(camera, &meshes[i]);
+				RenderMesh(camera, meshes[i]);
 			}
 
 			if(transp)

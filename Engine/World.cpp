@@ -74,7 +74,31 @@ namespace Engine
 		_entities.Clear();
 	}
 
-	int World::GetVisibleEntities(ModelEntity** entities, int max_entities)
+	int World::GetVisibleRenderableEntities(RenderableEntity** entities, int max_entities)
+	{
+		if(!entities || max_entities <= 0)
+			return 0;
+
+		int count = 0;
+		for(EntityHashMap::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
+		{
+			if(	(*it)->GetType() == ENTITY_TYPE_MODEL ||
+				(*it)->GetType() == ENTITY_TYPE_PARTICLE_SYS )
+			{
+				RenderableEntity* re = (RenderableEntity*)*it;
+				if(_camera.IsInsideFrustum(re->GetWorldBoundingBox()))
+				{
+					entities[count++] = re;
+					if(count == max_entities)
+						break;
+				}
+			}
+		}
+
+		return count;
+	}
+
+	int World::GetVisibleModelEntities(ModelEntity** entities, int max_entities)
 	{
 		if(!entities || max_entities <= 0)
 			return 0;

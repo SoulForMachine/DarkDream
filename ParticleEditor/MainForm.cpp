@@ -24,8 +24,8 @@ namespace ParticleEditor
 		_consoleForm = gcnew ConsoleForm(this);
 		_consoleForm->DockAreas &= ~WeifenLuo::WinFormsUI::Docking::DockAreas::Document;
 		_viewportForm = gcnew ViewportForm;
-		_propertyPanel = gcnew PropertiesPanel;
-		_emitterPanel = gcnew EmitterPanel(_propertyPanel);
+		_propertyPanel = gcnew PropertiesPanel(this);
+		_emitterPanel = gcnew EmitterPanel(this, _propertyPanel);
 
 		// load layout for dock panels from an xml
 		_dockPanel->SuspendLayout(true);
@@ -62,6 +62,8 @@ namespace ParticleEditor
 
 	void MainForm::FormNotify(System::Windows::Forms::Form^ form, NotifyMessage msg)
 	{
+		if(form == _emitterPanel || form == _propertyPanel)
+			_modified = true;
 	}
 
 	WeifenLuo::WinFormsUI::Docking::IDockContent^ MainForm::GetContentFromPersistString(String^ persistString)

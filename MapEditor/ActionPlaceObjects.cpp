@@ -23,13 +23,13 @@ namespace MapEditor
 
 	bool ActionPlaceObjects::BeginAction()
 	{
-		List<ModelEntity*>* ents = _parameters->selectedEntities;
+		List<RenderableEntity*>* ents = _parameters->selectedEntities;
 		if(!ents || !ents->GetCount())
 			return false;
 
 		_undoData->SetCount(ents->GetCount());
 		int i = 0;
-		for(List<ModelEntity*>::Iterator it = ents->Begin(); it != ents->End(); ++it)
+		for(List<RenderableEntity*>::Iterator it = ents->Begin(); it != ents->End(); ++it)
 		{
 			(*_undoData)[i].entity = *it;
 			(*_undoData)[i].transform = (*it)->GetWorldTransform();
@@ -41,7 +41,7 @@ namespace MapEditor
 		{
 			for(size_t i = 0; i < _undoData->GetCount(); ++i)
 			{
-				ModelEntity* entity = (*_undoData)[i].entity;
+				RenderableEntity* entity = (*_undoData)[i].entity;
 				vec3f pos = entity->GetPosition();
 				float y;
 				if(engineAPI->world->GetTerrain().ElevationFromPoint(vec2f(pos.x, pos.z), y))

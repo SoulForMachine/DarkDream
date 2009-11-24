@@ -224,18 +224,18 @@ namespace MapEditor
 		_renderer->SwapInterval(1);
 		_renderer->ClearColorBuffer(0.5f, 0.5f, 0.5f, 1.0f);
 		_renderer->ClearDepthStencilBuffer(DEPTH_BUFFER_BIT | STENCIL_BUFFER_BIT, 1.0f, 0);
-		_renderer->EnableFaceCulling(true);
 
 		if(_wireframe)
 			_renderer->RasterizationMode(GL::RASTER_LINE);
 
-		_renderer->EnableDepthTest(false);
+		_renderSystem->Update(_frameTime);
+
+		_renderSystem->RenderTerrain();
 		if(_viewMode == ViewMode::GAME)
-			engineAPI->renderSystem->RenderBgLayers(_frameTime);
-		_renderer->EnableDepthTest(true);
-		engineAPI->renderSystem->RenderTerrain(_frameTime);
-		engineAPI->renderSystem->RenderEntities(_frameTime);
-		engineAPI->renderSystem->RenderGrass(_frameTime);
+			_renderSystem->RenderBgLayers();
+		_renderSystem->RenderEntities();
+		_renderSystem->RenderGrass();
+		_renderSystem->RenderParticles();
 
 		if(_wireframe)
 			_renderer->RasterizationMode(GL::RASTER_FILL);

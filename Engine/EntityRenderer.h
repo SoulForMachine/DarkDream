@@ -30,7 +30,7 @@ namespace Engine
 		EntityRenderer();
 		bool Init();
 		void Deinit();
-		void Render(const Camera& camera, const MeshRenderData* meshes, int count);
+		void Render(const Camera& camera, MeshRenderData** meshes, int count);
 		void ReloadShaders();
 
 	private:

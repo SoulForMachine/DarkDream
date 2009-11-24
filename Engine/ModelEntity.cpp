@@ -31,10 +31,8 @@ namespace Engine
 
 	ModelEntity::ModelEntity()
 	{
-		SetWorldTransform(mat4f::identity);
 		_animTime = 0.0f;
 		_curAnim = 0;
-		_dropped = true;
 		_animPlaying = false;
 
 		_model = 0;
@@ -63,8 +61,6 @@ namespace Engine
 	{
 		Unload();
 
-		SetWorldTransform(entity.GetWorldTransform());
-		_dropped = entity._dropped;
 		_animPlaying = entity._animPlaying;
 
 		// properties
@@ -539,10 +535,22 @@ namespace Engine
 		}
 	}
 
-	void ModelEntity::UpdateGraphics(int frame_time)
+	void ModelEntity::UpdateTime(float frame_time)
 	{
-		float tsec = frame_time * 0.001f;
+		if(_curAnim)
+		{
+			if(_animPlaying)
+			{
+				_animTime += frame_time;
+				const Animation* anim = _curAnim->animation->GetAnimation();
+				if(_animTime > anim->GetLength())
+					_animTime = fmod(_animTime, anim->GetLength());
+			}
+		}
+	}
 
+	void ModelEntity::UpdateGraphics()
+	{
 		if(_curAnim)
 		{
 			const Animation* anim = _curAnim->animation->GetAnimation();
@@ -550,10 +558,6 @@ namespace Engine
 			if(_animPlaying)
 			{
 				// update joint transform matrices for current animation time
-				_animTime += tsec;
-				if(_animTime > anim->GetLength())
-					_animTime = fmod(_animTime, anim->GetLength());
-
 				anim->GetJointTransforms(
 					_animTime,
 					_jointMatPalette.GetData(),
@@ -565,15 +569,17 @@ namespace Engine
 			const StaticArray<mat4f>& cmb_xforms = anim->GetCombinedTransforms();
 			for(JointAttachMap::Iterator it = _jointAttachments.Begin(); it != _jointAttachments.End(); ++it)
 			{
+				RenderableEntity* entity;
 				if(it->type == JOINT_ATTACH_MODEL)
+					entity = ((ModelEntityRes*)it->attachment)->GetEntity();
+				else if(it->type == JOINT_ATTACH_PARTICLE_SYSTEM)
+					entity = ((PartSysRes*)it->attachment)->GetParticleSystem();
+
+				if(entity)
 				{
-					ModelEntity* entity = ((ModelEntityRes*)it->attachment)->GetEntity();
-					if(entity)
-					{
-						mat4f ent_mat;
-						mul(ent_mat, cmb_xforms[it->jointIndex], GetWorldTransform());
-						entity->SetWorldTransform(ent_mat);
-					}
+					mat4f ent_mat;
+					mul(ent_mat, cmb_xforms[it->jointIndex], GetWorldTransform());
+					entity->SetWorldTransform(ent_mat);
 				}
 			}
 		}
@@ -581,16 +587,18 @@ namespace Engine
 		{
 			for(JointAttachMap::Iterator it = _jointAttachments.Begin(); it != _jointAttachments.End(); ++it)
 			{
+				RenderableEntity* entity;
 				if(it->type == JOINT_ATTACH_MODEL)
+					entity = ((ModelEntityRes*)it->attachment)->GetEntity();
+				else if(it->type == JOINT_ATTACH_PARTICLE_SYSTEM)
+					entity = ((PartSysRes*)it->attachment)->GetParticleSystem();
+
+				if(entity)
 				{
-					ModelEntity* entity = ((ModelEntityRes*)it->attachment)->GetEntity();
-					if(entity)
-					{
-						mat4f ent_mat;
-						const Joint* joints = _model->GetModel()->GetJoints().GetData();
-						mul(ent_mat, joints[it->jointIndex].invOffsetMatrix, GetWorldTransform());
-						entity->SetWorldTransform(ent_mat);
-					}
+					mat4f ent_mat;
+					const Joint* joints = _model->GetModel()->GetJoints().GetData();
+					mul(ent_mat, joints[it->jointIndex].invOffsetMatrix, GetWorldTransform());
+					entity->SetWorldTransform(ent_mat);
 				}
 			}
 		}
@@ -988,16 +996,18 @@ namespace Engine
 		// joint attachments transforms
 		for(JointAttachMap::Iterator it = _jointAttachments.Begin(); it != _jointAttachments.End(); ++it)
 		{
+			RenderableEntity* entity;
 			if(it->type == JOINT_ATTACH_MODEL)
+				entity = ((ModelEntityRes*)it->attachment)->GetEntity();
+			else if(it->type == JOINT_ATTACH_PARTICLE_SYSTEM)
+				entity = ((PartSysRes*)it->attachment)->GetParticleSystem();
+
+			if(entity)
 			{
-				ModelEntity* entity = ((ModelEntityRes*)it->attachment)->GetEntity();
-				if(entity)
-				{
-					mat4f ent_mat;
-					const Joint* joints = _model->GetModel()->GetJoints().GetData();
-					mul(ent_mat, joints[it->jointIndex].invOffsetMatrix, GetWorldTransform());
-					entity->SetWorldTransform(ent_mat);
-				}
+				mat4f ent_mat;
+				const Joint* joints = _model->GetModel()->GetJoints().GetData();
+				mul(ent_mat, joints[it->jointIndex].invOffsetMatrix, GetWorldTransform());
+				entity->SetWorldTransform(ent_mat);
 			}
 		}
 	}

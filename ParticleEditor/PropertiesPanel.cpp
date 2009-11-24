@@ -16,10 +16,11 @@ using namespace math3d;
 namespace ParticleEditor
 {
 
-	PropertiesPanel::PropertiesPanel(void)
+	PropertiesPanel::PropertiesPanel(EditorCommon::FormDirector^ director)
 	{
 		InitializeComponent();
 
+		_director = director;
 		_particleSystem = 0;
 		_attribute = 0;
 		_graphTime = 15.0f;
@@ -312,6 +313,7 @@ namespace ParticleEditor
 				GraphPoint pt = { index , values[index].variable, values[index].value };
 				_selectedPoints[i] = pt;
 			}
+			Modified();
 		}
 	}
 
@@ -334,6 +336,7 @@ namespace ParticleEditor
 			bbox.minPt.x = -Decimal::ToSingle(_numBBoxWidth->Value) * 0.5f;
 			bbox.maxPt.x = Decimal::ToSingle(_numBBoxWidth->Value) * 0.5f;
 			_particleSystem->SetObjectBoundingBox(bbox);
+			Modified();
 		}
 	}
 
@@ -345,6 +348,7 @@ namespace ParticleEditor
 			bbox.minPt.y = -Decimal::ToSingle(_numBBoxHeight->Value) * 0.5f;
 			bbox.maxPt.y = Decimal::ToSingle(_numBBoxHeight->Value) * 0.5f;
 			_particleSystem->SetObjectBoundingBox(bbox);
+			Modified();
 		}
 	}
 
@@ -356,6 +360,7 @@ namespace ParticleEditor
 			bbox.minPt.z = -Decimal::ToSingle(_numBBoxDepth->Value) * 0.5f;
 			bbox.maxPt.z = Decimal::ToSingle(_numBBoxDepth->Value) * 0.5f;
 			_particleSystem->SetObjectBoundingBox(bbox);
+			Modified();
 		}
 	}
 
@@ -390,6 +395,7 @@ namespace ParticleEditor
 			_selectedPoints[0] = pt;
 
 			_panelGraph->Invalidate();
+			Modified();
 		}
 	}
 
@@ -406,6 +412,7 @@ namespace ParticleEditor
 			_selectedPoints[0] = pt;
 
 			_panelGraph->Invalidate();
+			Modified();
 		}
 	}
 
@@ -522,6 +529,7 @@ namespace ParticleEditor
 
 				_selectedPoints->Clear();
 				_panelGraph->Invalidate();
+				Modified();
 			}
 		}
 	}
@@ -540,7 +548,12 @@ namespace ParticleEditor
 
 			_selectedPoints->Clear();
 			_panelGraph->Invalidate();
+			Modified();
 		}
 	}
 
+	void PropertiesPanel::Modified()
+	{
+		_director->FormNotify(this, EditorCommon::NotifyMessage::Modified);
+	}
 }

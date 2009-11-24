@@ -47,9 +47,11 @@ namespace ParticleEditor
 	};
 
 
-	EmitterPanel::EmitterPanel(PropertiesPanel^ properties_panel)
+	EmitterPanel::EmitterPanel(EditorCommon::FormDirector^ director, PropertiesPanel^ properties_panel)
 	{
 		InitializeComponent();
+
+		_director = director;
 
 		_textName->MaxLength = ParticleSystem::Emitter::EMITTER_NAME_MAX_LEN;
 
@@ -217,6 +219,11 @@ namespace ParticleEditor
 		return name;
 	}
 
+	void EmitterPanel::Modified()
+	{
+		_director->FormNotify(this, EditorCommon::NotifyMessage::Modified);
+	}
+
 	System::Void EmitterPanel::_listEmitters_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_listEmitters->SelectedItems->Count == 1)
@@ -291,6 +298,8 @@ namespace ParticleEditor
 			EmitterListItem^ item = gcnew EmitterListItem(emitter);
 			_listEmitters->Items->Add(item);
 			item->Selected = true;
+
+			Modified();
 		}
 	}
 
@@ -300,6 +309,8 @@ namespace ParticleEditor
 		{
 			_particleSys->RemoveEmitter(*_selectedEmitter);
 			_listEmitters->Items->Remove(_listEmitters->SelectedItems[0]);
+
+			Modified();
 		}
 	}
 
@@ -324,6 +335,8 @@ namespace ParticleEditor
 			EmitterListItem^ item = gcnew EmitterListItem(emitter);
 			_listEmitters->Items->Insert(index, item);
 			item->Selected = true;
+
+			Modified();
 		}
 	}
 
@@ -340,6 +353,8 @@ namespace ParticleEditor
 			EmitterListItem^ item = gcnew EmitterListItem(emitter);
 			_listEmitters->Items->Insert(index, item);
 			item->Selected = true;
+
+			Modified();
 		}
 	}
 
@@ -352,6 +367,8 @@ namespace ParticleEditor
 			delete[] name;
 
 			_listEmitters->SelectedItems[0]->Text = _textName->Text;
+
+			Modified();
 		}
 	}
 
@@ -360,6 +377,7 @@ namespace ParticleEditor
 		if(_selectedEmitter && _cmbEmitterType->SelectedIndex != -1)
 		{
 			_selectedEmitter->SetEmitterType((ParticleSystem::Emitter::EmitterType)_cmbEmitterType->SelectedIndex);
+			Modified();
 		}
 	}
 
@@ -368,6 +386,7 @@ namespace ParticleEditor
 		if(_selectedEmitter && _cmbShader->SelectedIndex != -1)
 		{
 			_selectedEmitter->SetShader((ParticleSystem::Emitter::EmitterShader)_cmbShader->SelectedIndex);
+			Modified();
 		}
 	}
 
@@ -386,6 +405,7 @@ namespace ParticleEditor
 				_selectedEmitter->SetTexture(file_name);
 				_textResource->Text = gcnew String(file_name);
 				delete[] file_name;
+				Modified();
 			}
 		}
 	}
@@ -393,25 +413,37 @@ namespace ParticleEditor
 	System::Void EmitterPanel::_checkLoop_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_selectedEmitter)
+		{
 			_selectedEmitter->SetLoop(_checkLoop->Checked);
+			Modified();
+		}
 	}
 
 	System::Void EmitterPanel::_checkImplode_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_selectedEmitter)
+		{
 			_selectedEmitter->SetImplode(_checkImplode->Checked);
+			Modified();
+		}
 	}
 
 	System::Void EmitterPanel::_checkEmitFromEdge_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_selectedEmitter)
+		{
 			_selectedEmitter->SetEmitFromEdge(_checkEmitFromEdge->Checked);
+			Modified();
+		}
 	}
 
 	System::Void EmitterPanel::_checkAnimTex_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_selectedEmitter)
+		{
 			_selectedEmitter->SetAnimatedTex(_checkAnimTex->Checked);
+			Modified();
+		}
 	}
 
 	System::Void EmitterPanel::_numEmitterLife_ValueChanged(System::Object^  sender, System::EventArgs^  e)
@@ -420,6 +452,7 @@ namespace ParticleEditor
 		{
 			_selectedEmitter->SetLife(Decimal::ToSingle(_numEmitterLife->Value));
 			_listEmitterProperties->SelectedIndex = -1;
+			Modified();
 		}
 	}
 
@@ -445,13 +478,17 @@ namespace ParticleEditor
 		{
 			_selectedEmitter->SetParticleLife(Decimal::ToSingle(_numParticleLife->Value));
 			_listEmitterProperties->SelectedIndex = -1;
+			Modified();
 		}
 	}
 
 	System::Void EmitterPanel::_checkRandomOrient_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_selectedEmitter)
+		{
 			_selectedEmitter->SetParticleRandomOrient(_checkRandomOrient->Checked);
+			Modified();
+		}
 	}
 
 	System::Void EmitterPanel::_listEmitters_ItemChecked(System::Object^  sender, System::Windows::Forms::ItemCheckedEventArgs^  e) 
@@ -475,7 +512,10 @@ namespace ParticleEditor
 	System::Void EmitterPanel::_checkRandomRotDir_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_selectedEmitter)
+		{
 			_selectedEmitter->SetParticleRandomRotDir(_checkRandomRotDir->Checked);
+			Modified();
+		}
 	}
 
 	System::Void EmitterPanel::_numInitRotX_ValueChanged(System::Object^  sender, System::EventArgs^  e)
@@ -485,6 +525,7 @@ namespace ParticleEditor
 			math3d::vec3f rot = _selectedEmitter->GetInitialRotation();
 			rot.x = Decimal::ToSingle(_numInitRotX->Value);
 			_selectedEmitter->SetInitialRotation(rot);
+			Modified();
 		}
 	}
 
@@ -495,6 +536,7 @@ namespace ParticleEditor
 			math3d::vec3f rot = _selectedEmitter->GetInitialRotation();
 			rot.y = Decimal::ToSingle(_numInitRotY->Value);
 			_selectedEmitter->SetInitialRotation(rot);
+			Modified();
 		}
 	}
 
@@ -505,6 +547,7 @@ namespace ParticleEditor
 			math3d::vec3f rot = _selectedEmitter->GetInitialRotation();
 			rot.z = Decimal::ToSingle(_numInitRotZ->Value);
 			_selectedEmitter->SetInitialRotation(rot);
+			Modified();
 		}
 	}
 
@@ -513,6 +556,7 @@ namespace ParticleEditor
 		if(_selectedEmitter)
 		{
 			_selectedEmitter->SetAnimatedTexFPS(Decimal::ToInt32(_numAnimTexFPS->Value));
+			Modified();
 		}
 	}
 

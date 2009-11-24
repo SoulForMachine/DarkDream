@@ -25,7 +25,7 @@ namespace ParticleEditor {
 	public ref class EmitterPanel : public WeifenLuo::WinFormsUI::Docking::DockContent
 	{
 	public:
-		EmitterPanel(PropertiesPanel^ properties_panel);
+		EmitterPanel(EditorCommon::FormDirector^ director, PropertiesPanel^ properties_panel);
 
 		void SetParticleSystem(Engine::ParticleSystem* part_sys);
 
@@ -122,7 +122,9 @@ namespace ParticleEditor {
 		void UpdateControls();
 		void RefreshEmitterList();
 		String^ MakeEmitterName();
+		void Modified();
 
+		EditorCommon::FormDirector^ _director;
 		Engine::ParticleSystem* _particleSys;
 		Engine::ParticleSystem::Emitter* _selectedEmitter;
 		PropertiesPanel^ _propertiesPanel;

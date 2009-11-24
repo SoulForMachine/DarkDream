@@ -29,7 +29,7 @@ namespace MapEditor
 		_undoManager = undo_manager;
 		_undoManager->RegisterListener(this);
 		_actionPlaceObjs = nullptr;
-		_selectedEntities = new(mainPool) List<ModelEntity*>;
+		_selectedEntities = new(mainPool) List<RenderableEntity*>;
 		_parameters = gcnew Parameters;
 		_parameters->selectedEntities = _selectedEntities;
 		_moveStartPoint = new(mainPool) vec3f;
@@ -301,10 +301,10 @@ namespace MapEditor
 		_selectOne = (_selectionRect.Width == 1 && _selectionRect.Height == 1);
 	}
 
-	void EM_PlaceObject::SelectEntity(ModelEntity* entity, SelectMode mode)
+	void EM_PlaceObject::SelectEntity(RenderableEntity* entity, SelectMode mode)
 	{
 		// check if already in list
-		for(List<ModelEntity*>::Iterator it = _selectedEntities->Begin(); it != _selectedEntities->End(); ++it)
+		for(List<RenderableEntity*>::Iterator it = _selectedEntities->Begin(); it != _selectedEntities->End(); ++it)
 		{
 			if(*it == entity)
 			{
@@ -326,7 +326,7 @@ namespace MapEditor
 			mat4f view_proj = engineAPI->world->GetCamera().GetViewProjectionTransform();
 			view_proj.inverse();
 
-			for(List<ModelEntity*>::ConstIterator it = _selectedEntities->Begin(); it != _selectedEntities->End(); ++it)
+			for(List<RenderableEntity*>::ConstIterator it = _selectedEntities->Begin(); it != _selectedEntities->End(); ++it)
 			{
 				vec3f center = (*it)->GetPosition();
 				vec4f plane(vec3f::y_axis, -center.y);
@@ -380,7 +380,7 @@ namespace MapEditor
 			float color[] = { 0.0f, 1.0f, 0.0f, 1.0f };
 			_fragpConstColor->GetASMProgram()->LocalParameter(0, color);
 
-			for(List<ModelEntity*>::ConstIterator it = _selectedEntities->Begin(); it != _selectedEntities->End(); ++it)
+			for(List<RenderableEntity*>::ConstIterator it = _selectedEntities->Begin(); it != _selectedEntities->End(); ++it)
 			{
 				mat4f world, wvp;
 				world.set_translation((*it)->GetPosition());
@@ -505,8 +505,9 @@ namespace MapEditor
 			_selectedEntities->Clear();
 		}
 
-		ModelEntity** vis_ents = new(tempPool) ModelEntity*[World::MAX_NUM_ENTITIES];
-		int count = engineAPI->world->GetVisibleEntities(vis_ents, World::MAX_NUM_ENTITIES);
+		RenderableEntity** vis_ents = new(tempPool) RenderableEntity*[World::MAX_NUM_ENTITIES];
+		int count = engineAPI->world->GetVisibleRenderableEntities(vis_ents, World::MAX_NUM_ENTITIES);
+
 		if(count > 0)
 		{
 			// make 4 world-space planes from selection rect
@@ -545,7 +546,7 @@ namespace MapEditor
 
 			if(_selectOne)
 			{
-				ModelEntity* entity = 0;
+				RenderableEntity* entity = 0;
 				for(int i = 0; i < count; ++i)
 				{
 					const OBBox& bbox = vis_ents[i]->GetWorldBoundingBox();

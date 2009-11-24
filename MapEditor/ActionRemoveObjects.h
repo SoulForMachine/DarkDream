@@ -10,7 +10,7 @@ namespace MapEditor
 	public ref class ActionRemoveObjects: public Action
 	{
 	public:
-		ActionRemoveObjects(const List<Engine::ModelEntity*>& obj_list);
+		ActionRemoveObjects(const List<Engine::RenderableEntity*>& obj_list);
 		~ActionRemoveObjects();
 
 		virtual bool BeginAction() override;
@@ -22,7 +22,7 @@ namespace MapEditor
 	private:
 		void RemoveObjects();
 
-		List<Engine::ModelEntity*>* _objList;
+		List<Engine::RenderableEntity*>* _objList;
 		bool _ownObjects;
 	};
 

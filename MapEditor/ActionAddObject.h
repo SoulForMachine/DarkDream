@@ -22,7 +22,7 @@ namespace MapEditor
 	private:
 		System::String^ _path;
 		const math3d::vec3f* _point;
-		Engine::ModelEntity* _entity;
+		Engine::RenderableEntity* _entity;
 		bool _ownObject;
 	};
 

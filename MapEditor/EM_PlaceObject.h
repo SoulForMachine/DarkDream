@@ -29,7 +29,7 @@ namespace MapEditor
 			float translY;
 			float translZ;
 			float rotateY;
-			List<Engine::ModelEntity*>* selectedEntities;
+			List<Engine::RenderableEntity*>* selectedEntities;
 		};
 
 		EM_PlaceObject(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager);
@@ -72,14 +72,14 @@ namespace MapEditor
 		void DeleteObjects();
 		bool BBoxInSelRect(const OBBox& bbox, const math3d::vec4f planes[4]);
 		void UpdateSelectionRect(int x, int y);
-		void SelectEntity(Engine::ModelEntity* entity, SelectMode mode);
+		void SelectEntity(Engine::RenderableEntity* entity, SelectMode mode);
 		GizmoType MouseOverGizmo(int x, int y);
 
 		PlaceObjectPanel^ _panel;
 		UndoManager^ _undoManager;
 		ActionPlaceObjects^ _actionPlaceObjs;
 		Parameters^ _parameters;
-		List<Engine::ModelEntity*>* _selectedEntities;
+		List<Engine::RenderableEntity*>* _selectedEntities;
 		System::Drawing::Rectangle _selectionRect;
 		System::Drawing::Point _mouseStartPoint;
 		// used for moving on xz

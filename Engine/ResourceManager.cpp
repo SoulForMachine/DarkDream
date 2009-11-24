@@ -401,10 +401,16 @@ namespace Engine
 		return new(mapPool) AIScriptRes(file_name);
 	}
 
-	const PartSysRes* PartSysManager::CreatePartSys(const tchar* file_name)
+	PartSysRes* PartSysManager::CreatePartSys(const tchar* file_name)
 	{
 		const PartSysRes* part = (const PartSysRes*)ResourceManager::CreateRes(file_name, true);
 		return new(mapPool) PartSysRes(*part);
+	}
+
+	ParticleSystem* PartSysManager::CreatePartSysObject(const tchar* file_name)
+	{
+		PartSysRes* part = (PartSysRes*)ResourceManager::CreateRes(file_name, true);
+		return new(mapPool) ParticleSystem(*part->GetParticleSystem());
 	}
 
 	PartSysRes* PartSysManager::CreateResObj(const tchar* file_name)

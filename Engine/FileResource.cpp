@@ -814,11 +814,7 @@ namespace Engine
 
 	ModelEntityRes::~ModelEntityRes()
 	{
-		if(_entity)
-		{
-			_entity->Unload();
-			delete _entity;
-		}
+		Unload();
 	}
 
 	bool ModelEntityRes::Load()
@@ -892,11 +888,7 @@ namespace Engine
 
 	AnimationRes::~AnimationRes()
 	{
-		if(_animation)
-		{
-			_animation->Unload();
-			delete _animation;
-		}
+		Unload();
 	}
 
 	bool AnimationRes::Load()

@@ -33,6 +33,7 @@ namespace Engine
 		virtual const math3d::vec3f& GetPosition() const
 			{ return _position; }
 		virtual EntityType GetType() const = 0;
+		virtual void UpdateTime(float frame_time) {}
 
 	private:
 		math3d::vec3f _position;

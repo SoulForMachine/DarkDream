@@ -20,7 +20,94 @@ namespace Engine
 	Console::BoolVar g_cvarDrawParticleEmitter("r_drawParticleEmitter", false);
 
 
+	static
+	int MeshCmpFunc(const void* el1, const void* el2)
+	{
+		const EntityRenderer::MeshRenderData* mesh1 = *(EntityRenderer::MeshRenderData**)el1;
+		const EntityRenderer::MeshRenderData* mesh2 = *(EntityRenderer::MeshRenderData**)el2;
+
+		if(mesh1->mesh->vertLayout > mesh2->mesh->vertLayout)
+		{
+			return 1;
+		}
+		else if(mesh1->mesh->vertLayout < mesh2->mesh->vertLayout)
+		{
+			return -1;
+		}
+		else
+		{
+			if(mesh1->material > mesh2->material)
+			{
+				return 1;
+			}
+			else if(mesh1->material < mesh2->material)
+			{
+				return -1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+	}
+
+	static
+	int TranspMeshCmpFunc(const void* el1, const void* el2)
+	{
+		const EntityRenderer::MeshRenderData* mesh1 = *(EntityRenderer::MeshRenderData**)el1;
+		const EntityRenderer::MeshRenderData* mesh2 = *(EntityRenderer::MeshRenderData**)el2;
+
+		if(mesh1->eyeDistSq > mesh2->eyeDistSq)
+		{
+			return 1;
+		}
+		else if(mesh1->eyeDistSq < mesh2->eyeDistSq)
+		{
+			return -1;
+		}
+		else
+		{
+			if(mesh1->mesh->vertLayout > mesh2->mesh->vertLayout)
+			{
+				return 1;
+			}
+			else if(mesh1->mesh->vertLayout < mesh2->mesh->vertLayout)
+			{
+				return -1;
+			}
+			else
+			{
+				if(mesh1->material > mesh2->material)
+				{
+					return 1;
+				}
+				else if(mesh1->material < mesh2->material)
+				{
+					return -1;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+		}
+	}
+
+	static
+	int EmitterCmpFunc(const void* el1, const void* el2)
+	{
+		const ParticleSystem::Emitter* em1 = *(ParticleSystem::Emitter**)el1;
+		const ParticleSystem::Emitter* em2 = *(ParticleSystem::Emitter**)el2;
+
+		const vec3f& cam_pos = engineAPI.world->GetCamera().GetPosition();
+		float dif = (em1->GetPosition() - cam_pos).length_sq() - (em2->GetPosition() - cam_pos).length_sq();
+		return (dif > 0.0f)? -1: 1;
+	}
+
+
+
 	RenderSystem::RenderSystem()
+		: _meshDataPool(MAX_NUM_MESHES + MAX_NUM_TRANSP_MESHES)
 	{
 		Clear();
 	}
@@ -67,6 +154,12 @@ namespace Engine
 			"Vendor: %s",
 			info.versionMajor, info.versionMinor, info.glslVersion, info.renderer, info.vendor);
 
+		// set some default states
+		_renderer->FrontFace(GL::ORIENT_CCW);
+		_renderer->CullFace(GL::FACE_BACK);
+		_renderer->EnableFaceCulling(true);
+		_renderer->EnableDepthTest(true);
+
 		// init 2D rendering
 		_render2D = new(mainPool) Render2D;
 		result = _render2D->Init(this);
@@ -88,8 +181,8 @@ namespace Engine
 		}
 
 		_entityBuf = new(mainPool) ModelEntity*[MAX_NUM_ENTITIES];
-		_meshBuf = new(mainPool) EntityRenderer::MeshRenderData[MAX_NUM_MESHES];
-		_transpMeshBuf = new(mainPool) EntityRenderer::MeshRenderData[MAX_NUM_TRANSP_MESHES];
+		_meshBuf = new(mainPool) EntityRenderer::MeshRenderData*[MAX_NUM_MESHES];
+		_transpMeshBuf = new(mainPool) EntityRenderer::MeshRenderData*[MAX_NUM_TRANSP_MESHES];
 
 		// init terrain rendering
 		_terrainRenderer = new(mainPool) TerrainRenderer;
@@ -133,12 +226,10 @@ namespace Engine
 		int pixel = -1;
 		_texWhite = _renderer->CreateTexture2D();
 		_texWhite->TexImage(0, GL::PIXEL_FORMAT_RGBA8, 1, 1, GL::IMAGE_FORMAT_BGRA, GL::TYPE_UNSIGNED_BYTE, 0, &pixel);
-		_texWhite->GenerateMipmap();
 
 		pixel = 255 << 24;
 		_texBlack = _renderer->CreateTexture2D();
 		_texBlack->TexImage(0, GL::PIXEL_FORMAT_RGBA8, 1, 1, GL::IMAGE_FORMAT_BGRA, GL::TYPE_UNSIGNED_BYTE, 0, &pixel);
-		_texBlack->GenerateMipmap();
 
 		return true;
 	}
@@ -191,130 +282,147 @@ namespace Engine
 		delete[] _entityBuf;
 		delete[] _meshBuf;
 		delete[] _transpMeshBuf;
+		_meshDataPool.Reset();
 
 		Clear();
 	}
 
-	void RenderSystem::RenderFrame(int frame_time)
+	void RenderSystem::Update(int frame_time)
 	{
-		_frameTime = frame_time;
+		_frameTime = frame_time * 0.001f;
+		_frameTimeMsec = frame_time;
+
+		// model entities
+		EntityHashMap& entities = engineAPI.world->GetEntities();
+		for(EntityHashMap::Iterator it = entities.Begin(); it != entities.End(); ++it)
+		{
+			UpdateEntityTime(*it);
+		}
+
+		_visEntityCount = engineAPI.world->GetVisibleModelEntities(_entityBuf, MAX_NUM_ENTITIES);
+
+		_meshCount = 0;
+		_transpMeshCount = 0;
+		_meshDataPool.Reset();
+		_visEmitterCount = 0;
+		_visPartSysCount = 0;
+
+		for(int ent_i = 0; ent_i < _visEntityCount; ++ent_i)
+		{
+			if(_entityBuf[ent_i]->GetModelRes())
+			{
+				_entityBuf[ent_i]->UpdateGraphics();
+				AddEntityToDrawArray(_entityBuf[ent_i], engineAPI.world->GetCamera());
+			}
+		}
+
+		qsort(_meshBuf, _meshCount, sizeof(EntityRenderer::MeshRenderData*), MeshCmpFunc);
+		qsort(_transpMeshBuf, _transpMeshCount, sizeof(EntityRenderer::MeshRenderData*), TranspMeshCmpFunc);
+
+		// particle systems
+		ParticleSystem** ps = &_particleSystems[_visPartSysCount];
+		int ps_count = engineAPI.world->GetVisibleParticleSystems(ps, MAX_PARTICLE_SYSTEMS - _visPartSysCount);
+
+		for(int i = 0; i < ps_count; ++i)
+		{
+			ps[i]->UpdateGraphics();
+			AddPartSysToDrawArray(ps[i]);
+
+			if(_visEmitterCount == MAX_EMITTERS)
+				break;
+		}
+
+		qsort(_emitters, _visEmitterCount, sizeof(ParticleSystem::Emitter*), EmitterCmpFunc);
+
+		// terrain patches
+		_visTerrPatchesCount = engineAPI.world->GetVisibleTerrainPatches(_terrainPatches, Terrain::MAX_PATCHES);
+
+		// sprites
+		_visSpriteCount = engineAPI.world->GetVisibleLayerSprites(_sprites, MAX_SPRITES);
+	}
+
+	void RenderSystem::UpdateEntityTime(Entity* entity)
+	{
+		entity->UpdateTime(_frameTime);
+		if(entity->GetType() == ENTITY_TYPE_MODEL)
+		{
+			const ModelEntity::JointAttachMap& attachments = ((ModelEntity*)entity)->GetJointAttachments();
+			for(ModelEntity::JointAttachMap::ConstIterator it = attachments.Begin(); it != attachments.End(); ++it)
+			{
+				if(it->type == ModelEntity::JOINT_ATTACH_MODEL)
+				{
+					ModelEntity* att_ent = ((ModelEntityRes*)it->attachment)->GetEntity();
+					if(att_ent)
+					{
+						UpdateEntityTime(att_ent);
+					}
+				}
+				else if(it->type == ModelEntity::JOINT_ATTACH_PARTICLE_SYSTEM)
+				{
+					ParticleSystem* ps = ((PartSysRes*)it->attachment)->GetParticleSystem();
+					if(ps)
+					{
+						ps->UpdateTime(_frameTime);
+					}
+				}
+			}
+		}
+	}
+
+	void RenderSystem::RenderFrame()
+	{
 		_renderer->SwapInterval(0);
 		_renderer->ClearColorBuffer(0.0f, 0.0f, 0.0f, 0.0f);
 		_renderer->ClearDepthStencilBuffer(DEPTH_BUFFER_BIT | STENCIL_BUFFER_BIT, 1.0f, 0);
-	//	_renderer->RasterizationMode(RASTER_LINE);
-		_render2D->DrawConsole(frame_time);
+
+		RenderTerrain();
+		RenderBgLayers();
+		RenderEntities();
+		RenderGrass();
+		RenderParticles();
+
+	//	_render2D->DrawConsole(_frameTimeMsec);
 		_renderer->Flush();
 		_renderer->SwapBuffers();
 	}
 
-	static
-	int MeshCmpFunc(const void* el1, const void* el2)
+	void RenderSystem::RenderEntities()
 	{
-		const EntityRenderer::MeshRenderData* mesh1 = (EntityRenderer::MeshRenderData*)el1;
-		const EntityRenderer::MeshRenderData* mesh2 = (EntityRenderer::MeshRenderData*)el2;
+		_entityRenderer->Render(engineAPI.world->GetCamera(), _meshBuf, _meshCount);
+		_entityRenderer->Render(engineAPI.world->GetCamera(), _transpMeshBuf, _transpMeshCount);
 
-		if(mesh1->mesh->vertLayout > mesh2->mesh->vertLayout)
+		if(g_cvarDrawEntityBBoxes)
 		{
-			return 1;
-		}
-		else if(mesh1->mesh->vertLayout < mesh2->mesh->vertLayout)
-		{
-			return -1;
-		}
-		else
-		{
-			if(mesh1->material > mesh2->material)
+			for(int ent_i = 0; ent_i < _visEntityCount; ++ent_i)
 			{
-				return 1;
-			}
-			else if(mesh1->material < mesh2->material)
-			{
-				return -1;
-			}
-			else
-			{
-				return 0;
+				_debugRenderer->RenderBoundingBox(_entityBuf[ent_i]->GetWorldBoundingBox());
 			}
 		}
-	}
-
-	static
-	int TranspMeshCmpFunc(const void* el1, const void* el2)
-	{
-		const EntityRenderer::MeshRenderData* mesh1 = (EntityRenderer::MeshRenderData*)el1;
-		const EntityRenderer::MeshRenderData* mesh2 = (EntityRenderer::MeshRenderData*)el2;
-
-		if(mesh1->eyeDistSq > mesh2->eyeDistSq)
-		{
-			return 1;
-		}
-		else if(mesh1->eyeDistSq < mesh2->eyeDistSq)
-		{
-			return -1;
-		}
-		else
-		{
-			if(mesh1->mesh->vertLayout > mesh2->mesh->vertLayout)
-			{
-				return 1;
-			}
-			else if(mesh1->mesh->vertLayout < mesh2->mesh->vertLayout)
-			{
-				return -1;
-			}
-			else
-			{
-				if(mesh1->material > mesh2->material)
-				{
-					return 1;
-				}
-				else if(mesh1->material < mesh2->material)
-				{
-					return -1;
-				}
-				else
-				{
-					return 0;
-				}
-			}
-		}
-	}
-
-	static
-	int EmitterCmpFunc(const void* el1, const void* el2)
-	{
-		const ParticleSystem::Emitter* em1 = *(ParticleSystem::Emitter**)el1;
-		const ParticleSystem::Emitter* em2 = *(ParticleSystem::Emitter**)el2;
-
-		const vec3f& cam_pos = engineAPI.world->GetCamera().GetPosition();
-		float dif = (em1->GetPosition() - cam_pos).length_sq() - (em2->GetPosition() - cam_pos).length_sq();
-		return (dif > 0.0f)? -1: 1;
-	}
-
-	void RenderSystem::RenderEntities(int frame_time)
-	{
-		int ent_count = engineAPI.world->GetVisibleEntities(_entityBuf, MAX_NUM_ENTITIES);
-		RenderEntities(frame_time, engineAPI.world->GetCamera(), _entityBuf, ent_count);
 	}
 
 	void RenderSystem::RenderEntities(int frame_time, const Camera& camera, ModelEntity** entities, int ent_count)
 	{
+		_frameTime = frame_time * 0.001f;
+		_frameTimeMsec = frame_time;
+
 		_meshCount = 0;
 		_transpMeshCount = 0;
+		_meshDataPool.Reset();
+		_visEmitterCount = 0;
+
 		for(int ent_i = 0; ent_i < ent_count; ++ent_i)
 		{
 			if(entities[ent_i]->GetModelRes())
 			{
-				//! this should be somewhere else
-				entities[ent_i]->UpdateGraphics(frame_time);
+				UpdateEntityTime(entities[ent_i]);
+				entities[ent_i]->UpdateGraphics();
 				AddEntityToDrawArray(entities[ent_i], camera);
 			}
 		}
 
-		qsort(_meshBuf, _meshCount, sizeof(EntityRenderer::MeshRenderData), MeshCmpFunc);
-		qsort(_transpMeshBuf, _transpMeshCount, sizeof(EntityRenderer::MeshRenderData), TranspMeshCmpFunc);
+		qsort(_meshBuf, _meshCount, sizeof(EntityRenderer::MeshRenderData*), MeshCmpFunc);
+		qsort(_transpMeshBuf, _transpMeshCount, sizeof(EntityRenderer::MeshRenderData*), TranspMeshCmpFunc);
 
-		_renderer->CullFace(GL::FACE_BACK);
 		_entityRenderer->Render(camera, _meshBuf, _meshCount);
 		_entityRenderer->Render(camera, _transpMeshBuf, _transpMeshCount);
 
@@ -340,29 +448,31 @@ namespace Engine
 			if(	mesh_data[mesh_i].materialData->materialRes->GetMaterial()->HasTransparency() &&
 				_transpMeshCount < MAX_NUM_TRANSP_MESHES )
 			{
-				_transpMeshBuf[_transpMeshCount].mesh = &meshes[mesh_i];
-				_transpMeshBuf[_transpMeshCount].worldMat = &world_mat;
-				_transpMeshBuf[_transpMeshCount].jointMatPalette = joint_mat_palette.GetData();
-				_transpMeshBuf[_transpMeshCount].jointCount = joint_mat_palette.GetCount();
-				_transpMeshBuf[_transpMeshCount].material = mesh_data[mesh_i].materialData->materialRes->GetMaterial();
-				_transpMeshBuf[_transpMeshCount].shaderIndex = mesh_data[mesh_i].shaderIndex;
+				_transpMeshBuf[_transpMeshCount] = _meshDataPool.New();
+				_transpMeshBuf[_transpMeshCount]->mesh = &meshes[mesh_i];
+				_transpMeshBuf[_transpMeshCount]->worldMat = &world_mat;
+				_transpMeshBuf[_transpMeshCount]->jointMatPalette = joint_mat_palette.GetData();
+				_transpMeshBuf[_transpMeshCount]->jointCount = joint_mat_palette.GetCount();
+				_transpMeshBuf[_transpMeshCount]->material = mesh_data[mesh_i].materialData->materialRes->GetMaterial();
+				_transpMeshBuf[_transpMeshCount]->shaderIndex = mesh_data[mesh_i].shaderIndex;
 
 				vec3f wcenter;
 				transform(wcenter, meshes[mesh_i].center, world_mat);
 				float dist_sq = (camera.GetPosition() - wcenter).length_sq();
-				_transpMeshBuf[_transpMeshCount].eyeDistSq = dist_sq;
+				_transpMeshBuf[_transpMeshCount]->eyeDistSq = dist_sq;
 
 				_transpMeshCount++;
 			}
 			else if(_meshCount < MAX_NUM_MESHES)
 			{
-				_meshBuf[_meshCount].mesh = &meshes[mesh_i];
-				_meshBuf[_meshCount].worldMat = &world_mat;
-				_meshBuf[_meshCount].jointMatPalette = joint_mat_palette.GetData();
-				_meshBuf[_meshCount].jointCount = joint_mat_palette.GetCount();
-				_meshBuf[_meshCount].material = mesh_data[mesh_i].materialData->materialRes->GetMaterial();
-				_meshBuf[_meshCount].shaderIndex = mesh_data[mesh_i].shaderIndex;
-				_meshBuf[_meshCount].eyeDistSq = 0.0f;
+				_meshBuf[_meshCount] = _meshDataPool.New();
+				_meshBuf[_meshCount]->mesh = &meshes[mesh_i];
+				_meshBuf[_meshCount]->worldMat = &world_mat;
+				_meshBuf[_meshCount]->jointMatPalette = joint_mat_palette.GetData();
+				_meshBuf[_meshCount]->jointCount = joint_mat_palette.GetCount();
+				_meshBuf[_meshCount]->material = mesh_data[mesh_i].materialData->materialRes->GetMaterial();
+				_meshBuf[_meshCount]->shaderIndex = mesh_data[mesh_i].shaderIndex;
+				_meshBuf[_meshCount]->eyeDistSq = 0.0f;
 				_meshCount++;
 			}
 			else
@@ -378,88 +488,77 @@ namespace Engine
 			{
 				ModelEntity* att_ent = ((ModelEntityRes*)it->attachment)->GetEntity();
 				if(att_ent)
-					AddEntityToDrawArray(att_ent, camera);
-			}
-		}
-	}
-
-	void RenderSystem::RenderTerrain(int frame_time)
-	{
-		const Terrain::TerrainPatch* patches[Terrain::MAX_PATCHES];
-		int count = engineAPI.world->GetVisibleTerrainPatches(patches, Terrain::MAX_PATCHES);
-		_renderer->CullFace(GL::FACE_BACK);
-		_terrainRenderer->RenderTerrainPatches(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);
-
-		if(g_cvarDrawTerrainNormals)
-			_terrainRenderer->RenderTerrainPatchNormals(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);
-	}
-
-	void RenderSystem::RenderGrass(int frame_time)
-	{
-		const Terrain::TerrainPatch* patches[Terrain::MAX_PATCHES];
-		int count = engineAPI.world->GetVisibleTerrainPatches(patches, Terrain::MAX_PATCHES);
-		_terrainRenderer->RenderTerrainPatchGrass(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), patches, count);
-	}
-
-	void RenderSystem::RenderBgLayers(int frame_time)
-	{
-		const int MAX_SPRITES = 128;
-		const BgLayer::Sprite* sprites[MAX_SPRITES];
-		int count = engineAPI.world->GetVisibleLayerSprites(sprites, MAX_SPRITES);
-		_bgLayerRenderer->Render(sprites, count);
-	}
-
-	void RenderSystem::RenderParticles(int frame_time)
-	{
-		const int MAX_PARTICLE_SYSTEMS = 128;
-		ParticleSystem* part_sys[MAX_PARTICLE_SYSTEMS];
-		ParticleSystem::Emitter* emitters[MAX_PARTICLE_SYSTEMS * 8];
-		int count = engineAPI.world->GetVisibleParticleSystems(part_sys, MAX_PARTICLE_SYSTEMS);
-		int em_count = 0;
-
-		for(int i = 0; i < count; ++i)
-		{
-			part_sys[i]->UpdateGraphics(frame_time);
-			const List<ParticleSystem::Emitter*>& em_list = part_sys[i]->GetEmitterList();
-
-			for(List<ParticleSystem::Emitter*>::ConstIterator it = em_list.Begin(); it != em_list.End(); ++it)
-			{
-				if((*it)->IsEnabled())
 				{
-					emitters[em_count++] = *it;
-					if(em_count == MAX_PARTICLE_SYSTEMS * 8)
-						break;
+					att_ent->UpdateGraphics();
+					AddEntityToDrawArray(att_ent, camera);
 				}
 			}
-
-			if(em_count == MAX_PARTICLE_SYSTEMS * 8)
-				break;
+			else if(it->type == ModelEntity::JOINT_ATTACH_PARTICLE_SYSTEM)
+			{
+				ParticleSystem* ps = ((PartSysRes*)it->attachment)->GetParticleSystem();
+				if(ps)
+				{
+					ps->UpdateGraphics();
+					AddPartSysToDrawArray(ps);
+				}
+			}
 		}
+	}
 
-		qsort(emitters, em_count, sizeof(ParticleSystem::Emitter*), EmitterCmpFunc);
+	void RenderSystem::AddPartSysToDrawArray(ParticleSystem* part_sys)
+	{
+		if(_visPartSysCount == MAX_PARTICLE_SYSTEMS)
+			return;
 
-		_particleRenderer->Render(engineAPI.world->GetCamera(), emitters, em_count);
+		const List<ParticleSystem::Emitter*>& em_list = part_sys->GetEmitterList();
+		_visPartSysCount++;
+
+		for(List<ParticleSystem::Emitter*>::ConstIterator it = em_list.Begin(); it != em_list.End(); ++it)
+		{
+			if((*it)->IsEnabled())
+			{
+				if(_visEmitterCount == MAX_EMITTERS)
+					break;
+				_emitters[_visEmitterCount++] = *it;
+			}
+		}
+	}
+
+	void RenderSystem::RenderTerrain()
+	{
+		_terrainRenderer->RenderTerrainPatches(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), _terrainPatches, _visTerrPatchesCount);
+
+		if(g_cvarDrawTerrainNormals)
+			_terrainRenderer->RenderTerrainPatchNormals(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), _terrainPatches, _visTerrPatchesCount);
+	}
+
+	void RenderSystem::RenderGrass()
+	{
+		_terrainRenderer->RenderTerrainPatchGrass(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), _terrainPatches, _visTerrPatchesCount);
+	}
+
+	void RenderSystem::RenderBgLayers()
+	{
+		_bgLayerRenderer->Render(_sprites, _visSpriteCount);
+	}
+
+	void RenderSystem::RenderParticles()
+	{
+		_particleRenderer->Render(engineAPI.world->GetCamera(), _emitters, _visEmitterCount);
 
 		if(g_cvarDrawEntityBBoxes)
 		{
-			for(int i = 0; i < count; ++i)
+			for(int i = 0; i < _visPartSysCount; ++i)
 			{
-				_debugRenderer->RenderBoundingBox(part_sys[i]->GetWorldBoundingBox());
+				_debugRenderer->RenderBoundingBox(_particleSystems[i]->GetWorldBoundingBox());
 			}
 		}
 
 		if(g_cvarDrawParticleEmitter)
 		{
-			for(int i = 0; i < count; ++i)
+			for(int i = 0; i < _visEmitterCount; ++i)
 			{
-				const List<ParticleSystem::Emitter*>& em_list = part_sys[i]->GetEmitterList();
-				for(List<ParticleSystem::Emitter*>::ConstIterator it = em_list.Begin(); it != em_list.End(); ++it)
-				{
-					if((*it)->IsEnabled())
-					{
-						_debugRenderer->RenderParticleEmitter(**it);
-					}
-				}
+				_debugRenderer->RenderParticleEmitter(*_emitters[i]);
 			}
 		}
 	}
@@ -482,6 +581,11 @@ namespace Engine
 		_bgLayerRenderer = 0;
 		_particleRenderer = 0;
 		_debugRenderer = 0;
+		_visEntityCount = 0;
+		_visTerrPatchesCount = 0;
+		_visSpriteCount = 0;
+		_visPartSysCount = 0;
+		_visEmitterCount = 0;
 	}
 
 }

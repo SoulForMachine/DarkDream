@@ -30,13 +30,27 @@ namespace MapEditor
 	bool ActionAddObject::BeginAction()
 	{
 		tchar* path = ConvertString<tchar>(_path);
-		_entity = engineAPI->modelEntityManager->CreateEntityObject(path);
-		engineAPI->modelEntityManager->ReleaseAll(); //!
+		ModelEntity::JointAttachType type = ModelEntity::GetJointAttachTypeByExt(path);
+		switch(type)
+		{
+		case ModelEntity::JOINT_ATTACH_MODEL:
+			_entity = engineAPI->modelEntityManager->CreateEntityObject(path);
+			engineAPI->modelEntityManager->ReleaseAll(); //!
+			((ModelEntity*)_entity)->SetActiveAnimation("Idle");
+			break;
+		case ModelEntity::JOINT_ATTACH_PARTICLE_SYSTEM:
+			_entity = engineAPI->partSysManager->CreatePartSysObject(path);
+			engineAPI->partSysManager->ReleaseAll(); //!
+			break;
+		default:
+			delete[] path;
+			return false;
+		}
+
 		delete[] path;
 		if(engineAPI->world->AddEntity(_entity))
 		{
 			_entity->SetPosition(*_point);
-			_entity->SetActiveAnimation("Idle");
 			return true;
 		}
 		else

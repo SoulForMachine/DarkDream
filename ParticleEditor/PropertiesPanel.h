@@ -23,7 +23,7 @@ namespace ParticleEditor {
 	public ref class PropertiesPanel : public WeifenLuo::WinFormsUI::Docking::DockContent
 	{
 	public:
-		PropertiesPanel(void);
+		PropertiesPanel(EditorCommon::FormDirector^ director);
 
 		void SetParticleSystem(Engine::ParticleSystem* part_sys);
 		void SetGraphAttribute(Engine::ParticleSystem::Attribute* attrib, String^ name, float time, float min_val, float max_val);
@@ -85,7 +85,9 @@ namespace ParticleEditor {
 		void SelectPoint(int index);
 		void AddNewPoint(int x, int y);
 		void RemovePoint(int index);
+		void Modified();
 
+		EditorCommon::FormDirector^ _director;
 		Engine::ParticleSystem* _particleSystem;
 		Engine::ParticleSystem::Attribute* _attribute;
 		float _graphTime;

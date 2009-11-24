@@ -223,10 +223,10 @@ namespace ParticleEditor
 		_renderer->SwapInterval(1);
 		_renderer->ClearColorBuffer(0.5f, 0.5f, 0.5f, 1.0f);
 		_renderer->ClearDepthStencilBuffer(DEPTH_BUFFER_BIT | STENCIL_BUFFER_BIT, 1.0f, 0);
-		_renderer->EnableDepthTest(true);
 
 		RenderCoordSys();
-		RenderParticleSystem();
+		_renderSystem->Update(_frameTime);
+		_renderSystem->RenderParticles();
 		if(_stats)
 			RenderStats();
 
@@ -345,11 +345,6 @@ namespace ParticleEditor
 		_zoom = z;
 	}
 
-	void RenderWindow::RenderParticleSystem()
-	{
-		_renderSystem->RenderParticles(_frameTime);
-	}
-
 	void RenderWindow::RenderStats()
 	{
 		_renderer->EnableDepthTest(false);
@@ -406,6 +401,7 @@ namespace ParticleEditor
 
 		_renderSystem->GetRender2D()->FlushText();
 		_renderer->EnableDepthTest(true);
+		_renderer->FrontFace(GL::ORIENT_CCW);
 	}
 
 	void RenderWindow::RenderCoordSys()

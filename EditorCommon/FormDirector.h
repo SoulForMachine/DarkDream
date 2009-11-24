@@ -12,6 +12,7 @@ namespace EditorCommon
 		PatchAdded,
 		PatchRemoved,
 		CameraMoved,
+		Modified
 	};
 
 	public interface class FormDirector

@@ -13,6 +13,8 @@ namespace Engine
 	class ENGINE_API RenderableEntity: public Entity
 	{
 	public:
+		RenderableEntity();
+
 		const OBBox& GetWorldBoundingBox() const
 			{ return _worldBBox; }
 		void SetObjectBoundingBox(const AABBox& bbox);
@@ -22,7 +24,12 @@ namespace Engine
 			{ return _worldMat; }
 		void SetWorldTransform(const math3d::mat4f& transform);
 		virtual void SetPosition(const math3d::vec3f& pos);
-		virtual void UpdateGraphics(int frame_time) = 0;
+		virtual void UpdateGraphics() = 0;
+
+		bool IsDropped() const
+			{ return _dropped; }
+		void SetDropped(bool dropped)
+			{ _dropped = dropped; }
 
 	private:
 		void CalcWorldBBox();
@@ -30,6 +37,7 @@ namespace Engine
 		math3d::mat4f _worldMat;
 		AABBox _objectBBox; // entity's object space bounding box
 		OBBox _worldBBox; // entity's world space bounding box
+		bool _dropped; // true if object is on terrain
 	};
 
 }

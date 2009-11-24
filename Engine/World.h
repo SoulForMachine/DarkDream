@@ -35,7 +35,8 @@ namespace Engine
 		bool AddEntity(Entity* entity);
 		bool RemoveEntity(Entity* entity);
 		void RemoveAllEntities();
-		int GetVisibleEntities(ModelEntity** entities, int max_entities);
+		int GetVisibleRenderableEntities(RenderableEntity** entities, int max_entities);
+		int GetVisibleModelEntities(ModelEntity** entities, int max_entities);
 		int GetVisibleTerrainPatches(const Terrain::TerrainPatch** patches, int max_patches);
 		int GetVisibleLayerSprites(const BgLayer::Sprite** sprites, int max_sprites);
 		int GetVisibleParticleSystems(ParticleSystem** part_sys, int max_ps);

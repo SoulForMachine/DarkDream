@@ -206,7 +206,8 @@ namespace Engine
 	class ENGINE_API PartSysManager: public ResourceManager
 	{
 	public:
-		const PartSysRes* CreatePartSys(const tchar* file_name);
+		PartSysRes* CreatePartSys(const tchar* file_name);
+		ParticleSystem* CreatePartSysObject(const tchar* file_name);
 
 	private:
 		virtual PartSysRes* CreateResObj(const tchar* file_name);

@@ -23,9 +23,9 @@ namespace Engine
 	ParticleSystem::ParticleSystem()
 		: _emitters(mapPool)
 	{
-		SetWorldTransform(mat4f::identity);
 		AABBox bbox(vec3f(-1.0f, -1.0f, -1.0f), vec3f(1.0f, 1.0f, 1.0f));
 		SetObjectBoundingBox(bbox);
+		_frameTime = 0.0f;
 	}
 
 	ParticleSystem::ParticleSystem(const ParticleSystem& psys)
@@ -403,12 +403,16 @@ namespace Engine
 		_emitters.Clear();
 	}
 
-	void ParticleSystem::UpdateGraphics(int frame_time)
+	void ParticleSystem::UpdateTime(float frame_time)
 	{
-		float dt = frame_time * 0.001f;
+		_frameTime = frame_time;
+	}
+
+	void ParticleSystem::UpdateGraphics()
+	{
 		for(List<Emitter*>::Iterator it = _emitters.Begin(); it != _emitters.End(); ++it)
 		{
-			(*it)->Update(dt, GetWorldTransform());
+			(*it)->Update(_frameTime, GetWorldTransform());
 		}
 	}
 
@@ -469,6 +473,8 @@ namespace Engine
 		{
 			(*it)->Reset();
 		}
+
+		_frameTime = 0.0f;
 	}
 
 	List<ParticleSystem::Emitter*>::Iterator ParticleSystem::FindEmitter(Emitter* emitter)
@@ -844,17 +850,14 @@ namespace Engine
 					part->velocity.y -= part_grav * frame_time;
 				}
 				part->rotation += part->rotDir * part_rot_speed * frame_time;
-				if(part->rotation > 360.0f)
-					part->rotation -= 360.0f;
-				else if(part->rotation < 0.0f)
-					part->rotation = 360.0f + part->rotation;
+				wrap(part->rotation, 0.0f, 360.0f);
 				part->alpha = part_alpha;
 
 				if(_animatedTex)
 				{
 					part->frame += _animTexFPS * frame_time;
 					if(part->frame > (float)_texFrameCount)
-						part->frame -= _texFrameCount;
+						part->frame = fmod(part->frame, (float)_texFrameCount);
 				}
 			}
 			else
@@ -905,22 +908,13 @@ namespace Engine
 			// update emitter position and direction
 			mat3f rot, temp;
 			_rotation.x += rot_x * emitter_dt;
-			if(_rotation.x > 360.0f)
-				_rotation.x -= 360.0f;
-			else if(_rotation.x < 0.0f)
-				_rotation.x = 360.0f + _rotation.x;
+			wrap(_rotation.x, 0.0f, 360.0f);
 
 			_rotation.y += rot_y * emitter_dt;
-			if(_rotation.y > 360.0f)
-				_rotation.y -= 360.0f;
-			else if(_rotation.y < 0.0f)
-				_rotation.y = 360.0f + _rotation.y;
+			wrap(_rotation.y, 0.0f, 360.0f);
 
 			_rotation.z += rot_z * emitter_dt;
-			if(_rotation.z > 360.0f)
-				_rotation.z -= 360.0f;
-			else if(_rotation.z < 0.0f)
-				_rotation.z = 360.0f + _rotation.z;
+			wrap(_rotation.z, 0.0f, 360.0f);
 
 			mat4f local_mat;
 			local_mat.from_euler(deg2rad(_rotation.x), deg2rad(_rotation.y), deg2rad(_rotation.z));

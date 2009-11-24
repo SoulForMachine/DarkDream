@@ -35,7 +35,8 @@ namespace Engine
 		bool Load(const tchar* file_name);
 		bool Save(const tchar* file_name) const;
 		void Unload();
-		virtual void UpdateGraphics(int frame_time);
+		virtual void UpdateTime(float frame_time);
+		virtual void UpdateGraphics();
 
 		int AddEmitter(Emitter& emitter);
 		Emitter* AddEmitter();
@@ -53,6 +54,7 @@ namespace Engine
 		bool ReadAttribute(Parser& parser, Attribute& attrib, const char* attr_name);
 
 		List<Emitter*> _emitters;
+		float _frameTime;
 	};
 
 

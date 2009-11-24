@@ -105,7 +105,8 @@ namespace Engine
 		const StaticArray<math3d::mat4f>& GetJointTransforms() const
 			{ return _jointMatPalette; }
 		void MaterialChanged(const Material* material);
-		virtual void UpdateGraphics(int frame_time);
+		virtual void UpdateTime(float frame_time);
+		virtual void UpdateGraphics();
 		bool SetActiveAnimation(const char* anim_name);
 		void PlayAnimation()
 			{ _animPlaying = true; }
@@ -130,10 +131,6 @@ namespace Engine
 			{ return _sounds; }
 		const AnimData* GetCurrentAnimation() const
 			{ return _curAnim; }
-		bool IsDropped() const
-			{ return _dropped; }
-		void SetDropped(bool dropped)
-			{ _dropped = dropped; }
 
 		bool SetModel(const tchar* file_name);
 		bool SetAIScript(const tchar* file_name);
@@ -165,8 +162,9 @@ namespace Engine
 		void SetLifePoints(int pts)
 			{ _lifePoints = pts; }
 
-	private:
 		static JointAttachType GetJointAttachTypeByExt(const tchar* file_name);
+
+	private:
 		void ClearModelData();
 		void CalcWorldBBox();
 		ModelClass GetClassFromString(const char* name);
@@ -178,7 +176,6 @@ namespace Engine
 		float _animTime;
 		AnimData* _curAnim;
 		bool _animPlaying;
-		bool _dropped; // true if object is on terrain
 
 		const ModelRes* _model;
 		const AIScriptRes* _aiScript;

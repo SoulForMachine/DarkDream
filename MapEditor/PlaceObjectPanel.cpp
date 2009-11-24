@@ -17,27 +17,6 @@ using namespace Engine;
 namespace MapEditor
 {
 
-	ref class ObjectTreeNode: public TreeNode
-	{
-	public:
-		ObjectTreeNode(String^ text, String^ rel_path, bool dir)
-			: TreeNode(text, dir? 0: 1, dir? 0: 1)
-		{
-			_directory = dir;
-			_relPath = rel_path;
-		}
-
-		bool IsDirectory()
-			{ return _directory; }
-		String^ GetRelativePath()
-			{ return _relPath; }
-
-	private:
-		bool _directory;
-		String^ _relPath;
-	};
-
-
 	PlaceObjectPanel::PlaceObjectPanel(EM_PlaceObject^ edit_mode)
 	{
 		InitializeComponent();
@@ -66,15 +45,15 @@ namespace MapEditor
 		_objViewFrameBuf->AttachRenderbuffer(GL::BUFFER_DEPTH, _objViewDepthBuf);
 		_fbufOk = (_objViewFrameBuf->CheckStatus() == GL::FBUF_STATUS_COMPLETE);
 
-		_objViewCam = new(mainPool) Camera;
+		_world = new(mainPool) World;
 		float ratio = float(cl_width) / cl_height;
-		_objViewCam->Perspective(deg2rad(70.0f), ratio, 0.1f, 1000.0f);
+		_world->GetCamera().Perspective(deg2rad(70.0f), ratio, 0.1f, 1000.0f);
 		_objViewBmp = gcnew Bitmap(cl_width, cl_height, PixelFormat::Format32bppArgb);
 		_objRotX = 0.0f;
 		_objRotY = 0.0f;
 
-		_modelEntity = new(mainPool) ModelEntity;
-		_modelLoaded = false;
+		_entity = 0;
+		_entityLoaded = false;
 		_filterText = "";
 		RefreshObjectTree();
 		SetMode(Mode::PLACE_OBJECT);
@@ -90,11 +69,9 @@ namespace MapEditor
 		_renderer->DestroyRenderbuffer(_objViewColorBuf);
 		_renderer->DestroyRenderbuffer(_objViewDepthBuf);
 		_renderer->DestroyFramebuffer(_objViewFrameBuf);
-		//! resiti ovo sranje
-		_modelEntity->ModelEntity::~ModelEntity();
-		::operator delete(_modelEntity);
-		_objViewCam->Camera::~Camera();
-		::operator delete(_objViewCam);
+		DeleteEntity();		
+		_world->World::~World();
+		::operator delete(_world);
 		delete _objViewBmp;
 	}
 
@@ -104,11 +81,13 @@ namespace MapEditor
 		_treeObjects->Nodes->Clear();
 
 		const tchar* base = engineAPI->fileSystem->GetBaseDirPath();
-		String^ path = gcnew String(base) + "Entities";
+		String^ ent_path = gcnew String(base) + "Entities";
+		String^ part_path = gcnew String(base) + "Particles";
 
 		try
 		{
-			AddDir(path, _treeObjects->Nodes);
+			AddDir(ent_path, _treeObjects->Nodes, ObjectTreeNode::NodeType::MODEL);
+			AddDir(part_path, _treeObjects->Nodes, ObjectTreeNode::NodeType::PARTICLE_SYSTEM);
 		}
 		catch(...)
 		{
@@ -116,22 +95,24 @@ namespace MapEditor
 
 		if(_treeObjects->Nodes->Count > 0)
 			_treeObjects->Nodes[0]->Expand();
+		if(_treeObjects->Nodes->Count > 1)
+			_treeObjects->Nodes[1]->Expand();
 
 		_treeObjects->EndUpdate();
 		_panelObjectView->Refresh();
 	}
 
-	void PlaceObjectPanel::AddDir(String^ path, TreeNodeCollection^ nodes)
+	void PlaceObjectPanel::AddDir(String^ path, TreeNodeCollection^ nodes, ObjectTreeNode::NodeType type)
 	{
 		// add directory
 		DirectoryInfo^ dir = gcnew DirectoryInfo(path);
-		ObjectTreeNode^ dir_node = gcnew ObjectTreeNode(dir->Name, "", true);
+		ObjectTreeNode^ dir_node = gcnew ObjectTreeNode(dir->Name, "", ObjectTreeNode::NodeType::FOLDER);
 		nodes->Add(dir_node);
 
 		// add sub-directories
 		array<DirectoryInfo^>^ dirs = dir->GetDirectories();
 		for each(DirectoryInfo^ di in dirs)
-			AddDir(di->FullName, dir_node->Nodes);
+			AddDir(di->FullName, dir_node->Nodes, type);
 
 		// add files
 		array<FileInfo^>^ files = dir->GetFiles();
@@ -145,7 +126,7 @@ namespace MapEditor
 			if(MatchFilter(name))
 			{
 				tchar* rel_path = GetRelativePath(fi->FullName);
-				ObjectTreeNode^ node = gcnew ObjectTreeNode(name, gcnew String(rel_path), false);
+				ObjectTreeNode^ node = gcnew ObjectTreeNode(name, gcnew String(rel_path), type);
 				delete[] rel_path;
 				dir_node->Nodes->Add(node);
 			}
@@ -191,43 +172,88 @@ namespace MapEditor
             return true;
     }
 
+	void PlaceObjectPanel::DeleteEntity()
+	{
+		if(_entity)
+		{
+			if(_entity->GetType() == ENTITY_TYPE_MODEL)
+				((ModelEntity*)_entity)->ModelEntity::~ModelEntity();
+			else
+				((ParticleSystem*)_entity)->ParticleSystem::~ParticleSystem();
+			::operator delete(_entity);
+			_entity = 0;
+			_entityLoaded = false;
+		}
+	}
+
 	System::Void PlaceObjectPanel::_treeObjects_AfterSelect(System::Object^  sender, System::Windows::Forms::TreeViewEventArgs^  e)
 	{
+		_world->RemoveAllEntities();
+
 		ObjectTreeNode^ node = (ObjectTreeNode^)e->Node;
 		if(node->IsDirectory())
 		{
-			_modelEntity->Unload();
-			_modelLoaded = false;
+			DeleteEntity();
 		}
 		else
 		{
 			tchar* path = ConvertString<tchar>(node->GetRelativePath());
-			_modelLoaded = _modelEntity->Load(path);
-			delete[] path;
-			if(_modelLoaded)
+			if(node->GetNodeType() == ObjectTreeNode::NodeType::MODEL)
 			{
-				engineAPI->materialManager->LoadAll();
-				engineAPI->textureManager->LoadAll();
-				engineAPI->modelManager->LoadAll();
-				engineAPI->animationManager->LoadAll();
-				_modelEntity->SetupModelData();
-				_objRotX = 0.0f;
-				_objRotY = 0.0f;
+				DeleteEntity();
+				_entity = new(mainPool) ModelEntity;
+				_entityLoaded = ((ModelEntity*)_entity)->Load(path);
+
+				if(_entityLoaded)
+				{
+					engineAPI->materialManager->LoadAll();
+					engineAPI->textureManager->LoadAll();
+					engineAPI->modelManager->LoadAll();
+					engineAPI->animationManager->LoadAll();
+					((ModelEntity*)_entity)->SetupModelData();
+					_objRotX = 0.0f;
+					_objRotY = 0.0f;
+					_world->AddEntity(_entity);
+				}
+				else
+				{
+					DeleteEntity();
+				}
 			}
+			else
+			{
+				DeleteEntity();
+				_entity = new(mainPool) ParticleSystem;
+				_entityLoaded = ((ParticleSystem*)_entity)->Load(path);
+
+				if(_entityLoaded)
+				{
+					engineAPI->textureManager->LoadAll();
+					_objRotX = 0.0f;
+					_objRotY = 0.0f;
+					_world->AddEntity(_entity);
+				}
+				else
+				{
+					DeleteEntity();
+				}
+			}
+
+			delete[] path;
 		}
 		_panelObjectView->Refresh();
 	}
 
 	System::Void PlaceObjectPanel::_panelObjectView_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e)
 	{
-		if(_modelEntity && _modelLoaded && _fbufOk)
+		if(_entity && _entityLoaded && _fbufOk)
 		{
 			int cl_width = _panelObjectView->ClientRectangle.Width;
 			int cl_height = _panelObjectView->ClientRectangle.Height;
 			int old_vp[4];
 			_renderer->GetViewport(old_vp[0], old_vp[1], old_vp[2], old_vp[3]);
 			_renderer->Viewport(0, 0, cl_width, cl_height);
-			const OBBox& bbox = _modelEntity->GetWorldBoundingBox();
+			const OBBox& bbox = _entity->GetWorldBoundingBox();
 			vec3f at = bbox.GetCenterPoint();
 			mat4f cam, rot, look;
 			float max_dim = 
@@ -240,15 +266,18 @@ namespace MapEditor
 			rot.rotate_x(deg2rad(_objRotX));
 			rot.translate(at);
 			mul(cam, rot, look);
-			_objViewCam->SetViewingTransform(cam);
+			_world->GetCamera().SetViewingTransform(cam);
+			World* old_world = engineAPI->world;
+			engineAPI->world = _world;
 
 			_renderer->ActiveDrawFramebuffer(_objViewFrameBuf);
 			_renderer->ClearColorBuffer(0.5f, 0.5f, 0.5f, 1.0f);
 			_renderer->ClearDepthStencilBuffer(GL::DEPTH_BUFFER_BIT, 1.0f, 0);
-			ModelEntity* ents[] = { _modelEntity };
 			RenderSystem::RenderStyle render_style = engineAPI->renderSystem->GetRenderStyle();
 			engineAPI->renderSystem->SetRenderStyle(RenderSystem::RENDER_STYLE_EDITOR);
-			engineAPI->renderSystem->RenderEntities(0, *_objViewCam, ents, 1);
+			engineAPI->renderSystem->Update(0);
+			engineAPI->renderSystem->RenderEntities();
+			engineAPI->renderSystem->RenderParticles();
 			engineAPI->renderSystem->SetRenderStyle(render_style);
 			_renderer->ActiveDrawFramebuffer(0);
 			_renderer->Viewport(old_vp[0], old_vp[1], old_vp[2], old_vp[3]);
@@ -265,6 +294,8 @@ namespace MapEditor
 			e->Graphics->ScaleTransform(1.0f, -1.0f);
 			e->Graphics->TranslateTransform(0.0f, - (float)cl_height);
 			e->Graphics->DrawImageUnscaled(_objViewBmp, 0, 0);
+
+			engineAPI->world = old_world;
 		}
 		else
 		{
@@ -307,7 +338,7 @@ namespace MapEditor
 
 	String^ PlaceObjectPanel::GetSelObjectPath()
 	{
-		if(_treeObjects->SelectedNode == nullptr || !_modelLoaded)
+		if(_treeObjects->SelectedNode == nullptr || !_entityLoaded)
 			return nullptr;
 
 		ObjectTreeNode^ node = (ObjectTreeNode^)_treeObjects->SelectedNode;

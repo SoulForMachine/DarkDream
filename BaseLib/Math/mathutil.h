@@ -128,6 +128,16 @@ void clamp(_ST& t, _ST low, _ST high)
 
 template <class _ST>
 inline
+void wrap(_ST& t, _ST low, _ST high)
+{
+	if(t < low)
+		t = high - fmod(low - t, high - low);
+	else if(t > high)
+		t = low + fmod(t, high - low);
+}
+
+template <class _ST>
+inline
 _ST frand()
 {
 	return _ST(rand()) / _ST(RAND_MAX);

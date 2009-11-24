@@ -21,9 +21,6 @@ namespace EntityEditor
 	};
 
 
-	static math3d::mat4f s_worldMat;
-
-
 	RenderWindow::RenderWindow(Form^ parent)
 	{
 		_renderSystem = 0;
@@ -358,18 +355,20 @@ namespace EntityEditor
 		if(!_renderer)
 			return;
 
-		s_worldMat.set_rotation_y(deg2rad(_rotY));
-		s_worldMat.rotate_x(deg2rad(_rotX));
-
-		engineAPI->world->GetCamera().LookAt(
+		mat4f cam, view, rot;
+		rot.set_rotation_y(deg2rad(_rotY));
+		rot.rotate_x(deg2rad(_rotX));
+		view.look_at(
 			vec3f(_panX, _panY, _zoom),
 			vec3f(_panX, _panY, 0.0f),
 			vec3f::y_axis);
+		mul(cam, rot, view);
+
+		engineAPI->world->GetCamera().SetViewingTransform(cam);
 
 		_renderer->SwapInterval(1);
 		_renderer->ClearColorBuffer(0.5f, 0.5f, 0.5f, 1.0f);
 		_renderer->ClearDepthStencilBuffer(DEPTH_BUFFER_BIT | STENCIL_BUFFER_BIT, 1.0f, 0);
-		_renderer->EnableDepthTest(true);
 
 		RenderGrid();
 		RenderEntity();
@@ -518,9 +517,7 @@ namespace EntityEditor
 			_renderer->ActiveVertexASMProgram(_vpSimple->GetASMProgram());
 			_renderer->ActiveFragmentASMProgram(_fpConstClr->GetASMProgram());
 			const mat4f& view_proj = engineAPI->world->GetCamera().GetViewProjectionTransform();
-			mat4f wvp;
-			mul(wvp, s_worldMat, view_proj);
-			_vpSimple->GetASMProgram()->LocalMatrix4x4(0, wvp);
+			_vpSimple->GetASMProgram()->LocalMatrix4x4(0, view_proj);
 			float diff_color[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 			_fpConstClr->GetASMProgram()->LocalParameter(0, diff_color);
 
@@ -535,11 +532,9 @@ namespace EntityEditor
 			if(_wireframe)
 				_renderer->RasterizationMode(GL::RASTER_LINE);
 
-			_renderer->FrontFace(GL::ORIENT_CCW);
-			_renderer->CullFace(GL::FACE_BACK);
-			_renderer->EnableFaceCulling(true);
-			_entity->SetWorldTransform(s_worldMat);
-			_renderSystem->RenderEntities(_frameTime);
+			_renderSystem->Update(_frameTime);
+			_renderSystem->RenderEntities();
+			_renderSystem->RenderParticles();
 
 			if(_wireframe)
 				_renderer->RasterizationMode(GL::RASTER_FILL);
@@ -614,6 +609,7 @@ namespace EntityEditor
 
 		_renderSystem->GetRender2D()->FlushText();
 		_renderer->EnableDepthTest(true);
+		_renderer->FrontFace(GL::ORIENT_CCW);
 	}
 
 	void RenderWindow::RenderSkelet(const vec3f& color)
@@ -627,9 +623,8 @@ namespace EntityEditor
 
 		const Animation* animation = _entity->GetCurrentAnimation()? _entity->GetCurrentAnimation()->animation->GetAnimation(): 0;
 
-		mat4f wvp, matrix;
-		const mat4f& view_proj = engineAPI->world->GetCamera().GetViewProjectionTransform();
-		mul(wvp, s_worldMat, view_proj);
+		mat4f matrix;
+		const mat4f& wvp = engineAPI->world->GetCamera().GetViewProjectionTransform();
 
 		_renderer->ActiveVertexFormat(_lineVertFmt);
 		_renderer->VertexSource(0, _gridVertBuf, sizeof(LineVert3D), 0);

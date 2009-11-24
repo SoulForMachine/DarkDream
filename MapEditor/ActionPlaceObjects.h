@@ -10,7 +10,7 @@ namespace MapEditor
 
 	struct ActionPlaceObjects_UndoData
 	{
-		Engine::ModelEntity* entity;
+		Engine::RenderableEntity* entity;
 		math3d::mat4f transform;
 		bool dropped;
 	};

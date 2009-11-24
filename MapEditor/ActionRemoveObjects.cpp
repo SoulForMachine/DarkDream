@@ -8,9 +8,9 @@ using namespace Memory;
 namespace MapEditor
 {
 
-	ActionRemoveObjects::ActionRemoveObjects(const List<Engine::ModelEntity*>& obj_list)
+	ActionRemoveObjects::ActionRemoveObjects(const List<Engine::RenderableEntity*>& obj_list)
 	{
-		_objList = new(mainPool) List<Engine::ModelEntity*>(obj_list);
+		_objList = new(mainPool) List<Engine::RenderableEntity*>(obj_list);
 		_ownObjects = false;
 	}
 
@@ -18,7 +18,7 @@ namespace MapEditor
 	{
 		if(_ownObjects)
 		{
-			for(List<Engine::ModelEntity*>::ConstIterator it = _objList->Begin(); it != _objList->End(); ++it)
+			for(List<Engine::RenderableEntity*>::ConstIterator it = _objList->Begin(); it != _objList->End(); ++it)
 				delete *it;
 		}
 
@@ -37,7 +37,7 @@ namespace MapEditor
 
 	void ActionRemoveObjects::Undo()
 	{
-		for(List<Engine::ModelEntity*>::ConstIterator it = _objList->Begin(); it != _objList->End(); ++it)
+		for(List<Engine::RenderableEntity*>::ConstIterator it = _objList->Begin(); it != _objList->End(); ++it)
 			engineAPI->world->AddEntity(*it);
 		_ownObjects = false;
 	}
@@ -54,7 +54,7 @@ namespace MapEditor
 
 	void ActionRemoveObjects::RemoveObjects()
 	{
-		for(List<Engine::ModelEntity*>::ConstIterator it = _objList->Begin(); it != _objList->End(); ++it)
+		for(List<Engine::RenderableEntity*>::ConstIterator it = _objList->Begin(); it != _objList->End(); ++it)
 			engineAPI->world->RemoveEntity(*it);
 		_ownObjects = true;
 	}

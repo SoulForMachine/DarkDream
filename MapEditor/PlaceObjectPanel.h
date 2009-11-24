@@ -33,6 +33,8 @@ namespace MapEditor {
 		void SetMode(Mode mode);
 		Mode GetMode()
 			{ return _mode; }
+		void Redraw()
+			{ _panelObjectView->Invalidate(); }
 
 	private: System::Windows::Forms::Label^  label1;
 	private: System::Windows::Forms::TreeView^  _treeObjects;
@@ -57,19 +59,51 @@ namespace MapEditor {
 		/// Required designer variable.
 		/// </summary>
 
-		void AddDir(String^ path, TreeNodeCollection^ nodes);
+		ref class ObjectTreeNode: public TreeNode
+		{
+		public:
+			enum class NodeType
+			{
+				MODEL,
+				PARTICLE_SYSTEM,
+				FOLDER
+			};
+
+			ObjectTreeNode(String^ text, String^ rel_path, NodeType type)
+				: TreeNode(text)
+			{
+				ImageIndex = (int)type;
+				SelectedImageIndex = (int)type;
+				_nodeType = type;
+				_relPath = rel_path;
+			}
+
+			bool IsDirectory()
+				{ return _nodeType == NodeType::FOLDER; }
+			NodeType GetNodeType()
+				{ return _nodeType; }
+			String^ GetRelativePath()
+				{ return _relPath; }
+
+		private:
+			NodeType _nodeType;
+			String^ _relPath;
+		};
+
+		void AddDir(String^ path, TreeNodeCollection^ nodes, ObjectTreeNode::NodeType type);
 		bool MatchFilter(String^ str);
+		void DeleteEntity();
 
 		EM_PlaceObject^ _editMode;
 		String^ _filterText;
-		Engine::ModelEntity* _modelEntity;
-		bool _modelLoaded;
+		Engine::RenderableEntity* _entity;
+		bool _entityLoaded;
 		GL::Renderer* _renderer;
 		GL::Renderbuffer* _objViewColorBuf;
 		GL::Renderbuffer* _objViewDepthBuf;
 		GL::Framebuffer* _objViewFrameBuf;
 		bool _fbufOk;
-		Engine::Camera* _objViewCam;
+		Engine::World* _world;
 		Bitmap^ _objViewBmp;
 		float _objRotX;
 		float _objRotY;
@@ -125,8 +159,9 @@ namespace MapEditor {
 			// 
 			this->_imageListObjTree->ImageStream = (cli::safe_cast<System::Windows::Forms::ImageListStreamer^  >(resources->GetObject(L"_imageListObjTree.ImageStream")));
 			this->_imageListObjTree->TransparentColor = System::Drawing::Color::Transparent;
-			this->_imageListObjTree->Images->SetKeyName(0, L"f2.ico");
-			this->_imageListObjTree->Images->SetKeyName(1, L"obj.PNG");
+			this->_imageListObjTree->Images->SetKeyName(0, L"obj.PNG");
+			this->_imageListObjTree->Images->SetKeyName(1, L"ps.png");
+			this->_imageListObjTree->Images->SetKeyName(2, L"f2.ico");
 			// 
 			// _panelObjectView
 			// 
