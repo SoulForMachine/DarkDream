@@ -366,16 +366,16 @@ namespace ParticleEditor
 
 	System::Void PropertiesPanel::_checkShowBBox_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		char buf[128];
-		sprintf(buf, "r_drawEntityBBoxes %d", _checkShowBBox->Checked? 1: 0);
-		::Console::ExecuteStatement(buf);
+		::Console::BoolVar* cvar = ::Console::GetBoolVar("r_drawEntityBBoxes");
+		if(cvar)
+			*cvar = _checkShowBBox->Checked;
 	}
 
 	System::Void PropertiesPanel::_checkShowEmitter_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		char buf[128];
-		sprintf(buf, "r_drawParticleEmitter %d", _checkShowEmitter->Checked? 1: 0);
-		::Console::ExecuteStatement(buf);
+		::Console::BoolVar* cvar = ::Console::GetBoolVar("r_drawParticleEmitter");
+		if(cvar)
+			*cvar = _checkShowEmitter->Checked;
 	}
 
 	System::Void PropertiesPanel::_numTime_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e)

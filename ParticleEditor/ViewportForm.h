@@ -28,16 +28,23 @@ namespace ParticleEditor {
 		ViewportForm(void);
 
 		void SetParticleSystem(Engine::ParticleSystem* part_sys)
-			{ _renderWindow->SetParticleSystem(part_sys); }
+			{ if(_renderWindow) _renderWindow->SetParticleSystem(part_sys); }
 		void Redraw()
-			{ _renderWindow->Draw(); }
+			{ if(_renderWindow) _renderWindow->Draw(); }
 		void RedrawAsync();
 		void UpdateFrame()
-			{ _renderWindow->UpdateFrame(); }
+			{ if(_renderWindow) _renderWindow->UpdateFrame(); }
 		void ShowStats(bool stats)
-			{ _renderWindow->ShowStats(stats); }
+			{ if(_renderWindow) _renderWindow->ShowStats(stats); }
 		bool StatsVisible()
-			{ return _renderWindow->StatsVisible(); }
+		{
+			if(_renderWindow)
+				return _renderWindow->StatsVisible();
+			else
+				return false;
+		}
+		bool IsRenderingInitialized()
+			{ return _renderWindow != nullptr; }
 
 	protected:
 		/// <summary>

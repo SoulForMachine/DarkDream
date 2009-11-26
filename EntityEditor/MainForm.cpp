@@ -57,10 +57,19 @@ namespace EntityEditor
 		_skelet = false;
 		_modelForm->ShowStats(true);
 		_entity = nullptr;
-		NewEntity();
-		UpdateTitleBar();
 
-		Application::Idle += gcnew EventHandler(this, &MainForm::OnIdle);
+		if(_modelForm->IsRenderingInitialized())
+		{
+			NewEntity();
+			UpdateTitleBar();
+			Application::Idle += gcnew EventHandler(this, &MainForm::OnIdle);
+		}
+		else
+		{
+			_entityForm->Enabled = false;
+			_materialForm->Enabled = false;
+			_propertyForm->Enabled = false;
+		}
 	}
 
 	void MainForm::FormNotify(Form^ form, NotifyMessage msg)
@@ -163,6 +172,9 @@ namespace EntityEditor
 
 	System::Void MainForm::_mnuModelStats_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_modelForm->IsRenderingInitialized())
+			return;
+
 		_modelStats = !_modelStats;
 		_modelForm->ShowStats(_modelStats);
 	}
@@ -189,36 +201,54 @@ namespace EntityEditor
 
 	System::Void MainForm::_mnuWireframe_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_modelForm->IsRenderingInitialized())
+			return;
+
 		_wireframe = !_wireframe;
 		_modelForm->Wireframe(_wireframe);
 	}
 
 	System::Void MainForm::_mnuViewSkelet_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_modelForm->IsRenderingInitialized())
+			return;
+
 		_skelet = !_skelet;
 		_modelForm->ShowSkelet(_skelet);
 	}
 
 	System::Void MainForm::_mnuEntityNew_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_modelForm->IsRenderingInitialized())
+			return;
+
 		NewEntity();
 		UpdateTitleBar();
 	}
 
 	System::Void MainForm::_mnuEntityOpen_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_modelForm->IsRenderingInitialized())
+			return;
+
 		LoadEntity();
 		UpdateTitleBar();
 	}
 
 	System::Void MainForm::_mnuEntitySave_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_modelForm->IsRenderingInitialized())
+			return;
+
 		SaveEntity();
 		UpdateTitleBar();
 	}
 
 	System::Void MainForm::_mnuEntitySaveAs_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_modelForm->IsRenderingInitialized())
+			return;
+
 		SaveEntityAs();
 		UpdateTitleBar();
 	}

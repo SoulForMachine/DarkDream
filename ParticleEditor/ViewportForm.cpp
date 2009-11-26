@@ -15,7 +15,8 @@ namespace ParticleEditor
 
 	void ViewportForm::RedrawAsync()
 	{
-		InvalidateRect((HWND)_renderWindow->Handle.ToPointer(), 0, FALSE);
+		if(_renderWindow)
+			InvalidateRect((HWND)_renderWindow->Handle.ToPointer(), 0, FALSE);
 	}
 
 	System::Void ViewportForm::ViewportForm_HandleCreated(System::Object^ sender, System::EventArgs^ e)

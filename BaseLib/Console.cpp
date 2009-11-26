@@ -4,6 +4,9 @@
 #include <cstdarg>
 #include <cstring>
 #include "Memory.h"
+#include "Parser.h"
+#include "FileSys.h"
+#include "SystemInfo.h"
 #include "Console.h"
 
 using namespace Memory;
@@ -43,6 +46,14 @@ const vec4f Console::_colors[CLR_COUNT] =
 	vec4f(0.0f, 1.0f, 1.0f, 1.0f), // cyan
 	vec4f(1.0f, 0.0f, 1.0f, 1.0f), // magenta
 };
+
+
+Console::Command Console::_ccmdConDump(
+	"conDump",
+	"Dumps console buffer to file.\n"
+	"Syntax: conDump [file]",
+	&Console::Dump);
+
 
 
 // ------------ console object list ------------
@@ -644,6 +655,42 @@ void Console::ScrollToEnd()
 	_currentLine = _firstLine;
 }
 
+Console::IntVar* Console::GetIntVar(const char* name)
+{
+	ConsoleObject* obj = _consoleObjList.Find(name);
+	if(obj && obj->GetObjectType() == CON_TYPE_INT_VAR)
+		return (IntVar*)obj;
+	else
+		return 0;
+}
+
+Console::FloatVar* Console::GetFloatVar(const char* name)
+{
+	ConsoleObject* obj = _consoleObjList.Find(name);
+	if(obj && obj->GetObjectType() == CON_TYPE_FLOAT_VAR)
+		return (FloatVar*)obj;
+	else
+		return 0;
+}
+
+Console::BoolVar* Console::GetBoolVar(const char* name)
+{
+	ConsoleObject* obj = _consoleObjList.Find(name);
+	if(obj && obj->GetObjectType() == CON_TYPE_BOOL_VAR)
+		return (BoolVar*)obj;
+	else
+		return 0;
+}
+
+Console::StringVar* Console::GetStringVar(const char* name)
+{
+	ConsoleObject* obj = _consoleObjList.Find(name);
+	if(obj && obj->GetObjectType() == CON_TYPE_STRING_VAR)
+		return (StringVar*)obj;
+	else
+		return 0;
+}
+
 void Console::SetBufferSize(int line_size, int line_count)
 {
 	if(line_size == _bufferLineSize && line_count == _bufferLineCount)
@@ -729,6 +776,11 @@ const short* Console::GetBufferFirstLine()
 	return IsEmpty()? 0: GetLine(_firstLine);
 }
 
+const short* Console::GetBufferLastLine()
+{
+	return IsEmpty()? 0: GetLine(_lastLine);
+}
+
 const short* Console::GetBufferCurrentLine()
 {
 	return IsEmpty()? 0: GetLine(_currentLine);
@@ -744,6 +796,16 @@ const short* Console::GetBufferNextLine(const short* line)
 	return (next_line < _buffer)? GetLine(_bufferLineCount - 1): next_line;
 }
 
+const short* Console::GetBufferPrevLine(const short* line)
+{
+	// return 0 if we are at beginning of buffer
+	if(line == GetLine(_firstLine))
+		return 0;
+
+	const short* prev_line = line + _bufferLineSize;
+	return (prev_line > _buffer + _bufferSize)? GetLine(0): prev_line;
+}
+
 bool Console::IsEmpty()
 {
 	return (_firstLine == _lastLine && _pos == 0);
@@ -752,6 +814,59 @@ bool Console::IsEmpty()
 bool Console::IsFull()
 {
 	return ((_firstLine + 1) % _bufferLineCount == _lastLine && _pos > 0);
+}
+
+void Console::Dump(char* args)
+{
+	if(!args || !*args)
+	{
+		Console::PrintLn("File name required.");
+		return;
+	}
+
+	const char* file_name = strtok(args, " \n\t");
+
+	if(!file_name || !*file_name)
+	{
+		Console::PrintLn("File name required.");
+		return;
+	}
+
+	FileSys::FsysFile file;
+	tchar fn[MAX_PATH];
+	_stprintf(fn, _t("%hs"), file_name);
+	// if we do not have full path, create file in application directory
+	if(!tstrrchr(fn, _t('\\')))
+	{
+		tchar app_dir[MAX_PATH];
+		SystemInfo::GetApplicationDirectory(app_dir);
+		tstrncat(app_dir, fn, MAX_PATH);
+		tstrcpy(fn, app_dir);
+	}
+	if(!file.Open(fn, _t("wt")))
+	{
+		Console::PrintError("Failed to create output file: %s", file_name);
+		return;
+	}
+
+	const short* line = GetBufferLastLine();
+	char* text = new(tempPool) char[_bufferLineSize];
+
+	while(line)
+	{
+		int i = 0;
+		while(i < _bufferLineSize && (line[i] & 0xFF))
+		{
+			text[i] = (char)(line[i] & 0xFF);
+			++i;
+		}
+		text[i] = '\0';
+
+		file.Printf("%s\n", text);
+		line = GetBufferPrevLine(line);
+	}
+	delete[] text;
+	file.Close();
 }
 
 bool Console::RegisterObject(ConsoleObject& obj)

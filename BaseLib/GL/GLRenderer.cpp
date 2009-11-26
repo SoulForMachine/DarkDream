@@ -584,13 +584,13 @@ namespace GL
 		// v3.0
 		CHECK_EXTENSION_REQ(GL_ARB_texture_float, extTextureFloat)
 		LOAD_EXTENSION_REQ(GL_EXT_framebuffer_object, extFramebufferObject)
-		LOAD_EXTENSION_REQ(GL_ARB_color_buffer_float, extColorBufferFloat)
-		LOAD_EXTENSION_REQ(GL_EXT_gpu_shader4, extGPUShader4)
+		LOAD_EXTENSION(GL_ARB_color_buffer_float, extColorBufferFloat)
+		LOAD_EXTENSION(GL_EXT_gpu_shader4, extGPUShader4)
 		LOAD_EXTENSION(GL_EXT_transform_feedback, extTransformFeedback)
-		LOAD_EXTENSION_REQ(GL_EXT_draw_buffers2, extDrawBuffers2)
-		CHECK_EXTENSION_REQ(GL_EXT_framebuffer_sRGB, extFramebufferSRGB)
+		LOAD_EXTENSION(GL_EXT_draw_buffers2, extDrawBuffers2)
+		CHECK_EXTENSION(GL_EXT_framebuffer_sRGB, extFramebufferSRGB)
 		LOAD_EXTENSION_REQ(GL_EXT_framebuffer_multisample, extFramebufferMultisample)
-		LOAD_EXTENSION_REQ(GL_EXT_framebuffer_blit, extFramebufferBlit)
+		LOAD_EXTENSION(GL_EXT_framebuffer_blit, extFramebufferBlit)
 		LOAD_EXTENSION(GL_NV_conditional_render, extConditionalRender)
 		LOAD_EXTENSION(GL_ARB_map_buffer_range, extMapBufferRange)
 		CHECK_EXTENSION(GL_ARB_texture_compression_rgtc, extTextureCompressionRGTC)
@@ -598,8 +598,8 @@ namespace GL
 		// v3.1
 		LOAD_EXTENSION(GL_ARB_copy_buffer, extCopyBuffer)
 		LOAD_EXTENSION(GL_ARB_uniform_buffer_object, extUniformBufferObject)
-		LOAD_EXTENSION_REQ(GL_ARB_texture_buffer_object, extTextureBufferObject)
-		LOAD_EXTENSION_REQ(GL_ARB_draw_instanced, extDrawInstanced)
+		LOAD_EXTENSION(GL_ARB_texture_buffer_object, extTextureBufferObject)
+		LOAD_EXTENSION(GL_ARB_draw_instanced, extDrawInstanced)
 		CHECK_EXTENSION_REQ(GL_ARB_texture_rectangle, extTextureRectangle)
 		LOAD_EXTENSION(GL_NV_primitive_restart, extPrimitiveRestart)
 
@@ -621,12 +621,12 @@ namespace GL
 
 		// other
 		CHECK_EXTENSION_REQ(GL_EXT_texture_filter_anisotropic, extTextureFilterAnisotropic)
-		LOAD_EXTENSION_REQ(GL_ARB_geometry_shader4, extGeometryShader4)
+		LOAD_EXTENSION(GL_ARB_geometry_shader4, extGeometryShader4)
 
 		// wgl
 		LOAD_EXTENSION_REQ(WGL_ARB_extensions_string, wextExtensionsString)
 		LOAD_EXTENSION_REQ(WGL_ARB_pixel_format, wextPixelFormat)
-		CHECK_EXTENSION_REQ(WGL_ARB_pixel_format_float, wextPixelFormatFloat)
+		CHECK_EXTENSION(WGL_ARB_pixel_format_float, wextPixelFormatFloat)
 		CHECK_EXTENSION_REQ(WGL_ARB_multisample, wextMultisample)
 		LOAD_EXTENSION_REQ(WGL_EXT_swap_control, wextSwapControl)
 		CHECK_EXTENSION(WGL_EXT_framebuffer_sRGB, wextFramebufferSRGB)

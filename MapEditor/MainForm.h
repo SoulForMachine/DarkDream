@@ -99,7 +99,7 @@ namespace MapEditor {
 	private: System::Windows::Forms::ToolStripButton^  _toolBtnTerrainEdit;
 	private: System::Windows::Forms::ToolStripButton^  _toolBtnObjectPlacement;
 	private: System::Windows::Forms::ToolStripButton^  _toolBtnTriggers;
-	private: System::Windows::Forms::ToolStripButton^  _toolBtnParticleSystems;
+
 	private: System::Windows::Forms::ToolStripMenuItem^  toolStripMenuItem2;
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewWireframe;
 	private: System::Windows::Forms::ToolStripMenuItem^  _menuViewStats;
@@ -187,7 +187,6 @@ namespace MapEditor {
 			this->_toolBtnObjectPlacement = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnGrass = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnTriggers = (gcnew System::Windows::Forms::ToolStripButton());
-			this->_toolBtnParticleSystems = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnLayers = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_panelCamPosBar = (gcnew System::Windows::Forms::Panel());
 			this->_mainMenu->SuspendLayout();
@@ -461,9 +460,8 @@ namespace MapEditor {
 			// 
 			this->_mainToolbar->AutoSize = false;
 			this->_mainToolbar->ImageScalingSize = System::Drawing::Size(32, 32);
-			this->_mainToolbar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(7) {this->_toolBtnViewMode, 
-				this->_toolBtnTerrainEdit, this->_toolBtnObjectPlacement, this->_toolBtnGrass, this->_toolBtnTriggers, this->_toolBtnParticleSystems, 
-				this->_toolBtnLayers});
+			this->_mainToolbar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {this->_toolBtnViewMode, 
+				this->_toolBtnTerrainEdit, this->_toolBtnObjectPlacement, this->_toolBtnGrass, this->_toolBtnTriggers, this->_toolBtnLayers});
 			this->_mainToolbar->Location = System::Drawing::Point(0, 24);
 			this->_mainToolbar->Name = L"_mainToolbar";
 			this->_mainToolbar->Size = System::Drawing::Size(860, 38);
@@ -519,16 +517,6 @@ namespace MapEditor {
 			this->_toolBtnTriggers->Size = System::Drawing::Size(36, 35);
 			this->_toolBtnTriggers->Text = L"Triggers";
 			this->_toolBtnTriggers->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnTriggers_Click);
-			// 
-			// _toolBtnParticleSystems
-			// 
-			this->_toolBtnParticleSystems->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
-			this->_toolBtnParticleSystems->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnParticleSystems.Image")));
-			this->_toolBtnParticleSystems->ImageTransparentColor = System::Drawing::Color::Magenta;
-			this->_toolBtnParticleSystems->Name = L"_toolBtnParticleSystems";
-			this->_toolBtnParticleSystems->Size = System::Drawing::Size(36, 35);
-			this->_toolBtnParticleSystems->Text = L"Particle Systems";
-			this->_toolBtnParticleSystems->Click += gcnew System::EventHandler(this, &MainForm::_toolBtnParticleSystems_Click);
 			// 
 			// _toolBtnLayers
 			// 
@@ -590,7 +578,6 @@ namespace MapEditor {
 	private: System::Void _toolBtnTerrainEdit_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _toolBtnObjectPlacement_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _toolBtnTriggers_Click(System::Object^  sender, System::EventArgs^  e);
-	private: System::Void _toolBtnParticleSystems_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuRegionNewTerrainPatch_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void _menuViewWireframe_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void OnIdle(System::Object^  sender, System::EventArgs^  e);

@@ -63,6 +63,8 @@ bool IsPunctChar(char c)
 
 
 Parser::Parser()
+	: _tokens(tempPool),
+	_keywords(tempPool)
 {
 	_buffer = 0;
 	_ptr = 0;

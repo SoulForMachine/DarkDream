@@ -34,18 +34,20 @@ namespace EntityEditor {
 
 		void SetEntity(Engine::ModelEntity* entity);
 		void Redraw()
-			{ _renderWindow->Draw(); }
+			{ if(_renderWindow) _renderWindow->Draw(); }
 		void RedrawAsync();
 		void UpdateFrame()
-			{ _renderWindow->UpdateFrame(); }
+			{ if(_renderWindow) _renderWindow->UpdateFrame(); }
 		void Wireframe(bool wireframe)
-			{ _renderWindow->Wireframe(wireframe); }
+			{ if(_renderWindow) _renderWindow->Wireframe(wireframe); }
 		void ShowStats(bool stats)
-			{ _renderWindow->ShowStats(stats); }
+			{ if(_renderWindow) _renderWindow->ShowStats(stats); }
 		void ShowSkelet(bool show)
-			{ _renderWindow->ShowSkelet(show); }
+			{ if(_renderWindow) _renderWindow->ShowSkelet(show); }
 		void ModelChanged()
-			{ _renderWindow->ModelChanged(); }
+			{ if(_renderWindow) _renderWindow->ModelChanged(); }
+		bool IsRenderingInitialized()
+			{ return _renderWindow != nullptr; }
 
 	protected:
 		/// <summary>

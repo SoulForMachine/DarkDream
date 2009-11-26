@@ -49,6 +49,15 @@ public:
 		INM_OVERWRITE
 	};
 
+	enum ConsoleObjectType
+	{
+		CON_TYPE_COMMAND,
+		CON_TYPE_INT_VAR,
+		CON_TYPE_FLOAT_VAR,
+		CON_TYPE_BOOL_VAR,
+		CON_TYPE_STRING_VAR,
+	};
+
 	class BASELIB_API ConsoleObject;
 	class BASELIB_API Variable;
 	class BASELIB_API IntVar;
@@ -73,6 +82,10 @@ public:
 	static void Scroll(int offset);
 	static void ScrollToBeginning();
 	static void ScrollToEnd();
+	static IntVar* GetIntVar(const char* name);
+	static FloatVar* GetFloatVar(const char* name);
+	static BoolVar* GetBoolVar(const char* name);
+	static StringVar* GetStringVar(const char* name);
 
 	// --- console buffer functions ---
 	static void SetBufferSize(int line_size, int line_count);
@@ -80,10 +93,14 @@ public:
 	static int GetBufferLineCount();
 	static int GetBufferSize();
 	static const short* GetBufferFirstLine();
+	static const short* GetBufferLastLine();
 	static const short* GetBufferCurrentLine();
 	static const short* GetBufferNextLine(const short* line);
+	static const short* GetBufferPrevLine(const short* line);
 	static bool IsEmpty();
 	static bool IsFull();
+	static void Dump(char* args);
+
 
 	// --- input buffer functions ---
 	static void InputChar(char c);
@@ -160,6 +177,7 @@ private:
 	static int _historyLastLine;					// position of oldest command in history
 	static int _historyCurrentLine;					// points to current command while moving through history
 	static const math3d::vec4f _colors[CLR_COUNT];	// array of console colors
+	static Command _ccmdConDump;
 };
 
 // -------- base class for console variables and commands --------
@@ -171,6 +189,7 @@ public:
 	~ConsoleObject() {}
 
 	virtual void Execute(char* params) = 0;
+	virtual ConsoleObjectType GetObjectType() = 0;
 
 	const char* GetName() const
 		{ return _name; }
@@ -222,10 +241,13 @@ public:
 		const char* name, int default_value, const char* help = 0, bool read_only = false,
 		int min_val = std::numeric_limits<int>::min(), int max_val = std::numeric_limits<int>::max());
 
+	virtual ConsoleObjectType GetObjectType()
+		{ return CON_TYPE_INT_VAR; }
+
 	operator int() const
 		{ return _value; }
-	operator int&()
-		{ return _value; }
+	Console::IntVar& operator = (int val)
+		{ _value = val; return *this; }
 	void GetStringValue(char* str) const;
 	void SetStringValue(const char* val);
 	void GetDefaultStringValue(char* str) const;
@@ -246,10 +268,13 @@ public:
 		const char* name, float default_value, const char* help = 0, bool read_only = false,
 		float min_val = std::numeric_limits<float>::min(), float max_val = std::numeric_limits<float>::max());
 
+	virtual ConsoleObjectType GetObjectType()
+		{ return CON_TYPE_FLOAT_VAR; }
+
 	operator float() const
 		{ return _value; }
-	operator float&()
-		{ return _value; }
+	Console::FloatVar& operator = (float val)
+		{ _value = val; return *this; }
 	void GetStringValue(char* str) const;
 	void SetStringValue(const char* val);
 	void GetDefaultStringValue(char* str) const;
@@ -261,17 +286,20 @@ private:
 	float _maxValue;
 };
 
-// ------- float variable -------
+// ------- boolean variable -------
 
 class Console::BoolVar: public Console::Variable
 {
 public:
 	BoolVar(const char* name, bool default_value, const char* help = 0, bool read_only = false);
 
+	virtual ConsoleObjectType GetObjectType()
+		{ return CON_TYPE_BOOL_VAR; }
+
 	operator bool() const
 		{ return _value; }
-	operator bool&()
-		{ return _value; }
+	Console::BoolVar& operator = (bool val)
+		{ _value = val; return *this; }
 	void GetStringValue(char* str) const;
 	void SetStringValue(const char* val);
 	void GetDefaultStringValue(char* str) const;
@@ -287,6 +315,9 @@ class Console::StringVar: public Console::Variable
 {
 public:
 	StringVar(const char* name, const char* default_value, const char** allowed_values = 0, const char* help = 0, bool read_only = false);
+
+	virtual ConsoleObjectType GetObjectType()
+		{ return CON_TYPE_STRING_VAR; }
 
 	operator const char*() const
 		{ return _value; }
@@ -309,6 +340,9 @@ class Console::Command: public Console::ConsoleObject
 {
 public:
 	typedef void (*FuncPtr)(char* args);
+
+	virtual ConsoleObjectType GetObjectType()
+		{ return CON_TYPE_COMMAND; }
 
 	Command(const char* name, const char* help, FuncPtr func_ptr)
 		:ConsoleObject(name, help)

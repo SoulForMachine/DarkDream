@@ -15,12 +15,14 @@ namespace EntityEditor
 
 	void ModelForm::SetEntity(Engine::ModelEntity* entity)
 	{
-		_renderWindow->SetEntity(entity);
+		if(_renderWindow)
+			_renderWindow->SetEntity(entity);
 	}
 
 	void ModelForm::RedrawAsync()
 	{
-		InvalidateRect((HWND)_renderWindow->Handle.ToPointer(), 0, FALSE);
+		if(_renderWindow)
+			InvalidateRect((HWND)_renderWindow->Handle.ToPointer(), 0, FALSE);
 	}
 
 	System::Void ModelForm::ModelForm_HandleCreated(System::Object^ sender, System::EventArgs^ e)

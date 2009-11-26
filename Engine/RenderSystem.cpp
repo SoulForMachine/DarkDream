@@ -400,41 +400,6 @@ namespace Engine
 		}
 	}
 
-	void RenderSystem::RenderEntities(int frame_time, const Camera& camera, ModelEntity** entities, int ent_count)
-	{
-		_frameTime = frame_time * 0.001f;
-		_frameTimeMsec = frame_time;
-
-		_meshCount = 0;
-		_transpMeshCount = 0;
-		_meshDataPool.Reset();
-		_visEmitterCount = 0;
-
-		for(int ent_i = 0; ent_i < ent_count; ++ent_i)
-		{
-			if(entities[ent_i]->GetModelRes())
-			{
-				UpdateEntityTime(entities[ent_i]);
-				entities[ent_i]->UpdateGraphics();
-				AddEntityToDrawArray(entities[ent_i], camera);
-			}
-		}
-
-		qsort(_meshBuf, _meshCount, sizeof(EntityRenderer::MeshRenderData*), MeshCmpFunc);
-		qsort(_transpMeshBuf, _transpMeshCount, sizeof(EntityRenderer::MeshRenderData*), TranspMeshCmpFunc);
-
-		_entityRenderer->Render(camera, _meshBuf, _meshCount);
-		_entityRenderer->Render(camera, _transpMeshBuf, _transpMeshCount);
-
-		if(g_cvarDrawEntityBBoxes)
-		{
-			for(int ent_i = 0; ent_i < ent_count; ++ent_i)
-			{
-				_debugRenderer->RenderBoundingBox(entities[ent_i]->GetWorldBoundingBox());
-			}
-		}
-	}
-
 	void RenderSystem::AddEntityToDrawArray(ModelEntity* entity, const Camera& camera)
 	{
 		const Model* model = entity->GetModelRes()->GetModel();

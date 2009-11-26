@@ -43,7 +43,8 @@ namespace MapEditor
 			_toolPanel->Show(_dockPanel);
 
 		_mapForm->Show();
-		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
+		if(_mapForm->GetCurrentEditMode())
+			_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
 		UpdateToolbarButtons();
 
 		_dockPanel->ResumeLayout(true, true);
@@ -52,9 +53,11 @@ namespace MapEditor
 		_viewStats = true;
 		_movingCam = false;
 
-		Application::Idle += gcnew EventHandler(this, &MainForm::OnIdle);
-
-		engineAPI->world->GetTerrain().AddPatch();
+		if(_mapForm->IsRenderingInitialized())
+		{
+			Application::Idle += gcnew EventHandler(this, &MainForm::OnIdle);
+			engineAPI->world->GetTerrain().AddPatch();
+		}
 
 		System::Reflection::MethodInfo^ method = Control::typeid->GetMethod(
                "SetStyle",
@@ -103,21 +106,29 @@ namespace MapEditor
 
 	System::Void MainForm::_menuFileNewMap_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
 
 	}
 
 	System::Void MainForm::_menuFileOpenMap_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
 
 	}
 
 	System::Void MainForm::_menuFileSaveMap_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
 
 	}
 
 	System::Void MainForm::_menuFileSaveMapAs_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
 
 	}
 
@@ -128,21 +139,33 @@ namespace MapEditor
 
 	System::Void MainForm::_menuEditUndo_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_mapForm->GetUndoManager()->Undo();
 	}
 
 	System::Void MainForm::_menuEditRedo_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_mapForm->GetUndoManager()->Redo();
 	}
 
 	System::Void MainForm::_menuRegionNewTerrainPatch_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::ADD_PATCH);
 	}
 
 	System::Void MainForm::_menuTerrainNewPatchAtEnd_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		if(engineAPI->world->GetTerrain().GetPatchCount() == Engine::Terrain::MAX_PATCHES)
 		{
 			MessageBox::Show(
@@ -165,6 +188,9 @@ namespace MapEditor
 
 	System::Void MainForm::_menuTerrainRemovePatch_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::REMOVE_PATCH);
 	}
 
@@ -175,6 +201,9 @@ namespace MapEditor
 
 	System::Void MainForm::_toolBtnViewMode_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
 		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
 		UpdateToolbarButtons();
@@ -182,6 +211,9 @@ namespace MapEditor
 
 	System::Void MainForm::_toolBtnTerrainEdit_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::TERRAIN_EDIT);
 		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
 		UpdateToolbarButtons();
@@ -189,6 +221,9 @@ namespace MapEditor
 
 	System::Void MainForm::_toolBtnObjectPlacement_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::PLACE_OBJECT);
 		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
 		UpdateToolbarButtons();
@@ -196,17 +231,17 @@ namespace MapEditor
 
 	System::Void MainForm::_toolBtnTriggers_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
 
 		UpdateToolbarButtons();
 	}
 
-	System::Void MainForm::_toolBtnParticleSystems_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-
-	}
-
 	System::Void MainForm::_toolBtnLayers_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::LAYER_EDIT);
 		_mapForm->SetViewMode(MapRenderWindow::ViewMode::GAME);
 		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
@@ -216,6 +251,9 @@ namespace MapEditor
 
 	System::Void MainForm::_toolBtnGrass_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::PAINT_GRASS);
 		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
 		UpdateToolbarButtons();
@@ -223,6 +261,9 @@ namespace MapEditor
 
 	System::Void MainForm::_menuViewWireframe_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_wireframe = !_wireframe;
 		_mapForm->Wireframe(_wireframe);
 		_mapForm->Redraw();
@@ -235,29 +276,31 @@ namespace MapEditor
 		_toolBtnTerrainEdit->Checked = false;
 		_toolBtnObjectPlacement->Checked = false;
 		_toolBtnTriggers->Checked = false;
-		_toolBtnParticleSystems->Checked = false;
 		_toolBtnLayers->Checked = false;
 		_toolBtnGrass->Checked = false;
 
-		switch(_mapForm->GetPersistentEditMode()->GetModeEnum())
+		if(_mapForm->GetPersistentEditMode())
 		{
-		case EditMode::EditModeEnum::VIEW:
-			_toolBtnViewMode->Checked = true;
-			break;
-		case EditMode::EditModeEnum::TERRAIN_EDIT:
-			_toolBtnTerrainEdit->Checked = true;
-			break;
-		case EditMode::EditModeEnum::PLACE_OBJECT:
-			_toolBtnObjectPlacement->Checked = true;
-			break;
-		case EditMode::EditModeEnum::LAYER_EDIT:
-			_toolBtnLayers->Checked = true;
-			break;
-		case EditMode::EditModeEnum::PAINT_GRASS:
-			_toolBtnGrass->Checked = true;
-			break;
-		default:
-			assert(0);
+			switch(_mapForm->GetPersistentEditMode()->GetModeEnum())
+			{
+			case EditMode::EditModeEnum::VIEW:
+				_toolBtnViewMode->Checked = true;
+				break;
+			case EditMode::EditModeEnum::TERRAIN_EDIT:
+				_toolBtnTerrainEdit->Checked = true;
+				break;
+			case EditMode::EditModeEnum::PLACE_OBJECT:
+				_toolBtnObjectPlacement->Checked = true;
+				break;
+			case EditMode::EditModeEnum::LAYER_EDIT:
+				_toolBtnLayers->Checked = true;
+				break;
+			case EditMode::EditModeEnum::PAINT_GRASS:
+				_toolBtnGrass->Checked = true;
+				break;
+			default:
+				assert(0);
+			}
 		}
 	}
 
@@ -291,28 +334,40 @@ namespace MapEditor
 
 	System::Void MainForm::_menuViewStats_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_viewStats = !_viewStats;
 		_mapForm->ShowStats(_viewStats);
 	}
 
 	System::Void MainForm::_menuViewTerrainNormals_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_menuViewTerrainNormals->Checked = !_menuViewTerrainNormals->Checked;
-		char buf[128];
-		sprintf(buf, "r_drawTerrainNormals %d", _menuViewTerrainNormals->Checked? 1: 0);
-		::Console::ExecuteStatement(buf);
+		::Console::BoolVar* cvar = ::Console::GetBoolVar("r_drawTerrainNormals");
+		if(cvar)
+			*cvar = _menuViewTerrainNormals->Checked;
 	}
 
 	System::Void MainForm::_menuViewEntityBBoxes_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		_menuViewEntityBBoxes->Checked = !_menuViewEntityBBoxes->Checked;
-		char buf[128];
-		sprintf(buf, "r_drawEntityBBoxes %d", _menuViewEntityBBoxes->Checked? 1: 0);
-		::Console::ExecuteStatement(buf);
+		::Console::BoolVar* cvar = ::Console::GetBoolVar("r_drawEntityBBoxes");
+		if(cvar)
+			*cvar = _menuViewEntityBBoxes->Checked;
 	}
 
 	System::Void MainForm::_menuViewGameView_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_mapForm->IsRenderingInitialized())
+			return;
+
 		if(_mapForm->GetViewMode() == MapRenderWindow::ViewMode::EDITOR)
 		{
 			_mapForm->SetViewMode(MapRenderWindow::ViewMode::GAME);

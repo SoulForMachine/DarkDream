@@ -51,13 +51,20 @@ namespace ParticleEditor
 
 		_dockPanel->ResumeLayout(true, true);
 
-		Application::Idle += gcnew EventHandler(this, &MainForm::OnIdle);
-
 		_particleSystem = 0;
 		_fileName = nullptr;
 		_modified = false;
 
-		NewParticleSystem();
+		if(_viewportForm->IsRenderingInitialized())
+		{
+			Application::Idle += gcnew EventHandler(this, &MainForm::OnIdle);
+			NewParticleSystem();
+		}
+		else
+		{
+			_emitterPanel->Enabled = false;
+			_propertyPanel->Enabled = false;
+		}
 	}
 
 	void MainForm::FormNotify(System::Windows::Forms::Form^ form, NotifyMessage msg)
@@ -93,8 +100,11 @@ namespace ParticleEditor
 			_viewportForm->SetParticleSystem(0);
 			_emitterPanel->SetParticleSystem(0);
 			_propertyPanel->SetParticleSystem(0);
-			_particleSystem->ParticleSystem::~ParticleSystem();
-			::operator delete(_particleSystem);
+			if(_particleSystem)
+			{
+				_particleSystem->ParticleSystem::~ParticleSystem();
+				::operator delete(_particleSystem);
+			}
 			engineAPI->partSysManager->ReleaseAll();
 			// save layout for dock panels to xml
 			_dockPanel->SaveAsXml(Application::StartupPath + "\\" + DOCK_PANEL_XML_FILE);
@@ -107,21 +117,33 @@ namespace ParticleEditor
 
 	System::Void MainForm::_menuFileNew_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_viewportForm->IsRenderingInitialized())
+			return;
+
 		NewParticleSystem();
 	}
 
 	System::Void MainForm::_menuFileOpen_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_viewportForm->IsRenderingInitialized())
+			return;
+
 		LoadParticleSystem();
 	}
 
 	System::Void MainForm::_menuFileSave_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_viewportForm->IsRenderingInitialized())
+			return;
+
 		SaveParticleSystem();
 	}
 
 	System::Void MainForm::_menuFileSaveAs_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_viewportForm->IsRenderingInitialized())
+			return;
+
 		SaveParticleSystemAs();
 	}
 
@@ -137,6 +159,9 @@ namespace ParticleEditor
 
 	System::Void MainForm::_menuViewStats_Click(System::Object^  sender, System::EventArgs^  e)
 	{
+		if(!_viewportForm->IsRenderingInitialized())
+			return;
+
 		_viewportForm->ShowStats(!_viewportForm->StatsVisible());
 	}
 

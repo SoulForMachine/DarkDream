@@ -34,20 +34,25 @@ namespace MapEditor {
 		MapForm(EditorCommon::FormDirector^ director);
 
 		void Redraw()
-			{ _renderWindow->Draw(); }
+			{ if(_renderWindow) _renderWindow->Draw(); }
 		void RedrawAsync();
 		void UpdateFrame()
-			{ _renderWindow->UpdateFrame(); }
+			{ if(_renderWindow) _renderWindow->UpdateFrame(); }
 		void Animate(bool anim)
-			{ _renderWindow->Animate(anim); }
+			{ if(_renderWindow) _renderWindow->Animate(anim); }
 		void Wireframe(bool wireframe)
-			{ _renderWindow->Wireframe(wireframe); }
+			{ if(_renderWindow) _renderWindow->Wireframe(wireframe); }
 		void ShowStats(bool stats)
-			{ _renderWindow->ShowStats(stats); }
+			{ if(_renderWindow) _renderWindow->ShowStats(stats); }
 		void SetViewMode(MapRenderWindow::ViewMode mode)
-			{ _renderWindow->SetViewMode(mode); }
+			{ if(_renderWindow) _renderWindow->SetViewMode(mode); }
 		MapRenderWindow::ViewMode GetViewMode()
-			{ return _renderWindow->GetViewMode(); }
+		{
+			if(_renderWindow)
+				return _renderWindow->GetViewMode();
+			else
+				return MapRenderWindow::ViewMode::EDITOR;
+		}
 		void SetCurrentEditMode(EditMode::EditModeEnum mode);
 		EditMode^ GetCurrentEditMode()
 			{ return _currentEditMode; }
@@ -56,10 +61,17 @@ namespace MapEditor {
 		UndoManager^ GetUndoManager()
 			{ return _undoManager; }
 		void SetCamX(float x)
-			{ _renderWindow->SetCamX(x); }
+			{ if(_renderWindow) _renderWindow->SetCamX(x); }
 		float GetCamX()
-			{ return _renderWindow->GetCamX(); }
+		{
+			if(_renderWindow)
+				return _renderWindow->GetCamX();
+			else
+				return 0.0f;
+		}
 		virtual void EditModeEvent(EditModeEventListener::EMEvent ev);
+		bool IsRenderingInitialized()
+			{ return _renderWindow != nullptr; }
 
 	protected:
 		/// <summary>

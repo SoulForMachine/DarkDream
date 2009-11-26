@@ -38,7 +38,6 @@ namespace Engine
 		void Update(int frame_time);
 		void RenderFrame();
 		void RenderEntities();
-		void RenderEntities(int frame_time, const Camera& camera, ModelEntity** entities, int ent_count);
 		void RenderTerrain();
 		void RenderGrass();
 		void RenderBgLayers();

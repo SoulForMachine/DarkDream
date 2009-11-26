@@ -25,7 +25,8 @@ namespace MapEditor
 
 	void MapForm::RedrawAsync()
 	{
-		InvalidateRect((HWND)_renderWindow->Handle.ToPointer(), 0, FALSE);
+		if(_renderWindow)
+			InvalidateRect((HWND)_renderWindow->Handle.ToPointer(), 0, FALSE);
 	}
 
 	System::Void MapForm::MapForm_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e)
@@ -81,13 +82,21 @@ namespace MapEditor
 	System::Void MapForm::MapForm_HandleDestroyed(System::Object^  sender, System::EventArgs^  e)
 	{
 		delete _undoManager;
-		for each(EditMode^ em in _editModes)
-			delete em;
-		delete _editModes;
+		if(_editModes)
+		{
+			for each(EditMode^ em in _editModes)
+				delete em;
+			delete _editModes;
+			_editModes = nullptr;
+		}
 		_currentEditMode = nullptr;
 		_persistEditMode = nullptr;
-		_renderWindow->DestroyHandle();
-		delete _renderWindow;
+		if(_renderWindow)
+		{
+			_renderWindow->DestroyHandle();
+			delete _renderWindow;
+			_renderWindow = nullptr;
+		}
 	}
 
 	System::Void MapForm::MapForm_MouseWheel(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e)
@@ -100,11 +109,16 @@ namespace MapEditor
 
 	System::Void MapForm::MapForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e)
 	{
-		::SendMessage((HWND)_renderWindow->Handle.ToPointer(), WM_KEYDOWN, e->KeyValue, 0);
+		if(_renderWindow)
+		{
+			::SendMessage((HWND)_renderWindow->Handle.ToPointer(), WM_KEYDOWN, e->KeyValue, 0);
+		}
 	}
 
 	void MapForm::SetCurrentEditMode(EditMode::EditModeEnum mode)
 	{
+		if(_renderWindow == nullptr)
+			return;
 		if(_currentEditMode != nullptr && _currentEditMode->GetModeEnum() == mode)
 			return;
 
@@ -113,8 +127,7 @@ namespace MapEditor
 		if(_currentEditMode->IsPersistent())
 			_persistEditMode = _currentEditMode;
 
-		if(_renderWindow != nullptr)
-			_renderWindow->SetEditMode(_currentEditMode);
+		_renderWindow->SetEditMode(_currentEditMode);
 	}
 
 	void MapForm::EditModeEvent(EditModeEventListener::EMEvent ev)
