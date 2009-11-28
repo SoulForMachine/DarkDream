@@ -51,8 +51,11 @@ namespace Engine
 		// create font
 		if(!_consoleFont.Create(_renderer, _t("Courier New"), 12))
 		{
-			Deinit();
-			return false;
+			if(!_consoleFont.Create(_renderer, _t(""), 12))
+			{
+				Deinit();
+				return false;
+			}
 		}
 
 		// create vertex formats

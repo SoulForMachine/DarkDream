@@ -142,10 +142,14 @@ namespace MapEditor
 
 					_vertpSimple->GetASMProgram()->LocalMatrix4x4(0, engineAPI->world->GetCamera().GetViewProjectionTransform());
 
+					_renderer->EnableDepthTest(false);
+
 					float color[] = { 0.0f, 1.0f, 0.0f, 1.0f };
 					_fragpConstColor->GetASMProgram()->LocalParameter(0, color);
 
 					_renderer->Draw(GL::PRIM_LINE_LOOP, 0, 4);
+
+					_renderer->EnableDepthTest(true);
 				}
 			}
 		}

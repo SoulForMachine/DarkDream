@@ -236,7 +236,7 @@ namespace GL
 			return false;
 
 		BOOL result;
-		tchar tmp_wnd_class[] = _t("TempWndClass");
+		tchar tmp_wnd_class[] = _t("DD_TempWndClass");
 
 		// create temporary window
 		WNDCLASS wc;
@@ -249,6 +249,7 @@ namespace GL
 		result = RegisterClass(&wc);
 		if(!result)
 		{
+			Console::PrintError("Failed to register temporary window class.");
 			return false;
 		}
 
@@ -260,6 +261,7 @@ namespace GL
 		if(!tmp_hwnd)
 		{
 			UnregisterClass(tmp_wnd_class, _instanceHandle);
+			Console::PrintError("Failed to create temporary window.");
 			return false;
 		}
 
@@ -278,6 +280,7 @@ namespace GL
 		{
 			DestroyWindow(tmp_hwnd);
 			UnregisterClass(tmp_wnd_class, _instanceHandle);
+			Console::PrintError("Failed to get temporary window DC.");
 			return false;
 		}
 
@@ -286,6 +289,7 @@ namespace GL
 		{
 			DestroyWindow(tmp_hwnd);
 			UnregisterClass(tmp_wnd_class, _instanceHandle);
+			Console::PrintError("ChoosePixelFormat() failed for temporary window.");
 			return false;
 		}
 
@@ -294,6 +298,7 @@ namespace GL
 		{
 			DestroyWindow(tmp_hwnd);
 			UnregisterClass(tmp_wnd_class, _instanceHandle);
+			Console::PrintError("SetPixelFormat() failed for temporary window.");
 			return false;
 		}
 
@@ -302,6 +307,7 @@ namespace GL
 		{
 			DestroyWindow(tmp_hwnd);
 			UnregisterClass(tmp_wnd_class, _instanceHandle);
+			Console::PrintError("wglCreateContext() failed for temporary window.");
 			return false;
 		}
 
@@ -311,6 +317,7 @@ namespace GL
 			wglDeleteContext(tmp_rc);
 			DestroyWindow(tmp_hwnd);
 			UnregisterClass(tmp_wnd_class, _instanceHandle);
+			Console::PrintError("Failed to make temporary window rendering context current.");
 			return false;
 		}
 
@@ -331,12 +338,14 @@ namespace GL
 		if(!result)
 		{
 			DeinitOpenGL();
+			Console::PrintError("Failed to make rendering context current.");
 			return false;
 		}
 
 		if(!LoadOpenGLExtensions())
 		{
 			DeinitOpenGL();
+			Console::PrintError("Failed to load required extensions.");
 			return false;
 		}
 
@@ -362,17 +371,20 @@ namespace GL
 		HDC hdc = GetDC(window_handle);
 		if(!hdc)
 		{
+			Console::PrintError("Failed to get window DC.");
 			return false;
 		}
 
 		// create rendering context with WGL_ARB_pixel_format extension
 		if(!glextIsSupported("WGL_ARB_pixel_format"))
 		{
+			Console::PrintError("WGL_ARB_pixel_format not supported.");
 			return false;
 		}
 
 		if(!glextLoad_WGL_ARB_pixel_format())
 		{
+			Console::PrintError("The driver does not have all function entries for WGL_ARB_pixel_format.");
 			return false;
 		}
 
@@ -400,6 +412,7 @@ namespace GL
 		result = wglChoosePixelFormatARB(hdc, int_atribs, 0, 1, &pixel_format, &num_formats);
 		if(!result || num_formats < 1)
 		{
+			Console::PrintError("wglChoosePixelFormatARB() failed.");
 			return false;
 		}
 
@@ -407,12 +420,14 @@ namespace GL
 		result = DescribePixelFormat(hdc, pixel_format, sizeof(pfd), &pfd);
 		if(!result)
 		{
+			Console::PrintError("DescribePixelFormat() failed.");
 			return false;
 		}
 
 		result = SetPixelFormat(hdc, pixel_format, &pfd);
 		if(!result)
 		{
+			Console::PrintError("SetPixelFormat() failed.");
 			return false;
 		}
 
@@ -426,7 +441,7 @@ namespace GL
 				int attribs[] =
 				{
 					WGL_CONTEXT_MAJOR_VERSION_ARB, version / 100,
-					WGL_CONTEXT_MINOR_VERSION_ARB, version % 100,
+					WGL_CONTEXT_MINOR_VERSION_ARB, version % 100 / 10,
 					WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
 					0
 				};
@@ -449,6 +464,7 @@ namespace GL
 		{
 			_hglrc = 0;
 			_hdc = 0;
+			Console::PrintError("Rendering context creation failed for version %u.", version);
 			return false;
 		}
 	}

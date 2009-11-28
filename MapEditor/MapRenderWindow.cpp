@@ -230,9 +230,9 @@ namespace MapEditor
 
 		_renderSystem->Update(_frameTime);
 
-		_renderSystem->RenderTerrain();
 		if(_viewMode == ViewMode::GAME)
 			_renderSystem->RenderBgLayers();
+		_renderSystem->RenderTerrain();
 		_renderSystem->RenderEntities();
 		_renderSystem->RenderGrass();
 		_renderSystem->RenderParticles();

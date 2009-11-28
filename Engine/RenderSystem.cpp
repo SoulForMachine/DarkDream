@@ -236,6 +236,9 @@ namespace Engine
 
 	void RenderSystem::Deinit()
 	{
+		if(!_renderer)
+			return;
+
 		Console::PrintLn("----- Deinitializing rendering system -----");
 
 		if(_render2D)
@@ -375,13 +378,12 @@ namespace Engine
 		_renderer->ClearColorBuffer(0.0f, 0.0f, 0.0f, 0.0f);
 		_renderer->ClearDepthStencilBuffer(DEPTH_BUFFER_BIT | STENCIL_BUFFER_BIT, 1.0f, 0);
 
-		RenderTerrain();
 		RenderBgLayers();
+		RenderTerrain();
 		RenderEntities();
 		RenderGrass();
 		RenderParticles();
 
-	//	_render2D->DrawConsole(_frameTimeMsec);
 		_renderer->Flush();
 		_renderer->SwapBuffers();
 	}
