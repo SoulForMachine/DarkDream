@@ -413,6 +413,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Exception.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Exception.h"
+			>
+		</File>
+		<File
 			RelativePath=".\FileSys.cpp"
 			>
 		</File>

@@ -201,12 +201,12 @@
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\WeifenLuo.WinFormsUI.Docking.dll"
-			AssemblyName="WeifenLuo.WinFormsUI.Docking, Version=2.2.2864.18696, PublicKeyToken=d481317c817cec47, processorArchitecture=MSIL"
+			AssemblyName="WeifenLuo.WinFormsUI.Docking, Version=2.3.1.24483, processorArchitecture=MSIL"
 			MinFrameworkVersion="131072"
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\EditorCommon.dll"
-			AssemblyName="EditorCommon, Version=1.0.3581.18369, processorArchitecture=x86"
+			AssemblyName="EditorCommon, Version=1.0.3619.25175, processorArchitecture=x86"
 			MinFrameworkVersion="131072"
 		/>
 	</References>
@@ -298,6 +298,15 @@
 					</File>
 				</File>
 				<File
+					RelativePath=".\TriggerPanel.h"
+					FileType="4"
+					>
+					<File
+						RelativePath=".\TriggerPanel.resx"
+						>
+					</File>
+				</File>
+				<File
 					RelativePath=".\ViewPanel.h"
 					FileType="4"
 					>
@@ -342,6 +351,10 @@
 				</File>
 				<File
 					RelativePath=".\ToolPanel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TriggerPanel.cpp"
 					>
 				</File>
 				<File
@@ -493,6 +506,14 @@
 			</File>
 			<File
 				RelativePath=".\EM_TerrainEdit.h"
+				>
+			</File>
+			<File
+				RelativePath=".\EM_Triggers.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\EM_Triggers.h"
 				>
 			</File>
 			<File

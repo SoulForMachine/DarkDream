@@ -30,6 +30,7 @@ namespace MapEditor
 			PLACE_OBJECT,
 			LAYER_EDIT,
 			PAINT_GRASS,
+			EDIT_TRIGGERS,
 
 			EDIT_MODE_COUNT
 		};

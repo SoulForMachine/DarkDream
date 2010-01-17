@@ -9,6 +9,7 @@
 #include "BaseLib/Memory.h"
 #include "BaseLib/Console.h"
 #include "BaseLib/Timer.h"
+#include "BaseLib/Exception.h"
 
 #undef MessageBox
 

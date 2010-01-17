@@ -6,6 +6,7 @@
 #include "EM_PlaceObject.h"
 #include "EM_LayerEdit.h"
 #include "EM_PaintGrass.h"
+#include "EM_Triggers.h"
 #include "ToolPanel.h"
 #include "UndoManager.h"
 #include "MapForm.h"
@@ -69,6 +70,7 @@ namespace MapEditor
 			_editModes[(int)EditMode::EditModeEnum::PLACE_OBJECT] = gcnew EM_PlaceObject(this, true, _undoManager);
 			_editModes[(int)EditMode::EditModeEnum::LAYER_EDIT] = gcnew EM_LayerEdit(this, true, _undoManager);
 			_editModes[(int)EditMode::EditModeEnum::PAINT_GRASS] = gcnew EM_PaintGrass(this, true, _undoManager);
+			_editModes[(int)EditMode::EditModeEnum::EDIT_TRIGGERS] = gcnew EM_Triggers(this, true, _undoManager);
 
 			SetCurrentEditMode(EditMode::EditModeEnum::VIEW);
 			_renderWindow->SetViewParameters(((EM_View^)_editModes[(int)EditMode::EditModeEnum::VIEW])->GetParameters());

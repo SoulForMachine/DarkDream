@@ -46,7 +46,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="$(SolutionDir)"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;ENGINE_EXPORTS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;ENGINE_EXPORTS;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -120,7 +120,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="$(SolutionDir)"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ENGINE_EXPORTS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ENGINE_EXPORTS;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -456,6 +456,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Trigger.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Trigger.h"
+			>
+		</File>
+		<File
 			RelativePath=".\World.cpp"
 			>
 		</File>
@@ -465,5 +473,9 @@
 		</File>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="\Dev\Projects\DarkDream\ParticleEditor\app.rc"
+		/>
 	</Globals>
 </VisualStudioProject>

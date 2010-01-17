@@ -234,6 +234,8 @@ namespace MapEditor
 		if(!_mapForm->IsRenderingInitialized())
 			return;
 
+		_mapForm->SetCurrentEditMode(EditMode::EditModeEnum::EDIT_TRIGGERS);
+		_toolPanel->SetPanel(_mapForm->GetCurrentEditMode()->GetPanel());
 		UpdateToolbarButtons();
 	}
 
@@ -297,6 +299,9 @@ namespace MapEditor
 				break;
 			case EditMode::EditModeEnum::PAINT_GRASS:
 				_toolBtnGrass->Checked = true;
+				break;
+			case EditMode::EditModeEnum::EDIT_TRIGGERS:
+				_toolBtnTriggers->Checked = true;
 				break;
 			default:
 				assert(0);
