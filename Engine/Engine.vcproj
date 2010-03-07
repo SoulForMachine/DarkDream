@@ -336,14 +336,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\FileResource.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\FileResource.h"
-			>
-		</File>
-		<File
 			RelativePath=".\FileSystem.cpp"
 			>
 		</File>
@@ -429,6 +421,14 @@
 		</File>
 		<File
 			RelativePath=".\RenderSystem.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Resource.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Resource.h"
 			>
 		</File>
 		<File

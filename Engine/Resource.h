@@ -1,6 +1,6 @@
 
-#ifndef _FILE_RESOURCE_H_
-#define _FILE_RESOURCE_H_
+#ifndef _ENGINE_RESOURCE_H_
+#define _ENGINE_RESOURCE_H_
 
 #include <cassert>
 #include "BaseLib/GL/GLRenderer.h"
@@ -514,4 +514,4 @@ namespace Engine
 }
 
 
-#endif // _FILE_RESOURCE_H_
+#endif // _ENGINE_RESOURCE_H_
