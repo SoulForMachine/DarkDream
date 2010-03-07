@@ -122,7 +122,7 @@ namespace ParticleEditor
 			
 			if(_selectedEmitter->GetTexture())
 			{
-				_textResource->Text = gcnew String(_selectedEmitter->GetTexture()->GetFileName());
+				_textResource->Text = gcnew String(_selectedEmitter->GetTexture().GetFileRes()->GetFileName());
 			}
 			else
 			{

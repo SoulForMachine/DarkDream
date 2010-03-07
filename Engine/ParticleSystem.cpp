@@ -7,7 +7,7 @@
 #include "Camera.h"
 #include "World.h"
 #include "FileSystem.h"
-#include "FileResource.h"
+#include "Resource.h"
 #include "ResourceManager.h"
 #include "ParticleSystem.h"
 
@@ -349,7 +349,7 @@ namespace Engine
 			file->Printf("\t\tparticleType\t\t%s\n", Emitter::GetParticleTypeString(emitter.GetParticleType()));
 
 			if(emitter.GetParticleType() == Emitter::PARTICLE_TYPE_TEXTURE)
-				tstr = emitter.GetTexture()? emitter.GetTexture()->GetFileName(): _t("");
+				tstr = emitter.GetTexture()? emitter.GetTexture().GetFileRes()->GetFileName(): _t("");
 			else
 				tstr = _t("");
 			file->Printf("\t\tresource\t\t\"%ls\"\n", tstr);
@@ -683,7 +683,7 @@ namespace Engine
 		_name[0] = '\0';
 		_type = EMITTER_TYPE_SPHERE;
 		_shader = EMITTER_SHADER_ADDITIVE;
-		_texture = 0;
+		_texture = Texture2DResPtr::null;
 		_life = 10.0f;
 		_loop = false;
 		_implode = false;
@@ -751,9 +751,9 @@ namespace Engine
 		_shader = emitter._shader;
 
 		if(emitter._texture)
-			_texture = engineAPI.textureManager->CreateTexture(emitter._texture->GetFileName(), true);
+			_texture = engineAPI.textureManager->CreateTexture2D(emitter._texture.GetFileRes()->GetFileName(), true);
 		else
-			_texture = 0;
+			_texture = Texture2DResPtr::null;
 
 		_life = emitter._life;
 		_loop = emitter._loop;
@@ -802,10 +802,9 @@ namespace Engine
 		if(!_enabled)
 			return;
 
-		if(_animatedTex && _texture && _texture->GetTexture())
+		if(_animatedTex && _texture.IsValid())
 		{
-			GL::Texture2D* tex = (GL::Texture2D*)_texture->GetTexture();
-			_texFrameCount = tex->GetWidth() / tex->GetHeight();
+			_texFrameCount = _texture->GetWidth() / _texture->GetHeight();
 		}
 
 		// update existing particles
@@ -1214,7 +1213,7 @@ namespace Engine
 	{
 		if(_texture)
 			engineAPI.textureManager->ReleaseTexture(_texture);
-		_texture = engineAPI.textureManager->CreateTexture(file_name, immediate);
+		_texture = engineAPI.textureManager->CreateTexture2D(file_name, immediate);
 	}
 
 	void ParticleSystem::Emitter::ClearTexture()
@@ -1222,7 +1221,7 @@ namespace Engine
 		if(_texture)
 		{
 			engineAPI.textureManager->ReleaseTexture(_texture);
-			_texture = 0;
+			_texture = Texture2DResPtr::null;
 		}
 	}
 

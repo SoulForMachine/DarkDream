@@ -115,9 +115,9 @@ namespace Engine
 
 		_patchCount = 0;
 		_hlightPatch = 0;
-		_texture = 0;
+		_texture = Texture2DResPtr::null;
 		_texTile = 32.0f;
-		_grassTexture = 0;
+		_grassTexture = Texture2DResPtr::null;
 		_optimizeGrassEdit = false;
 
 		return true;
@@ -140,7 +140,6 @@ namespace Engine
 		for(int i = 0; i < _patchCount; ++i)
 		{
 			_renderer->DestroyBuffer(_patches[i].vertBuf);
-			_renderer->DestroyBuffer(_patches[i].normalBuf);
 			for(int j = 0; j < GRASS_SEGMENTS; ++j)
 				_renderer->DestroyBuffer(_patches[i].grassSegments[j].grassVertBuf);
 			delete[] _patches[i].elevation;
@@ -151,8 +150,8 @@ namespace Engine
 
 		engineAPI.textureManager->ReleaseTexture(_texture);
 		engineAPI.textureManager->ReleaseTexture(_grassTexture);
-		_texture = 0;
-		_grassTexture = 0;
+		_texture = Texture2DResPtr::null;
+		_grassTexture = Texture2DResPtr::null;
 	}
 
 	/*
@@ -203,13 +202,10 @@ namespace Engine
 		if(!patch.vertBuf)
 			return -1;
 
-		patch.normalBuf = _renderer->CreateBuffer(GL::OBJ_VERTEX_BUFFER, vert_count * sizeof(vec3f) * 2, 0, GL::USAGE_STATIC_DRAW);
-
 		PatchVertex* vertices = (PatchVertex*)patch.vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
 		if(!vertices)
 		{
 			_renderer->DestroyBuffer(patch.vertBuf);
-			_renderer->DestroyBuffer(patch.normalBuf);
 			delete[] patch.elevation;
 			return -1;
 		}
@@ -269,24 +265,10 @@ namespace Engine
 		if(index > 0)
 		{
 			// update normals on the edge of previous patch
-			PatchVertex* prev_verts = (PatchVertex*)_patches[index - 1].vertBuf->MapBuffer(GL::ACCESS_READ_WRITE, false);
+			PatchVertex* prev_verts = (PatchVertex*)_patches[index - 1].vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
 			if(prev_verts)
 			{
 				UpdatePatchNormals(index - 1, prev_verts, PATCH_WIDTH - 1, 0, PATCH_WIDTH, PATCH_HEIGHT);
-				vec3f* normals = (vec3f*)_patches[index - 1].normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
-				if(normals)
-				{
-					for(int h = 0; h <= PATCH_HEIGHT; ++h)
-					{
-						for(int w = PATCH_WIDTH - 1; w <= PATCH_WIDTH; ++w)
-						{
-							int i = h * (PATCH_WIDTH + 1) + w;
-							normals[i * 2] = prev_verts[i].position.rvec3;
-							normals[i * 2 + 1] = prev_verts[i].position.rvec3 + prev_verts[i].normal.rvec3;
-						}
-					}
-					_patches[index - 1].normalBuf->UnmapBuffer();
-				}
 				_patches[index - 1].vertBuf->UnmapBuffer();
 			}
 
@@ -298,24 +280,10 @@ namespace Engine
 		if(index + 1 < _patchCount)
 		{
 			// update normals on the edge of next patch
-			PatchVertex* next_verts = (PatchVertex*)_patches[index + 1].vertBuf->MapBuffer(GL::ACCESS_READ_WRITE, false);
+			PatchVertex* next_verts = (PatchVertex*)_patches[index + 1].vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
 			if(next_verts)
 			{
 				UpdatePatchNormals(index + 1, next_verts, 0, 0, 1, PATCH_HEIGHT);
-				vec3f* normals = (vec3f*)_patches[index + 1].normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
-				if(normals)
-				{
-					for(int h = 0; h <= PATCH_HEIGHT; ++h)
-					{
-						for(int w = 0; w <= 1; ++w)
-						{
-							int i = h * (PATCH_WIDTH + 1) + w;
-							normals[i * 2] = next_verts[i].position.rvec3;
-							normals[i * 2 + 1] = next_verts[i].position.rvec3 + next_verts[i].normal.rvec3;
-						}
-					}
-					_patches[index + 1].normalBuf->UnmapBuffer();
-				}
 				_patches[index + 1].vertBuf->UnmapBuffer();
 			}
 
@@ -324,22 +292,9 @@ namespace Engine
 				UpdatePatchNormals(index, vertices, PATCH_WIDTH - 1, 0, PATCH_WIDTH, PATCH_HEIGHT);
 		}
 
-		vec3f* normals = (vec3f*)patch.normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
-		for(int h = 0; h <= PATCH_HEIGHT; ++h)
-		{
-			for(int w = 0; w <= PATCH_WIDTH; ++w)
-			{
-				int i = h * (PATCH_WIDTH + 1) + w;
-				normals[i * 2] = vertices[i].position.rvec3;
-				normals[i * 2 + 1] = vertices[i].position.rvec3 + vertices[i].normal.rvec3;
-			}
-		}
-		patch.normalBuf->UnmapBuffer();
-
 		if(!patch.vertBuf->UnmapBuffer())
 		{
 			_renderer->DestroyBuffer(patch.vertBuf);
-			_renderer->DestroyBuffer(patch.normalBuf);
 			delete[] patch.elevation;
 			_patchCount--;
 			return -1;
@@ -370,7 +325,6 @@ namespace Engine
 	{
 		assert(index >= 0 && index < _patchCount);
 		_renderer->DestroyBuffer(_patches[index].vertBuf);
-		_renderer->DestroyBuffer(_patches[index].normalBuf);
 		delete[] _patches[index].elevation;
 		for(int i = 0; i < GRASS_SEGMENTS; ++i)
 			_renderer->DestroyBuffer(_patches[index].grassSegments[i].grassVertBuf);
@@ -441,31 +395,9 @@ namespace Engine
 
 					// update normals on the last two columns of previous patch
 					UpdatePatchNormals(index - 1, prev_verts, PATCH_WIDTH - 1, 0, PATCH_WIDTH, PATCH_HEIGHT);
-					vec3f* normals = (vec3f*)prev_patch.normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
-					if(normals)
-					{
-						for(int h = 0; h <= PATCH_HEIGHT; ++h)
-						{
-							int i = h * (PATCH_WIDTH + 1) + PATCH_WIDTH;
-							normals[i * 2] = prev_verts[i].position.rvec3;
-							normals[i * 2 + 1] = prev_verts[i].position.rvec3 + prev_verts[i].normal.rvec3;
-						}
-						prev_patch.normalBuf->UnmapBuffer();
-					}
 
 					// update normals on the first two columns of next patch
 					UpdatePatchNormals(index, next_verts, 0, 0, 1, PATCH_HEIGHT);
-					normals = (vec3f*)next_patch.normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
-					if(normals)
-					{
-						for(int h = 0; h <= PATCH_HEIGHT; ++h)
-						{
-							int i = h * (PATCH_WIDTH + 1);
-							normals[i * 2] = next_verts[i].position.rvec3;
-							normals[i * 2 + 1] = next_verts[i].position.rvec3 + next_verts[i].normal.rvec3;
-						}
-						next_patch.normalBuf->UnmapBuffer();
-					}
 
 					prev_patch.vertBuf->UnmapBuffer();
 					next_patch.vertBuf->UnmapBuffer();
@@ -919,17 +851,6 @@ namespace Engine
 
 				UpdatePatchNormals(i, vertices, Max(x1 - 1, 0), Max(y1 - 1, 0), Min(x2 + 1, PATCH_WIDTH), Min(y2 + 1, PATCH_HEIGHT));
 
-				vec3f* normals = (vec3f*)patch.normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
-				for(int y = Max(y1 - 1, 0); y <= Min(y2 + 1, PATCH_HEIGHT); ++y)
-				{
-					for(int x = Max(x1 - 1, 0); x <= Min(x2 + 1, PATCH_WIDTH); ++x)
-					{
-						normals[(y * X_COUNT + x) * 2 + 0] = vertices[y * X_COUNT + x].position.rvec3;
-						normals[(y * X_COUNT + x) * 2 + 1] = vertices[y * X_COUNT + x].position.rvec3 + vertices[y * X_COUNT + x].normal.rvec3;
-					}
-				}
-				patch.normalBuf->UnmapBuffer();
-
 				patch.vertBuf->UnmapBuffer();
 			}
 		}
@@ -993,17 +914,6 @@ namespace Engine
 
 				UpdatePatchNormals(i, vertices, Max(x1 - 1, 0), Max(y1 - 1, 0), Min(x2 + 1, PATCH_WIDTH), Min(y2 + 1, PATCH_HEIGHT));
 
-				vec3f* normals = (vec3f*)patch.normalBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, false);
-				for(int y = Max(y1 - 1, 0); y <= Min(y2 + 1, PATCH_HEIGHT); ++y)
-				{
-					for(int x = Max(x1 - 1, 0); x <= Min(x2 + 1, PATCH_WIDTH); ++x)
-					{
-						normals[(y * X_COUNT + x) * 2 + 0] = vertices[y * X_COUNT + x].position.rvec3;
-						normals[(y * X_COUNT + x) * 2 + 1] = vertices[y * X_COUNT + x].position.rvec3 + vertices[y * X_COUNT + x].normal.rvec3;
-					}
-				}
-				patch.normalBuf->UnmapBuffer();
-
 				patch.vertBuf->UnmapBuffer();
 			}
 		}
@@ -1040,13 +950,13 @@ namespace Engine
 		}
 	}
 
-	void Terrain::SetTexture(const TextureRes* texture)
+	void Terrain::SetTexture(Texture2DResPtr texture)
 	{
 		engineAPI.textureManager->ReleaseTexture(_texture);
 		_texture = texture;
 	}
 
-	void Terrain::SetGrassTexture(const TextureRes* texture)
+	void Terrain::SetGrassTexture(Texture2DResPtr texture)
 	{
 		engineAPI.textureManager->ReleaseTexture(_grassTexture);
 		_grassTexture = texture;
@@ -1465,7 +1375,7 @@ namespace Engine
 							vertices[2].position.set(pos.x + p.x, pos.y + szy, pos.z + p.y, alpha);
 							vertices[3].position.set(pos.x - p.x, pos.y + szy, pos.z - p.y, alpha);
 
-							if(!_grassTexture || !_grassTexture->GetTexture())
+							if(!_grassTexture.IsValid())
 							{
 								vertices[0].uv.set(0.0f, 0.0f);
 								vertices[1].uv.set(0.0f, 0.0f);
@@ -1474,14 +1384,13 @@ namespace Engine
 							}
 							else
 							{
-								GL::Texture2D* tex = (GL::Texture2D*)_grassTexture->GetTexture();
-								int tex_per_row = tex->GetWidth() / GRASS_TEX_SIZE;
+								int tex_per_row = _grassTexture->GetWidth() / GRASS_TEX_SIZE;
 								int texx = patch.grassData[y * X_COUNT + x].texIndex % tex_per_row;
 								int texy = patch.grassData[y * X_COUNT + x].texIndex / tex_per_row;
-								float u1 = float(texx * GRASS_TEX_SIZE + 1) / tex->GetWidth();
-								float u2 = float(texx * GRASS_TEX_SIZE + GRASS_TEX_SIZE - 1) / tex->GetWidth();
-								float v1 = float(texy * GRASS_TEX_SIZE + GRASS_TEX_SIZE - 1) / tex->GetHeight();
-								float v2 = float(texy * GRASS_TEX_SIZE + 1) / tex->GetHeight();
+								float u1 = float(texx * GRASS_TEX_SIZE + 1) / _grassTexture->GetWidth();
+								float u2 = float(texx * GRASS_TEX_SIZE + GRASS_TEX_SIZE - 1) / _grassTexture->GetWidth();
+								float v1 = float(texy * GRASS_TEX_SIZE + GRASS_TEX_SIZE - 1) / _grassTexture->GetHeight();
+								float v2 = float(texy * GRASS_TEX_SIZE + 1) / _grassTexture->GetHeight();
 								vertices[0].uv.set(u1, v1);
 								vertices[1].uv.set(u2, v1);
 								vertices[2].uv.set(u2, v2);

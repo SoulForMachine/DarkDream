@@ -1,6 +1,7 @@
 
 #include "BaseLib/Math/math3d.h"
 #include "EngineInternal.h"
+#include "ResourceManager.h"
 #include "RenderSystem.h"
 #include "Camera.h"
 #include "ParticleRenderer.h"
@@ -73,8 +74,8 @@ namespace Engine
 		sampl_desc.magFilter = GL::TEX_FILTER_LINEAR;
 		_partTexState = _renderer->CreateSamplerState(sampl_desc);
 
-		_partVertProg = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Particle.vp"), true);
-		_partFragProg = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Particle.fp"), true);
+		_partVertProg = engineAPI.asmProgManager->CreateVertexASMProgram(_t("Programs/Particle.vp"), true);
+		_partFragProg = engineAPI.asmProgManager->CreateFragmentASMProgram(_t("Programs/Particle.fp"), true);
 
 		return true;
 	}
@@ -99,12 +100,12 @@ namespace Engine
 		_renderer->VertexSource(0, _partVertexBuf, sizeof(ParticleVertex), 0);
 		_renderer->IndexSource(_partIndexBuf, GL::TYPE_UNSIGNED_SHORT);
 		_renderer->ActiveVertexFormat(_partVertFmt);
-		_renderer->ActiveVertexASMProgram(_partVertProg->GetASMProgram());
-		_renderer->ActiveFragmentASMProgram(_partFragProg->GetASMProgram());
+		_renderer->ActiveVertexASMProgram(_partVertProg);
+		_renderer->ActiveFragmentASMProgram(_partFragProg);
 		_renderer->EnableBlending(true);
 		_renderer->EnableDepthWrite(false);
 
-		_partVertProg->GetASMProgram()->LocalMatrix4x4(0, camera.GetViewProjectionTransform());
+		_partVertProg->LocalMatrix4x4(0, camera.GetViewProjectionTransform());
 
 		do
 		{
@@ -137,7 +138,7 @@ namespace Engine
 
 		while(i < count && _batchList.GetCount() < MAX_BATCHES && !full_buf)
 		{
-			const TextureRes* last_tex = emitters[i]->GetTexture();
+			Texture2DResPtr last_tex = emitters[i]->GetTexture();
 			ParticleSystem::Emitter::EmitterShader last_shader = emitters[i]->GetShader();
 
 			uint vert_count = 0;
@@ -254,7 +255,7 @@ namespace Engine
 					_renderer->BlendingFunc(GL::BLEND_FUNC_SRC_ALPHA, GL::BLEND_FUNC_ONE);
 
 				_renderer->SetSamplerState(0, _partTexState);
-				_renderer->SetSamplerTexture(0, batch.texture->GetTexture());
+				_renderer->SetSamplerTexture(0, batch.texture);
 
 				_renderer->DrawIndexed(
 					GL::PRIM_TRIANGLES,
@@ -275,8 +276,8 @@ namespace Engine
 		_partIndexBuf = 0;
 		_partVertFmt = 0;
 		_partTexState = 0;
-		_partVertProg = 0;
-		_partFragProg = 0;
+		_partVertProg = VertexASMProgResPtr::null;
+		_partFragProg = FragmentASMProgResPtr::null;
 		_vertexCount = 0;
 		_camera = 0;
 	}

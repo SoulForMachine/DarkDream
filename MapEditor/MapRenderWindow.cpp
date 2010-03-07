@@ -27,14 +27,16 @@ namespace MapEditor
 	vec3f g_camForward;
 
 
-	MapRenderWindow::MapRenderWindow(Form^ parent, EditorCommon::FormDirector^ director)
+	MapRenderWindow::MapRenderWindow(Form^ parent, EditorCommon::FormDirector^ director) :
+		_vpSimple(*new(mainPool) VertexASMProgResPtr),
+		_fpConstClr(*new(mainPool) FragmentASMProgResPtr)
 	{
 		_renderSystem = 0;
 		_renderer = 0;
 		_font = 0;
 		_lineVertFmt = 0;
-		_vpSimple = 0;
-		_fpConstClr = 0;
+		_vpSimple = VertexASMProgResPtr::null;
+		_fpConstClr = FragmentASMProgResPtr::null;
 
 		_rotX = 0.0f;
 		_rotY = 0.0f;
@@ -116,8 +118,8 @@ namespace MapEditor
 		_font = new(mainPool) Font;
 		_font->Create(_renderer, _t("Verdana"), 11);
 
-		_vpSimple = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
-		_fpConstClr = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
+		_vpSimple = engineAPI->asmProgManager->CreateVertexASMProgram(_t("Programs/Simple.vp"), true);
+		_fpConstClr = engineAPI->asmProgManager->CreateFragmentASMProgram(_t("Programs/ConstColor.fp"), true);
 
 		VertexAttribDesc desc[] =
 		{
@@ -137,13 +139,13 @@ namespace MapEditor
 		if(_vpSimple)
 		{
 			engineAPI->asmProgManager->ReleaseASMProgram(_vpSimple);
-			_vpSimple = 0;
+			_vpSimple = VertexASMProgResPtr::null;
 		}
 
 		if(_fpConstClr)
 		{
 			engineAPI->asmProgManager->ReleaseASMProgram(_fpConstClr);
-			_fpConstClr = 0;
+			_fpConstClr = FragmentASMProgResPtr::null;
 		}
 
 		_renderer->DestroyVertexFormat(_lineVertFmt);
@@ -284,6 +286,9 @@ namespace MapEditor
 			engineAPI->world->Deinit();
 			_renderSystem->Deinit();
 		}
+
+		delete &_vpSimple;
+		delete &_fpConstClr;
 	}
 
 	void MapRenderWindow::OnMouseMove(int modifiers, int x, int y)

@@ -3,7 +3,7 @@
 #include "Engine/Terrain.h"
 #include "Engine/EngineInternal.h"
 #include "ResourceManager.h"
-#include "FileResource.h"
+#include "Resource.h"
 #include "World.h"
 
 using namespace Memory;

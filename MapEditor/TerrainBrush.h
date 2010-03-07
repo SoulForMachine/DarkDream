@@ -3,10 +3,6 @@
 
 #include "EM_TerrainEdit.h"
 
-namespace Engine
-{
-	class ASMProgRes;
-}
 
 namespace GL
 {
@@ -22,8 +18,7 @@ namespace MapEditor
 	ref class TerrainBrush
 	{
 	public:
-		TerrainBrush(EM_TerrainEdit::Parameters^ params)
-			{ _parameters = params; }
+		TerrainBrush(EM_TerrainEdit::Parameters^ params);
 
 		bool Init();
 		void Deinit();
@@ -39,8 +34,8 @@ namespace MapEditor
 		GL::Renderer* _renderer;
 		GL::Buffer* _vertBuf;
 		GL::VertexFormat* _vertFmt;
-		const Engine::ASMProgRes* _vertpBrush;
-		const Engine::ASMProgRes* _fragpBrush;
+		Engine::VertexASMProgResPtr& _vertpBrush;
+		Engine::FragmentASMProgResPtr& _fragpBrush;
 	};
 
 }

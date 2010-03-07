@@ -4,6 +4,7 @@
 
 using namespace math3d;
 using namespace Engine;
+using namespace Memory;
 
 #define CIRCLE_VERTEX_COUNT		64
 
@@ -16,6 +17,12 @@ namespace MapEditor
 		vec3f position;
 	};
 
+	GrassBrush::GrassBrush(EM_PaintGrass::Parameters^ params) :
+		_vertpBrush(*new(mainPool) VertexASMProgResPtr),
+		_fragpBrush(*new(mainPool) FragmentASMProgResPtr)
+	{
+		_parameters = params;
+	}
 
 	bool GrassBrush::Init()
 	{
@@ -35,8 +42,8 @@ namespace MapEditor
 		};
 		_vertFmt = _renderer->CreateVertexFormat(vert_fmt, COUNTOF(vert_fmt));
 
-		_vertpBrush = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
-		_fragpBrush = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
+		_vertpBrush = engineAPI->asmProgManager->CreateVertexASMProgram(_t("Programs/Simple.vp"), true);
+		_fragpBrush = engineAPI->asmProgManager->CreateFragmentASMProgram(_t("Programs/ConstColor.fp"), true);
 
 		return true;
 	}
@@ -47,6 +54,9 @@ namespace MapEditor
 		_renderer->DestroyVertexFormat(_vertFmt);
 		engineAPI->asmProgManager->ReleaseASMProgram(_vertpBrush);
 		engineAPI->asmProgManager->ReleaseASMProgram(_fragpBrush);
+
+		delete &_vertpBrush;
+		delete &_fragpBrush;
 	}
 
 	void GrassBrush::Draw()
@@ -65,20 +75,20 @@ namespace MapEditor
 			_renderer->ActiveVertexFormat(_vertFmt);
 			_renderer->IndexSource(0, GL::TYPE_VOID);
 			_renderer->VertexSource(0, _vertBuf, sizeof(BrushVertex), 0);
-			_renderer->ActiveVertexASMProgram(_vertpBrush->GetASMProgram());
-			_renderer->ActiveFragmentASMProgram(_fragpBrush->GetASMProgram());
+			_renderer->ActiveVertexASMProgram(_vertpBrush);
+			_renderer->ActiveFragmentASMProgram(_fragpBrush);
 
-			_vertpBrush->GetASMProgram()->LocalMatrix4x4(0, engineAPI->world->GetCamera().GetViewProjectionTransform());
+			_vertpBrush->LocalMatrix4x4(0, engineAPI->world->GetCamera().GetViewProjectionTransform());
 
 			vec4f red(1.0f, 0.0f, 0.0f, 1.0f);
 			vec4f orange(1.0f, 0.5f, 0.0f, 1.0f);
-			_fragpBrush->GetASMProgram()->LocalParameter(0, red);
+			_fragpBrush->LocalParameter(0, red);
 
 			_renderer->EnableDepthTest(false);
 			_renderer->Draw(GL::PRIM_LINES, 0, 4);
 			if(_parameters->hardness < 1.0f)
 				_renderer->Draw(GL::PRIM_LINE_LOOP, 4, CIRCLE_VERTEX_COUNT);
-			_fragpBrush->GetASMProgram()->LocalParameter(0, orange);
+			_fragpBrush->LocalParameter(0, orange);
 			_renderer->Draw(GL::PRIM_LINE_LOOP, 4 + CIRCLE_VERTEX_COUNT, CIRCLE_VERTEX_COUNT);
 			_renderer->EnableDepthTest(true);
 		}

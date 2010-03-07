@@ -23,33 +23,33 @@ namespace Engine
 	{
 		_renderer = engineAPI.renderSystem->GetRenderer();
 
-		_vpMesh = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh.vp"), true);
-		_vpMeshNrm = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh_Nrm.vp"), true);
-		_vpMeshSkin = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh_Skin.vp"), true);
-		_vpMeshNrmSkin = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh_NrmSkin.vp"), true);
-		_fpMesh = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh.fp"), true);
-		_fpMeshNrm = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Mesh_Nrm.fp"), true);
+		_vpMesh = engineAPI.asmProgManager->CreateVertexASMProgram(_t("Programs/Mesh.vp"), true);
+		_vpMeshNrm = engineAPI.asmProgManager->CreateVertexASMProgram(_t("Programs/Mesh_Nrm.vp"), true);
+		_vpMeshSkin = engineAPI.asmProgManager->CreateVertexASMProgram(_t("Programs/Mesh_Skin.vp"), true);
+		_vpMeshNrmSkin = engineAPI.asmProgManager->CreateVertexASMProgram(_t("Programs/Mesh_NrmSkin.vp"), true);
+		_fpMesh = engineAPI.asmProgManager->CreateFragmentASMProgram(_t("Programs/Mesh.fp"), true);
+		_fpMeshNrm = engineAPI.asmProgManager->CreateFragmentASMProgram(_t("Programs/Mesh_Nrm.fp"), true);
 
-		_fpLambert = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Lambert.fp"), true);
-		_fpLambertNrm = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Lambert_Nrm.fp"), true);
+		_fpLambert = engineAPI.asmProgManager->CreateFragmentASMProgram(_t("Programs/Lambert.fp"), true);
+		_fpLambertNrm = engineAPI.asmProgManager->CreateFragmentASMProgram(_t("Programs/Lambert_Nrm.fp"), true);
 
-		_shaders[0].vertProg = _vpMesh->GetASMProgram();
-		_shaders[0].fragProg = _fpMesh->GetASMProgram();
-		_shaders[1].vertProg = _vpMeshNrm->GetASMProgram();
-		_shaders[1].fragProg = _fpMeshNrm->GetASMProgram();
-		_shaders[2].vertProg = _vpMeshSkin->GetASMProgram();
-		_shaders[2].fragProg = _fpMesh->GetASMProgram();
-		_shaders[3].vertProg = _vpMeshNrmSkin->GetASMProgram();
-		_shaders[3].fragProg = _fpMeshNrm->GetASMProgram();
+		_shaders[0].vertProg = _vpMesh;
+		_shaders[0].fragProg = _fpMesh;
+		_shaders[1].vertProg = _vpMeshNrm;
+		_shaders[1].fragProg = _fpMeshNrm;
+		_shaders[2].vertProg = _vpMeshSkin;
+		_shaders[2].fragProg = _fpMesh;
+		_shaders[3].vertProg = _vpMeshNrmSkin;
+		_shaders[3].fragProg = _fpMeshNrm;
 
-		_editorShaders[0].vertProg = _vpMesh->GetASMProgram();
-		_editorShaders[0].fragProg = _fpLambert->GetASMProgram();
-		_editorShaders[1].vertProg = _vpMesh->GetASMProgram();
-		_editorShaders[1].fragProg = _fpLambert->GetASMProgram();
-		_editorShaders[2].vertProg = _vpMeshSkin->GetASMProgram();
-		_editorShaders[2].fragProg = _fpLambert->GetASMProgram();
-		_editorShaders[3].vertProg = _vpMeshSkin->GetASMProgram();
-		_editorShaders[3].fragProg = _fpLambert->GetASMProgram();
+		_editorShaders[0].vertProg = _vpMesh;
+		_editorShaders[0].fragProg = _fpLambert;
+		_editorShaders[1].vertProg = _vpMesh;
+		_editorShaders[1].fragProg = _fpLambert;
+		_editorShaders[2].vertProg = _vpMeshSkin;
+		_editorShaders[2].fragProg = _fpLambert;
+		_editorShaders[3].vertProg = _vpMeshSkin;
+		_editorShaders[3].fragProg = _fpLambert;
 
 		GL::VertexAttribDesc vfmt[] =
 		{
@@ -190,19 +190,19 @@ namespace Engine
 		_renderer->SetSamplerState(3, _normalSampler);
 
 		const GL::Texture* tex = mesh_data->material->HasDiffuse()?
-			mesh_data->material->GetDiffuseTexture()->GetTexture(): engineAPI.renderSystem->GetWhiteTexture();
+			mesh_data->material->GetDiffuseTexture(): engineAPI.renderSystem->GetWhiteTexture();
 		_renderer->SetSamplerTexture(0, tex);
 
 		tex = mesh_data->material->HasEmission()?
-			mesh_data->material->GetEmissionTexture()->GetTexture(): engineAPI.renderSystem->GetBlackTexture();
+			mesh_data->material->GetEmissionTexture(): engineAPI.renderSystem->GetBlackTexture();
 		_renderer->SetSamplerTexture(1, tex);
 
 		tex = mesh_data->material->GetTransparencyTexture()?
-			mesh_data->material->GetTransparencyTexture()->GetTexture(): engineAPI.renderSystem->GetWhiteTexture();
+			mesh_data->material->GetTransparencyTexture(): engineAPI.renderSystem->GetWhiteTexture();
 		_renderer->SetSamplerTexture(2, tex);
 
 		if(nrm)
-			_renderer->SetSamplerTexture(3, mesh_data->material->GetNormalMap()->GetTexture());
+			_renderer->SetSamplerTexture(3, mesh_data->material->GetNormalMap());
 
 		_renderer->DrawIndexed(GL::PRIM_TRIANGLES, 0, mesh_data->mesh->numIndices);
 
@@ -214,14 +214,14 @@ namespace Engine
 
 	void EntityRenderer::Clear()
 	{
-		_vpMesh = 0;
-		_vpMeshNrm = 0;
-		_vpMeshSkin = 0;
-		_vpMeshNrmSkin = 0;
-		_fpMesh = 0;
-		_fpMeshNrm = 0;
-		_fpLambert = 0;
-		_fpLambertNrm = 0;
+		_vpMesh = VertexASMProgResPtr::null;
+		_vpMeshNrm = VertexASMProgResPtr::null;
+		_vpMeshSkin = VertexASMProgResPtr::null;
+		_vpMeshNrmSkin = VertexASMProgResPtr::null;
+		_fpMesh = FragmentASMProgResPtr::null;
+		_fpMeshNrm = FragmentASMProgResPtr::null;
+		_fpLambert = FragmentASMProgResPtr::null;
+		_fpLambertNrm = FragmentASMProgResPtr::null;
 		_vertFmtMesh = 0;
 		_vertFmtSkinnedMesh = 0;
 		_diffuseSampler = 0;

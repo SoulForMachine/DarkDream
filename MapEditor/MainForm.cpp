@@ -326,6 +326,10 @@ namespace MapEditor
 			_menuViewGameView->Enabled = (_mapForm->GetCurrentEditMode()->GetModeEnum() != EditMode::EditModeEnum::LAYER_EDIT);
 			_menuViewToolPanel->Checked = !_toolPanel->IsHidden;
 			_menuViewConsole->Checked = !_consoleForm->IsHidden;
+			::Console::BoolVar* cvar = ::Console::GetBoolVar("r_drawTerrainNormals");
+			_menuViewTerrainNormals->Checked = cvar? *cvar: false;
+			cvar = ::Console::GetBoolVar("r_drawEntityBBoxes");
+			_menuViewEntityBBoxes->Checked = cvar? *cvar: false;
 			_menuEditUndo->Enabled = _mapForm->GetUndoManager()->HasUndo();
 			_menuEditRedo->Enabled = _mapForm->GetUndoManager()->HasRedo();
 
@@ -354,7 +358,10 @@ namespace MapEditor
 		_menuViewTerrainNormals->Checked = !_menuViewTerrainNormals->Checked;
 		::Console::BoolVar* cvar = ::Console::GetBoolVar("r_drawTerrainNormals");
 		if(cvar)
-			*cvar = _menuViewTerrainNormals->Checked;
+		{
+			*cvar = !*cvar;
+			_menuViewTerrainNormals->Checked = *cvar;
+		}
 	}
 
 	System::Void MainForm::_menuViewEntityBBoxes_Click(System::Object^  sender, System::EventArgs^  e)
@@ -365,7 +372,10 @@ namespace MapEditor
 		_menuViewEntityBBoxes->Checked = !_menuViewEntityBBoxes->Checked;
 		::Console::BoolVar* cvar = ::Console::GetBoolVar("r_drawEntityBBoxes");
 		if(cvar)
-			*cvar = _menuViewEntityBBoxes->Checked;
+		{
+			*cvar = !*cvar;
+			_menuViewEntityBBoxes->Checked = *cvar;
+		}
 	}
 
 	System::Void MainForm::_menuViewGameView_Click(System::Object^  sender, System::EventArgs^  e)

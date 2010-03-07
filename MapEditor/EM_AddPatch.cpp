@@ -5,6 +5,7 @@
 #include "EM_AddPatch.h"
 
 using namespace Engine;
+using namespace Memory;
 using namespace math3d;
 using namespace System::Windows::Forms;
 
@@ -13,7 +14,9 @@ namespace MapEditor
 {
 
 	EM_AddPatch::EM_AddPatch(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager)
-			: EditMode(listener, persistent)
+			: EditMode(listener, persistent),
+			_vertProg(*new(mainPool) VertexASMProgResPtr),
+			_fragProg(*new(mainPool) FragmentASMProgResPtr)
 	{
 		_isExecuting = false;
 		_undoManager = undo_manager;
@@ -27,8 +30,8 @@ namespace MapEditor
 		};
 		_vertFmt = _renderer->CreateVertexFormat(vert_fmt, COUNTOF(vert_fmt));
 
-		_vertProg = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
-		_fragProg = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
+		_vertProg = engineAPI->asmProgManager->CreateVertexASMProgram(_t("Programs/Simple.vp"), true);
+		_fragProg = engineAPI->asmProgManager->CreateFragmentASMProgram(_t("Programs/ConstColor.fp"), true);
 	}
 
 	EM_AddPatch::~EM_AddPatch()
@@ -37,6 +40,9 @@ namespace MapEditor
 		_renderer->DestroyVertexFormat(_vertFmt);
 		engineAPI->asmProgManager->ReleaseASMProgram(_vertProg);
 		engineAPI->asmProgManager->ReleaseASMProgram(_fragProg);
+
+		delete &_vertProg;
+		delete &_fragProg;
 	}
 
 	void EM_AddPatch::Activate()
@@ -148,11 +154,11 @@ namespace MapEditor
 				_renderer->ActiveVertexFormat(_vertFmt);
 				_renderer->IndexSource(0, GL::TYPE_VOID);
 				_renderer->VertexSource(0, _vertBuf, sizeof(vec3f), 0);
-				_renderer->ActiveVertexASMProgram(_vertProg->GetASMProgram());
-				_renderer->ActiveFragmentASMProgram(_fragProg->GetASMProgram());
-				_vertProg->GetASMProgram()->LocalMatrix4x4(0, engineAPI->world->GetCamera().GetViewProjectionTransform());
+				_renderer->ActiveVertexASMProgram(_vertProg);
+				_renderer->ActiveFragmentASMProgram(_fragProg);
+				_vertProg->LocalMatrix4x4(0, engineAPI->world->GetCamera().GetViewProjectionTransform());
 				vec4f green(0.0f, 1.0f, 0.0f, 0.3f);
-				_fragProg->GetASMProgram()->LocalParameter(0, green);
+				_fragProg->LocalParameter(0, green);
 
 				_renderer->EnableBlending(true);
 				_renderer->BlendingFunc(GL::BLEND_FUNC_SRC_ALPHA, GL::BLEND_FUNC_ONE_MINUS_SRC_ALPHA);

@@ -12,7 +12,9 @@ namespace MapEditor
 {
 
 	EM_LayerEdit::EM_LayerEdit(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager)
-		: EditMode(listener, persistent)
+		: EditMode(listener, persistent),
+		_vertpSimple(*new VertexASMProgResPtr()),
+		_fragpConstColor(*new FragmentASMProgResPtr())
 	{
 		_panel = gcnew LayersPanel(this);
 		_undoManager = undo_manager;
@@ -30,8 +32,8 @@ namespace MapEditor
 		};
 		_vertFmtPos = _renderer->CreateVertexFormat(desc, COUNTOF(desc));;
 
-		_vertpSimple = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
-		_fragpConstColor = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
+		_vertpSimple = engineAPI->asmProgManager->CreateVertexASMProgram(_t("Programs/Simple.vp"), true);
+		_fragpConstColor = engineAPI->asmProgManager->CreateFragmentASMProgram(_t("Programs/ConstColor.fp"), true);
 	}
 
 	EM_LayerEdit::~EM_LayerEdit()
@@ -42,6 +44,9 @@ namespace MapEditor
 		_renderer->DestroyVertexFormat(_vertFmtPos);
 		engineAPI->asmProgManager->ReleaseASMProgram(_vertpSimple);
 		engineAPI->asmProgManager->ReleaseASMProgram(_fragpConstColor);
+
+		delete &_vertpSimple;
+		delete &_fragpConstColor;
 	}
 
 	System::Windows::Forms::UserControl^ EM_LayerEdit::GetPanel()
@@ -137,15 +142,15 @@ namespace MapEditor
 					_renderer->ActiveVertexFormat(_vertFmtPos);
 					_renderer->VertexSource(0, _vertBufSelRect, sizeof(vec4f), 0);
 					_renderer->IndexSource(0, GL::TYPE_VOID);
-					_renderer->ActiveVertexASMProgram(_vertpSimple->GetASMProgram());
-					_renderer->ActiveFragmentASMProgram(_fragpConstColor->GetASMProgram());
+					_renderer->ActiveVertexASMProgram(_vertpSimple);
+					_renderer->ActiveFragmentASMProgram(_fragpConstColor);
 
-					_vertpSimple->GetASMProgram()->LocalMatrix4x4(0, engineAPI->world->GetCamera().GetViewProjectionTransform());
+					_vertpSimple->LocalMatrix4x4(0, engineAPI->world->GetCamera().GetViewProjectionTransform());
 
 					_renderer->EnableDepthTest(false);
 
 					float color[] = { 0.0f, 1.0f, 0.0f, 1.0f };
-					_fragpConstColor->GetASMProgram()->LocalParameter(0, color);
+					_fragpConstColor->LocalParameter(0, color);
 
 					_renderer->Draw(GL::PRIM_LINE_LOOP, 0, 4);
 

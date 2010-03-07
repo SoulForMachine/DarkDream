@@ -31,8 +31,8 @@ namespace MapEditor
 		GL::Renderer* _renderer;
 		GL::Buffer* _vertBuf;
 		GL::VertexFormat* _vertFmt;
-		const Engine::ASMProgRes* _vertProg;
-		const Engine::ASMProgRes* _fragProg;
+		Engine::VertexASMProgResPtr& _vertProg;
+		Engine::FragmentASMProgResPtr& _fragProg;
 	};
 
 }

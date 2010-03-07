@@ -47,9 +47,9 @@ namespace ParticleEditor
 		GL::Renderer* _renderer;
 		GL::Buffer* _axisVertBuf;
 		GL::VertexFormat* _lineVertFmt;
-		const Engine::ASMProgRes* _vertProgSimple;
-		const Engine::ASMProgRes* _fragProgConst;
 		Engine::ParticleSystem* _particleSystem;
+		Engine::VertexASMProgResPtr& _vertProgSimple;
+		Engine::FragmentASMProgResPtr& _fragProgConst;
 
 		// drawing stuff
 		Engine::Font* _font;

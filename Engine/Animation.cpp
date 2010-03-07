@@ -132,6 +132,20 @@ namespace Engine
 		}
 	}
 
+	bool Animation::IsSkeletCompatible(const StaticArray<Joint>& joint_array) const
+	{
+		if(joint_array.GetCount() != _tracks.GetCount())
+			return false;
+
+		for(size_t i = 0; i < joint_array.GetCount(); ++i)
+		{
+			if(joint_array[i].parentIndex != _tracks[i].parentIndex)
+				return false;
+		}
+
+		return true;
+	}
+
 	const char* Animation::GetAnimTypeName(AnimType anim)
 	{
 		if(anim < ANIM_TYPE_COUNT)

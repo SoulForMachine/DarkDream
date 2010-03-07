@@ -5,6 +5,7 @@
 #include "BaseLib/Bounds.h"
 #include "BaseLib/HashMap.h"
 #include "BaseLib/Math/mat4.h"
+#include "ResourceManager.h"
 #include "Animation.h"
 #include "RenderableEntity.h"
 #include "Entity.h"
@@ -14,7 +15,7 @@
 namespace Engine
 {
 
-	class FileResource;
+	class ResourceBase;
 	class ModelRes;
 	class MaterialRes;
 	class AIScriptRes;
@@ -52,7 +53,7 @@ namespace Engine
 		struct MaterialData
 		{
 			char* name;
-			const MaterialRes* materialRes;
+			MaterialResPtr materialRes;
 		};
 
 		struct JointAttachData
@@ -60,20 +61,20 @@ namespace Engine
 			char* name;
 			JointAttachType type;
 			int jointIndex;
-			const FileResource* attachment;
+			const ResourceBase* attachment;
 		};
 
 		struct AnimData
 		{
 			char* name;
 			Animation::AnimType type;
-			const AnimationRes* animation;
+			AnimationResPtr animation;
 		};
 
 		struct SoundData
 		{
 			char* name;
-			const SoundRes* sound;
+			SoundResPtr sound;
 		};
 
 		struct MeshData
@@ -85,7 +86,7 @@ namespace Engine
 		typedef HashMap<const char*, ModelEntity::MaterialData> MaterialMap;
 		typedef StaticArray<MeshData> MeshDataArray;
 		typedef HashMap<const char*, ModelEntity::JointAttachData> JointAttachMap;
-		typedef StaticArray<const FileResource*> JointAttachArray;
+		typedef StaticArray<const ResourceBase*> JointAttachArray;
 		typedef HashMap<const char*, ModelEntity::AnimData> AnimMap;
 		typedef HashMap<const char*, ModelEntity::SoundData> SoundMap;
 
@@ -115,9 +116,9 @@ namespace Engine
 		bool IsAnimationPlaying() const
 			{ return _animPlaying; }
 
-		const ModelRes* GetModelRes() const
+		ModelResPtr GetModelRes() const
 			{ return _model; }
-		const AIScriptRes* GetAIScriptRes() const
+		AIScriptResPtr GetAIScriptRes() const
 			{ return _aiScript; }
 		const MeshDataArray& GetMeshDataArray() const
 			{ return _meshDataArray; }
@@ -171,14 +172,15 @@ namespace Engine
 		const char* GetClassString(ModelClass c);
 		void BindPoseTransforms();
 		int GetShaderIndex(uint vert_flags, const Material* material);
+		bool IsAnimCompatible(const Animation& anim);
 
 		StaticArray<math3d::mat4f> _jointMatPalette;
 		float _animTime;
 		AnimData* _curAnim;
 		bool _animPlaying;
 
-		const ModelRes* _model;
-		const AIScriptRes* _aiScript;
+		ModelResPtr _model;
+		AIScriptResPtr _aiScript;
 		MaterialMap _materials;
 		MeshDataArray _meshDataArray;
 		JointAttachMap _jointAttachments;

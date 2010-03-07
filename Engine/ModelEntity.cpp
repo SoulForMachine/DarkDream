@@ -7,7 +7,6 @@
 #include "Material.h"
 #include "ParticleSystem.h"
 #include "FileSystem.h"
-#include "ResourceManager.h"
 #include "EngineInternal.h"
 #include "ModelEntity.h"
 
@@ -35,8 +34,8 @@ namespace Engine
 		_curAnim = 0;
 		_animPlaying = false;
 
-		_model = 0;
-		_aiScript = 0;
+		_model = ModelResPtr::null;
+		_aiScript = AIScriptResPtr::null;
 
 		// set initial properties
 		_class = MODEL_CLASS_GENERIC;
@@ -47,8 +46,8 @@ namespace Engine
 
 	ModelEntity::ModelEntity(const ModelEntity& entity)
 	{
-		_model = 0;
-		_aiScript = 0;
+		_model = ModelResPtr::null;
+		_aiScript = AIScriptResPtr::null;
 		*this = entity;
 	}
 
@@ -71,16 +70,16 @@ namespace Engine
 
 		// resources
 		if(entity._model)
-			_model = engineAPI.modelManager->CreateModel(entity._model->GetFileName());
+			_model = engineAPI.modelManager->CreateModel(entity._model.GetFileRes()->GetFileName());
 
 		if(entity._aiScript)
-			_aiScript = engineAPI.aiScriptManager->CreateAIScript(entity._aiScript->GetFileName());
+			_aiScript = engineAPI.aiScriptManager->CreateAIScript(entity._aiScript.GetFileRes()->GetFileName());
 
 		for(MaterialMap::ConstIterator it = entity._materials.Begin(); it != entity._materials.End(); ++it)
 		{
 			MaterialData md;
 			md.name = StringDup(it->name);
-			md.materialRes = engineAPI.materialManager->CreateMaterial(it->materialRes->GetFileName());
+			md.materialRes = engineAPI.materialManager->CreateMaterial(it->materialRes.GetFileRes()->GetFileName());
 			_materials[it->name] = md;
 		}
 
@@ -90,9 +89,15 @@ namespace Engine
 			jd.name = StringDup(it->name);
 			jd.type = it->type;
 			if(jd.type == JOINT_ATTACH_MODEL)
-				jd.attachment = new(mapPool) ModelEntityRes((const ModelEntityRes&)*it->attachment);
+			{
+				ModelEntityResPtr ptr = ModelEntityResPtr((const ModelEntityRes*)it->attachment);
+				jd.attachment = engineAPI.modelEntityManager->CreateCopy(ptr).GetFileRes();
+			}
 			else if(jd.type == JOINT_ATTACH_PARTICLE_SYSTEM)
-				jd.attachment = new(mapPool) PartSysRes((const PartSysRes&)*it->attachment);
+			{
+				PartSysResPtr ptr = PartSysResPtr((const PartSysRes*)it->attachment);
+				jd.attachment = engineAPI.partSysManager->CreateCopy(ptr).GetFileRes();
+			}
 			jd.jointIndex = it->jointIndex;
 			_jointAttachments[it->name] = jd;
 		}
@@ -102,7 +107,7 @@ namespace Engine
 			AnimData ad;
 			ad.name = StringDup(it->name);
 			ad.type = it->type;
-			ad.animation = engineAPI.animationManager->CreateAnimation(it->animation->GetFileName());
+			ad.animation = engineAPI.animationManager->CreateAnimation(it->animation.GetFileRes()->GetFileName());
 			_animations[it->name] = ad;
 		}
 
@@ -110,7 +115,7 @@ namespace Engine
 		{
 			SoundData sd;
 			sd.name = StringDup(it->name);
-			sd.sound = engineAPI.soundManager->CreateSound(it->sound->GetFileName());
+			sd.sound = engineAPI.soundManager->CreateSound(it->sound.GetFileRes()->GetFileName());
 			_sounds[it->name] = sd;
 		}
 
@@ -303,11 +308,11 @@ namespace Engine
 					jd.type = GetJointAttachTypeByExt(p);
 					if(jd.type == JOINT_ATTACH_MODEL)
 					{
-						jd.attachment = engineAPI.modelEntityManager->CreateEntity(p);
+						jd.attachment = engineAPI.modelEntityManager->CreateEntity(p).GetFileRes();
 					}
 					else if(jd.type == JOINT_ATTACH_PARTICLE_SYSTEM)
 					{
-						jd.attachment = engineAPI.partSysManager->CreatePartSys(p);
+						jd.attachment = engineAPI.partSysManager->CreateParticleSystem(p).GetFileRes();
 					}
 					delete[] p;
 					JointAttachMap::ConstIterator it = _jointAttachments.Find(jd.name);
@@ -460,17 +465,17 @@ namespace Engine
 
 		const tchar* fn;
 
-		fn = _model? _model->GetFileName(): _T("");
+		fn = _model? _model.GetFileRes()->GetFileName(): _T("");
 		file->Printf("\tmodel\t\t\"%ls\"\n", fn);
 
-		fn = _aiScript? _aiScript->GetFileName(): _T("");
+		fn = _aiScript? _aiScript.GetFileRes()->GetFileName(): _T("");
 		file->Printf("\taiScript\t\t\"%ls\"\n\n", fn);
 
 		// materials
 		file->Printf("\tmaterials\n\t{\n");
 		for(MaterialMap::ConstIterator it = _materials.Begin(); it != _materials.End(); ++it)
 		{
-			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->materialRes->GetFileName());
+			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->materialRes.GetFileRes()->GetFileName());
 		}
 		file->Printf("\t}\n\n");
 
@@ -486,7 +491,7 @@ namespace Engine
 		file->Printf("\tanimations\n\t{\n");
 		for(AnimMap::ConstIterator it = _animations.Begin(); it != _animations.End(); ++it)
 		{
-			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->animation->GetFileName());
+			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->animation.GetFileRes()->GetFileName());
 		}
 		file->Printf("\t}\n\n");
 
@@ -494,7 +499,7 @@ namespace Engine
 		file->Printf("\tsounds\n\t{\n");
 		for(SoundMap::ConstIterator it = _sounds.Begin(); it != _sounds.End(); ++it)
 		{
-			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->sound->GetFileName());
+			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->sound.GetFileRes()->GetFileName());
 		}
 		file->Printf("\t}\n\n");
 
@@ -508,13 +513,13 @@ namespace Engine
 		if(_model)
 		{
 			engineAPI.modelManager->ReleaseModel(_model);
-			_model = 0;
+			_model = ModelResPtr::null;
 		}
 
 		if(_aiScript)
 		{
 			engineAPI.aiScriptManager->ReleaseAIScript(_aiScript);
-			_aiScript = 0;
+			_aiScript = AIScriptResPtr::null;
 		}
 
 		ClearModelData();
@@ -524,10 +529,10 @@ namespace Engine
 	{
 		if(_meshDataArray.GetCount())
 		{
-			const StaticArray<Mesh>& meshes = _model->GetModel()->GetMeshes();
+			const StaticArray<Mesh>& meshes = _model->GetMeshes();
 			for(size_t i = 0; i < _meshDataArray.GetCount(); ++i)
 			{
-				if(_meshDataArray[i].materialData->materialRes->GetMaterial() == material)
+				if(_meshDataArray[i].materialData->materialRes == material)
 				{
 					_meshDataArray[i].shaderIndex = GetShaderIndex(meshes[i].flags, material);
 				}
@@ -542,7 +547,7 @@ namespace Engine
 			if(_animPlaying)
 			{
 				_animTime += frame_time;
-				const Animation* anim = _curAnim->animation->GetAnimation();
+				AnimationResPtr anim = _curAnim->animation;
 				if(_animTime > anim->GetLength())
 					_animTime = fmod(_animTime, anim->GetLength());
 			}
@@ -553,7 +558,7 @@ namespace Engine
 	{
 		if(_curAnim)
 		{
-			const Animation* anim = _curAnim->animation->GetAnimation();
+			AnimationResPtr anim = _curAnim->animation;
 
 			if(_animPlaying)
 			{
@@ -561,8 +566,8 @@ namespace Engine
 				anim->GetJointTransforms(
 					_animTime,
 					_jointMatPalette.GetData(),
-					_model->GetModel()->GetRootJoint(),
-					_model->GetModel()->GetJoints().GetData());
+					_model->GetRootJoint(),
+					_model->GetJoints().GetData());
 			}
 
 			// update attachments world matrices
@@ -571,9 +576,9 @@ namespace Engine
 			{
 				RenderableEntity* entity;
 				if(it->type == JOINT_ATTACH_MODEL)
-					entity = ((ModelEntityRes*)it->attachment)->GetEntity();
+					entity = (ModelEntity*) ((ModelEntityRes*)it->attachment)->GetResource();
 				else if(it->type == JOINT_ATTACH_PARTICLE_SYSTEM)
-					entity = ((PartSysRes*)it->attachment)->GetParticleSystem();
+					entity = (ParticleSystem*) ((PartSysRes*)it->attachment)->GetResource();
 
 				if(entity)
 				{
@@ -589,14 +594,14 @@ namespace Engine
 			{
 				RenderableEntity* entity;
 				if(it->type == JOINT_ATTACH_MODEL)
-					entity = ((ModelEntityRes*)it->attachment)->GetEntity();
+					entity = (ModelEntity*) ((ModelEntityRes*)it->attachment)->GetResource();
 				else if(it->type == JOINT_ATTACH_PARTICLE_SYSTEM)
-					entity = ((PartSysRes*)it->attachment)->GetParticleSystem();
+					entity = (ParticleSystem*) ((PartSysRes*)it->attachment)->GetResource();
 
 				if(entity)
 				{
 					mat4f ent_mat;
-					const Joint* joints = _model->GetModel()->GetJoints().GetData();
+					const Joint* joints = _model->GetJoints().GetData();
 					mul(ent_mat, joints[it->jointIndex].invOffsetMatrix, GetWorldTransform());
 					entity->SetWorldTransform(ent_mat);
 				}
@@ -665,13 +670,11 @@ namespace Engine
 	*/
 	void ModelEntity::SetupModelData()
 	{
-		if(!_model || !_model->GetModel())
+		if(!_model || !_model.GetFileRes()->IsLoaded())
 			return;
 
-		const Model* model = _model->GetModel();
-
 		// Bind meshes to their data (materials and gpu program indices)
-		const StaticArray<Mesh>& meshes = model->GetMeshes();
+		const StaticArray<Mesh>& meshes = _model->GetMeshes();
 		size_t mesh_count = meshes.GetCount();
 		_meshDataArray.SetCount(mesh_count);
 		for(size_t i = 0; i < mesh_count; ++i)
@@ -685,18 +688,18 @@ namespace Engine
 			else
 			{
 				// create default material
-				const MaterialRes* mat = engineAPI.materialManager->CreateMaterial(_T(""), true);
+				MaterialResPtr mat = engineAPI.materialManager->CreateDefaultMaterial();
 				// add it to material map
 				char* name = StringDup(meshes[i].material);
 				MaterialData md = { name, mat };
 				_materials[name] = md;
 				_meshDataArray[i].materialData = &_materials[name];
 			}
-			_meshDataArray[i].shaderIndex = GetShaderIndex(meshes[i].flags, _meshDataArray[i].materialData->materialRes->GetMaterial());
+			_meshDataArray[i].shaderIndex = GetShaderIndex(meshes[i].flags, _meshDataArray[i].materialData->materialRes);
 		}
 
 		// Bind joints to their attached entities (i-th entity in attachment array corresponds to i-th joint in model's joint array).
-		const StaticArray<Joint>& joints = model->GetJoints();
+		const StaticArray<Joint>& joints = _model->GetJoints();
 		size_t joint_count = joints.GetCount();
 		_jointAttachArray.SetCount(joint_count);
 		_jointMatPalette.SetCount(joint_count);
@@ -714,11 +717,11 @@ namespace Engine
 			if(it->type == JOINT_ATTACH_MODEL)
 			{
 				ModelEntityRes* res = (ModelEntityRes*)it->attachment;
-				res->GetEntity()->SetupModelData();
+				((ModelEntity*)res->GetResource())->SetupModelData();
 			}
 		}
 
-		SetObjectBoundingBox(model->GetBoundingBox());
+		SetObjectBoundingBox(_model->GetBoundingBox());
 
 		_animTime = 0.0f;
 		_curAnim = 0;
@@ -726,7 +729,7 @@ namespace Engine
 
 	bool ModelEntity::SetModel(const tchar* file_name)
 	{
-		const ModelRes* model = engineAPI.modelManager->CreateModel(file_name, true);
+		ModelResPtr model = engineAPI.modelManager->CreateModel(file_name, true);
 		if(model)
 		{
 			engineAPI.modelManager->ReleaseModel(_model);
@@ -741,7 +744,7 @@ namespace Engine
 
 	bool ModelEntity::SetAIScript(const tchar* file_name)
 	{
-		const AIScriptRes* ai = engineAPI.aiScriptManager->CreateAIScript(file_name, true);
+		AIScriptResPtr ai = engineAPI.aiScriptManager->CreateAIScript(file_name, true);
 		if(ai)
 		{
 			engineAPI.aiScriptManager->ReleaseAIScript(_aiScript);
@@ -754,13 +757,13 @@ namespace Engine
 
 	bool ModelEntity::SetMaterial(const char* mat_name, const tchar* file_name)
 	{
-		if(!_model || !_model->GetModel())
+		if(!_model || !_model.GetFileRes()->IsLoaded())
 			return false;
 
 		MaterialMap::Iterator it = _materials.Find(mat_name);
 		if(it != _materials.End())
 		{
-			const MaterialRes* mat = engineAPI.materialManager->CreateMaterial(file_name, true);
+			MaterialResPtr mat = engineAPI.materialManager->CreateMaterial(file_name, true);
 			if(mat)
 			{
 				// release old material and set new
@@ -768,14 +771,14 @@ namespace Engine
 				it->materialRes = mat;
 
 				// set pointers to new material in _materialArray
-				const StaticArray<Mesh>& meshes = _model->GetModel()->GetMeshes();
+				const StaticArray<Mesh>& meshes = _model->GetMeshes();
 				assert(meshes.GetCount() == _meshDataArray.GetCount());
 				for(size_t i = 0; i < meshes.GetCount(); ++i)
 				{
 					if(!strcmp(mat_name, meshes[i].material))
 					{
 						_meshDataArray[i].materialData->materialRes = mat;
-						_meshDataArray[i].shaderIndex = GetShaderIndex(meshes[i].flags, mat->GetMaterial());
+						_meshDataArray[i].shaderIndex = GetShaderIndex(meshes[i].flags, mat);
 					}
 				}
 			}
@@ -787,11 +790,11 @@ namespace Engine
 
 	bool ModelEntity::SetJointAttachment(const char* joint_name, const tchar* file_name)
 	{
-		if(!_model || !_model->GetModel())
+		if(!_model || !_model.GetFileRes()->IsLoaded())
 			return false;
 
 		// find joint with this name in model skelet
-		const StaticArray<Joint>& joints = _model->GetModel()->GetJoints();
+		const StaticArray<Joint>& joints = _model->GetJoints();
 		int joint_index = -1;
 		for(size_t i = 0; i < joints.GetCount(); ++i)
 		{
@@ -809,24 +812,24 @@ namespace Engine
 		if(type == JOINT_ATTACH_UNKNOWN)
 			return false;
 
-		const FileResource* res;
+		const ResourceBase* res;
 		if(type == JOINT_ATTACH_MODEL)
 		{
-			ModelEntityRes* ent = engineAPI.modelEntityManager->CreateEntity(file_name);
-			if(ent && ent->GetEntity())
+			ModelEntityResPtr ent = engineAPI.modelEntityManager->CreateEntity(file_name);
+			if(ent.GetFileRes() && ent.GetFileRes()->IsLoaded())
 			{
 				// This entity must not have attachments; only 1 level allowed.
-				if(ent->GetEntity()->_jointAttachments.GetCount())
+				if(ent->_jointAttachments.GetCount())
 				{
 					delete ent;
 					return false;
 				}
 			}
-			res = ent;
+			res = ent.GetFileRes();
 		}
 		else if(type == JOINT_ATTACH_PARTICLE_SYSTEM)
 		{
-			res = engineAPI.partSysManager->CreatePartSys(file_name);
+			res = engineAPI.partSysManager->CreateParticleSystem(file_name).GetFileRes();
 		}
 
 		if(res)
@@ -871,25 +874,32 @@ namespace Engine
 
 	bool ModelEntity::AddAnimation(const char* anim_name, const tchar* file_name)
 	{
-		const AnimationRes* anim = engineAPI.animationManager->CreateAnimation(file_name, true);
+		AnimationResPtr anim = engineAPI.animationManager->CreateAnimation(file_name, true);
 		if(anim)
 		{
-			AnimMap::Iterator it = _animations.Find(anim_name);
-			if(it != _animations.End())
+			if(IsAnimCompatible(*anim))
 			{
-				assert(!strcmp(anim_name, it->name));
-				engineAPI.animationManager->ReleaseAnimation(it->animation);
-				it->animation = anim;
+				AnimMap::Iterator it = _animations.Find(anim_name);
+				if(it != _animations.End())
+				{
+					assert(!strcmp(anim_name, it->name));
+					engineAPI.animationManager->ReleaseAnimation(it->animation);
+					it->animation = anim;
+				}
+				else
+				{
+					AnimData ad;
+					ad.name = StringDup(anim_name);
+					ad.type = Animation::GetAnimTypeByName(anim_name);
+					ad.animation = anim;
+					_animations[anim_name] = ad;
+				}
+				return true;
 			}
 			else
 			{
-				AnimData ad;
-				ad.name = StringDup(anim_name);
-				ad.type = Animation::GetAnimTypeByName(anim_name);
-				ad.animation = anim;
-				_animations[anim_name] = ad;
+				engineAPI.animationManager->ReleaseAnimation(anim);
 			}
-			return true;
 		}
 
 		return false;
@@ -917,7 +927,7 @@ namespace Engine
 
 	bool ModelEntity::AddSound(const char* snd_name, const tchar* file_name)
 	{
-		const SoundRes* sound = engineAPI.soundManager->CreateSound(file_name, true);
+		SoundResPtr sound = engineAPI.soundManager->CreateSound(file_name, true);
 		if(sound)
 		{
 			SoundMap::Iterator it = _sounds.Find(snd_name);
@@ -998,14 +1008,14 @@ namespace Engine
 		{
 			RenderableEntity* entity;
 			if(it->type == JOINT_ATTACH_MODEL)
-				entity = ((ModelEntityRes*)it->attachment)->GetEntity();
+				entity = (ModelEntity*) ((ModelEntityRes*)it->attachment)->GetResource();
 			else if(it->type == JOINT_ATTACH_PARTICLE_SYSTEM)
-				entity = ((PartSysRes*)it->attachment)->GetParticleSystem();
+				entity = (ParticleSystem*) ((PartSysRes*)it->attachment)->GetResource();
 
 			if(entity)
 			{
 				mat4f ent_mat;
-				const Joint* joints = _model->GetModel()->GetJoints().GetData();
+				const Joint* joints = _model->GetJoints().GetData();
 				mul(ent_mat, joints[it->jointIndex].invOffsetMatrix, GetWorldTransform());
 				entity->SetWorldTransform(ent_mat);
 			}
@@ -1021,6 +1031,14 @@ namespace Engine
 			index |= 1;
 
 		return index;
+	}
+
+	bool ModelEntity::IsAnimCompatible(const Animation& anim)
+	{
+		if(!_model.GetFileRes() || !_model.GetFileRes()->IsLoaded() || !_model->GetRootJoint())
+			return false;
+
+		return anim.IsSkeletCompatible(_model->GetJoints());
 	}
 
 }

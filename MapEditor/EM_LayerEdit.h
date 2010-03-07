@@ -48,8 +48,8 @@ namespace MapEditor
 		GL::Renderer* _renderer;
 		GL::Buffer* _vertBufSelRect;
 		GL::VertexFormat* _vertFmtPos;
-		const Engine::ASMProgRes* _vertpSimple;
-		const Engine::ASMProgRes* _fragpConstColor;
+		Engine::VertexASMProgResPtr& _vertpSimple;
+		Engine::FragmentASMProgResPtr& _fragpConstColor;
 	};
 
 }

@@ -11,8 +11,6 @@
 namespace Engine
 {
 
-	class TextureRes;
-
 
 	class ENGINE_API BgLayer
 	{
@@ -26,7 +24,7 @@ namespace Engine
 				FLAG_ADDITIVE_BLEND = 4,
 			};
 
-			const TextureRes* texture;
+			Texture2DResPtr texture;
 			RectFloat rect; // absolute layer-space coords: [x1, y1] - lower left, [x2, y2] upper right
 			math3d::vec2f uvScale;
 			int layerIndex;

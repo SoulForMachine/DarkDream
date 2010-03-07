@@ -54,7 +54,6 @@ namespace EntityEditor
 
 		_wireframe = false;
 		_modelStats = true;
-		_skelet = false;
 		_modelForm->ShowStats(true);
 		_entity = nullptr;
 
@@ -213,8 +212,12 @@ namespace EntityEditor
 		if(!_modelForm->IsRenderingInitialized())
 			return;
 
-		_skelet = !_skelet;
-		_modelForm->ShowSkelet(_skelet);
+		::Console::BoolVar* cvar = ::Console::GetBoolVar("r_drawModelSkelet");
+		if(cvar)
+		{
+			*cvar = !*cvar;
+			_mnuViewSkelet->Checked = *cvar;
+		}
 	}
 
 	System::Void MainForm::_mnuEntityNew_Click(System::Object^  sender, System::EventArgs^  e)
@@ -380,7 +383,8 @@ namespace EntityEditor
 			_mnuViewMaterialPanel->Checked = !_materialForm->IsHidden;
 			_mnuViewPropertyPanel->Checked = !_propertyForm->IsHidden;
 			_mnuWireframe->Checked = _wireframe;
-			_mnuViewSkelet->Checked = _skelet;
+			::Console::BoolVar* cvar = ::Console::GetBoolVar("r_drawModelSkelet");
+			_mnuViewSkelet->Checked = cvar? *cvar: false;
 			_mnuModelStats->Checked = _modelStats;
 			_toolBtnConsole->Checked = !_consoleForm->IsHidden;
 

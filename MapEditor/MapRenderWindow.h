@@ -72,8 +72,8 @@ namespace MapEditor
 		// drawing stuff
 		Engine::Font* _font;
 		GL::VertexFormat* _lineVertFmt;
-		const Engine::ASMProgRes* _vpSimple;
-		const Engine::ASMProgRes* _fpConstClr;
+		Engine::VertexASMProgResPtr& _vpSimple;
+		Engine::FragmentASMProgResPtr& _fpConstClr;
 
 		int _width;
 		int _height;

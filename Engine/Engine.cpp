@@ -13,7 +13,13 @@ namespace Engine
 
 	EngineAPI* CreateEngineAPI()
 	{
-		// initialize graphics resource managers
+		// create engine sub-systems
+		engineAPI.fileSystem = new(mainPool) FileSystem;
+		engineAPI.inputSystem = new(mainPool) InputSystem;
+		engineAPI.renderSystem = new(mainPool) RenderSystem;
+		engineAPI.world = new(mainPool) World;
+
+		// initialize resource managers
 		engineAPI.shaderManager = new(mainPool) ShaderManager;
 		engineAPI.materialManager = new(mainPool) MaterialManager;
 		engineAPI.asmProgManager = new(mainPool) ASMProgManager;
@@ -25,25 +31,11 @@ namespace Engine
 		engineAPI.aiScriptManager = new(mainPool) AIScriptManager;
 		engineAPI.soundManager = new(mainPool) SoundManager;
 
-		engineAPI.fileSystem = new(mainPool) FileSystem;
-		engineAPI.inputSystem = new(mainPool) InputSystem;
-		engineAPI.renderSystem = new(mainPool) RenderSystem;
-		engineAPI.world = new(mainPool) World;
-
 		return &engineAPI;
 	}
 
 	void DestroyEngineAPI(EngineAPI* api)
 	{
-		delete engineAPI.fileSystem;
-		engineAPI.fileSystem = 0;
-		delete engineAPI.inputSystem;
-		engineAPI.inputSystem = 0;
-		delete engineAPI.renderSystem;
-		engineAPI.renderSystem = 0;
-		delete engineAPI.world;
-		engineAPI.world = 0;
-
 		delete engineAPI.shaderManager;
 		engineAPI.shaderManager = 0;
 		delete engineAPI.materialManager;
@@ -64,6 +56,15 @@ namespace Engine
 		engineAPI.aiScriptManager = 0;
 		delete engineAPI.soundManager;
 		engineAPI.soundManager = 0;
+
+		delete engineAPI.fileSystem;
+		engineAPI.fileSystem = 0;
+		delete engineAPI.inputSystem;
+		engineAPI.inputSystem = 0;
+		delete engineAPI.renderSystem;
+		engineAPI.renderSystem = 0;
+		delete engineAPI.world;
+		engineAPI.world = 0;
 	}
 
 }

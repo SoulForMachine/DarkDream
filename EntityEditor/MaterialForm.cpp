@@ -71,7 +71,7 @@ namespace EntityEditor
 			delete[] mat_name;
 			if(it != materials.End())
 			{
-				_material = const_cast<Material*>(it->materialRes->GetMaterial());
+				_material = const_cast<Material*>((const Material*)it->materialRes);
 			}
 		}
 
@@ -79,15 +79,15 @@ namespace EntityEditor
 		{
 			EnableControls(true);
 
-			const TextureRes* tex = _material->GetEmissionTexture();
-			_textEmissionTex->Text = gcnew String(tex? tex->GetFileName(): _t(""));
+			Texture2DResPtr tex = _material->GetEmissionTexture();
+			_textEmissionTex->Text = gcnew String(tex? tex.GetFileRes()->GetFileName(): _t(""));
 
 			_clrDiffuse->BackColor = Color::FromArgb(PackColor(_material->GetDiffuseColor()));
 			tex = _material->GetDiffuseTexture();
-			_textDiffuseTex->Text = gcnew String(tex? tex->GetFileName(): _t(""));
+			_textDiffuseTex->Text = gcnew String(tex? tex.GetFileRes()->GetFileName(): _t(""));
 
 			tex = _material->GetNormalMap();
-			_textNormalMap->Text = gcnew String(tex? tex->GetFileName(): _t(""));
+			_textNormalMap->Text = gcnew String(tex? tex.GetFileRes()->GetFileName(): _t(""));
 
 			_checkTransparency->Checked = _material->UsesTransparency();
 			int opacity = int(_material->GetOpacity() * 100.0f);
@@ -95,7 +95,7 @@ namespace EntityEditor
 			_textOpacity->Text = opacity.ToString();
 
 			tex = _material->GetTransparencyTexture();
-			_textTransparencyMap->Text = gcnew String(tex? tex->GetFileName(): _t(""));
+			_textTransparencyMap->Text = gcnew String(tex? tex.GetFileRes()->GetFileName(): _t(""));
 		}
 		else
 		{
@@ -122,13 +122,13 @@ namespace EntityEditor
 		if(!_entity)
 			return;
 
-		const ModelRes* model = _entity->GetModelRes();
+		ModelResPtr model = _entity->GetModelRes();
 
 		_listMaterials->Items->Clear();
-		if(model && model->GetModel())
+		if(model.IsValid())
 		{
 			LinkedList<String^>^ names = gcnew LinkedList<String^>;
-			const StaticArray<Mesh>& meshes = model->GetModel()->GetMeshes();
+			const StaticArray<Mesh>& meshes = model->GetMeshes();
 			for(size_t i = 0; i < meshes.GetCount(); ++i)
 			{
 				String^ n = gcnew String(meshes[i].material);
@@ -149,7 +149,7 @@ namespace EntityEditor
 				ListViewItem^ item = FindListItem(_listMaterials, gcnew String(md.name));
 				if(item != nullptr)
 				{
-					const tchar* file_name = md.materialRes->GetFileName();
+					const tchar* file_name = md.materialRes.GetFileRes()->GetFileName();
 					bool modified = (!file_name || !*file_name);
 					item->Tag = modified;
 					String^ text = modified? "<Unsaved>": gcnew String(file_name);
@@ -182,10 +182,10 @@ namespace EntityEditor
 			if(mat.Save(file_name))
 			{
 				// if material with this file name is already loaded, force it's reload
-				const MaterialRes* matres = engineAPI->materialManager->FindMaterial(file_name);
+				MaterialResPtr matres = engineAPI->materialManager->FindMaterial(file_name);
 				if(matres)
 				{
-					const_cast<Material*>(matres->GetMaterial())->Load(file_name);
+					const_cast<Material*>((const Material*)matres)->Load(file_name);
 				}
 
 				if(_entity->SetMaterial(mat_name, file_name))
@@ -226,10 +226,10 @@ namespace EntityEditor
 			tchar* file_name = GetRelativePath(_openFileDialog->FileName);
 
 			// if material with this file name is already loaded, force it's reload
-			const MaterialRes* matres = engineAPI->materialManager->FindMaterial(file_name);
+			MaterialResPtr matres = engineAPI->materialManager->FindMaterial(file_name);
 			if(matres)
 			{
-				const_cast<Material*>(matres->GetMaterial())->Load(file_name);
+				const_cast<Material*>((const Material*)matres)->Load(file_name);
 			}
 
 			if(_entity->SetMaterial(mat_name, file_name))
@@ -308,8 +308,8 @@ namespace EntityEditor
 		if(it != materials.End())
 		{
 			// save material to file
-			const Material* mat = it->materialRes->GetMaterial();
-			const tchar* file_name = it->materialRes->GetFileName();
+			const Material* mat = it->materialRes;
+			const tchar* file_name = it->materialRes.GetFileRes()->GetFileName();
 			if(file_name && *file_name)
 			{
 				if(mat->Save(file_name))
@@ -479,12 +479,12 @@ namespace EntityEditor
 			if(_selectTextureDialog->ShowDialog(this) == Forms::DialogResult::OK)
 			{
 				tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
-				const TextureRes* tex = engineAPI->textureManager->CreateTexture(file_name, true);
+				Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
 				delete[] file_name;
 				if(tex)
 				{
 					_material->SetDiffuseTexture(tex);
-					_textDiffuseTex->Text = gcnew String(tex->GetFileName());
+					_textDiffuseTex->Text = gcnew String(tex.GetFileRes()->GetFileName());
 					MaterialChangedNotify(true);
 				}
 			}
@@ -499,12 +499,12 @@ namespace EntityEditor
 			if(_selectTextureDialog->ShowDialog(this) == Forms::DialogResult::OK)
 			{
 				tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
-				const TextureRes* tex = engineAPI->textureManager->CreateTexture(file_name, true);
+				Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
 				delete[] file_name;
 				if(tex)
 				{
 					_material->SetNormalMap(tex);
-					_textNormalMap->Text = gcnew String(tex->GetFileName());
+					_textNormalMap->Text = gcnew String(tex.GetFileRes()->GetFileName());
 					MaterialChangedNotify(true);
 				}
 			}
@@ -552,7 +552,7 @@ namespace EntityEditor
 	{
 		if(_material)
 		{
-			_material->SetDiffuseTexture(0);
+			_material->SetDiffuseTexture(Texture2DResPtr::null);
 			_textDiffuseTex->Text = "";
 			MaterialChangedNotify(true);
 		}
@@ -562,7 +562,7 @@ namespace EntityEditor
 	{
 		if(_material)
 		{
-			_material->SetNormalMap(0);
+			_material->SetNormalMap(Texture2DResPtr::null);
 			_textNormalMap->Text = "";
 			MaterialChangedNotify(true);
 		}
@@ -576,12 +576,12 @@ namespace EntityEditor
 			if(_selectTextureDialog->ShowDialog(this) == Forms::DialogResult::OK)
 			{
 				tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
-				const TextureRes* tex = engineAPI->textureManager->CreateTexture(file_name, true);
+				Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
 				delete[] file_name;
 				if(tex)
 				{
 					_material->SetEmissionTexture(tex);
-					_textEmissionTex->Text = gcnew String(tex->GetFileName());
+					_textEmissionTex->Text = gcnew String(tex.GetFileRes()->GetFileName());
 					MaterialChangedNotify(true);
 				}
 			}
@@ -592,7 +592,7 @@ namespace EntityEditor
 	{
 		if(_material)
 		{
-			_material->SetEmissionTexture(0);
+			_material->SetEmissionTexture(Texture2DResPtr::null);
 			_textEmissionTex->Text = "";
 			MaterialChangedNotify(true);
 		}
@@ -615,12 +615,12 @@ namespace EntityEditor
 			if(_selectTextureDialog->ShowDialog(this) == Forms::DialogResult::OK)
 			{
 				tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
-				const TextureRes* tex = engineAPI->textureManager->CreateTexture(file_name, true);
+				Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
 				delete[] file_name;
 				if(tex)
 				{
 					_material->SetTransparencyTexture(tex);
-					_textTransparencyMap->Text = gcnew String(tex->GetFileName());
+					_textTransparencyMap->Text = gcnew String(tex.GetFileRes()->GetFileName());
 					MaterialChangedNotify(true);
 				}
 			}
@@ -631,7 +631,7 @@ namespace EntityEditor
 	{
 		if(_material)
 		{
-			_material->SetTransparencyTexture(0);
+			_material->SetTransparencyTexture(Texture2DResPtr::null);
 			_textTransparencyMap->Text = "";
 			MaterialChangedNotify(true);
 		}

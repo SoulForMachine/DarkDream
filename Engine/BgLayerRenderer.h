@@ -37,8 +37,8 @@ namespace Engine
 		GL::VertexFormat* _spriteVertFmt;
 		GL::SamplerState* _spriteSampler;
 		GL::SamplerState* _spriteSamplerTile;
-		const ASMProgRes* _spriteVertProg;
-		const ASMProgRes* _spriteFragProg;
+		VertexASMProgResPtr _spriteVertProg;
+		FragmentASMProgResPtr _spriteFragProg;
 	};
 
 }

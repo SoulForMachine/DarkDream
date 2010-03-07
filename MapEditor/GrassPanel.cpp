@@ -121,8 +121,8 @@ namespace MapEditor
 		{
 			tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
 			_textTexture->Text = gcnew String(file_name);
-			const TextureRes* tex = engineAPI->textureManager->CreateTexture(file_name, true);
-			if(FillTextureList(tex->GetTexture()))
+			Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
+			if(FillTextureList(tex))
 			{
 				engineAPI->world->GetTerrain().SetGrassTexture(tex);
 			}

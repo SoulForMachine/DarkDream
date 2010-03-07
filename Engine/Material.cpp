@@ -4,8 +4,7 @@
 #include "BaseLib/Console.h"
 #include "BaseLib/GL/GLRenderer.h"
 #include "Engine/FileSystem.h"
-#include "Engine/ResourceManager.h"
-#include "Engine/FileResource.h"
+#include "Engine/Resource.h"
 #include "Engine/EngineInternal.h"
 #include "Material.h"
 
@@ -18,10 +17,10 @@ namespace Engine
 	Material::Material()
 	{
 		_flags = 0;
-		_emissionTexture = 0;
-		_diffuseTexture = 0;
-		_normalMap = 0;
-		_transpTexture = 0;
+		_emissionTexture = Texture2DResPtr::null;
+		_diffuseTexture = Texture2DResPtr::null;
+		_normalMap = Texture2DResPtr::null;
+		_transpTexture = Texture2DResPtr::null;
 
 		_diffuseColor.set(1.0f, 1.0f, 1.0f);
 		_useTransparency = false;
@@ -45,37 +44,37 @@ namespace Engine
 		if(mat._emissionTexture)
 		{
 			engineAPI.textureManager->ReleaseTexture(_emissionTexture);
-			_emissionTexture = engineAPI.textureManager->CreateTexture(mat._emissionTexture->GetFileName());
+			_emissionTexture = engineAPI.textureManager->CreateTexture2D(mat._emissionTexture.GetFileRes()->GetFileName());
 		}
 		else
-			_emissionTexture = 0;
+			_emissionTexture = Texture2DResPtr::null;
 
 		_diffuseColor = mat._diffuseColor;
 		if(mat._diffuseTexture)
 		{
 			engineAPI.textureManager->ReleaseTexture(_diffuseTexture);
-			_diffuseTexture = engineAPI.textureManager->CreateTexture(mat._diffuseTexture->GetFileName());
+			_diffuseTexture = engineAPI.textureManager->CreateTexture2D(mat._diffuseTexture.GetFileRes()->GetFileName());
 		}
 		else
-			_diffuseTexture = 0;
+			_diffuseTexture = Texture2DResPtr::null;
 
 		if(mat._normalMap)
 		{
 			engineAPI.textureManager->ReleaseTexture(_normalMap);
-			_normalMap = engineAPI.textureManager->CreateTexture(mat._normalMap->GetFileName());
+			_normalMap = engineAPI.textureManager->CreateTexture2D(mat._normalMap.GetFileRes()->GetFileName());
 		}
 		else
-			_normalMap = 0;
+			_normalMap = Texture2DResPtr::null;
 
 		_useTransparency = mat._useTransparency;
 		_globalOpacity = mat._globalOpacity;
 		if(mat._transpTexture)
 		{
 			engineAPI.textureManager->ReleaseTexture(_transpTexture);
-			_transpTexture = engineAPI.textureManager->CreateTexture(mat._transpTexture->GetFileName());
+			_transpTexture = engineAPI.textureManager->CreateTexture2D(mat._transpTexture.GetFileRes()->GetFileName());
 		}
 		else
-			_transpTexture = 0;
+			_transpTexture = Texture2DResPtr::null;
 
 		return *this;
 	}
@@ -162,28 +161,28 @@ namespace Engine
 		if(*emiss_tex_path)
 		{
 			path = CharToWideChar(emiss_tex_path);
-			_emissionTexture = engineAPI.textureManager->CreateTexture(path);
+			_emissionTexture = engineAPI.textureManager->CreateTexture2D(path);
 			delete[] path;
 		}
 
 		if(*diff_tex_path)
 		{
 			path = CharToWideChar(diff_tex_path);
-			_diffuseTexture = engineAPI.textureManager->CreateTexture(path);
+			_diffuseTexture = engineAPI.textureManager->CreateTexture2D(path);
 			delete[] path;
 		}
 
 		if(*nrm_tex_path)
 		{
 			path = CharToWideChar(nrm_tex_path);
-			_normalMap = engineAPI.textureManager->CreateTexture(path);
+			_normalMap = engineAPI.textureManager->CreateTexture2D(path);
 			delete[] path;
 		}
 
 		if(*transp_tex_path)
 		{
 			path = CharToWideChar(transp_tex_path);
-			_transpTexture = engineAPI.textureManager->CreateTexture(path);
+			_transpTexture = engineAPI.textureManager->CreateTexture2D(path);
 			delete[] path;
 		}
 
@@ -207,25 +206,25 @@ namespace Engine
 		file->Printf("// Daemonium engine material file\n\n");
 		file->Printf("material\n{\n");
 
-		tstr = _emissionTexture? _emissionTexture->GetFileName(): _t("");
+		tstr = _emissionTexture? _emissionTexture.GetFileRes()->GetFileName(): _t("");
 		if(!tstr)
 			tstr = _t("");
 		file->Printf("\temissionTexture\t\t\"%ls\"\n", tstr);
 
 		file->Printf("\tdiffuseColor\t\t[%f %f %f]\n", _diffuseColor.r, _diffuseColor.g, _diffuseColor.b);
-		tstr = _diffuseTexture? _diffuseTexture->GetFileName(): _t("");
+		tstr = _diffuseTexture? _diffuseTexture.GetFileRes()->GetFileName(): _t("");
 		if(!tstr)
 			tstr = _t("");
 		file->Printf("\tdiffuseTexture\t\t\"%ls\"\n", tstr);
 
-		tstr = _normalMap? _normalMap->GetFileName(): _t("");
+		tstr = _normalMap? _normalMap.GetFileRes()->GetFileName(): _t("");
 		if(!tstr)
 			tstr = _t("");
 		file->Printf("\tnormalMap\t\t\"%ls\"\n", tstr);
 
 		file->Printf("\tuseTransparency\t\t%s\n", _useTransparency? "True": "False");
 		file->Printf("\tglobalTransparency\t\t%f\n", _globalOpacity);
-		tstr = _transpTexture? _transpTexture->GetFileName(): _t("");
+		tstr = _transpTexture? _transpTexture.GetFileRes()->GetFileName(): _t("");
 		if(!tstr)
 			tstr = _t("");
 		file->Printf("\ttransparencyTexture\t\t\"%ls\"\n", tstr);
@@ -242,50 +241,50 @@ namespace Engine
 		if(_emissionTexture)
 		{
 			engineAPI.textureManager->ReleaseTexture(_emissionTexture);
-			_emissionTexture = 0;
+			_emissionTexture = Texture2DResPtr::null;
 		}
 
 		if(_diffuseTexture)
 		{
 			engineAPI.textureManager->ReleaseTexture(_diffuseTexture);
-			_diffuseTexture = 0;
+			_diffuseTexture = Texture2DResPtr::null;
 		}
 
 		if(_normalMap)
 		{
 			engineAPI.textureManager->ReleaseTexture(_normalMap);
-			_normalMap = 0;
+			_normalMap = Texture2DResPtr::null;
 		}
 
 		if(_transpTexture)
 		{
 			engineAPI.textureManager->ReleaseTexture(_transpTexture);
-			_transpTexture = 0;
+			_transpTexture = Texture2DResPtr::null;
 		}
 	}
 
-	void Material::SetEmissionTexture(const TextureRes* val)
+	void Material::SetEmissionTexture(Texture2DResPtr val)
 	{
 		engineAPI.textureManager->ReleaseTexture(_emissionTexture);
 		_emissionTexture = val;
 		UpdateFlags();
 	}
 
-	void Material::SetDiffuseTexture(const TextureRes* val)
+	void Material::SetDiffuseTexture(Texture2DResPtr val)
 	{
 		engineAPI.textureManager->ReleaseTexture(_diffuseTexture);
 		_diffuseTexture = val;
 		UpdateFlags();
 	}
 
-	void Material::SetNormalMap(const TextureRes* val)
+	void Material::SetNormalMap(Texture2DResPtr val)
 	{
 		engineAPI.textureManager->ReleaseTexture(_normalMap);
 		_normalMap = val;
 		UpdateFlags();
 	}
 
-	void Material::SetTransparencyTexture(const TextureRes* val)
+	void Material::SetTransparencyTexture(Texture2DResPtr val)
 	{
 		engineAPI.textureManager->ReleaseTexture(_transpTexture);
 		_transpTexture = val;

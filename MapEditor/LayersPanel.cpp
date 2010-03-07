@@ -128,7 +128,7 @@ namespace MapEditor
 		if(_selectTextureDialog->ShowDialog(this) == Windows::Forms::DialogResult::OK)
 		{
 			tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
-			const TextureRes* tex_res = engineAPI->textureManager->CreateTexture(file_name, true);
+			Texture2DResPtr tex_res = engineAPI->textureManager->CreateTexture2D(file_name, true);
 			delete[] file_name;
 			if(tex_res)
 			{
@@ -343,7 +343,7 @@ namespace MapEditor
 
 	void LayersPanel::AddSpriteToList(BgLayer::Sprite* sprite)
 	{
-		String^ text = gcnew String(sprite->texture->GetFileName());
+		String^ text = gcnew String(sprite->texture.GetFileRes()->GetFileName());
 		int dot = text->LastIndexOf('.');
 		if(dot == -1)
 			dot = 0;
@@ -384,7 +384,7 @@ namespace MapEditor
 			BgLayer::Sprite* sprite = item->GetSprite();
 
 			bool tile = false;
-			GL::Texture2D* tex = (GL::Texture2D*)sprite->texture->GetTexture();
+			const GL::Texture2D* tex = sprite->texture;
 			float scale;
 			if(	(sprite->flags & BgLayer::Sprite::FLAG_TILE_U) &&
 				(sprite->flags & BgLayer::Sprite::FLAG_TILE_V) )
@@ -465,8 +465,7 @@ namespace MapEditor
 			engineAPI->renderSystem->GetRenderer()->GetViewport(viewport);
 			vec2f pos;
 			layer.PickLayerPoint(viewport[2] / 2, viewport[3], pos);
-			GL::Texture2D* tex = (GL::Texture2D*)sprite->texture->GetTexture();
-			float height = tex->GetHeight() / 4.0f;
+			float height = sprite->texture->GetHeight() / 4.0f;
 
 			sprite->rect.x1 = - layer.GetScreenWidth();
 			sprite->rect.x2 = layer.GetScreenWidth();
@@ -479,8 +478,7 @@ namespace MapEditor
 			engineAPI->renderSystem->GetRenderer()->GetViewport(viewport);
 			vec2f pos;
 			layer.PickLayerPoint(viewport[2] / 2, viewport[3], pos);
-			GL::Texture2D* tex = (GL::Texture2D*)sprite->texture->GetTexture();
-			float width = tex->GetWidth() / 4.0f;
+			float width = sprite->texture->GetWidth() / 4.0f;
 
 			sprite->rect.x1 = pos.x - width * 0.5f;
 			sprite->rect.x2 = sprite->rect.x1 + width;
@@ -493,9 +491,8 @@ namespace MapEditor
 			engineAPI->renderSystem->GetRenderer()->GetViewport(viewport);
 			vec2f pos;
 			layer.PickLayerPoint(viewport[2] / 2, viewport[3], pos);
-			GL::Texture2D* tex = (GL::Texture2D*)sprite->texture->GetTexture();
-			float width = tex->GetWidth() / 4.0f;
-			float height = tex->GetHeight() / 4.0f;
+			float width = sprite->texture->GetWidth() / 4.0f;
+			float height = sprite->texture->GetHeight() / 4.0f;
 			sprite->rect.x1 = pos.x - width * 0.5f;
 			sprite->rect.y1 = pos.y - height;
 			sprite->rect.x2 = sprite->rect.x1 + width;
@@ -509,33 +506,29 @@ namespace MapEditor
 		{
 			float width = sprite->rect.x2 - sprite->rect.x1;
 			float height = sprite->rect.y2 - sprite->rect.y1;
-			GL::Texture2D* tex = (GL::Texture2D*)sprite->texture->GetTexture();
-			float vscale = (height * tex->GetWidth()) / (width * tex->GetHeight()) * scale;
+			float vscale = (height * sprite->texture->GetWidth()) / (width * sprite->texture->GetHeight()) * scale;
 			sprite->uvScale.set(scale, vscale);
 		}
 		else if(sprite->flags & BgLayer::Sprite::FLAG_TILE_U)
 		{
-			GL::Texture2D* tex = (GL::Texture2D*)sprite->texture->GetTexture();
-			sprite->rect.y2 = sprite->rect.y1 + tex->GetHeight() * scale;
+			sprite->rect.y2 = sprite->rect.y1 + sprite->texture->GetHeight() * scale;
 			float width = sprite->rect.x2 - sprite->rect.x1;
 			float height = sprite->rect.y2 - sprite->rect.y1;
-			float uscale = (width * tex->GetHeight()) / (height * tex->GetWidth());
+			float uscale = (width * sprite->texture->GetHeight()) / (height * sprite->texture->GetWidth());
 			sprite->uvScale.set(uscale, 1.0f);
 		}
 		else if(sprite->flags & BgLayer::Sprite::FLAG_TILE_V)
 		{
-			GL::Texture2D* tex = (GL::Texture2D*)sprite->texture->GetTexture();
-			sprite->rect.x2 = sprite->rect.x1 + tex->GetWidth() * scale;
+			sprite->rect.x2 = sprite->rect.x1 + sprite->texture->GetWidth() * scale;
 			float width = sprite->rect.x2 - sprite->rect.x1;
 			float height = sprite->rect.y2 - sprite->rect.y1;
-			float vscale = (height * tex->GetWidth()) / (width * tex->GetHeight());
+			float vscale = (height * sprite->texture->GetWidth()) / (width * sprite->texture->GetHeight());
 			sprite->uvScale.set(1.0f, vscale);
 		}
 		else
 		{
-			GL::Texture2D* tex = (GL::Texture2D*)sprite->texture->GetTexture();
-			sprite->rect.x2 = sprite->rect.x1 + tex->GetWidth() * scale;
-			sprite->rect.y2 = sprite->rect.y1 + tex->GetHeight() * scale;
+			sprite->rect.x2 = sprite->rect.x1 + sprite->texture->GetWidth() * scale;
+			sprite->rect.y2 = sprite->rect.y1 + sprite->texture->GetHeight() * scale;
 			sprite->uvScale.set(1.0f, 1.0f);
 		}
 	}

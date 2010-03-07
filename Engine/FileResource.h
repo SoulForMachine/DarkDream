@@ -2,26 +2,12 @@
 #ifndef _FILE_RESOURCE_H_
 #define _FILE_RESOURCE_H_
 
-#include "BaseLib/String.h"
-#include "BaseLib/Image.h"
+#include <cassert>
+#include "BaseLib/GL/GLRenderer.h"
 #include "Common.h"
 
 
-namespace GL
-{
-
-	class Renderer;
-	class Texture;
-	class Texture2D;
-	class Texture3D;
-	class TextureCube;
-	class GLSLShader;
-	class ASMProgram;
-	enum ObjectType;
-	enum PixelFormat;
-	enum ImageFormat;
-
-}
+class Image;
 
 
 namespace Engine
@@ -33,19 +19,97 @@ namespace Engine
 	class Animation;
 	class ParticleSystem;
 
+	class ResourceManager;
+	class ShaderManager;
+	class MaterialManager;
+	class ASMProgManager;
+	class TextureManager;
+	class ModelManager;
+	class AnimationManager;
+	class ModelEntityManager;
+	class SoundManager;
+	class AIScriptManager;
+	class PartSysManager;
 
-	class ENGINE_API FileResource
+
+	//=================================================================================
+
+	template <class _FRes>
+	class ResourcePtr
 	{
 	public:
-		FileResource(const tchar* file_name);
-		virtual ~FileResource() = 0;
+		ResourcePtr() { }
+		explicit ResourcePtr(const _FRes* res)
+			{ _fileRes = res; }
 
+		operator const typename _FRes::ResType* () const
+			{ assert(_fileRes); return _fileRes->GetResource(); }
+		const typename _FRes::ResType* operator -> () const
+			{ assert(_fileRes); return _fileRes->GetResource(); }
+		const _FRes* GetFileRes() const
+			{ return _fileRes; }
+		bool IsValid() const
+			{ return (_fileRes && _fileRes->GetResource()); }
+
+		operator bool () const
+			{ return (_fileRes != 0); }
+
+		static const ResourcePtr null;
+
+	private:
+		friend bool operator == (const ResourcePtr& lhs, const ResourcePtr& rhs)
+			{ return lhs._fileRes == rhs._fileRes; }
+		friend bool operator != (const ResourcePtr& lhs, const ResourcePtr& rhs)
+			{ return lhs._fileRes != rhs._fileRes; }
+
+		const _FRes* _fileRes;
+	};
+
+
+	template <class _FRes>
+	const ResourcePtr<_FRes> ResourcePtr<_FRes>::null(0);
+
+
+	//=================================================================================
+
+	class ENGINE_API ResourceBase
+	{
+	public:
+		virtual ~ResourceBase() = 0 { }
+
+		virtual bool IsLoaded() const = 0;
+		virtual const tchar* GetFileName() const = 0;
+
+	protected:
 		virtual bool Load() = 0;
 		virtual bool LoadDefault() = 0;
 		virtual void Unload() = 0;
-		virtual bool IsLoaded() const = 0;
+		virtual void IncRefCount() = 0;
+		virtual void DecRefCount() = 0;
+		virtual bool IsReferenced() const = 0;
+
+		friend class ResourceManager;
+	};
+
+	//=================================================================================
+
+	template <class _Res, int _ResSubType = 0>
+	class ENGINE_API Resource: public ResourceBase
+	{
+	public:
+		typedef _Res ResType;
+
+		const _Res* GetResource() const
+			{ return _resource; }
+		bool IsLoaded() const
+			{ return (_resource != _null); }
 		const tchar* GetFileName() const
 			{ return _fileName; }
+
+	protected:
+		Resource(const tchar* file_name);
+		virtual ~Resource() = 0;
+
 		void IncRefCount()
 			{ ++_refCount; }
 		void DecRefCount()
@@ -53,214 +117,399 @@ namespace Engine
 		bool IsReferenced() const // returns true if anyone's holding this resource
 			{ return (_refCount > 0); }
 
-	protected:
+		_Res* _resource;
+		static _Res* _null;
 		tchar* _fileName;
 		size_t _refCount;
 
 	private:
-		FileResource( const FileResource&);
-		FileResource& operator = ( const FileResource&);
+		Resource( const Resource&);
+		Resource& operator = ( const Resource&);
 	};
 
+	/*template <class _Res, int _ResSubType>
+	_Res* Resource<_Res, _ResSubType>::_null;*/
 
-	class ENGINE_API TextureRes: public FileResource
+
+	//=================================================================================
+
+	class ENGINE_API Texture2DRes: public Resource<GL::Texture2D>
 	{
-	public:
-		TextureRes(const tchar* file_name, GL::Renderer* renderer);
-		~TextureRes();
-
+	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
-		bool IsLoaded() const
-			{ return (_texture != 0); }
-		const GL::Texture* GetTexture() const
-			{ return _texture; }
 
 	private:
-		GL::Texture2D* LoadTexture2D(const Image& image);
-		GL::Texture3D* LoadTexture3D(const Image& image);
-		GL::TextureCube* LoadTextureCube(const Image& image);
-		GL::PixelFormat GetGLInternalFormat(ImagePixelFormat image_format);
-		GL::ImageFormat GetGLFormat(ImagePixelFormat image_format);
-		GL::PixelFormat GetGLCompressedFormat(ImagePixelFormat image_format);
+		Texture2DRes(const tchar* file_name);
+		~Texture2DRes();
 
-		GL::Renderer* _renderer;
-		GL::Texture* _texture;
+		GL::Texture2D* LoadTexture2D(const Image& image);
+
+		static GL::Texture2D* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class TextureManager;
+		friend class RenderSystem;
 	};
 
+	class ENGINE_API Texture3DRes: public Resource<GL::Texture3D>
+	{
+	protected:
+		bool Load();
+		bool LoadDefault();
+		void Unload();
 
-	class ENGINE_API ShaderRes: public FileResource
+	private:
+		Texture3DRes(const tchar* file_name);
+		~Texture3DRes();
+
+		GL::Texture3D* LoadTexture3D(const Image& image);
+
+		static GL::Texture3D* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class TextureManager;
+		friend class RenderSystem;
+	};
+
+	class ENGINE_API TextureCubeRes: public Resource<GL::TextureCube>
+	{
+	protected:
+		bool Load();
+		bool LoadDefault();
+		void Unload();
+
+	private:
+		TextureCubeRes(const tchar* file_name);
+		~TextureCubeRes();
+
+		GL::TextureCube* LoadTextureCube(const Image& image);
+
+		static GL::TextureCube* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class TextureManager;
+		friend class RenderSystem;
+	};
+
+	//=================================================================================
+
+	template <GL::ObjectType _ShaderType>
+	class ENGINE_API ShaderRes: public Resource<GL::GLSLShader, _ShaderType>
 	{
 	public:
-		ShaderRes(const tchar* file_name, const char* macros, GL::Renderer* renderer);
+		const char* GetMacros() const
+			{ return _macros; }
+	protected:
+		ShaderRes(const tchar* file_name, const char* macros);
 		~ShaderRes();
 
 		bool Load();
-		bool LoadDefault();
-		void Unload();
-		bool IsLoaded() const
-			{ return (_shader != 0); }
-		const GL::GLSLShader* GetShader() const
-			{ return _shader; }
-		const char* GetMacros() const
-			{ return _macros; }
 
-	private:
-		GL::ObjectType GetShaderType(const tchar* file_name);
-
-		GL::Renderer* _renderer;
-		GL::GLSLShader* _shader;
 		const char* _macros;
 	};
 
-
-	class ENGINE_API ASMProgRes: public FileResource
+	class ENGINE_API VertexShaderRes: public ShaderRes<GL::OBJ_GLSL_VERTEX_SHADER>
 	{
-	public:
-		ASMProgRes(const tchar* file_name, GL::Renderer* renderer);
+	protected:
+		bool Load();
+		bool LoadDefault();
+		void Unload();
+
+	private:
+		VertexShaderRes(const tchar* file_name, const char* macros);
+		~VertexShaderRes();
+
+		static GL::GLSLShader* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class ShaderManager;
+		friend class RenderSystem;
+	};
+
+	class ENGINE_API FragmentShaderRes: public ShaderRes<GL::OBJ_GLSL_FRAGMENT_SHADER>
+	{
+	protected:
+		bool Load();
+		bool LoadDefault();
+		void Unload();
+
+	private:
+		FragmentShaderRes(const tchar* file_name, const char* macros);
+		~FragmentShaderRes();
+
+		static GL::GLSLShader* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class ShaderManager;
+		friend class RenderSystem;
+	};
+
+	class ENGINE_API GeometryShaderRes: public ShaderRes<GL::OBJ_GLSL_GEOMETRY_SHADER>
+	{
+	protected:
+		bool Load();
+		bool LoadDefault();
+		void Unload();
+
+	private:
+		GeometryShaderRes(const tchar* file_name, const char* macros);
+		~GeometryShaderRes();
+
+		static GL::GLSLShader* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class ShaderManager;
+		friend class RenderSystem;
+	};
+
+	//=================================================================================
+
+	template <GL::ObjectType _ShaderType>
+	class ENGINE_API ASMProgRes: public Resource<GL::ASMProgram, _ShaderType>
+	{
+	protected:
+		ASMProgRes(const tchar* file_name);
 		~ASMProgRes();
 
 		bool Load();
-		bool LoadDefault();
-		void Unload();
-		bool IsLoaded() const
-			{ return (_program != 0); }
-		const GL::ASMProgram* GetASMProgram() const
-			{ return _program; }
-
-	private:
-		GL::ObjectType GetProgramType(const tchar* file_name);
-
-		GL::Renderer* _renderer;
-		GL::ASMProgram* _program;
 	};
 
 
-	class ENGINE_API ModelRes: public FileResource
+	class ENGINE_API VertexASMProgRes: public ASMProgRes<GL::OBJ_ASM_VERTEX_PROGRAM>
 	{
-	public:
+	protected:
+		bool Load();
+		bool LoadDefault();
+		void Unload();
+
+	private:
+		VertexASMProgRes(const tchar* file_name);
+		~VertexASMProgRes();
+
+		static GL::ASMProgram* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class ASMProgManager;
+		friend class RenderSystem;
+	};
+
+	class ENGINE_API FragmentASMProgRes: public ASMProgRes<GL::OBJ_ASM_FRAGMENT_PROGRAM>
+	{
+	protected:
+		bool Load();
+		bool LoadDefault();
+		void Unload();
+
+	private:
+		FragmentASMProgRes(const tchar* file_name);
+		~FragmentASMProgRes();
+
+		static GL::ASMProgram* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class ASMProgManager;
+		friend class RenderSystem;
+	};
+
+	class ENGINE_API GeometryASMProgRes: public ASMProgRes<GL::OBJ_ASM_GEOMETRY_PROGRAM>
+	{
+	protected:
+		bool Load();
+		bool LoadDefault();
+		void Unload();
+
+	private:
+		GeometryASMProgRes(const tchar* file_name);
+		~GeometryASMProgRes();
+
+		static GL::ASMProgram* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class ASMProgManager;
+		friend class RenderSystem;
+	};
+
+	//=================================================================================
+
+	class ENGINE_API ModelRes: public Resource<Model>
+	{
+	protected:
+		bool Load();
+		bool LoadDefault();
+		void Unload();
+
+	private:
 		ModelRes(const tchar* file_name);
 		~ModelRes();
 
+		static Model* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class ModelManager;
+		friend class RenderSystem;
+	};
+
+	//=================================================================================
+
+	class ENGINE_API MaterialRes: public Resource<Material>
+	{
+	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
-		bool IsLoaded() const
-			{ return (_model != 0); }
-		const Model* GetModel() const
-			{ return _model; }
 
 	private:
-		Model* _model;
-	};
-
-
-	class ENGINE_API MaterialRes: public FileResource
-	{
-	public:
 		MaterialRes(const tchar* file_name);
 		~MaterialRes();
 
+		static Material* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class MaterialManager;
+		friend class RenderSystem;
+	};
+
+	//=================================================================================
+
+	class ENGINE_API AIScriptRes: public Resource<int>
+	{
+	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
-		bool IsLoaded() const
-			{ return (_material != 0); }
-		const Material* GetMaterial() const
-			{ return _material; }
 
 	private:
-		Material* _material;
-	};
-
-
-	class ENGINE_API AIScriptRes: public FileResource
-	{
-	public:
 		AIScriptRes(const tchar* file_name);
 		~AIScriptRes();
 
+		static int* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class AIScriptManager;
+		friend class RenderSystem;
+	};
+
+	//=================================================================================
+
+	class ENGINE_API ModelEntityRes: public Resource<ModelEntity>
+	{
+	public:
+		bool IsEntityReferenced(const tchar* file_name); //! premesti u ModelEntity
+
+	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
-		bool IsLoaded() const
-			{ return false; }
+
 	private:
-	};
-
-
-	class ENGINE_API ModelEntityRes: public FileResource
-	{
-	public:
 		ModelEntityRes(const tchar* file_name);
 		ModelEntityRes(const ModelEntityRes& res);
 		~ModelEntityRes();
 
+		static ModelEntity* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class ModelEntityManager;
+		friend class RenderSystem;
+	};
+
+	//=================================================================================
+
+	class ENGINE_API AnimationRes: public Resource<Animation>
+	{
+	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
-		bool IsLoaded() const
-			{ return (_entity != 0); }
-		ModelEntity* GetEntity()
-			{ return _entity; }
-		bool IsEntityReferenced(const tchar* file_name);
 
 	private:
-		ModelEntity* _entity;
-	};
-
-
-	class ENGINE_API AnimationRes: public FileResource
-	{
-	public:
 		AnimationRes(const tchar* file_name);
 		~AnimationRes();
 
+		static Animation* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class AnimationManager;
+		friend class RenderSystem;
+	};
+
+	//=================================================================================
+
+	class ENGINE_API SoundRes: public Resource<int>
+	{
+	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
-		bool IsLoaded() const
-			{ return (_animation != 0); }
-		const Animation* GetAnimation() const
-			{ return _animation; }
 
 	private:
-		Animation* _animation;
-	};
-
-
-	class ENGINE_API SoundRes: public FileResource
-	{
-	public:
 		SoundRes(const tchar* file_name);
 		~SoundRes();
 
+		static int* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
+
+		friend class SoundManager;
+		friend class RenderSystem;
+	};
+
+	//=================================================================================
+
+	class ENGINE_API PartSysRes: public Resource<ParticleSystem>
+	{
+	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
-		bool IsLoaded() const
-			{ return false; }
-	};
 
-	class ENGINE_API PartSysRes: public FileResource
-	{
-	public:
+	private:
 		PartSysRes(const tchar* file_name);
 		PartSysRes(const PartSysRes& res);
 		~PartSysRes();
 
-		bool Load();
-		bool LoadDefault();
-		void Unload();
-		bool IsLoaded() const
-			{ return false; }
-		ParticleSystem* GetParticleSystem()
-			{ return _particleSys; }
+		static ParticleSystem* CreateDefault();
+		static bool CreateNull();
+		static void DestroyNull();
 
-	private:
-		ParticleSystem* _particleSys;
+		friend class PartSysManager;
+		friend class RenderSystem;
 	};
+
+	//=================================================================================
+
+	typedef ResourcePtr<Texture2DRes> Texture2DResPtr;
+	typedef ResourcePtr<Texture3DRes> Texture3DResPtr;
+	typedef ResourcePtr<TextureCubeRes> TextureCubeResPtr;
+	typedef ResourcePtr<VertexShaderRes> VertexShaderResPtr;
+	typedef ResourcePtr<FragmentShaderRes> FragmentShaderResPtr;
+	typedef ResourcePtr<GeometryShaderRes> GeometryShaderResPtr;
+	typedef ResourcePtr<VertexASMProgRes> VertexASMProgResPtr;
+	typedef ResourcePtr<FragmentASMProgRes> FragmentASMProgResPtr;
+	typedef ResourcePtr<GeometryASMProgRes> GeometryASMProgResPtr;
+	typedef ResourcePtr<ModelRes> ModelResPtr;
+	typedef ResourcePtr<MaterialRes> MaterialResPtr;
+	typedef ResourcePtr<AIScriptRes> AIScriptResPtr;
+	typedef ResourcePtr<ModelEntityRes> ModelEntityResPtr;
+	typedef ResourcePtr<AnimationRes> AnimationResPtr;
+	typedef ResourcePtr<SoundRes> SoundResPtr;
+	typedef ResourcePtr<PartSysRes> PartSysResPtr;
 
 }
 

@@ -5,7 +5,7 @@
 #include "BaseLib/GL/GLRenderer.h"
 #include "BaseLib/FreeStackPool.h"
 #include "Engine/Common.h"
-#include "Engine/ResourceManager.h"
+//#include "Engine/ResourceManager.h"
 #include "Render2D.h"
 #include "TerrainRenderer.h"
 #include "EntityRenderer.h"
@@ -90,6 +90,8 @@ namespace Engine
 		void AddEntityToDrawArray(ModelEntity* entity, const Camera& camera);
 		void AddPartSysToDrawArray(ParticleSystem* part_sys);
 		void UpdateEntityTime(Entity* entity);
+		bool CreateNullResources();
+		void DestroyNullResources();
 
 		GL::Renderer* _renderer;
 		Render2D* _render2D;

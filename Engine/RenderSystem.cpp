@@ -18,6 +18,7 @@ namespace Engine
 
 	Console::BoolVar g_cvarDrawEntityBBoxes("r_drawEntityBBoxes", false);
 	Console::BoolVar g_cvarDrawParticleEmitter("r_drawParticleEmitter", false);
+	Console::BoolVar g_cvarDrawModelSkelet("r_drawModelSkelet", false);
 
 
 	static
@@ -160,6 +161,13 @@ namespace Engine
 		_renderer->EnableFaceCulling(true);
 		_renderer->EnableDepthTest(true);
 
+		// create graphics related null resources
+		if(!CreateNullResources())
+		{
+			Deinit();
+			return false;
+		}
+
 		// init 2D rendering
 		_render2D = new(mainPool) Render2D;
 		result = _render2D->Init(this);
@@ -280,6 +288,8 @@ namespace Engine
 		_renderer->DestroyTexture(_texWhite);
 		_renderer->DestroyTexture(_texBlack);
 
+		DestroyNullResources();
+
 		GL::DestroyRenderer(_renderer);
 
 		delete[] _entityBuf;
@@ -354,7 +364,7 @@ namespace Engine
 			{
 				if(it->type == ModelEntity::JOINT_ATTACH_MODEL)
 				{
-					ModelEntity* att_ent = ((ModelEntityRes*)it->attachment)->GetEntity();
+					ModelEntity* att_ent = (ModelEntity*) ((ModelEntityRes*)it->attachment)->GetResource();
 					if(att_ent)
 					{
 						UpdateEntityTime(att_ent);
@@ -362,7 +372,7 @@ namespace Engine
 				}
 				else if(it->type == ModelEntity::JOINT_ATTACH_PARTICLE_SYSTEM)
 				{
-					ParticleSystem* ps = ((PartSysRes*)it->attachment)->GetParticleSystem();
+					ParticleSystem* ps = (ParticleSystem*) ((PartSysRes*)it->attachment)->GetResource();
 					if(ps)
 					{
 						ps->UpdateTime(_frameTime);
@@ -370,6 +380,126 @@ namespace Engine
 				}
 			}
 		}
+	}
+
+	bool RenderSystem::CreateNullResources()
+	{
+		if(!Texture2DRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null 2D texture.");
+			Deinit();
+			return false;
+		}
+
+		if(!Texture3DRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null 3D texture.");
+			Deinit();
+			return false;
+		}
+
+		if(!TextureCubeRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null cube texture.");
+			Deinit();
+			return false;
+		}
+
+		if(!VertexShaderRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null vertex shader.");
+			Deinit();
+			return false;
+		}
+
+		if(!FragmentShaderRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null fragment shader.");
+			Deinit();
+			return false;
+		}
+		if(!GeometryShaderRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null geometry shader.");
+			Deinit();
+			return false;
+		}
+
+		if(!VertexASMProgRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null vertex asm program.");
+			Deinit();
+			return false;
+		}
+
+		if(!FragmentASMProgRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null fragment asm program.");
+			Deinit();
+			return false;
+		}
+
+		if(!GeometryASMProgRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null geometry asm program.");
+			Deinit();
+			return false;
+		}
+
+		if(!ModelRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null model.");
+			Deinit();
+			return false;
+		}
+
+		if(!MaterialRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null material.");
+			Deinit();
+			return false;
+		}
+
+		if(!ModelEntityRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null model entity.");
+			Deinit();
+			return false;
+		}
+
+		if(!AnimationRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null animation.");
+			Deinit();
+			return false;
+		}
+
+		if(!PartSysRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null particle system.");
+			Deinit();
+			return false;
+		}
+
+		return true;
+	}
+
+	void RenderSystem::DestroyNullResources()
+	{
+		Texture2DRes::DestroyNull();
+		Texture3DRes::DestroyNull();
+		TextureCubeRes::DestroyNull();
+		VertexShaderRes::DestroyNull();
+		FragmentShaderRes::DestroyNull();
+		GeometryShaderRes::DestroyNull();
+		VertexASMProgRes::DestroyNull();
+		FragmentASMProgRes::DestroyNull();
+		GeometryASMProgRes::DestroyNull();
+		ModelRes::DestroyNull();
+		MaterialRes::DestroyNull();
+		ModelEntityRes::DestroyNull();
+		AnimationRes::DestroyNull();
+		PartSysRes::DestroyNull();
 	}
 
 	void RenderSystem::RenderFrame()
@@ -400,11 +530,19 @@ namespace Engine
 				_debugRenderer->RenderBoundingBox(_entityBuf[ent_i]->GetWorldBoundingBox());
 			}
 		}
+
+		if(g_cvarDrawModelSkelet)
+		{
+			for(int ent_i = 0; ent_i < _visEntityCount; ++ent_i)
+			{
+				_debugRenderer->RenderModelSkelet(*_entityBuf[ent_i], vec3f(0.0f, 1.0f, 0.0f));
+			}
+		}
 	}
 
 	void RenderSystem::AddEntityToDrawArray(ModelEntity* entity, const Camera& camera)
 	{
-		const Model* model = entity->GetModelRes()->GetModel();
+		const Model* model = entity->GetModelRes();
 		const StaticArray<Mesh>& meshes = model->GetMeshes();
 		const ModelEntity::MeshDataArray& mesh_data = entity->GetMeshDataArray(); 
 		const mat4f& world_mat = entity->GetWorldTransform();
@@ -412,7 +550,7 @@ namespace Engine
 
 		for(size_t mesh_i = 0; mesh_i < meshes.GetCount(); ++mesh_i)
 		{
-			if(	mesh_data[mesh_i].materialData->materialRes->GetMaterial()->HasTransparency() &&
+			if(	mesh_data[mesh_i].materialData->materialRes->HasTransparency() &&
 				_transpMeshCount < MAX_NUM_TRANSP_MESHES )
 			{
 				_transpMeshBuf[_transpMeshCount] = _meshDataPool.New();
@@ -420,7 +558,7 @@ namespace Engine
 				_transpMeshBuf[_transpMeshCount]->worldMat = &world_mat;
 				_transpMeshBuf[_transpMeshCount]->jointMatPalette = joint_mat_palette.GetData();
 				_transpMeshBuf[_transpMeshCount]->jointCount = joint_mat_palette.GetCount();
-				_transpMeshBuf[_transpMeshCount]->material = mesh_data[mesh_i].materialData->materialRes->GetMaterial();
+				_transpMeshBuf[_transpMeshCount]->material = mesh_data[mesh_i].materialData->materialRes;
 				_transpMeshBuf[_transpMeshCount]->shaderIndex = mesh_data[mesh_i].shaderIndex;
 
 				vec3f wcenter;
@@ -437,7 +575,7 @@ namespace Engine
 				_meshBuf[_meshCount]->worldMat = &world_mat;
 				_meshBuf[_meshCount]->jointMatPalette = joint_mat_palette.GetData();
 				_meshBuf[_meshCount]->jointCount = joint_mat_palette.GetCount();
-				_meshBuf[_meshCount]->material = mesh_data[mesh_i].materialData->materialRes->GetMaterial();
+				_meshBuf[_meshCount]->material = mesh_data[mesh_i].materialData->materialRes;
 				_meshBuf[_meshCount]->shaderIndex = mesh_data[mesh_i].shaderIndex;
 				_meshBuf[_meshCount]->eyeDistSq = 0.0f;
 				_meshCount++;
@@ -453,7 +591,7 @@ namespace Engine
 		{
 			if(it->type == ModelEntity::JOINT_ATTACH_MODEL)
 			{
-				ModelEntity* att_ent = ((ModelEntityRes*)it->attachment)->GetEntity();
+				ModelEntity* att_ent = (ModelEntity*) ((ModelEntityRes*)it->attachment)->GetResource();
 				if(att_ent)
 				{
 					att_ent->UpdateGraphics();
@@ -462,7 +600,7 @@ namespace Engine
 			}
 			else if(it->type == ModelEntity::JOINT_ATTACH_PARTICLE_SYSTEM)
 			{
-				ParticleSystem* ps = ((PartSysRes*)it->attachment)->GetParticleSystem();
+				ParticleSystem* ps = (ParticleSystem*) ((PartSysRes*)it->attachment)->GetResource();
 				if(ps)
 				{
 					ps->UpdateGraphics();
@@ -496,7 +634,12 @@ namespace Engine
 		_terrainRenderer->RenderTerrainPatches(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), _terrainPatches, _visTerrPatchesCount);
 
 		if(g_cvarDrawTerrainNormals)
-			_terrainRenderer->RenderTerrainPatchNormals(engineAPI.world->GetCamera(), &engineAPI.world->GetTerrain(), _terrainPatches, _visTerrPatchesCount);
+		{
+			for(int i = 0; i < _visTerrPatchesCount; ++i)
+			{
+				_debugRenderer->RenderTerrainPatchNormals(*_terrainPatches[i], vec3f(1.0f, 0.0f, 0.0f));
+			}
+		}
 	}
 
 	void RenderSystem::RenderGrass()

@@ -30,14 +30,14 @@ namespace EntityEditor
 	{
 		// model
 		String^ model_file = "";
-		const ModelRes* model = 0;
+		ModelResPtr model = ModelResPtr::null;
 
 		if(_entity)
 		{
 			model = _entity->GetModelRes();
 			if(model)
 			{
-				const tchar* file_name = model->GetFileName();
+				const tchar* file_name = model.GetFileRes()->GetFileName();
 				if(file_name)
 					model_file = gcnew String(file_name);
 			}
@@ -47,10 +47,10 @@ namespace EntityEditor
 		// skeleton
 		_treeSkelet->BeginUpdate();
 		_treeSkelet->Nodes->Clear();
-		bool model_loaded = _entity && model && model->GetModel();
-		if(model_loaded && model->GetModel()->GetRootJoint())
+		bool model_loaded = _entity && model.IsValid();
+		if(model_loaded && model->GetRootJoint())
 		{
-			InsertJoint(_treeSkelet->Nodes, model->GetModel()->GetRootJoint());
+			InsertJoint(_treeSkelet->Nodes, model->GetRootJoint());
 			if(_treeSkelet->Nodes->Count)
 			{
 				_treeSkelet->ExpandAll();
@@ -71,7 +71,7 @@ namespace EntityEditor
 		_btnRemoveAttachment->Enabled = false;
 
 		// animations
-		bool has_skelet = model_loaded && model->GetModel()->HasSkelet();
+		bool has_skelet = model_loaded && model->HasSkelet();
 		_btnAddAnim->Enabled = has_skelet;
 		_btnRemoveAnim->Enabled = false;
 		_btnPlayAnim->Enabled = false;
@@ -84,7 +84,7 @@ namespace EntityEditor
 			{
 				const ModelEntity::AnimData& ad = *it;
 				ListViewItem^ item = gcnew ListViewItem(gcnew String(ad.name));
-				item->SubItems->Add(gcnew String(ad.animation->GetFileName()));
+				item->SubItems->Add(gcnew String(ad.animation.GetFileRes()->GetFileName()));
 				_listAnimations->Items->Add(item);
 			}
 		}
@@ -98,7 +98,7 @@ namespace EntityEditor
 			{
 				const ModelEntity::SoundData& sd = *it;
 				ListViewItem^ item = gcnew ListViewItem(gcnew String(sd.name));
-				item->SubItems->Add(gcnew String(sd.sound->GetFileName()));
+				item->SubItems->Add(gcnew String(sd.sound.GetFileRes()->GetFileName()));
 				_listSounds->Items->Add(item);
 			}
 		}
@@ -107,9 +107,9 @@ namespace EntityEditor
 		String^ ai_path = "";
 		if(_entity)
 		{
-			const AIScriptRes* script = _entity->GetAIScriptRes();
+			AIScriptResPtr script = _entity->GetAIScriptRes();
 			if(script)
-				ai_path = gcnew String(script->GetFileName());
+				ai_path = gcnew String(script.GetFileRes()->GetFileName());
 		}
 		_textAIScript->Text = ai_path;
 	}
@@ -184,8 +184,8 @@ namespace EntityEditor
 					{
 						if(att_ent->type == ModelEntity::JOINT_ATTACH_MODEL)
 						{
-							ModelEntityRes* res = (ModelEntityRes*)att_ent->attachment;
-							res->GetEntity()->SetupModelData();
+							ModelEntity* ent = (ModelEntity*) ((ModelEntityRes*)att_ent->attachment)->GetResource();
+							ent->SetupModelData();
 						}
 					}
 
@@ -347,7 +347,7 @@ namespace EntityEditor
 	{
 		if(e->Node != nullptr && e->Node->Text != "< No skelet >")
 		{
-			assert(_entity && _entity->GetModelRes() && _entity->GetModelRes()->GetModel());
+			assert(_entity && _entity->GetModelRes().IsValid());
 			char* name = ConvertString<char>(e->Node->Text);
 			const ModelEntity::JointAttachMap& att = _entity->GetJointAttachments();
 			ModelEntity::JointAttachMap::ConstIterator it = att.Find(name);

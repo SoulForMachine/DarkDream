@@ -39,7 +39,7 @@ namespace MapEditor
 			((ModelEntity*)_entity)->SetActiveAnimation("Idle");
 			break;
 		case ModelEntity::JOINT_ATTACH_PARTICLE_SYSTEM:
-			_entity = engineAPI->partSysManager->CreatePartSysObject(path);
+			_entity = engineAPI->partSysManager->CreateParticleSystemObject(path);
 			engineAPI->partSysManager->ReleaseAll(); //!
 			break;
 		default:

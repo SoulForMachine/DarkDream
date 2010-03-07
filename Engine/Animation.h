@@ -62,6 +62,7 @@ namespace Engine
 			{ return _framesPerSec; }
 		int GetFrameCount() const
 			{ return _frameCount; }
+		bool IsSkeletCompatible(const StaticArray<Joint>& joint_array) const;
 
 		static const char* GetAnimTypeName(AnimType anim);
 		static AnimType GetAnimTypeByName(const char* name);

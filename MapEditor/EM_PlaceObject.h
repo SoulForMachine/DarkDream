@@ -93,9 +93,9 @@ namespace MapEditor
 		GL::Buffer* _indBufSelRect;
 		GL::Buffer* _vertBufSelMark;
 		GL::VertexFormat* _vertFmtPos;
-		const Engine::ASMProgRes* _vertpSimple2D;
-		const Engine::ASMProgRes* _vertpSimple;
-		const Engine::ASMProgRes* _fragpConstColor;
+		Engine::VertexASMProgResPtr& _vertpSimple2D;
+		Engine::VertexASMProgResPtr& _vertpSimple;
+		Engine::FragmentASMProgResPtr& _fragpConstColor;
 		HCURSOR	_cursorMove;
 		HCURSOR	_cursorMoveUD;
 		HCURSOR	_cursorRotate;

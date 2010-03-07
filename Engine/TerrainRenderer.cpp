@@ -3,6 +3,7 @@
 #include "Engine/EngineInternal.h"
 #include "Engine/RenderSystem.h"
 #include "Engine/Camera.h"
+#include "ResourceManager.h"
 #include "TerrainRenderer.h"
 
 
@@ -22,17 +23,17 @@ namespace Engine
 	bool TerrainRenderer::Init()
 	{
 		_renderer = engineAPI.renderSystem->GetRenderer();
-		_vpTerrain = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Terrain.vp"), true);
-		_fpTerrain = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Terrain.fp"), true);
-		_fpLambert = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Lambert.fp"), true);
+		_vpTerrain = engineAPI.asmProgManager->CreateVertexASMProgram(_t("Programs/Terrain.vp"), true);
+		_fpTerrain = engineAPI.asmProgManager->CreateFragmentASMProgram(_t("Programs/Terrain.fp"), true);
+		_fpLambert = engineAPI.asmProgManager->CreateFragmentASMProgram(_t("Programs/Lambert.fp"), true);
 
-		_vpGrass = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Grass.vp"), true);
-		_fpGrass = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Grass.fp"), true);
+		_vpGrass = engineAPI.asmProgManager->CreateVertexASMProgram(_t("Programs/Grass.vp"), true);
+		_fpGrass = engineAPI.asmProgManager->CreateFragmentASMProgram(_t("Programs/Grass.fp"), true);
 
-		_vpDbgLine = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
-		_fpDbgLine = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
+		_vpDbgLine = engineAPI.asmProgManager->CreateVertexASMProgram(_t("Programs/Simple.vp"), true);
+		_fpDbgLine = engineAPI.asmProgManager->CreateFragmentASMProgram(_t("Programs/ConstColor.fp"), true);
 
-		_gradTex = engineAPI.textureManager->CreateTexture(_t("Textures/terrain_grad.dds"), true);
+		_gradTex = engineAPI.textureManager->CreateTexture2D(_t("Textures/terrain_grad.dds"), true);
 
 		GL::SamplerStateDesc terr_sampler = GL::GLState::defaultSamplerState;
 		terr_sampler.addressU = GL::TEX_ADDRESS_REPEAT;
@@ -109,50 +110,49 @@ namespace Engine
 	{
 	//	const GL::ASMProgram* frag_prog = 
 	//		(engineAPI.renderSystem->GetRenderStyle() == RenderSystem::RENDER_STYLE_GAME)?
-	//		_fpTerrain->GetASMProgram(): _fpLambert->GetASMProgram();
-		const GL::ASMProgram* frag_prog = _fpTerrain->GetASMProgram();
+	//		_fpTerrain: _fpLambert;
 		_renderer->IndexSource(terrain->GetPatchIndexBuffer(), GL::TYPE_UNSIGNED_SHORT);
-		_renderer->ActiveVertexASMProgram(_vpTerrain->GetASMProgram());
-		_renderer->ActiveFragmentASMProgram(frag_prog);
+		_renderer->ActiveVertexASMProgram(_vpTerrain);
+		_renderer->ActiveFragmentASMProgram(_fpTerrain);
 		_renderer->ActiveVertexFormat(_vertFmtTerrain);
-		_vpTerrain->GetASMProgram()->LocalMatrix4x4(1, camera.GetViewProjectionTransform());
-		_vpTerrain->GetASMProgram()->LocalParameter(5, vec4f(camera.GetPosition()));
+		_vpTerrain->LocalMatrix4x4(1, camera.GetViewProjectionTransform());
+		_vpTerrain->LocalParameter(5, vec4f(camera.GetPosition()));
 		float tile = terrain->GetTexureTile();
-		_vpTerrain->GetASMProgram()->LocalParameter(6, vec4f(tile / Terrain::PATCH_WIDTH, tile / Terrain::PATCH_WIDTH, 0.0f, 0.0f));
+		_vpTerrain->LocalParameter(6, vec4f(tile / Terrain::PATCH_WIDTH, tile / Terrain::PATCH_WIDTH, 0.0f, 0.0f));
 		const float* color = engineAPI.renderSystem->GetMainColor();
-		frag_prog->LocalParameter(0, color);
+		_fpTerrain->LocalParameter(0, color);
 		const Terrain::TerrainPatch* hlight = terrain->GetHighlightPatch();
 
-		const TextureRes* tex_res = terrain->GetTexture();
+		Texture2DResPtr tex_res = terrain->GetTexture();
 		const GL::Texture* tex;
 		if(tex_res)
-			tex = tex_res->GetTexture();
+			tex = tex_res;
 		else
 			tex = engineAPI.renderSystem->GetWhiteTexture();
 
 		_renderer->SetSamplerState(0, _terrainSampler);
 		_renderer->SetSamplerState(1, _gradSampler);
 		_renderer->SetSamplerTexture(0, tex);
-		_renderer->SetSamplerTexture(1, _gradTex->GetTexture());
+		_renderer->SetSamplerTexture(1, _gradTex);
 
 		for(int i = 0; i < count; ++i)
 		{
 			_renderer->VertexSource(0, patches[i]->vertBuf, sizeof(Terrain::PatchVertex), 0);
 
 			float transl[] = { patches[i]->boundBox.minPt.x, 0.0f, 0.0f, 0.0f };
-			_vpTerrain->GetASMProgram()->LocalParameter(0, transl);
+			_vpTerrain->LocalParameter(0, transl);
 
 			if(patches[i] == hlight)
 			{
 				float hlcolor[] = { 0.9215f, 0.5529f, 0.4470f, 1.0f };
-				frag_prog->LocalParameter(0, hlcolor);
+				_fpTerrain->LocalParameter(0, hlcolor);
 			}
 
 			_renderer->DrawIndexed(GL::PRIM_TRIANGLES, 0, terrain->GetPatchIndexCount());
 
 			if(patches[i] == hlight)
 			{
-				frag_prog->LocalParameter(0, color);
+				_fpTerrain->LocalParameter(0, color);
 			}
 		}
 
@@ -160,43 +160,17 @@ namespace Engine
 		_renderer->SetSamplerTexture(1, 0);
 	}
 
-	void TerrainRenderer::RenderTerrainPatchNormals(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count)
-	{
-		_renderer->IndexSource(0, GL::TYPE_VOID);
-		_renderer->ActiveVertexASMProgram(_vpDbgLine->GetASMProgram());
-		_renderer->ActiveFragmentASMProgram(_fpDbgLine->GetASMProgram());
-		_renderer->ActiveVertexFormat(_vertFmtDbgLine);
-
-		float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-		_fpDbgLine->GetASMProgram()->LocalParameter(0, color);
-
-		for(int i = 0; i < count; ++i)
-		{
-			if(patches[i]->normalBuf)
-			{
-				_renderer->VertexSource(0, patches[i]->normalBuf, sizeof(vec3f), 0);
-
-				mat4f transl, wvp;
-				transl.set_translation(patches[i]->boundBox.minPt.x, 0.0f, 0.0f);
-				mul(wvp, transl, camera.GetViewProjectionTransform());
-				_vpDbgLine->GetASMProgram()->LocalMatrix4x4(0, wvp);
-
-				_renderer->Draw(GL::PRIM_LINES, 0, terrain->GetPatchIndexCount() * 2);
-			}
-		}
-	}
-
 	void TerrainRenderer::RenderTerrainPatchGrass(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count)
 	{
 		_renderer->IndexSource(terrain->GetGrassIndexBuffer(), GL::TYPE_UNSIGNED_SHORT);
-		_renderer->ActiveVertexASMProgram(_vpGrass->GetASMProgram());
-		_renderer->ActiveFragmentASMProgram(_fpGrass->GetASMProgram());
+		_renderer->ActiveVertexASMProgram(_vpGrass);
+		_renderer->ActiveFragmentASMProgram(_fpGrass);
 		_renderer->ActiveVertexFormat(_vertFmtGrass);
 
-		_vpGrass->GetASMProgram()->LocalMatrix4x4(1, camera.GetViewProjectionTransform());
+		_vpGrass->LocalMatrix4x4(1, camera.GetViewProjectionTransform());
 
 		_renderer->SetSamplerState(0, _grassSampler);
-		_renderer->SetSamplerTexture(0, terrain->GetGrassTexture()? terrain->GetGrassTexture()->GetTexture(): 0);
+		_renderer->SetSamplerTexture(0, terrain->GetGrassTexture()? (const GL::Texture2D*)terrain->GetGrassTexture(): 0);
 
 		_renderer->EnableBlending(true);
 		_renderer->BlendingFunc(GL::BLEND_FUNC_SRC_ALPHA, GL::BLEND_FUNC_ONE_MINUS_SRC_ALPHA);
@@ -205,7 +179,7 @@ namespace Engine
 		for(int i = 0; i < count; ++i)
 		{
 			vec4f transl(patches[i]->boundBox.minPt.x, 0.0f, 0.0f, 0.0f);
-			_vpGrass->GetASMProgram()->LocalParameter(0, transl);
+			_vpGrass->LocalParameter(0, transl);
 
 			for(int j = 0; j < Terrain::GRASS_SEGMENTS; ++j)
 			{
@@ -226,20 +200,20 @@ namespace Engine
 	void TerrainRenderer::Clear()
 	{
 		_renderer = 0;
-		_vpTerrain = 0;
-		_fpTerrain = 0;
-		_fpLambert = 0;
-		_vpDbgLine = 0;
-		_fpDbgLine = 0;
-		_vpGrass = 0;
-		_fpGrass = 0;
+		_vpTerrain = VertexASMProgResPtr::null;
+		_fpTerrain = FragmentASMProgResPtr::null;
+		_fpLambert = FragmentASMProgResPtr::null;
+		_vpDbgLine = VertexASMProgResPtr::null;
+		_fpDbgLine = FragmentASMProgResPtr::null;
+		_vpGrass = VertexASMProgResPtr::null;
+		_fpGrass = FragmentASMProgResPtr::null;
 		_vertFmtTerrain = 0;
 		_vertFmtDbgLine = 0;
 		_vertFmtGrass = 0;
 		_gradSampler = 0;
 		_terrainSampler = 0;
 		_grassSampler = 0;
-		_gradTex = 0;
+		_gradTex = Texture2DResPtr::null;
 	}
 
 }

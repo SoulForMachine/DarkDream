@@ -4,6 +4,7 @@
 #include "EngineInternal.h"
 #include "Engine/RenderSystem.h"
 #include "Engine/ModelEntity.h"
+#include "Engine/Material.h"
 #include "ResourceManager.h"
 
 using namespace Memory;
@@ -22,41 +23,42 @@ namespace Engine
 	Console::Command reloadShaders("reloadShaders", "reloads all curently loaded shaders", CmdReloadShaders);
 
 
+	bool ResourceManager::_loadDefaultOnFail = false;
+
 
 	/*
-		If immediate is true, the resource will be immediately loaded
+		If immediate is true, the resource will be immediately loaded. If file_name is empty string,
+		created resource will point to null resource and it won't be added to manager map.
 	*/
-	const FileResource* ResourceManager::CreateRes(const tchar* file_name, bool immediate)
+	const ResourceBase* ResourceManager::CreateRes(const tchar* key, const CreateResObjFunc& create_res_obj, bool immediate)
 	{
-		if(!file_name)
+		if(!key)
 			return 0;
 
 		// see if this resource is already created
-		FileResource* res = (FileResource*)FindRes(file_name);
+		ResourceBase* res = (ResourceBase*)FindRes(key);
 		if(res)
 		{
 			res->IncRefCount();
 			if(immediate && !res->IsLoaded())
 			{
-				if(!res->Load())
+				if(!res->Load() && _loadDefaultOnFail)
 					res->LoadDefault();
 			}
 			return res;
 		}
 
 		// create new object
-		res = CreateResObj(file_name);
+		res = create_res_obj();
 
 		if(res)
 		{
-			if(*file_name != '\0')
+			if(*key)
 			{
 				if(immediate)
-				{
-					if(!res->Load())
+					if(!res->Load() && _loadDefaultOnFail)
 						res->LoadDefault();
-				}
-				_resources[file_name] = res;
+				_resources[key] = res;
 			}
 			else
 			{
@@ -65,25 +67,25 @@ namespace Engine
 		}
 		else
 		{
-			Console::PrintError("Failed to create resource object for %ls", file_name);
+			Console::PrintError("Failed to create resource: %ls", key);
 		}
 
 		return res;
 	}
 
-	bool ResourceManager::ReleaseRes(const FileResource* res)
+	bool ResourceManager::ReleaseRes(const tchar* key, const ResourceBase* res)
 	{
 		if(!res)
 			return false;
 
-		// if file name is empty string, just release the resource
-		if(!res->GetFileName() || *res->GetFileName() == '\0')
+		// if file name is an empty string, just release the resource
+		if(!key || *key == '\0')
 		{
 			delete res;
 			return true;
 		}
 
-		ResHashMap::Iterator it = _resources.Find(res->GetFileName());
+		ResHashMap::Iterator it = _resources.Find(key);
 
 		if(it != _resources.End())
 		{
@@ -108,12 +110,7 @@ namespace Engine
 	{
 		for(ResHashMap::Iterator it = _resources.Begin(); it != _resources.End(); ++it)
 		{
-			FileResource* res = *it;
-			if(!res->IsLoaded())
-			{
-				if(!res->Load())
-					res->LoadDefault();
-			}
+			(*it)->Load();
 		}
 	}
 
@@ -135,118 +132,233 @@ namespace Engine
 		_resources.Clear();
 	}
 
-	const FileResource* ResourceManager::FindRes(const tchar* file_name)
+	const ResourceBase* ResourceManager::FindRes(const tchar* file_name)
 	{
 		ResHashMap::Iterator it = _resources.Find(file_name);
 		return (it != _resources.End())? *it: 0;
 	}
 
-	TextureRes* TextureManager::CreateResObj(const tchar* file_name)
+	//=============================================================================================
+
+	Texture2DResPtr TextureManager::CreateTexture2D(const tchar* file_name, bool immediate)
 	{
-		return new(mapPool) TextureRes(file_name, engineAPI.renderSystem->GetRenderer());
+		struct CreateTex2D: CreateResObjFunc
+		{
+			CreateTex2D(const tchar* file_name)
+				{ _fileName = file_name; }
+			ResourceBase* operator () () const
+				{ return new(mapPool) Texture2DRes(_fileName); }
+		private:
+			const tchar* _fileName;
+		};
+
+		return Texture2DResPtr((const Texture2DRes*)CreateRes(file_name, CreateTex2D(file_name), immediate));
 	}
 
-	const ShaderRes* ShaderManager::CreateShader(const tchar* file_name, const char* macros, bool immediate)
+	Texture3DResPtr TextureManager::CreateTexture3D(const tchar* file_name, bool immediate)
 	{
-		if(!file_name)
-			return 0;
-
-		// make a hash map key from concatenated file name and macros
-		tchar* key = new(tempPool) tchar[tstrlen(file_name) + strlen(macros) + 2];
-		tstrcpy(key, file_name);
-		tstrcat(key, _t("|"));
-		tchar* tm = CharToWideChar(macros);
-		tstrcat(key, tm);
-		delete[] tm;
-
-		// see if this resource is already created
-		FileResource* res = (FileResource*)FindRes(key);
-		if(res)
+		struct CreateTex3D: CreateResObjFunc
 		{
-			res->IncRefCount();
-			if(immediate && !res->IsLoaded())
-			{
-				if(!res->Load())
-					res->LoadDefault();
-			}
-			delete[] key;
-			return (const ShaderRes*)res;
-		}
+			CreateTex3D(const tchar* file_name)
+				{ _fileName = file_name; }
+			ResourceBase* operator () () const
+				{ return new(mapPool) Texture3DRes(_fileName); }
+		private:
+			const tchar* _fileName;
+		};
 
-		// create new object
-		res = new(mapPool) ShaderRes(file_name, macros, engineAPI.renderSystem->GetRenderer());
+		return Texture3DResPtr((const Texture3DRes*)CreateRes(file_name, CreateTex3D(file_name), immediate));
+	}
 
-		if(res)
+	TextureCubeResPtr TextureManager::CreateTextureCube(const tchar* file_name, bool immediate)
+	{
+		struct CreateTexCube: CreateResObjFunc
 		{
-			if(*file_name != '\0')
-			{
-				if(immediate)
-				{
-					if(!res->Load())
-						res->LoadDefault();
-				}
-				_resources[key] = res;
-			}
-			else
-			{
-				res->LoadDefault();
-			}
-		}
-		else
-		{
-			Console::PrintError("Failed to create shader object, file: %ls, macros: %s", file_name, macros);
-		}
+			CreateTexCube(const tchar* file_name)
+				{ _fileName = file_name; }
+			ResourceBase* operator () () const
+				{ return new(mapPool) TextureCubeRes(_fileName); }
+		private:
+			const tchar* _fileName;
+		};
 
+		return TextureCubeResPtr((const TextureCubeRes*)CreateRes(file_name, CreateTexCube(file_name), immediate));
+	}
+
+	bool TextureManager::ReleaseTexture(Texture2DResPtr texture)
+	{
+		if(!texture)
+			return false;
+		return ReleaseRes(texture.GetFileRes()->GetFileName(), texture.GetFileRes());
+	}
+
+	bool TextureManager::ReleaseTexture(Texture3DResPtr texture)
+	{
+		if(!texture)
+			return false;
+		return ReleaseRes(texture.GetFileRes()->GetFileName(), texture.GetFileRes());
+	}
+
+	bool TextureManager::ReleaseTexture(TextureCubeResPtr texture)
+	{
+		if(!texture)
+			return false;
+		return ReleaseRes(texture.GetFileRes()->GetFileName(), texture.GetFileRes());
+	}
+
+	Texture2DResPtr TextureManager::FindTexture2D(const tchar* file_name)
+	{
+		return Texture2DResPtr((const Texture2DRes*)FindRes(file_name));
+	}
+
+	Texture3DResPtr TextureManager::FindTexture3D(const tchar* file_name)
+	{
+		return Texture3DResPtr((const Texture3DRes*)FindRes(file_name));
+	}
+
+	TextureCubeResPtr TextureManager::FindTextureCube(const tchar* file_name)
+	{
+		return TextureCubeResPtr((const TextureCubeRes*)FindRes(file_name));
+	}
+
+	//=============================================================================================
+
+	VertexShaderResPtr ShaderManager::CreateVertexShader(const tchar* file_name, const char* macros, bool immediate)
+	{
+		tchar* key = MakeKey(file_name, macros);
+
+		struct CreateVertShaderObj: CreateResObjFunc
+		{
+			CreateVertShaderObj(const tchar* file_name, const char* macros)
+			{
+				_fileName = file_name;
+				_macros = macros;
+			}
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) VertexShaderRes(_fileName, _macros); }
+
+		private:
+			const tchar* _fileName;
+			const char* _macros;
+		};
+
+		VertexShaderResPtr ptr = VertexShaderResPtr((const VertexShaderRes*)CreateRes(key, CreateVertShaderObj(file_name, macros), immediate));
 		delete[] key;
-		return (const ShaderRes*)res;
+		return ptr;
 	}
 
-	bool ShaderManager::ReleaseShader(const ShaderRes* shader)
+	FragmentShaderResPtr ShaderManager::CreateFragmentShader(const tchar* file_name, const char* macros, bool immediate)
+	{
+		tchar* key = MakeKey(file_name, macros);
+
+		struct CreateFragShaderObj: CreateResObjFunc
+		{
+			CreateFragShaderObj(const tchar* file_name, const char* macros)
+			{
+				_fileName = file_name;
+				_macros = macros;
+			}
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) FragmentShaderRes(_fileName, _macros); }
+
+		private:
+			const tchar* _fileName;
+			const char* _macros;
+		};
+
+		FragmentShaderResPtr ptr = FragmentShaderResPtr((const FragmentShaderRes*)CreateRes(key, CreateFragShaderObj(file_name, macros), immediate));
+		delete[] key;
+		return ptr;
+	}
+
+	GeometryShaderResPtr ShaderManager::CreateGeometryShader(const tchar* file_name, const char* macros, bool immediate)
+	{
+		tchar* key = MakeKey(file_name, macros);
+
+		struct CreateGeomShaderObj: CreateResObjFunc
+		{
+			CreateGeomShaderObj(const tchar* file_name, const char* macros)
+			{
+				_fileName = file_name;
+				_macros = macros;
+			}
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) GeometryShaderRes(_fileName, _macros); }
+
+		private:
+			const tchar* _fileName;
+			const char* _macros;
+		};
+
+		GeometryShaderResPtr ptr = GeometryShaderResPtr((const GeometryShaderRes*)CreateRes(key, CreateGeomShaderObj(file_name, macros), immediate));
+		delete[] key;
+		return ptr;
+	}
+
+	bool ShaderManager::ReleaseShader(VertexShaderResPtr shader)
 	{
 		if(!shader)
 			return false;
 
-		const tchar* file_name = shader->GetFileName();
-		const char* macros = shader->GetMacros();
-
-		// if file name is empty string, just release the resource
-		if(!file_name || *file_name == '\0')
-		{
-			delete shader;
-			return true;
-		}
-
-		// make a hash map key from concatenated file name and macros
-		tchar* key = new(tempPool) tchar[tstrlen(file_name) + strlen(macros) + 2];
-		tstrcpy(key, file_name);
-		tstrcat(key, _t("|"));
-		tchar* tm = CharToWideChar(macros);
-		tstrcat(key, tm);
-		delete[] tm;
-
-		ResHashMap::Iterator it = _resources.Find(key);
+		tchar* key = MakeKey(shader.GetFileRes()->GetFileName(), shader.GetFileRes()->GetMacros());
+		bool result = ReleaseRes(key, shader.GetFileRes());
 		delete[] key;
+		return result;
+	}
 
-		if(it != _resources.End())
-		{
-			assert(*it == shader);
-			(*it)->DecRefCount();
-			if(!(*it)->IsReferenced())
-			{
-				(*it)->Unload();
-				delete *it;
-				_resources.Remove(it);
-			}
-			return true;
-		}
-		else
-		{
-			Console::PrintWarning("Releasing shader: %ls not found in manager.", shader->GetFileName());
+	bool ShaderManager::ReleaseShader(FragmentShaderResPtr shader)
+	{
+		if(!shader)
 			return false;
-		}
+
+		tchar* key = MakeKey(shader.GetFileRes()->GetFileName(), shader.GetFileRes()->GetMacros());
+		bool result = ReleaseRes(key, shader.GetFileRes());
+		delete[] key;
+		return result;
 	}
 
-	const ShaderRes* ShaderManager::FindShader(const tchar* file_name, const char* macros)
+	bool ShaderManager::ReleaseShader(GeometryShaderResPtr shader)
+	{
+		if(!shader)
+			return false;
+
+		tchar* key = MakeKey(shader.GetFileRes()->GetFileName(), shader.GetFileRes()->GetMacros());
+		bool result = ReleaseRes(key, shader.GetFileRes());
+		delete[] key;
+		return result;
+	}
+
+	VertexShaderResPtr ShaderManager::FindVertexShader(const tchar* file_name, const char* macros)
+	{
+		tchar* key = MakeKey(file_name, macros);
+
+		VertexShaderResPtr ptr = VertexShaderResPtr((const VertexShaderRes*)ResourceManager::FindRes(key));
+		delete[] key;
+		return ptr;
+	}
+
+	FragmentShaderResPtr ShaderManager::FindFragmentShader(const tchar* file_name, const char* macros)
+	{
+		tchar* key = MakeKey(file_name, macros);
+
+		FragmentShaderResPtr ptr = FragmentShaderResPtr((const FragmentShaderRes*)ResourceManager::FindRes(key));
+		delete[] key;
+		return ptr;
+	}
+
+	GeometryShaderResPtr ShaderManager::FindGeometryShader(const tchar* file_name, const char* macros)
+	{
+		tchar* key = MakeKey(file_name, macros);
+
+		GeometryShaderResPtr ptr = GeometryShaderResPtr((const GeometryShaderRes*)ResourceManager::FindRes(key));
+		delete[] key;
+		return ptr;
+	}
+
+	tchar* ShaderManager::MakeKey(const tchar* file_name, const char* macros)
 	{
 		// make a hash map key from concatenated file name and macros
 		tchar* key = new(tempPool) tchar[tstrlen(file_name) + strlen(macros) + 2];
@@ -255,167 +367,371 @@ namespace Engine
 		tchar* tm = CharToWideChar(macros);
 		tstrcat(key, tm);
 		delete[] tm;
-
-		const ShaderRes* shader = (const ShaderRes*)ResourceManager::FindRes(key);
-		delete[] key;
-		return shader;
+		return key;
 	}
 
-	ShaderRes* ShaderManager::CreateResObj(const tchar* file_name)
+	//=============================================================================================
+
+	VertexASMProgResPtr ASMProgManager::CreateVertexASMProgram(const tchar* file_name, bool immediate)
 	{
-		assert(false);
-		return 0;
+		struct CreateVertexProgObj: CreateResObjFunc
+		{
+			CreateVertexProgObj(const tchar* file_name)
+				{ _fileName = file_name; }
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) VertexASMProgRes(_fileName); }
+
+		private:
+			const tchar* _fileName;
+		};
+
+		return VertexASMProgResPtr((VertexASMProgRes*)CreateRes(file_name, CreateVertexProgObj(file_name), immediate));
 	}
 
-	MaterialRes* MaterialManager::CreateResObj(const tchar* file_name)
+	FragmentASMProgResPtr ASMProgManager::CreateFragmentASMProgram(const tchar* file_name, bool immediate)
 	{
-		return new(mapPool) MaterialRes(file_name);
+		struct CreateFragmentProgObj: CreateResObjFunc
+		{
+			CreateFragmentProgObj(const tchar* file_name)
+				{ _fileName = file_name; }
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) FragmentASMProgRes(_fileName); }
+
+		private:
+			const tchar* _fileName;
+		};
+
+		return FragmentASMProgResPtr((FragmentASMProgRes*)CreateRes(file_name, CreateFragmentProgObj(file_name), immediate));
 	}
 
-	const ASMProgRes* ASMProgManager::CreateASMProgram(const tchar* file_name, bool immediate)
+	GeometryASMProgResPtr ASMProgManager::CreateGeometryASMProgram(const tchar* file_name, bool immediate)
 	{
-		if(!file_name)
-			return 0;
-
-		// see if this resource is already created
-		FileResource* res = (FileResource*)FindRes(file_name);
-		if(res)
+		struct CreateGeometryProgObj: CreateResObjFunc
 		{
-			res->IncRefCount();
-			if(immediate && !res->IsLoaded())
-			{
-				if(!res->Load())
-					res->LoadDefault();
-			}
-			return (const ASMProgRes*)res;
-		}
+			CreateGeometryProgObj(const tchar* file_name)
+				{ _fileName = file_name; }
 
-		// create new object
-		res = new(mapPool) ASMProgRes(file_name, engineAPI.renderSystem->GetRenderer());
+			ResourceBase* operator () () const
+				{ return new(mapPool) GeometryASMProgRes(_fileName); }
 
-		if(res)
-		{
-			if(*file_name != '\0')
-			{
-				if(immediate)
-				{
-					if(!res->Load())
-						res->LoadDefault();
-				}
-				_resources[file_name] = res;
-			}
-			else
-			{
-				res->LoadDefault();
-			}
-		}
-		else
-		{
-			Console::PrintError("Failed to create asm program object, file: %ls", file_name);
-		}
+		private:
+			const tchar* _fileName;
+		};
 
-		return (const ASMProgRes*)res;
+		return GeometryASMProgResPtr((GeometryASMProgRes*)CreateRes(file_name, CreateGeometryProgObj(file_name), immediate));
 	}
 
-	bool ASMProgManager::ReleaseASMProgram(const ASMProgRes* program)
+
+	bool ASMProgManager::ReleaseASMProgram(VertexASMProgResPtr program)
 	{
 		if(!program)
 			return false;
 
-		const tchar* file_name = program->GetFileName();
+		return ReleaseRes(program.GetFileRes()->GetFileName(), program.GetFileRes());
+	}
 
-		// if file name is empty string, just release the resource
-		if(!file_name || *file_name == '\0')
-		{
-			delete program;
-			return true;
-		}
-
-		ResHashMap::Iterator it = _resources.Find(file_name);
-
-		if(it != _resources.End())
-		{
-			assert(*it == program);
-			(*it)->DecRefCount();
-			if(!(*it)->IsReferenced())
-			{
-				(*it)->Unload();
-				delete *it;
-				_resources.Remove(it);
-			}
-			return true;
-		}
-		else
-		{
-			Console::PrintWarning("Releasing asm program: %ls not found in manager.", file_name);
+	bool ASMProgManager::ReleaseASMProgram(FragmentASMProgResPtr program)
+	{
+		if(!program)
 			return false;
-		}
+
+		return ReleaseRes(program.GetFileRes()->GetFileName(), program.GetFileRes());
 	}
 
-	const ASMProgRes* ASMProgManager::FindASMProgram(const tchar* file_name)
+	bool ASMProgManager::ReleaseASMProgram(GeometryASMProgResPtr program)
 	{
-		const ASMProgRes* program = (const ASMProgRes*)ResourceManager::FindRes(file_name);
-		return program;
+		if(!program)
+			return false;
+
+		return ReleaseRes(program.GetFileRes()->GetFileName(), program.GetFileRes());
 	}
 
-	ASMProgRes* ASMProgManager::CreateResObj(const tchar* file_name)
+	VertexASMProgResPtr ASMProgManager::FindVertexASMProgram(const tchar* file_name)
 	{
-		assert(false);
-		return 0;
+		return VertexASMProgResPtr((VertexASMProgRes*)ResourceManager::FindRes(file_name));
 	}
 
-	ModelRes* ModelManager::CreateResObj(const tchar* file_name)
+	FragmentASMProgResPtr ASMProgManager::FindFragmentASMProgram(const tchar* file_name)
 	{
-		return new(mapPool) ModelRes(file_name);
+		return FragmentASMProgResPtr((FragmentASMProgRes*)ResourceManager::FindRes(file_name));
 	}
 
-	AnimationRes* AnimationManager::CreateResObj(const tchar* file_name)
+	GeometryASMProgResPtr ASMProgManager::FindGeometryASMProgram(const tchar* file_name)
 	{
-		return new(mapPool) AnimationRes(file_name);
+		return GeometryASMProgResPtr((GeometryASMProgRes*)ResourceManager::FindRes(file_name));
 	}
 
-	ModelEntityRes* ModelEntityManager::CreateEntity(const tchar* file_name)
+	//=============================================================================================
+
+	MaterialResPtr MaterialManager::CreateMaterial(const tchar* file_name, bool immediate)
 	{
-		const ModelEntityRes* ent = (const ModelEntityRes*)ResourceManager::CreateRes(file_name, true);
-		return new(mapPool) ModelEntityRes(*ent);
+		struct CreateMaterialObj: CreateResObjFunc
+		{
+			CreateMaterialObj(const tchar* file_name)
+				{ _fileName = file_name; }
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) MaterialRes(_fileName); }
+
+		private:
+			const tchar* _fileName;
+		};
+
+		return MaterialResPtr((const MaterialRes*)CreateRes(file_name, CreateMaterialObj(file_name), immediate));
+	}
+
+	MaterialResPtr MaterialManager::CreateDefaultMaterial()
+	{
+		MaterialRes* mat = new(mapPool) MaterialRes(_t(""));
+		mat->_resource = new(mapPool) Material;
+		return MaterialResPtr(mat);
+	}
+
+	bool MaterialManager::ReleaseMaterial(MaterialResPtr material)
+	{
+		if(!material)
+			return false;
+
+		return ReleaseRes(material.GetFileRes()->GetFileName(), material.GetFileRes());
+	}
+
+	MaterialResPtr MaterialManager::FindMaterial(const tchar* file_name)
+	{
+		return MaterialResPtr((const MaterialRes*)FindRes(file_name));
+	}
+
+	//=============================================================================================
+
+	ModelResPtr ModelManager::CreateModel(const tchar* file_name, bool immediate)
+	{
+		struct CreateModelObj: CreateResObjFunc
+		{
+			CreateModelObj(const tchar* file_name)
+				{ _fileName = file_name; }
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) ModelRes(_fileName); }
+
+		private:
+			const tchar* _fileName;
+		};
+
+		return ModelResPtr((const ModelRes*)CreateRes(file_name, CreateModelObj(file_name), immediate));
+	}
+
+	bool ModelManager::ReleaseModel(ModelResPtr Model)
+	{
+		if(!Model)
+			return false;
+
+		return ReleaseRes(Model.GetFileRes()->GetFileName(), Model.GetFileRes());
+	}
+
+	ModelResPtr ModelManager::FindModel(const tchar* file_name)
+	{
+		return ModelResPtr((const ModelRes*)FindRes(file_name));
+	}
+
+	//=============================================================================================
+
+	AnimationResPtr AnimationManager::CreateAnimation(const tchar* file_name, bool immediate)
+	{
+		struct CreateAnimationObj: CreateResObjFunc
+		{
+			CreateAnimationObj(const tchar* file_name)
+				{ _fileName = file_name; }
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) AnimationRes(_fileName); }
+
+		private:
+			const tchar* _fileName;
+		};
+
+		return AnimationResPtr((const AnimationRes*)CreateRes(file_name, CreateAnimationObj(file_name), immediate));
+	}
+
+	bool AnimationManager::ReleaseAnimation(AnimationResPtr Animation)
+	{
+		if(!Animation)
+			return false;
+
+		return ReleaseRes(Animation.GetFileRes()->GetFileName(), Animation.GetFileRes());
+	}
+
+	AnimationResPtr AnimationManager::FindAnimation(const tchar* file_name)
+	{
+		return AnimationResPtr((const AnimationRes*)FindRes(file_name));
+	}
+
+	//=============================================================================================
+
+	ModelEntityResPtr ModelEntityManager::CreateEntity(const tchar* file_name)
+	{
+		struct CreateModelEntityObj: CreateResObjFunc
+		{
+			CreateModelEntityObj(const tchar* file_name)
+				{ _fileName = file_name; }
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) ModelEntityRes(_fileName); }
+
+		private:
+			const tchar* _fileName;
+		};
+
+		const ModelEntityRes* ent = (const ModelEntityRes*)ResourceManager::CreateRes(file_name, CreateModelEntityObj(file_name), true);
+		return ModelEntityResPtr(new(mapPool) ModelEntityRes(*ent));
 	}
 
 	ModelEntity* ModelEntityManager::CreateEntityObject(const tchar* file_name)
 	{
-		ModelEntityRes* ent = (ModelEntityRes*)ResourceManager::CreateRes(file_name, true);
-		return new(mapPool) ModelEntity(*ent->GetEntity());
+		struct CreateModelEntityObj: CreateResObjFunc
+		{
+			CreateModelEntityObj(const tchar* file_name)
+				{ _fileName = file_name; }
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) ModelEntityRes(_fileName); }
+
+		private:
+			const tchar* _fileName;
+		};
+
+		ModelEntityRes* ent = (ModelEntityRes*)ResourceManager::CreateRes(file_name, CreateModelEntityObj(file_name), true);
+		return new(mapPool) ModelEntity(*ent->GetResource());
 	}
 
-	ModelEntityRes* ModelEntityManager::CreateResObj(const tchar* file_name)
+	ModelEntityResPtr ModelEntityManager::CreateCopy(ModelEntityResPtr model_entity)
 	{
-		return new(mapPool) ModelEntityRes(file_name);
+		if(!model_entity || !model_entity.GetFileRes()->IsLoaded())
+			return ModelEntityResPtr::null;
+
+		return ModelEntityResPtr(new(mapPool) ModelEntityRes(*model_entity.GetFileRes()));
 	}
 
-	SoundRes* SoundManager::CreateResObj(const tchar* file_name)
+	void ModelEntityManager::ReleaseModelEntity(ModelEntityResPtr model_entity)
 	{
-		return new(mapPool) SoundRes(file_name);
+		if(model_entity.GetFileRes())
+			delete model_entity;
 	}
 
-	AIScriptRes* AIScriptManager::CreateResObj(const tchar* file_name)
+	//=============================================================================================
+
+	PartSysResPtr PartSysManager::CreateParticleSystem(const tchar* file_name)
 	{
-		return new(mapPool) AIScriptRes(file_name);
+		struct CreatePartSysObj: CreateResObjFunc
+		{
+			CreatePartSysObj(const tchar* file_name)
+				{ _fileName = file_name; }
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) PartSysRes(_fileName); }
+
+		private:
+			const tchar* _fileName;
+		};
+
+		const PartSysRes* ent = (const PartSysRes*)ResourceManager::CreateRes(file_name, CreatePartSysObj(file_name), true);
+		return PartSysResPtr(new(mapPool) PartSysRes(*ent));
 	}
 
-	PartSysRes* PartSysManager::CreatePartSys(const tchar* file_name)
+	ParticleSystem* PartSysManager::CreateParticleSystemObject(const tchar* file_name)
 	{
-		const PartSysRes* part = (const PartSysRes*)ResourceManager::CreateRes(file_name, true);
-		return new(mapPool) PartSysRes(*part);
+		struct CreatePartSysObj: CreateResObjFunc
+		{
+			CreatePartSysObj(const tchar* file_name)
+				{ _fileName = file_name; }
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) PartSysRes(_fileName); }
+
+		private:
+			const tchar* _fileName;
+		};
+
+		PartSysRes* ps = (PartSysRes*)ResourceManager::CreateRes(file_name, CreatePartSysObj(file_name), true);
+		return new(mapPool) ParticleSystem(*ps->GetResource());
 	}
 
-	ParticleSystem* PartSysManager::CreatePartSysObject(const tchar* file_name)
+	PartSysResPtr PartSysManager::CreateCopy(PartSysResPtr part_sys)
 	{
-		PartSysRes* part = (PartSysRes*)ResourceManager::CreateRes(file_name, true);
-		return new(mapPool) ParticleSystem(*part->GetParticleSystem());
+		if(!part_sys || !part_sys.GetFileRes()->IsLoaded())
+			return PartSysResPtr::null;
+
+		return PartSysResPtr(new(mapPool) PartSysRes(*part_sys.GetFileRes()));
 	}
 
-	PartSysRes* PartSysManager::CreateResObj(const tchar* file_name)
+	void PartSysManager::ReleasePartSys(PartSysResPtr part_sys)
 	{
-		return new(mapPool) PartSysRes(file_name);
+		if(part_sys.GetFileRes())
+			delete part_sys;
+	}
+
+	//=============================================================================================
+
+	SoundResPtr SoundManager::CreateSound(const tchar* file_name, bool immediate)
+	{
+		struct CreateSoundObj: CreateResObjFunc
+		{
+			CreateSoundObj(const tchar* file_name)
+				{ _fileName = file_name; }
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) SoundRes(_fileName); }
+
+		private:
+			const tchar* _fileName;
+		};
+
+		return SoundResPtr((const SoundRes*)CreateRes(file_name, CreateSoundObj(file_name), immediate));
+	}
+
+	bool SoundManager::ReleaseSound(SoundResPtr Sound)
+	{
+		if(!Sound)
+			return false;
+
+		return ReleaseRes(Sound.GetFileRes()->GetFileName(), Sound.GetFileRes());
+	}
+
+	SoundResPtr SoundManager::FindSound(const tchar* file_name)
+	{
+		return SoundResPtr((const SoundRes*)FindRes(file_name));
+	}
+
+	//=============================================================================================
+
+	AIScriptResPtr AIScriptManager::CreateAIScript(const tchar* file_name, bool immediate)
+	{
+		struct CreateAIScriptObj: CreateResObjFunc
+		{
+			CreateAIScriptObj(const tchar* file_name)
+				{ _fileName = file_name; }
+
+			ResourceBase* operator () () const
+				{ return new(mapPool) AIScriptRes(_fileName); }
+
+		private:
+			const tchar* _fileName;
+		};
+
+		return AIScriptResPtr((const AIScriptRes*)CreateRes(file_name, CreateAIScriptObj(file_name), immediate));
+	}
+
+	bool AIScriptManager::ReleaseAIScript(AIScriptResPtr AIScript)
+	{
+		if(!AIScript)
+			return false;
+
+		return ReleaseRes(AIScript.GetFileRes()->GetFileName(), AIScript.GetFileRes());
+	}
+
+	AIScriptResPtr AIScriptManager::FindAIScript(const tchar* file_name)
+	{
+		return AIScriptResPtr((const AIScriptRes*)FindRes(file_name));
 	}
 
 }

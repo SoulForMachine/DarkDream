@@ -4,7 +4,6 @@
 
 #include "BaseLib/Math/math3d.h"
 #include "Engine/Common.h"
-#include "Engine/ParticleSystem.h"
 
 
 class AABBox;
@@ -21,7 +20,9 @@ namespace GL
 namespace Engine
 {
 
-	class ASMProgRes;
+	class ModelEntity;
+	struct Joint;
+	struct Terrain::TerrainPatch;
 
 
 	class ENGINE_API DebugRenderer
@@ -39,17 +40,20 @@ namespace Engine
 		void RenderRectangle(const math3d::mat4f& world_mat, float width, float height, const math3d::vec3f& color);
 		void RenderLines(const math3d::mat4f& world_mat, const math3d::vec3f* points, int point_count, const math3d::vec3f& color);
 		void RenderParticleEmitter(const ParticleSystem::Emitter& emitter);
+		void RenderTerrainPatchNormals(const Terrain::TerrainPatch& patch, const math3d::vec3f& color);
+		void RenderModelSkelet(const ModelEntity& entity, const math3d::vec3f& color);
 
 	private:
 		void CreateResources();
 		void DestroyResources();
 		void RenderBoundingBox(const math3d::vec3f points[8]);
+		void RenderBone(const Joint* joint, float joint_radius, const math3d::mat4f& matrix, const math3d::vec3f& color);
 
-		static const int MAX_VERTICES = 1024;
+		static const int MAX_VERTICES = 8 * 1024;
 
 		GL::Renderer* _renderer;
-		const ASMProgRes* _vpSimple;
-		const ASMProgRes* _fpConstColor;
+		VertexASMProgResPtr _vpSimple;
+		FragmentASMProgResPtr _fpConstColor;
 		GL::VertexFormat* _vertFmtLines;
 		GL::Buffer* _vertBuf;
 		GL::Buffer* _circleVertBuf;

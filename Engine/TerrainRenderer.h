@@ -17,8 +17,6 @@ namespace GL
 namespace Engine
 {
 
-	class ASMProgRes;
-	class TextureRes;
 	class Camera;
 
 
@@ -31,22 +29,21 @@ namespace Engine
 		void Deinit();
 
 		void RenderTerrainPatches(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count);
-		void RenderTerrainPatchNormals(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count);
 		void RenderTerrainPatchGrass(const Camera& camera, const Terrain* terrain, const Terrain::TerrainPatch** patches, int count);
 
 	private:
 		GL::Renderer* _renderer;
-		const ASMProgRes* _vpTerrain;
-		const ASMProgRes* _fpTerrain;
-		const ASMProgRes* _fpLambert;
-		const ASMProgRes* _vpDbgLine;
-		const ASMProgRes* _fpDbgLine;
-		const ASMProgRes* _vpGrass;
-		const ASMProgRes* _fpGrass;
+		VertexASMProgResPtr _vpTerrain;
+		FragmentASMProgResPtr _fpTerrain;
+		FragmentASMProgResPtr _fpLambert;
+		VertexASMProgResPtr _vpDbgLine;
+		FragmentASMProgResPtr _fpDbgLine;
+		VertexASMProgResPtr _vpGrass;
+		FragmentASMProgResPtr _fpGrass;
 		GL::VertexFormat* _vertFmtTerrain;
 		GL::VertexFormat* _vertFmtDbgLine;
 		GL::VertexFormat* _vertFmtGrass;
-		const TextureRes* _gradTex;
+		Texture2DResPtr _gradTex;
 		GL::SamplerState* _gradSampler;
 		GL::SamplerState* _terrainSampler;
 		GL::SamplerState* _grassSampler;

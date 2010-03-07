@@ -6,6 +6,7 @@
 #include "BaseLib/Math/math3d.h"
 #include "BaseLib/Bounds.h"
 #include "BaseLib/HashMap.h"
+#include "ResourceManager.h"
 #include "Engine/EntityHashMap.h"
 #include "Engine/Common.h"
 
@@ -50,7 +51,6 @@ namespace Engine
 			GL::Buffer* vertBuf;
 			float* elevation;
 			AABBox boundBox;
-			GL::Buffer* normalBuf;
 			GrassSegment grassSegments[GRASS_SEGMENTS];
 			GrassBlade* grassData;
 		};
@@ -91,15 +91,15 @@ namespace Engine
 			{ _hlightPatch = &_patches[index]; }
 		const TerrainPatch* GetHighlightPatch() const
 			{ return _hlightPatch; }
-		void SetTexture(const TextureRes* texture);
-		const TextureRes* GetTexture() const
+		void SetTexture(Texture2DResPtr texture);
+		Texture2DResPtr GetTexture() const
 			{ return _texture; }
 		void SetTextureTile(float tile)
 			{ _texTile = tile; }
 		float GetTexureTile() const
 			{ return _texTile; }
-		void SetGrassTexture(const TextureRes* texture);
-		const TextureRes* GetGrassTexture() const
+		void SetGrassTexture(Texture2DResPtr texture);
+		Texture2DResPtr GetGrassTexture() const
 			{ return _grassTexture; }
 		void SetGrassBlades(int start_x, int start_y, int end_x, int end_y, const GrassBlade* grass_data);
 		void GetGrassBlades(int start_x, int start_y, int end_x, int end_y, GrassBlade* grass_data);
@@ -121,9 +121,9 @@ namespace Engine
 		int _patchCount;
 		int _patchIndexCount;
 		TerrainPatch* _hlightPatch; // used by map editor
-		const TextureRes* _texture;
+		Texture2DResPtr _texture;
 		float _texTile;
-		const TextureRes* _grassTexture;
+		Texture2DResPtr _grassTexture;
 		bool _optimizeGrassEdit;
 	};
 

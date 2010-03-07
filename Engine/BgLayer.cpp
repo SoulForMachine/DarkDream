@@ -1,5 +1,6 @@
 
 #include "EngineInternal.h"
+#include "ResourceManager.h"
 #include "RenderSystem.h"
 #include "World.h"
 #include "BgLayer.h"

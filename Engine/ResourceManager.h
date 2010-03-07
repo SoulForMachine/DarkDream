@@ -4,7 +4,7 @@
 
 #include "BaseLib/Memory.h"
 #include "BaseLib/HashMap.h"
-#include "Engine/FileResource.h"
+#include "Engine/Resource.h"
 
 
 namespace Engine
@@ -21,6 +21,7 @@ namespace Engine
 	class AIScriptManager;
 	class PartSysManager;
 
+	// ================================================================================================
 
 	class ENGINE_API ResourceManager
 	{
@@ -32,14 +33,22 @@ namespace Engine
 		void UnloadAll();
 		void ReleaseAll();
 
+		/*
+			If set to true, loads default resource if requested resource loading fails. Otherwise,
+			it points to null resource. This is intended for use by editors to prevent changing
+			null resource.
+		*/
+		static void LoadDefaultOnFail(bool on)
+			{ _loadDefaultOnFail = on; }
+
 	protected:
 		struct ResHashMapTraits
 		{
 			ResHashMapTraits(Memory::Allocator& pool, size_t size)
 				: _pool(pool) {}
-			HashMapNode<FileResource*>* New()
-				{ return new(_pool) HashMapNode<FileResource*>; }
-			void Delete(HashMapNode<FileResource*>* ptr)
+			HashMapNode<ResourceBase*>* New()
+				{ return new(_pool) HashMapNode<ResourceBase*>; }
+			void Delete(HashMapNode<ResourceBase*>* ptr)
 				{ delete ptr; }
 			uint GetHash(const tchar* str)
 				{ return ::GetStringiHash(str); }
@@ -48,13 +57,20 @@ namespace Engine
 			Memory::Allocator& _pool;
 		};
 
-		const FileResource* CreateRes(const tchar* file_name, bool immediate);
-		bool ReleaseRes(const FileResource* res);
-		const FileResource* FindRes(const tchar* file_name);
+		typedef HashMap<const tchar*, ResourceBase*, ResHashMapTraits> ResHashMap;
 
-		typedef HashMap<const tchar*, FileResource*, ResHashMapTraits> ResHashMap;
-		virtual FileResource* CreateResObj(const tchar* file_name) = 0;
+		struct CreateResObjFunc
+		{
+			virtual ResourceBase* operator () () const = 0;
+		};
+
+		const ResourceBase* CreateRes(const tchar* key, const CreateResObjFunc& create_res_obj, bool immediate);
+		bool ReleaseRes(const tchar* key, const ResourceBase* res);
+		const ResourceBase* FindRes(const tchar* key);
+
+	private:
 		ResHashMap _resources;
+		static bool _loadDefaultOnFail;
 	};
 
 	// ================================================================================================
@@ -64,15 +80,15 @@ namespace Engine
 	public:
 		TextureManager() {}
 
-		const TextureRes* CreateTexture(const tchar* file_name, bool immediate = false)
-			{ return (const TextureRes*)CreateRes(file_name, immediate); }
-		bool ReleaseTexture(const TextureRes* texture)
-			{ return ReleaseRes(texture); }
-		const TextureRes* FindTexture(const tchar* file_name)
-			{ return (const TextureRes*)FindRes(file_name); }
-	
-	protected:
-		virtual TextureRes* CreateResObj(const tchar* file_name);
+		Texture2DResPtr CreateTexture2D(const tchar* file_name, bool immediate = false);
+		Texture3DResPtr CreateTexture3D(const tchar* file_name, bool immediate = false);
+		TextureCubeResPtr CreateTextureCube(const tchar* file_name, bool immediate = false);
+		bool ReleaseTexture(Texture2DResPtr texture);
+		bool ReleaseTexture(Texture3DResPtr texture);
+		bool ReleaseTexture(TextureCubeResPtr texture);
+		Texture2DResPtr FindTexture2D(const tchar* file_name);
+		Texture3DResPtr FindTexture3D(const tchar* file_name);
+		TextureCubeResPtr FindTextureCube(const tchar* file_name);
 	};
 
 	// ================================================================================================
@@ -82,28 +98,18 @@ namespace Engine
 	public:
 		ShaderManager() {}
 
-		const ShaderRes* CreateShader(const tchar* file_name, const char* macros = "", bool immediate = false);
-		bool ReleaseShader(const ShaderRes* shader);
-		const ShaderRes* FindShader(const tchar* file_name, const char* macros);
+		VertexShaderResPtr CreateVertexShader(const tchar* file_name, const char* macros = "", bool immediate = false);
+		FragmentShaderResPtr CreateFragmentShader(const tchar* file_name, const char* macros = "", bool immediate = false);
+		GeometryShaderResPtr CreateGeometryShader(const tchar* file_name, const char* macros = "", bool immediate = false);
+		bool ReleaseShader(VertexShaderResPtr shader);
+		bool ReleaseShader(FragmentShaderResPtr shader);
+		bool ReleaseShader(GeometryShaderResPtr shader);
+		VertexShaderResPtr FindVertexShader(const tchar* file_name, const char* macros);
+		FragmentShaderResPtr FindFragmentShader(const tchar* file_name, const char* macros);
+		GeometryShaderResPtr FindGeometryShader(const tchar* file_name, const char* macros);
 
-	protected:
-		virtual ShaderRes* CreateResObj(const tchar* file_name);
-	};
-
-	// ================================================================================================
-
-	class ENGINE_API MaterialManager: public ResourceManager
-	{
-	public:
-		const MaterialRes* CreateMaterial(const tchar* file_name, bool immediate = false)
-			{ return (const MaterialRes*)CreateRes(file_name, immediate); }
-		bool ReleaseMaterial(const MaterialRes* material)
-			{ return ReleaseRes(material); }
-		const MaterialRes* FindMaterial(const tchar* file_name)
-			{ return (const MaterialRes*)FindRes(file_name); }
-
-	protected:
-		virtual MaterialRes* CreateResObj(const tchar* file_name);
+	private:
+		tchar* MakeKey(const tchar* file_name, const char* macros);
 	};
 
 	// ================================================================================================
@@ -113,12 +119,26 @@ namespace Engine
 	public:
 		ASMProgManager() {}
 
-		const ASMProgRes* CreateASMProgram(const tchar* file_name, bool immediate = false);
-		bool ReleaseASMProgram(const ASMProgRes* program);
-		const ASMProgRes* FindASMProgram(const tchar* file_name);
+		VertexASMProgResPtr CreateVertexASMProgram(const tchar* file_name, bool immediate = false);
+		FragmentASMProgResPtr CreateFragmentASMProgram(const tchar* file_name, bool immediate = false);
+		GeometryASMProgResPtr CreateGeometryASMProgram(const tchar* file_name, bool immediate = false);
+		bool ReleaseASMProgram(VertexASMProgResPtr program);
+		bool ReleaseASMProgram(FragmentASMProgResPtr program);
+		bool ReleaseASMProgram(GeometryASMProgResPtr program);
+		VertexASMProgResPtr FindVertexASMProgram(const tchar* file_name);
+		FragmentASMProgResPtr FindFragmentASMProgram(const tchar* file_name);
+		GeometryASMProgResPtr FindGeometryASMProgram(const tchar* file_name);
+	};
 
-	protected:
-		virtual ASMProgRes* CreateResObj(const tchar* file_name);
+	// ================================================================================================
+
+	class ENGINE_API MaterialManager: public ResourceManager
+	{
+	public:
+		MaterialResPtr CreateMaterial(const tchar* file_name, bool immediate = false);
+		MaterialResPtr CreateDefaultMaterial();
+		bool ReleaseMaterial(MaterialResPtr material);
+		MaterialResPtr FindMaterial(const tchar* file_name);
 	};
 
 	// ================================================================================================
@@ -126,15 +146,9 @@ namespace Engine
 	class ENGINE_API ModelManager: public ResourceManager
 	{
 	public:
-		const ModelRes* CreateModel(const tchar* file_name, bool immediate = false)
-			{ return (const ModelRes*)CreateRes(file_name, immediate); }
-		bool ReleaseModel(const ModelRes* model)
-			{ return ReleaseRes(model); }
-		const ModelRes* FindModel(const tchar* file_name)
-			{ return (const ModelRes*)FindRes(file_name); }
-
-	protected:
-		virtual ModelRes* CreateResObj(const tchar* file_name);
+		ModelResPtr CreateModel(const tchar* file_name, bool immediate = false);
+		bool ReleaseModel(ModelResPtr Model);
+		ModelResPtr FindModel(const tchar* file_name);
 	};
 
 	// ================================================================================================
@@ -142,15 +156,9 @@ namespace Engine
 	class ENGINE_API AnimationManager: public ResourceManager
 	{
 	public:
-		const AnimationRes* CreateAnimation(const tchar* file_name, bool immediate = false)
-			{ return (const AnimationRes*)CreateRes(file_name, immediate); }
-		bool ReleaseAnimation(const AnimationRes* anim)
-			{ return ReleaseRes(anim); }
-		const AnimationRes* FindAnimation(const tchar* file_name)
-			{ return (const AnimationRes*)FindRes(file_name); }
-
-	protected:
-		virtual AnimationRes* CreateResObj(const tchar* file_name);
+		AnimationResPtr CreateAnimation(const tchar* file_name, bool immediate = false);
+		bool ReleaseAnimation(AnimationResPtr Animation);
+		AnimationResPtr FindAnimation(const tchar* file_name);
 	};
 
 	// ================================================================================================
@@ -160,43 +168,10 @@ namespace Engine
 	class ENGINE_API ModelEntityManager: public ResourceManager
 	{
 	public:
-		ModelEntityRes* CreateEntity(const tchar* file_name);
+		ModelEntityResPtr CreateEntity(const tchar* file_name);
 		ModelEntity* CreateEntityObject(const tchar* file_name);
-
-	private:
-		virtual ModelEntityRes* CreateResObj(const tchar* file_name);
-	};
-
-	// ================================================================================================
-
-	class ENGINE_API SoundManager: public ResourceManager
-	{
-	public:
-		const SoundRes* CreateSound(const tchar* file_name, bool immediate = false)
-			{ return (const SoundRes*)CreateRes(file_name, immediate); }
-		bool ReleaseSound(const SoundRes* sound)
-			{ return ReleaseRes(sound); }
-		const SoundRes* FindSound(const tchar* file_name)
-			{ return (const SoundRes*)FindRes(file_name); }
-
-	protected:
-		virtual SoundRes* CreateResObj(const tchar* file_name);
-	};
-
-	// ================================================================================================
-
-	class ENGINE_API AIScriptManager: public ResourceManager
-	{
-	public:
-		const AIScriptRes* CreateAIScript(const tchar* file_name, bool immediate = false)
-			{ return (const AIScriptRes*)CreateRes(file_name, immediate); }
-		bool ReleaseAIScript(const AIScriptRes* ai)
-			{ return ReleaseRes(ai); }
-		const AIScriptRes* FindAIScript(const tchar* file_name)
-			{ return (const AIScriptRes*)FindRes(file_name); }
-
-	protected:
-		virtual AIScriptRes* CreateResObj(const tchar* file_name);
+		ModelEntityResPtr CreateCopy(ModelEntityResPtr model_entity);
+		void ReleaseModelEntity(ModelEntityResPtr model_entity);
 	};
 
 	// ================================================================================================
@@ -206,11 +181,30 @@ namespace Engine
 	class ENGINE_API PartSysManager: public ResourceManager
 	{
 	public:
-		PartSysRes* CreatePartSys(const tchar* file_name);
-		ParticleSystem* CreatePartSysObject(const tchar* file_name);
+		PartSysResPtr CreateParticleSystem(const tchar* file_name);
+		ParticleSystem* CreateParticleSystemObject(const tchar* file_name);
+		PartSysResPtr CreateCopy(PartSysResPtr part_sys);
+		void ReleasePartSys(PartSysResPtr part_sys);
+	};
 
-	private:
-		virtual PartSysRes* CreateResObj(const tchar* file_name);
+	// ================================================================================================
+
+	class ENGINE_API SoundManager: public ResourceManager
+	{
+	public:
+		SoundResPtr CreateSound(const tchar* file_name, bool immediate = false);
+		bool ReleaseSound(SoundResPtr Sound);
+		SoundResPtr FindSound(const tchar* file_name);
+	};
+
+	// ================================================================================================
+
+	class ENGINE_API AIScriptManager: public ResourceManager
+	{
+	public:
+		AIScriptResPtr CreateAIScript(const tchar* file_name, bool immediate = false);
+		bool ReleaseAIScript(AIScriptResPtr AIScript);
+		AIScriptResPtr FindAIScript(const tchar* file_name);
 	};
 
 }

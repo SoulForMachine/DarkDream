@@ -44,14 +44,14 @@ namespace Engine
 		void Clear();
 
 		GL::Renderer* _renderer;
-		const ASMProgRes* _vpMesh;
-		const ASMProgRes* _vpMeshNrm;
-		const ASMProgRes* _vpMeshSkin;
-		const ASMProgRes* _vpMeshNrmSkin;
-		const ASMProgRes* _fpMesh;
-		const ASMProgRes* _fpMeshNrm;
-		const ASMProgRes* _fpLambert;
-		const ASMProgRes* _fpLambertNrm;
+		VertexASMProgResPtr _vpMesh;
+		VertexASMProgResPtr _vpMeshNrm;
+		VertexASMProgResPtr _vpMeshSkin;
+		VertexASMProgResPtr _vpMeshNrmSkin;
+		FragmentASMProgResPtr _fpMesh;
+		FragmentASMProgResPtr _fpMeshNrm;
+		FragmentASMProgResPtr _fpLambert;
+		FragmentASMProgResPtr _fpLambertNrm;
 		GL::VertexFormat* _vertFmtMesh;
 		GL::VertexFormat* _vertFmtSkinnedMesh;
 		GL::SamplerState* _diffuseSampler;

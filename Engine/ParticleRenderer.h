@@ -32,7 +32,7 @@ namespace Engine
 		{
 			uint vertexOffset;	// index of first vertex in buffer
 			uint vertexCount;	// vertex count for this batch
-			const TextureRes* texture;
+			Texture2DResPtr texture;
 			ParticleSystem::Emitter::EmitterShader shader;
 		};
 
@@ -56,8 +56,8 @@ namespace Engine
 		GL::Buffer* _partIndexBuf;
 		GL::VertexFormat* _partVertFmt;
 		GL::SamplerState* _partTexState;
-		const ASMProgRes* _partVertProg;
-		const ASMProgRes* _partFragProg;
+		VertexASMProgResPtr _partVertProg;
+		FragmentASMProgResPtr _partFragProg;
 		uint _vertexCount;
 		const Camera* _camera;
 	};

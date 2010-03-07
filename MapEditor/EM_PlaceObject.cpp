@@ -22,8 +22,12 @@ using namespace Engine;
 namespace MapEditor
 {
 
+
 	EM_PlaceObject::EM_PlaceObject(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager)
-		: EditMode(listener, persistent)
+		: EditMode(listener, persistent),
+		_vertpSimple2D(*new(mainPool) VertexASMProgResPtr),
+		_vertpSimple(*new(mainPool) VertexASMProgResPtr),
+		_fragpConstColor(*new(mainPool) FragmentASMProgResPtr)
 	{
 		_panel = gcnew PlaceObjectPanel(this);
 		_undoManager = undo_manager;
@@ -75,9 +79,9 @@ namespace MapEditor
 		};
 		_vertFmtPos = _renderer->CreateVertexFormat(desc, COUNTOF(desc));
 
-		_vertpSimple2D = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/Simple2D.vp"), true);
-		_vertpSimple = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
-		_fragpConstColor = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
+		_vertpSimple2D = engineAPI->asmProgManager->CreateVertexASMProgram(_t("Programs/Simple2D.vp"), true);
+		_vertpSimple = engineAPI->asmProgManager->CreateVertexASMProgram(_t("Programs/Simple.vp"), true);
+		_fragpConstColor = engineAPI->asmProgManager->CreateFragmentASMProgram(_t("Programs/ConstColor.fp"), true);
 
 		HINSTANCE hinst = (HINSTANCE)Runtime::InteropServices::Marshal::GetHINSTANCE(GetType()->Module).ToPointer();
 		_cursorMove = LoadCursor(hinst, MAKEINTRESOURCE(IDC_CURSOR_MOVE));
@@ -99,6 +103,10 @@ namespace MapEditor
 		engineAPI->asmProgManager->ReleaseASMProgram(_vertpSimple2D);
 		engineAPI->asmProgManager->ReleaseASMProgram(_vertpSimple);
 		engineAPI->asmProgManager->ReleaseASMProgram(_fragpConstColor);
+
+		delete &_vertpSimple2D;
+		delete &_vertpSimple;
+		delete &_fragpConstColor;
 	}
 
 	System::Windows::Forms::UserControl^ EM_PlaceObject::GetPanel()
@@ -374,18 +382,18 @@ namespace MapEditor
 			_renderer->VertexSource(0, _vertBufSelMark, sizeof(vec3f), 0);
 			_renderer->IndexSource(0, GL::TYPE_VOID);
 			_renderer->EnableDepthTest(false);
-			_renderer->ActiveVertexASMProgram(_vertpSimple->GetASMProgram());
-			_renderer->ActiveFragmentASMProgram(_fragpConstColor->GetASMProgram());
+			_renderer->ActiveVertexASMProgram(_vertpSimple);
+			_renderer->ActiveFragmentASMProgram(_fragpConstColor);
 
 			float color[] = { 0.0f, 1.0f, 0.0f, 1.0f };
-			_fragpConstColor->GetASMProgram()->LocalParameter(0, color);
+			_fragpConstColor->LocalParameter(0, color);
 
 			for(List<RenderableEntity*>::ConstIterator it = _selectedEntities->Begin(); it != _selectedEntities->End(); ++it)
 			{
 				mat4f world, wvp;
 				world.set_translation((*it)->GetPosition());
 				mul(wvp, world, engineAPI->world->GetCamera().GetViewProjectionTransform());
-				_vertpSimple->GetASMProgram()->LocalMatrix4x4(0, wvp);
+				_vertpSimple->LocalMatrix4x4(0, wvp);
 
 				_renderer->Draw(GL::PRIM_LINES, 0, 4);
 				_renderer->Draw(GL::PRIM_LINE_LOOP, 4, CIRCLE_VERTEX_COUNT);
@@ -414,22 +422,22 @@ namespace MapEditor
 					_renderer->ActiveVertexFormat(_vertFmtPos);
 					_renderer->VertexSource(0, _vertBufSelRect, sizeof(vec3f), 0);
 					_renderer->IndexSource(_indBufSelRect, GL::TYPE_UNSIGNED_SHORT);
-					_renderer->ActiveVertexASMProgram(_vertpSimple2D->GetASMProgram());
-					_renderer->ActiveFragmentASMProgram(_fragpConstColor->GetASMProgram());
+					_renderer->ActiveVertexASMProgram(_vertpSimple2D);
+					_renderer->ActiveFragmentASMProgram(_fragpConstColor);
 					_renderer->EnableDepthTest(false);
 
-					_vertpSimple2D->GetASMProgram()->LocalParameter(0, viewport);
+					_vertpSimple2D->LocalParameter(0, viewport);
 
 					_renderer->EnableBlending(true);
 					_renderer->BlendingFunc(GL::BLEND_FUNC_SRC_ALPHA, GL::BLEND_FUNC_ONE_MINUS_SRC_ALPHA);
 					float fill_color[] = { 0.0f, 0.0f, 1.0f, 0.1f };
-					_fragpConstColor->GetASMProgram()->LocalParameter(0, fill_color);
+					_fragpConstColor->LocalParameter(0, fill_color);
 					_renderer->DrawIndexed(GL::PRIM_TRIANGLE_STRIP, 0, 4);
 					_renderer->EnableBlending(false);
 
 					float outl_color[] = { 0.2f, 0.2f, 0.7f, 1.0f };
 					_renderer->IndexSource(0, GL::TYPE_VOID);
-					_fragpConstColor->GetASMProgram()->LocalParameter(0, outl_color);
+					_fragpConstColor->LocalParameter(0, outl_color);
 					_renderer->Draw(GL::PRIM_LINE_LOOP, 0, 4);
 
 					_renderer->EnableDepthTest(true);

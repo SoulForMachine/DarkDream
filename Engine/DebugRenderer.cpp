@@ -1,9 +1,14 @@
 
 #include "BaseLib/Bounds.h"
 #include "EngineInternal.h"
+#include "ResourceManager.h"
 #include "RenderSystem.h"
 #include "Camera.h"
 #include "World.h"
+#include "ParticleSystem.h"
+#include "Terrain.h"
+#include "ModelEntity.h"
+#include "Model.h"
 #include "DebugRenderer.h"
 
 using namespace math3d;
@@ -14,8 +19,8 @@ namespace Engine
 
 	DebugRenderer::DebugRenderer()
 	{
-		_vpSimple = 0;
-		_fpConstColor = 0;
+		_vpSimple = VertexASMProgResPtr::null;
+		_fpConstColor = FragmentASMProgResPtr::null;
 		_vertFmtLines = 0;
 		_vertBuf = 0;
 		_circleVertBuf = 0;
@@ -27,8 +32,8 @@ namespace Engine
 	{
 		_renderer = engineAPI.renderSystem->GetRenderer();
 
-		_vpSimple = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
-		_fpConstColor = engineAPI.asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
+		_vpSimple = engineAPI.asmProgManager->CreateVertexASMProgram(_t("Programs/Simple.vp"), true);
+		_fpConstColor = engineAPI.asmProgManager->CreateFragmentASMProgram(_t("Programs/ConstColor.fp"), true);
 
 		return true;
 	}
@@ -66,12 +71,12 @@ namespace Engine
 				_renderer->ActiveVertexFormat(_vertFmtLines);
 				_renderer->VertexSource(0, _vertBuf, sizeof(vec3f), 0);
 				_renderer->IndexSource(_indBufBBox, GL::TYPE_UNSIGNED_SHORT);
-				_renderer->ActiveVertexASMProgram(_vpSimple->GetASMProgram());
-				_renderer->ActiveFragmentASMProgram(_fpConstColor->GetASMProgram());
+				_renderer->ActiveVertexASMProgram(_vpSimple);
+				_renderer->ActiveFragmentASMProgram(_fpConstColor);
 
 				const Camera& camera = engineAPI.world->GetCamera();
-				_vpSimple->GetASMProgram()->LocalMatrix4x4(0, camera.GetViewProjectionTransform());
-				_fpConstColor->GetASMProgram()->LocalParameter(0, vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+				_vpSimple->LocalMatrix4x4(0, camera.GetViewProjectionTransform());
+				_fpConstColor->LocalParameter(0, vec4f(1.0f, 0.0f, 0.0f, 1.0f));
 
 				_renderer->DrawIndexed(GL::PRIM_LINES, 0, 24);
 			}
@@ -85,16 +90,16 @@ namespace Engine
 		_renderer->ActiveVertexFormat(_vertFmtLines);
 		_renderer->VertexSource(0, _circleVertBuf, sizeof(vec3f), 0);
 		_renderer->IndexSource(0, GL::TYPE_VOID);
-		_renderer->ActiveVertexASMProgram(_vpSimple->GetASMProgram());
-		_renderer->ActiveFragmentASMProgram(_fpConstColor->GetASMProgram());
+		_renderer->ActiveVertexASMProgram(_vpSimple);
+		_renderer->ActiveFragmentASMProgram(_fpConstColor);
 
 		const Camera& camera = engineAPI.world->GetCamera();
 		mat4f wvp, scale, temp;
 		scale.set_scale(radius, radius, radius);
 		mul(temp, world_mat, camera.GetViewProjectionTransform());
 		mul(wvp, scale, temp);
-		_vpSimple->GetASMProgram()->LocalMatrix4x4(0, wvp);
-		_fpConstColor->GetASMProgram()->LocalParameter(0, vec4f(color));
+		_vpSimple->LocalMatrix4x4(0, wvp);
+		_fpConstColor->LocalParameter(0, vec4f(color));
 
 		_renderer->Draw(GL::PRIM_LINE_LOOP, 60, 60);
 	}
@@ -106,16 +111,16 @@ namespace Engine
 		_renderer->ActiveVertexFormat(_vertFmtLines);
 		_renderer->VertexSource(0, _circleVertBuf, sizeof(vec3f), 0);
 		_renderer->IndexSource(0, GL::TYPE_VOID);
-		_renderer->ActiveVertexASMProgram(_vpSimple->GetASMProgram());
-		_renderer->ActiveFragmentASMProgram(_fpConstColor->GetASMProgram());
+		_renderer->ActiveVertexASMProgram(_vpSimple);
+		_renderer->ActiveFragmentASMProgram(_fpConstColor);
 
 		const Camera& camera = engineAPI.world->GetCamera();
 		mat4f wvp, scale, temp;
 		scale.set_scale(radius, radius, radius);
 		mul(temp, world_mat, camera.GetViewProjectionTransform());
 		mul(wvp, scale, temp);
-		_vpSimple->GetASMProgram()->LocalMatrix4x4(0, wvp);
-		_fpConstColor->GetASMProgram()->LocalParameter(0, vec4f(color));
+		_vpSimple->LocalMatrix4x4(0, wvp);
+		_fpConstColor->LocalParameter(0, vec4f(color));
 
 		_renderer->Draw(GL::PRIM_LINE_LOOP, 0, 60);
 		_renderer->Draw(GL::PRIM_LINE_LOOP, 60, 60);
@@ -124,6 +129,8 @@ namespace Engine
 
 	void DebugRenderer::RenderRectangle(const math3d::mat4f& world_mat, float width, float height, const vec3f& color)
 	{
+		CreateResources();
+
 		vec3f* vertices = (vec3f*)_vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, true);
 		if(vertices)
 		{
@@ -137,14 +144,14 @@ namespace Engine
 				_renderer->ActiveVertexFormat(_vertFmtLines);
 				_renderer->VertexSource(0, _vertBuf, sizeof(vec3f), 0);
 				_renderer->IndexSource(0, GL::TYPE_VOID);
-				_renderer->ActiveVertexASMProgram(_vpSimple->GetASMProgram());
-				_renderer->ActiveFragmentASMProgram(_fpConstColor->GetASMProgram());
+				_renderer->ActiveVertexASMProgram(_vpSimple);
+				_renderer->ActiveFragmentASMProgram(_fpConstColor);
 
 				const Camera& camera = engineAPI.world->GetCamera();
 				mat4f wvp;
 				mul(wvp, world_mat, camera.GetViewProjectionTransform());
-				_vpSimple->GetASMProgram()->LocalMatrix4x4(0, wvp);
-				_fpConstColor->GetASMProgram()->LocalParameter(0, vec4f(color));
+				_vpSimple->LocalMatrix4x4(0, wvp);
+				_fpConstColor->LocalParameter(0, vec4f(color));
 
 				_renderer->Draw(GL::PRIM_LINE_LOOP, 0, 4);
 			}
@@ -153,9 +160,9 @@ namespace Engine
 
 	void DebugRenderer::RenderLines(const math3d::mat4f& world_mat, const math3d::vec3f* points, int point_count, const vec3f& color)
 	{
-		if(point_count > MAX_VERTICES)
-			return;
+		CreateResources();
 
+		point_count = Min(point_count, MAX_VERTICES);
 		vec3f* vertices = (vec3f*)_vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, true);
 		if(vertices)
 		{
@@ -166,14 +173,14 @@ namespace Engine
 				_renderer->ActiveVertexFormat(_vertFmtLines);
 				_renderer->VertexSource(0, _vertBuf, sizeof(vec3f), 0);
 				_renderer->IndexSource(0, GL::TYPE_VOID);
-				_renderer->ActiveVertexASMProgram(_vpSimple->GetASMProgram());
-				_renderer->ActiveFragmentASMProgram(_fpConstColor->GetASMProgram());
+				_renderer->ActiveVertexASMProgram(_vpSimple);
+				_renderer->ActiveFragmentASMProgram(_fpConstColor);
 
 				const Camera& camera = engineAPI.world->GetCamera();
 				mat4f wvp;
 				mul(wvp, world_mat, camera.GetViewProjectionTransform());
-				_vpSimple->GetASMProgram()->LocalMatrix4x4(0, wvp);
-				_fpConstColor->GetASMProgram()->LocalParameter(0, vec4f(color));
+				_vpSimple->LocalMatrix4x4(0, wvp);
+				_fpConstColor->LocalParameter(0, vec4f(color));
 
 				_renderer->Draw(GL::PRIM_LINES, 0, point_count);
 			}
@@ -208,6 +215,120 @@ namespace Engine
 		vec3f line[2] = { vec3f(0.0f, 0.0f, 0.0f), vec3f(0.0f, emitter.GetCurrentSize(), 0.0f) };
 		RenderLines(emitter.GetWorldTransform(), line, 2, vec3f(1.0f, 1.0f, 0.0f));
 		_renderer->EnableDepthTest(true);
+	}
+
+	void DebugRenderer::RenderTerrainPatchNormals(const Terrain::TerrainPatch& patch, const vec3f& color)
+	{
+		if(!patch.vertBuf)
+			return;
+
+		Terrain::PatchVertex* patch_verts = (Terrain::PatchVertex*)patch.vertBuf->MapBuffer(GL::ACCESS_READ_ONLY, false);
+		if(!patch_verts)
+			return;
+
+		CreateResources();
+
+		int vert_count = (Terrain::PATCH_WIDTH + 1) * (Terrain::PATCH_HEIGHT + 1) * 2;
+		while(vert_count > 0)
+		{
+			vec3f* dest = (vec3f*)_vertBuf->MapBuffer(GL::ACCESS_WRITE_ONLY, true);
+			if(!dest)
+				break;
+
+			int to_copy = Min(vert_count, MAX_VERTICES);
+			vert_count -= to_copy;
+			for(int i = 0; i < to_copy / 2; ++i)
+			{
+				*dest++ = patch_verts->position.rvec3;
+				*dest++ = patch_verts->position.rvec3 + patch_verts->normal.rvec3;
+				patch_verts++;
+			}
+
+			if(_vertBuf->UnmapBuffer())
+			{
+				_renderer->ActiveVertexFormat(_vertFmtLines);
+				_renderer->VertexSource(0, _vertBuf, sizeof(vec3f), 0);
+				_renderer->IndexSource(0, GL::TYPE_VOID);
+				_renderer->ActiveVertexASMProgram(_vpSimple);
+				_renderer->ActiveFragmentASMProgram(_fpConstColor);
+
+				const Camera& camera = engineAPI.world->GetCamera();
+				mat4f wvp, world_mat;
+				world_mat.set_translation(patch.boundBox.minPt.x, 0.0f, 0.0f);
+				mul(wvp, world_mat, camera.GetViewProjectionTransform());
+				_vpSimple->LocalMatrix4x4(0, wvp);
+				_fpConstColor->LocalParameter(0, vec4f(color));
+
+				_renderer->Draw(GL::PRIM_LINES, 0, to_copy);
+			}
+		}
+
+		patch.vertBuf->UnmapBuffer();
+	}
+
+	void DebugRenderer::RenderModelSkelet(const ModelEntity& entity, const vec3f& color)
+	{
+		if(!entity.GetModelRes())
+			return;
+
+		const Model& model = *entity.GetModelRes();
+		if(!model.GetRootJoint())
+			return;
+
+		const AABBox& bbox = model.GetBoundingBox();
+		float max_dim = Max(bbox.maxPt.x - bbox.minPt.x,
+			Max(bbox.maxPt.y - bbox.minPt.y, bbox.maxPt.z - bbox.minPt.z));
+		float joint_radius = max_dim * 0.025f;
+
+		const Animation* animation = entity.GetCurrentAnimation()? entity.GetCurrentAnimation()->animation: (const Animation*)0;
+
+		mat4f matrix;
+		const StaticArray<Joint>& joints = model.GetJoints();
+		const mat4f* joint_transforms = entity.GetJointTransforms().GetData();
+		for(size_t i = 0; i < joints.GetCount(); ++i)
+		{
+			if(animation)
+			{
+				RenderBone(&joints[i], joint_radius, joint_transforms[i], color);
+			}
+			else
+			{
+				RenderBone(&joints[i], joint_radius, mat4f::identity, color);
+			}
+		}
+	}
+
+	void DebugRenderer::RenderBone(const Joint* joint, float joint_radius, const mat4f& matrix, const vec3f& color)
+	{
+		if(!joint)
+			return;
+
+		mat4f mat;
+
+		if(joint->child)
+		{
+			Joint* ptr = joint->child;
+			const int max_verts = 128;
+			vec3f lines[max_verts];
+			int vert_count = 0;
+
+			while(ptr)
+			{
+				lines[vert_count++] = joint->invOffsetMatrix.row3.rvec3;
+				lines[vert_count++] = ptr->invOffsetMatrix.row3.rvec3;
+
+				if(vert_count >= max_verts - 1)
+					break;
+
+				ptr = ptr->sibling;
+			}
+
+			RenderLines(matrix, lines, vert_count, color);
+		}
+
+		// draw joint
+		mul(mat, joint->invOffsetMatrix, matrix);
+		RenderSphere(mat, joint_radius, color);
 	}
 
 	void DebugRenderer::CreateResources()

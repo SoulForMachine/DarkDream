@@ -67,7 +67,6 @@ namespace EntityEditor {
 		Entity^ _entity;
 		bool _wireframe;
 		bool _modelStats;
-		bool _skelet;
 
 	private: WeifenLuo::WinFormsUI::Docking::DockPanel^  _dockPanel;
 	private: System::Windows::Forms::MenuStrip^  _mainMenu;

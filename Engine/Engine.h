@@ -14,7 +14,7 @@
 #include "BgLayer.h"
 #include "InputSystem.h"
 #include "FileSystem.h"
-#include "FileResource.h"
+#include "Resource.h"
 #include "ResourceManager.h"
 #include "ModelEntity.h"
 #include "World.h"

@@ -15,15 +15,18 @@ using namespace math3d;
 namespace ParticleEditor
 {
 
-	RenderWindow::RenderWindow(Form^ parent)
+
+	RenderWindow::RenderWindow(Form^ parent) :
+		_vertProgSimple(*new(mainPool) VertexASMProgResPtr),
+		_fragProgConst(*new(mainPool) FragmentASMProgResPtr)
 	{
 		_renderSystem = 0;
 		_renderer = 0;
 		_font = 0;
 		_axisVertBuf = 0;
 		_lineVertFmt = 0;
-		_vertProgSimple = 0;
-		_fragProgConst = 0;
+		_vertProgSimple = VertexASMProgResPtr::null;
+		_fragProgConst = FragmentASMProgResPtr::null;
 
 		_particleSystem = 0;
 
@@ -104,8 +107,8 @@ namespace ParticleEditor
 		};
 		_lineVertFmt = _renderer->CreateVertexFormat(vert_desc, COUNTOF(vert_desc));
 
-		_vertProgSimple = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/Simple.vp"), true);
-		_fragProgConst = engineAPI->asmProgManager->CreateASMProgram(_t("Programs/ConstColor.fp"), true);
+		_vertProgSimple = engineAPI->asmProgManager->CreateVertexASMProgram(_t("Programs/Simple.vp"), true);
+		_fragProgConst = engineAPI->asmProgManager->CreateFragmentASMProgram(_t("Programs/ConstColor.fp"), true);
 
 		return true;
 	}
@@ -261,6 +264,9 @@ namespace ParticleEditor
 			engineAPI->world->Deinit();
 			_renderSystem->Deinit();
 		}
+
+		delete &_vertProgSimple;
+		delete &_fragProgConst;
 	}
 
 	void RenderWindow::OnMouseMove(int modifiers, int x, int y)
@@ -408,22 +414,22 @@ namespace ParticleEditor
 	{
 		_renderer->VertexSource(0, _axisVertBuf, sizeof(vec3f), 0);
 		_renderer->ActiveVertexFormat(_lineVertFmt);
-		_renderer->ActiveVertexASMProgram(_vertProgSimple->GetASMProgram());
-		_renderer->ActiveFragmentASMProgram(_fragProgConst->GetASMProgram());
+		_renderer->ActiveVertexASMProgram(_vertProgSimple);
+		_renderer->ActiveFragmentASMProgram(_fragProgConst);
 
-		_vertProgSimple->GetASMProgram()->LocalMatrix4x4(0, engineAPI->world->GetCamera().GetViewProjectionTransform());
+		_vertProgSimple->LocalMatrix4x4(0, engineAPI->world->GetCamera().GetViewProjectionTransform());
 
 		vec4f red(1.0f, 0.0f, 0.0f, 1.0f);
 		vec4f green(0.0f, 1.0f, 0.0f, 1.0f);
 		vec4f blue(0.0f, 0.0f, 1.0f, 1.0f);
 
-		_fragProgConst->GetASMProgram()->LocalParameter(0, red);
+		_fragProgConst->LocalParameter(0, red);
 		_renderer->Draw(GL::PRIM_LINES, 0, 2);
 
-		_fragProgConst->GetASMProgram()->LocalParameter(0, green);
+		_fragProgConst->LocalParameter(0, green);
 		_renderer->Draw(GL::PRIM_LINES, 2, 2);
 
-		_fragProgConst->GetASMProgram()->LocalParameter(0, blue);
+		_fragProgConst->LocalParameter(0, blue);
 		_renderer->Draw(GL::PRIM_LINES, 4, 2);
 	}
 

@@ -161,7 +161,7 @@ namespace Engine
 			{ return _shader; }
 		void SetShader(EmitterShader shader)
 			{ _shader = shader; }
-		const TextureRes* GetTexture() const
+		Texture2DResPtr GetTexture() const
 			{ return _texture; }
 		void SetTexture(const tchar* file_name, bool immediate = true);
 		void ClearTexture();
@@ -288,7 +288,7 @@ namespace Engine
 		char _name[EMITTER_NAME_MAX_LEN];
 		EmitterType _type;
 		EmitterShader _shader;
-		const TextureRes* _texture;
+		Texture2DResPtr _texture;
 		float _life;
 		bool _loop;
 		bool _implode;
