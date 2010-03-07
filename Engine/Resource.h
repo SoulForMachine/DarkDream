@@ -365,6 +365,14 @@ namespace Engine
 
 	class ENGINE_API MaterialRes: public Resource<Material>
 	{
+	public:
+		/*
+			If set to true, loads a copy of a default material if requested material loading fails. Otherwise,
+			it points to null material. This is intended for use by editors to prevent changing null material.
+		*/
+		static void LoadDefaultOnFail(bool on)
+			{ _loadDefaultOnFail = on; }
+
 	protected:
 		bool Load();
 		bool LoadDefault();
@@ -377,6 +385,8 @@ namespace Engine
 		static Material* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
+
+		static bool _loadDefaultOnFail;
 
 		friend class MaterialManager;
 		friend class RenderSystem;

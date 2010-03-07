@@ -384,6 +384,11 @@ namespace Engine
 
 	bool RenderSystem::CreateNullResources()
 	{
+		/*
+			The order of initialization is important; "composite" resources (the ones that contain other resources)
+			must be initialized after the resources they depend on.
+		*/
+
 		if(!Texture2DRes::CreateNull())
 		{
 			Console::PrintError("Failed to create null 2D texture.");
@@ -453,23 +458,16 @@ namespace Engine
 			return false;
 		}
 
-		if(!MaterialRes::CreateNull())
-		{
-			Console::PrintError("Failed to create null material.");
-			Deinit();
-			return false;
-		}
-
-		if(!ModelEntityRes::CreateNull())
-		{
-			Console::PrintError("Failed to create null model entity.");
-			Deinit();
-			return false;
-		}
-
 		if(!AnimationRes::CreateNull())
 		{
 			Console::PrintError("Failed to create null animation.");
+			Deinit();
+			return false;
+		}
+
+		if(!MaterialRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null material.");
 			Deinit();
 			return false;
 		}
@@ -481,11 +479,27 @@ namespace Engine
 			return false;
 		}
 
+		if(!ModelEntityRes::CreateNull())
+		{
+			Console::PrintError("Failed to create null model entity.");
+			Deinit();
+			return false;
+		}
+
 		return true;
 	}
 
 	void RenderSystem::DestroyNullResources()
 	{
+		/*
+			The order of deinitialization is important; "composite" resources (the ones that contain other resources)
+			must be deinitialized before the resources they depend on.
+		*/
+
+		ModelEntityRes::DestroyNull();
+		PartSysRes::DestroyNull();
+		MaterialRes::DestroyNull();
+
 		Texture2DRes::DestroyNull();
 		Texture3DRes::DestroyNull();
 		TextureCubeRes::DestroyNull();
@@ -496,10 +510,7 @@ namespace Engine
 		FragmentASMProgRes::DestroyNull();
 		GeometryASMProgRes::DestroyNull();
 		ModelRes::DestroyNull();
-		MaterialRes::DestroyNull();
-		ModelEntityRes::DestroyNull();
 		AnimationRes::DestroyNull();
-		PartSysRes::DestroyNull();
 	}
 
 	void RenderSystem::RenderFrame()

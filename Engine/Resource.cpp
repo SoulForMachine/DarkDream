@@ -1391,6 +1391,8 @@ namespace Engine
 	template <>
 	Material* Resource<Material, 0>::_null;
 
+	bool MaterialRes::_loadDefaultOnFail = false;
+
 
 	MaterialRes::MaterialRes(const tchar* file_name):
 		Resource(file_name)
@@ -1407,16 +1409,19 @@ namespace Engine
 		if(IsLoaded())
 			return true;
 		if(!_fileName || !*_fileName)
-			return false;
+			return _loadDefaultOnFail? LoadDefault(): false;
 
 		Console::PrintLn("Loading material: %ls", _fileName);
 		_resource = new(mapPool) Material;
 		bool result = _resource->Load(_fileName);
 		if(!result)
 		{
-			delete _resource;
-			_resource = _null;
 			Console::PrintError("Failed to load material: %ls", _fileName);
+			delete _resource;
+			if(_loadDefaultOnFail)
+				result = LoadDefault();
+			else
+				_resource = _null;
 		}
 		return result;
 	}

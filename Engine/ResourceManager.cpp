@@ -23,8 +23,6 @@ namespace Engine
 	Console::Command reloadShaders("reloadShaders", "reloads all curently loaded shaders", CmdReloadShaders);
 
 
-	bool ResourceManager::_loadDefaultOnFail = false;
-
 
 	/*
 		If immediate is true, the resource will be immediately loaded. If file_name is empty string,
@@ -42,8 +40,7 @@ namespace Engine
 			res->IncRefCount();
 			if(immediate && !res->IsLoaded())
 			{
-				if(!res->Load() && _loadDefaultOnFail)
-					res->LoadDefault();
+				res->Load();
 			}
 			return res;
 		}
@@ -56,13 +53,12 @@ namespace Engine
 			if(*key)
 			{
 				if(immediate)
-					if(!res->Load() && _loadDefaultOnFail)
-						res->LoadDefault();
+					res->Load();
 				_resources[key] = res;
 			}
 			else
 			{
-				res->LoadDefault();
+				res->Load();
 			}
 		}
 		else
@@ -464,6 +460,7 @@ namespace Engine
 	}
 
 	//=============================================================================================
+
 
 	MaterialResPtr MaterialManager::CreateMaterial(const tchar* file_name, bool immediate)
 	{

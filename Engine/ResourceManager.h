@@ -33,14 +33,6 @@ namespace Engine
 		void UnloadAll();
 		void ReleaseAll();
 
-		/*
-			If set to true, loads default resource if requested resource loading fails. Otherwise,
-			it points to null resource. This is intended for use by editors to prevent changing
-			null resource.
-		*/
-		static void LoadDefaultOnFail(bool on)
-			{ _loadDefaultOnFail = on; }
-
 	protected:
 		struct ResHashMapTraits
 		{
@@ -70,7 +62,6 @@ namespace Engine
 
 	private:
 		ResHashMap _resources;
-		static bool _loadDefaultOnFail;
 	};
 
 	// ================================================================================================

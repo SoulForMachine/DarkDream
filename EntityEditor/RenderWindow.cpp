@@ -89,6 +89,7 @@ namespace EntityEditor
 		{
 			_renderer = _renderSystem->GetRenderer();
 			engineAPI->world->Init();
+			MaterialRes::LoadDefaultOnFail(true);
 		}
 		else
 		{
