@@ -1,6 +1,6 @@
 
-#ifndef _FILESYS_H_
-#define _FILESYS_H_
+#ifndef _FILEUTIL_H_
+#define _FILEUTIL_H_
 
 
 #include "Types.h"
@@ -10,7 +10,7 @@
 #include <cstdarg>
 
 
-namespace FileSys
+namespace FileUtil
 {
 
 
@@ -252,7 +252,7 @@ namespace FileSys
 	};
 
 
-} // namespace FileSys
+} // namespace FileUtil
 
 
-#endif // _FILESYS_H_
+#endif // _FILEUTIL_H_

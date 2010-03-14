@@ -2,10 +2,10 @@
 
 #include <cassert>
 #include "Console.h"
-#include "FileSys.h"
+#include "FileUtil.h"
 
 
-namespace FileSys
+namespace FileUtil
 {
 
 	// file name helpers
@@ -617,4 +617,4 @@ namespace FileSys
 		return false;
 	}
 
-} // namespace FileSys
+} // namespace FileUtil
