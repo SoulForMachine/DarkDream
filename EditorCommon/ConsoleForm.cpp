@@ -68,7 +68,7 @@ namespace EditorCommon
 		{
 			CreateHandle(cp);
 		}
-		catch(Exception^)
+		catch(System::Exception^)
 		{
 			throw "Failed to create handle.";
 		}

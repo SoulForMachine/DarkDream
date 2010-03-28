@@ -64,7 +64,7 @@ namespace ParticleEditor
 		{
 			CreateHandle(cp);
 		}
-		catch(Exception^)
+		catch(System::Exception^)
 		{
 			throw "Failed to create handle.";
 		}
@@ -90,7 +90,7 @@ namespace ParticleEditor
 
 	bool RenderWindow::CreateResources()
 	{
-		_font = new(mainPool) Font;
+		_font = ObjectFactory::NewFont();
 		_font->Create(_renderer, _t("Verdana"), 11);
 
 		vec3f vertices[] =
@@ -117,7 +117,7 @@ namespace ParticleEditor
 	{
 		if(_font)
 			_font->Destroy();
-		delete _font;
+		ObjectFactory::DeleteFont(_font);
 
 		_renderer->DestroyBuffer(_axisVertBuf);
 		_axisVertBuf = 0;

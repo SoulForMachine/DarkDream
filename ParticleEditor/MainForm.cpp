@@ -102,8 +102,8 @@ namespace ParticleEditor
 			_propertyPanel->SetParticleSystem(0);
 			if(_particleSystem)
 			{
-				_particleSystem->ParticleSystem::~ParticleSystem();
-				::operator delete(_particleSystem);
+				ObjectFactory::DeleteEntity(_particleSystem);
+				_particleSystem = 0;
 			}
 			engineAPI->partSysManager->ReleaseAll();
 			// save layout for dock panels to xml
@@ -198,7 +198,7 @@ namespace ParticleEditor
 				::operator delete(_particleSystem);
 			}
 
-			_particleSystem = new(mainPool) ParticleSystem;
+			_particleSystem = ObjectFactory::NewParticleSystem();
 			_viewportForm->SetParticleSystem(_particleSystem);
 			_emitterPanel->SetParticleSystem(_particleSystem);
 			_propertyPanel->SetParticleSystem(_particleSystem);

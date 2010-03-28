@@ -9,6 +9,11 @@
 #include "FileSystem.h"
 #include "EngineInternal.h"
 #include "ModelEntity.h"
+#include "AIEntity.h"
+#include "PlayerEntity.h"
+#include "ItemEntity.h"
+#include "WeaponEntity.h"
+
 
 using namespace Memory;
 using namespace math3d;
@@ -17,17 +22,6 @@ using namespace math3d;
 namespace Engine
 {
 
-	const char* ModelEntity::_classNames[MODEL_CLASS_COUNT] =
-	{
-		"Generic",
-		"NPC",
-		"Monster",
-		"Boss",
-		"Building",
-		"Foliage",
-		"Debris",
-	};
-
 	ModelEntity::ModelEntity()
 	{
 		_animTime = 0.0f;
@@ -35,19 +29,14 @@ namespace Engine
 		_animPlaying = false;
 
 		_model = ModelResPtr::null;
-		_aiScript = AIScriptResPtr::null;
 
-		// set initial properties
-		_class = MODEL_CLASS_GENERIC;
+		// set initial common properties
 		_name[0] = '\0';
-		_clip = true;;
-		_lifePoints = 100;
 	}
 
 	ModelEntity::ModelEntity(const ModelEntity& entity)
 	{
 		_model = ModelResPtr::null;
-		_aiScript = AIScriptResPtr::null;
 		*this = entity;
 	}
 
@@ -60,20 +49,16 @@ namespace Engine
 	{
 		Unload();
 
-		_animPlaying = entity._animPlaying;
+		_animTime = 0.0f;
+		_curAnim = 0;
+		_animPlaying = false;
 
 		// properties
-		_class = entity._class;
 		strcpy(_name, entity._name);
-		_clip = entity._clip;
-		_lifePoints = entity._lifePoints;
 
 		// resources
 		if(entity._model)
 			_model = engineAPI.modelManager->CreateModel(entity._model.GetFileRes()->GetFileName());
-
-		if(entity._aiScript)
-			_aiScript = engineAPI.aiScriptManager->CreateAIScript(entity._aiScript.GetFileRes()->GetFileName());
 
 		for(MaterialMap::ConstIterator it = entity._materials.Begin(); it != entity._materials.End(); ++it)
 		{
@@ -124,12 +109,67 @@ namespace Engine
 		return *this;
 	}
 
+	ModelEntity* ModelEntity::CreateFromFile(const tchar* file_name)
+	{
+		if(!file_name)
+			return 0;
+
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(file_name, _t("rb"));
+		if(!file)
+			return 0;
+
+		Parser parser;
+		if(!parser.LoadFile(*file))
+			return 0;
+		file->Close();
+
+		const int MAX_IDENT_LEN = 64;
+		char buf[MAX_IDENT_LEN];
+
+		try
+		{
+			parser.ExpectTokenString("entity");
+			parser.ReadIdentifier(buf, MAX_IDENT_LEN);
+		}
+		catch(ParserException& e)
+		{
+			Console::PrintError(e.GetDesc());
+			return 0;
+		}
+
+		ModelEntity* ent = 0;
+		if(!strcmp(buf, "AI"))
+		{
+			ent = new(mapPool) AIEntity;
+		}
+		else if(!strcmp(buf, "Item"))
+		{
+			ent = new(mapPool) ItemEntity;
+		}
+		else if(!strcmp(buf, "Weapon"))
+		{
+			ent = new(mapPool) WeaponEntity;
+		}
+		else if(!strcmp(buf, "Player"))
+		{
+			ent = new(mapPool) PlayerEntity;
+		}
+
+		if(!ent->Load(parser))
+		{
+			delete ent;
+			ent = 0;
+		}
+
+		return ent;
+	}
+
 	bool ModelEntity::Load(const tchar* file_name)
 	{
 		if(!file_name)
 			return false;
 
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(file_name, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(file_name, _t("rb"));
 		if(!file)
 			return false;
 
@@ -138,113 +178,76 @@ namespace Engine
 			return false;
 		file->Close();
 
+		try
+		{
+			parser.ExpectTokenString("entity");
+			parser.ExpectTokenType(Parser::TOK_IDENTIFIER, 0);
+		}
+		catch(ParserException& e)
+		{
+			Console::PrintError(e.GetDesc());
+			return false;
+		}
+
+		return Load(parser);
+	}
+
+	bool ModelEntity::Load(Parser& parser)
+	{
 		Unload();
 
-		const int MAX_IDENT_LEN = 64;
-		char buf[MAX_IDENT_LEN];
-
-		if(!parser.ExpectTokenString("entity"))
-			return false;
-		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
-			return false;
-
-		// read properties
-		if(!parser.ExpectTokenString("properties"))
-			return false;
-		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
-			return false;
-		if(!parser.ExpectTokenString("class"))
-			return false;
-		if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
-			return false;
-		_class = GetClassFromString(buf);
-		if(_class == MODEL_CLASS_COUNT)
+		try
 		{
-			Console::PrintError("Invalid value for entity class: %s", buf);
-			return false;
-		}
-		if(!parser.ExpectTokenString("name"))
-			return false;
-		if(!parser.ReadString(_name, MAX_NAME_LENGTH))
-			return false;
-		if(!parser.ExpectTokenString("clip"))
-			return false;
-		if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
-			return false;
-		if(!strcmp(buf, "True"))
-			_clip = true;
-		else if(!strcmp(buf, "False"))
-			_clip = false;
-		else
-		{
-			Console::PrintError("Invalid value for clip: %s", buf);
-			return false;
-		}
-		if(!parser.ExpectTokenString("lifePoints"))
-			return false;
-		if(!parser.ReadInt(_lifePoints))
-			return false;
-		// properties closing brace
-		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_CLOSE_BRACE))
-			return false;
+			parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE);
 
-		// read entity resources
+			// read properties
+			parser.ExpectTokenString("properties");
+			parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE);
+			// common properties
+			parser.ExpectTokenString("name");
+			parser.ReadString(_name, MAX_NAME_LENGTH);
+			// read type specific properties
+			ReadProperties(parser);
+			parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_CLOSE_BRACE);
 
-		char path[MAX_PATH];
+			// read entity resources
 
-		if(!parser.ExpectTokenString("model"))
-			return false;
-		if(!parser.ReadString(path, MAX_PATH))
-			return false;
-		tchar* p = CharToWideChar(path);
-		_model = engineAPI.modelManager->CreateModel(p);
-		delete[] p;
+			char path[MAX_PATH];
 
-		if(!parser.ExpectTokenString("aiScript"))
-			{ Unload(); return false; }
-		if(!parser.ReadString(path, MAX_PATH))
-			{ Unload(); return false; }
-		p = CharToWideChar(path);
-		_aiScript = engineAPI.aiScriptManager->CreateAIScript(p);
-		delete[] p;
+			parser.ExpectTokenString("model");
+			parser.ReadString(path, MAX_PATH);
+			tchar* p = CharToWideChar(path);
+			_model = engineAPI.modelManager->CreateModel(p);
+			delete[] p;
 
-		Parser::Token tok_name;
+			Parser::Token tok_name;
 
-		// materials
-		{
-			if(!parser.ExpectTokenString("materials"))
-				{ Unload(); return false; }
-			if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
-				{ Unload(); return false; }
-			MaterialData md;
-			while(1)
+			// materials
 			{
-				if(!parser.ReadToken(tok_name))
-					{ Unload(); return false; }
-				if(tok_name.type == Parser::TOK_PUNCTUATION &&
-					tok_name.subTypePunct == Parser::PUNCT_CLOSE_BRACE)
-				{
-					break;
-				}
-				else if(tok_name.type == Parser::TOK_IDENTIFIER)
-				{
-					md.name = StringDup(tok_name.str);
-				}
-				else
-				{
-					Console::PrintError("Expected material name, found \'%s\'", tok_name.str);
-					Unload();
-					return false;
-				}
+				parser.ExpectTokenString("materials");
+				parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE);
 
-				if(!parser.ReadString(path, MAX_PATH))
+				MaterialData md;
+				while(1)
 				{
-					Console::PrintError("Expected material path");
-					Unload();
-					return false;
-				}
-				else
-				{
+					parser.ReadToken(tok_name);
+					if(tok_name.type == Parser::TOK_PUNCTUATION &&
+						tok_name.subTypePunct == Parser::PUNCT_CLOSE_BRACE)
+					{
+						break;
+					}
+					else if(tok_name.type == Parser::TOK_IDENTIFIER)
+					{
+						md.name = StringDup(tok_name.str);
+					}
+					else
+					{
+						Console::PrintError("Expected material name, found \'%s\'", tok_name.str);
+						Unload();
+						return false;
+					}
+
+					parser.ReadString(path, MAX_PATH);
 					tchar* p = CharToWideChar(path);
 					md.materialRes = engineAPI.materialManager->CreateMaterial(p);
 					delete[] p;
@@ -260,50 +263,35 @@ namespace Engine
 					}
 				}
 			}
-		}
 
-		// joint attachments
-		{
-			if(!parser.ExpectTokenString("jointAttachments"))
-				{ Unload(); return false; }
-			if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
-				{ Unload(); return false; }
-			JointAttachData jd;
-			while(1)
+			// joint attachments
 			{
-				if(!parser.ReadToken(tok_name))
-					{ Unload(); return false; }
-				if(tok_name.type == Parser::TOK_PUNCTUATION &&
-					tok_name.subTypePunct == Parser::PUNCT_CLOSE_BRACE)
-				{
-					break;
-				}
-				else if(tok_name.type == Parser::TOK_IDENTIFIER)
-				{
-					jd.name = StringDup(tok_name.str);
-				}
-				else
-				{
-					Console::PrintError("Expected joint attachment name, found \'%s\'", tok_name.str);
-					Unload();
-					return false;
-				}
+				parser.ExpectTokenString("jointAttachments");
+				parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE);
 
-				if(!parser.ReadInt(jd.jointIndex))
+				JointAttachData jd;
+				while(1)
 				{
-					Console::PrintError("Expected attachment joint index");
-					Unload();
-					return false;
-				}
+					parser.ReadToken(tok_name);
+					if(tok_name.type == Parser::TOK_PUNCTUATION &&
+						tok_name.subTypePunct == Parser::PUNCT_CLOSE_BRACE)
+					{
+						break;
+					}
+					else if(tok_name.type == Parser::TOK_IDENTIFIER)
+					{
+						jd.name = StringDup(tok_name.str);
+					}
+					else
+					{
+						Console::PrintError("Expected joint attachment name, found \'%s\'", tok_name.str);
+						Unload();
+						return false;
+					}
 
-				if(!parser.ReadString(path, MAX_PATH))
-				{
-					Console::PrintError("Expected joint attachment path");
-					Unload();
-					return false;
-				}
-				else
-				{
+					parser.ReadInt(jd.jointIndex);
+
+					parser.ReadString(path, MAX_PATH);
 					tchar* p = CharToWideChar(path);
 					jd.type = GetJointAttachTypeByExt(p);
 					if(jd.type == JOINT_ATTACH_MODEL)
@@ -327,43 +315,33 @@ namespace Engine
 					}
 				}
 			}
-		}
 
-		// animations
-		{
-			if(!parser.ExpectTokenString("animations"))
-				{ Unload(); return false; }
-			if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
-				{ Unload(); return false; }
-			AnimData ad;
-			while(1)
+			// animations
 			{
-				if(!parser.ReadToken(tok_name))
-					{ Unload(); return false; }
-				if(tok_name.type == Parser::TOK_PUNCTUATION &&
-					tok_name.subTypePunct == Parser::PUNCT_CLOSE_BRACE)
-				{
-					break;
-				}
-				else if(tok_name.type == Parser::TOK_IDENTIFIER)
-				{
-					ad.name = StringDup(tok_name.str);
-				}
-				else
-				{
-					Console::PrintError("Expected animation name, found \'%s\'", tok_name.str);
-					Unload();
-					return false;
-				}
+				parser.ExpectTokenString("animations");
+				parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE);
 
-				if(!parser.ReadString(path, MAX_PATH))
+				AnimData ad;
+				while(1)
 				{
-					Console::PrintError("Expected animation path");
-					Unload();
-					return false;
-				}
-				else
-				{
+					parser.ReadToken(tok_name);
+					if(tok_name.type == Parser::TOK_PUNCTUATION &&
+						tok_name.subTypePunct == Parser::PUNCT_CLOSE_BRACE)
+					{
+						break;
+					}
+					else if(tok_name.type == Parser::TOK_IDENTIFIER)
+					{
+						ad.name = StringDup(tok_name.str);
+					}
+					else
+					{
+						Console::PrintError("Expected animation name, found \'%s\'", tok_name.str);
+						Unload();
+						return false;
+					}
+
+					parser.ReadString(path, MAX_PATH);
 					tchar* p = CharToWideChar(path);
 					ad.type = Animation::GetAnimTypeByName(ad.name);
 					ad.animation = engineAPI.animationManager->CreateAnimation(p);
@@ -380,43 +358,33 @@ namespace Engine
 					}
 				}
 			}
-		}
 
-		// sounds
-		{
-			if(!parser.ExpectTokenString("sounds"))
-				{ Unload(); return false; }
-			if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
-				{ Unload(); return false; }
-			SoundData sd;
-			while(1)
+			// sounds
 			{
-				if(!parser.ReadToken(tok_name))
-					{ Unload(); return false; }
-				if(tok_name.type == Parser::TOK_PUNCTUATION &&
-					tok_name.subTypePunct == Parser::PUNCT_CLOSE_BRACE)
-				{
-					break;
-				}
-				else if(tok_name.type == Parser::TOK_IDENTIFIER)
-				{
-					sd.name = StringDup(tok_name.str);
-				}
-				else
-				{
-					Console::PrintError("Expected sound name, found \'%s\'", tok_name.str);
-					Unload();
-					return false;
-				}
+				parser.ExpectTokenString("sounds");
+				parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE);
 
-				if(!parser.ReadString(path, MAX_PATH))
+				SoundData sd;
+				while(1)
 				{
-					Console::PrintError("Expected sound path");
-					Unload();
-					return false;
-				}
-				else
-				{
+					parser.ReadToken(tok_name);
+					if(tok_name.type == Parser::TOK_PUNCTUATION &&
+						tok_name.subTypePunct == Parser::PUNCT_CLOSE_BRACE)
+					{
+						break;
+					}
+					else if(tok_name.type == Parser::TOK_IDENTIFIER)
+					{
+						sd.name = StringDup(tok_name.str);
+					}
+					else
+					{
+						Console::PrintError("Expected sound name, found \'%s\'", tok_name.str);
+						Unload();
+						return false;
+					}
+
+					parser.ReadString(path, MAX_PATH);					
 					tchar* p = CharToWideChar(path);
 					sd.sound = engineAPI.soundManager->CreateSound(p);
 					delete[] p;
@@ -432,18 +400,23 @@ namespace Engine
 					}
 				}
 			}
-		}
 
-		// entity closing brace
-		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_CLOSE_BRACE))
-			{ Unload(); return false; }
+			// entity closing brace
+			parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_CLOSE_BRACE);
+		}
+		catch(ParserException& e)
+		{
+			Console::PrintError(e.GetDesc());
+			Unload();
+			return false;
+		}
 
 		return true;
 	}
 
 	bool ModelEntity::Save(const tchar* file_name)
 	{
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(file_name, _t("wt"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(file_name, _t("wt"));
 		if(!file)
 		{
 			Console::PrintError("Failed to write entity file: %ls", file_name);
@@ -455,10 +428,8 @@ namespace Engine
 
 		// properties
 		file->Printf("\tproperties\n\t{\n");
-		file->Printf("\t\tclass\t\t%s\n", GetClassString(_class));
 		file->Printf("\t\tname\t\t\"%s\"\n", _name);
-		file->Printf("\t\tclip\t\t%s\n", _clip? "True": "False");
-		file->Printf("\t\tlifePoints\t\t%d\n", _lifePoints);
+		WriteProperties(*file, "\t\t");
 		file->Printf("\t}\n\n");
 
 		// entity resources
@@ -467,9 +438,6 @@ namespace Engine
 
 		fn = _model? _model.GetFileRes()->GetFileName(): _T("");
 		file->Printf("\tmodel\t\t\"%ls\"\n", fn);
-
-		fn = _aiScript? _aiScript.GetFileRes()->GetFileName(): _T("");
-		file->Printf("\taiScript\t\t\"%ls\"\n\n", fn);
 
 		// materials
 		file->Printf("\tmaterials\n\t{\n");
@@ -514,12 +482,6 @@ namespace Engine
 		{
 			engineAPI.modelManager->ReleaseModel(_model);
 			_model = ModelResPtr::null;
-		}
-
-		if(_aiScript)
-		{
-			engineAPI.aiScriptManager->ReleaseAIScript(_aiScript);
-			_aiScript = AIScriptResPtr::null;
 		}
 
 		ClearModelData();
@@ -736,19 +698,6 @@ namespace Engine
 			_model = model;
 			ClearModelData();
 			SetupModelData();
-			return true;
-		}
-		else
-			return false;
-	}
-
-	bool ModelEntity::SetAIScript(const tchar* file_name)
-	{
-		AIScriptResPtr ai = engineAPI.aiScriptManager->CreateAIScript(file_name, true);
-		if(ai)
-		{
-			engineAPI.aiScriptManager->ReleaseAIScript(_aiScript);
-			_aiScript = ai;
 			return true;
 		}
 		else
@@ -975,26 +924,6 @@ namespace Engine
 				return JOINT_ATTACH_PARTICLE_SYSTEM;
 		}
 		return JOINT_ATTACH_UNKNOWN;
-	}
-
-	ModelClass ModelEntity::GetClassFromString(const char* name)
-	{
-		for(int i = 0; i < MODEL_CLASS_COUNT; ++i)
-		{
-			if(!strcmp(name, _classNames[i]))
-				return (ModelClass)i;
-		}
-
-		return MODEL_CLASS_COUNT;
-	}
-
-	const char* ModelEntity::GetClassString(ModelClass c)
-	{
-		int i = (int)c;
-		if(i >= 0 && i < MODEL_CLASS_COUNT)
-			return _classNames[i];
-		else
-			return "";
 	}
 
 	void ModelEntity::BindPoseTransforms()

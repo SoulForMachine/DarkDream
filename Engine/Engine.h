@@ -17,7 +17,13 @@
 #include "Resource.h"
 #include "ResourceManager.h"
 #include "ModelEntity.h"
+#include "StaticEntity.h"
+#include "PlayerEntity.h"
+#include "AIEntity.h"
+#include "WeaponEntity.h"
+#include "ItemEntity.h"
 #include "World.h"
+#include "ObjectFactory.h"
 
 
 namespace Engine

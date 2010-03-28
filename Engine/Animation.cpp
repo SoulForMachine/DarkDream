@@ -1,5 +1,5 @@
 
-#include "BaseLib/FileSys.h"
+#include "BaseLib/FileUtil.h"
 #include "BaseLib/SSE.h"
 #include "BaseLib/SmartPtr.h"
 #include "BaseLib/Console.h"
@@ -44,7 +44,7 @@ namespace Engine
 
 	bool Animation::Load(const tchar* file_name)
 	{
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(file_name, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(file_name, _t("rb"));
 
 		if(!file)
 		{

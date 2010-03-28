@@ -260,6 +260,14 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\AIEntity.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\AIEntity.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Animation.cpp"
 			>
 		</File>
@@ -360,6 +368,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\ItemEntity.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ItemEntity.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Material.cpp"
 			>
 		</File>
@@ -384,6 +400,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\ObjectFactory.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ObjectFactory.h"
+			>
+		</File>
+		<File
 			RelativePath=".\ParticleRenderer.cpp"
 			>
 		</File>
@@ -397,6 +421,14 @@
 		</File>
 		<File
 			RelativePath=".\ParticleSystem.h"
+			>
+		</File>
+		<File
+			RelativePath=".\PlayerEntity.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\PlayerEntity.h"
 			>
 		</File>
 		<File
@@ -440,6 +472,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\StaticEntity.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\StaticEntity.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Terrain.cpp"
 			>
 		</File>
@@ -461,6 +501,14 @@
 		</File>
 		<File
 			RelativePath=".\Trigger.h"
+			>
+		</File>
+		<File
+			RelativePath=".\WeaponEntity.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\WeaponEntity.h"
 			>
 		</File>
 		<File

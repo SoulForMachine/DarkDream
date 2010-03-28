@@ -86,7 +86,7 @@ namespace Engine
 
 		Unload();
 
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(file_name, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(file_name, _t("rb"));
 		if(!file)
 			return false;
 
@@ -100,60 +100,41 @@ namespace Engine
 		char nrm_tex_path[MAX_PATH];
 		char transp_tex_path[MAX_PATH];
 		const int MAX_IDENT_LEN = 64;
-		char buf[MAX_IDENT_LEN];
 
-		if(!parser.ExpectTokenString("material"))
-			return false;
-
-		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
-			return false;
-
-		if(!parser.ExpectTokenString("emissionTexture"))
-			return false;
-		if(!parser.ReadString(emiss_tex_path, MAX_PATH))
-			return false;
-
-		if(!parser.ExpectTokenString("diffuseColor"))
-			return false;
-		if(!parser.ReadVec3f(_diffuseColor))
-			return false;
-
-		if(!parser.ExpectTokenString("diffuseTexture"))
-			return false;
-		if(!parser.ReadString(diff_tex_path, MAX_PATH))
-			return false;
-
-		if(!parser.ExpectTokenString("normalMap"))
-			return false;
-		if(!parser.ReadString(nrm_tex_path, MAX_PATH))
-			return false;
-
-		if(!parser.ExpectTokenString("useTransparency"))
-			return false;
-		if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
-			return false;
-		if(!strcmp(buf, "True"))
-			_useTransparency = true;
-		else if(!strcmp(buf, "False"))
-			_useTransparency = false;
-		else
+		try
 		{
-			Console::PrintError("Invalid value for useTransparency: %s", buf);
+			parser.ExpectTokenString("material");
+
+			parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE);
+
+			parser.ExpectTokenString("emissionTexture");
+			parser.ReadString(emiss_tex_path, MAX_PATH);
+
+			parser.ExpectTokenString("diffuseColor");
+			parser.ReadVec3f(_diffuseColor);
+
+			parser.ExpectTokenString("diffuseTexture");
+			parser.ReadString(diff_tex_path, MAX_PATH);
+
+			parser.ExpectTokenString("normalMap");
+			parser.ReadString(nrm_tex_path, MAX_PATH);
+
+			parser.ExpectTokenString("useTransparency");
+			parser.ReadBool(_useTransparency);
+
+			parser.ExpectTokenString("globalTransparency");
+			parser.ReadFloat(_globalOpacity);
+
+			parser.ExpectTokenString("transparencyTexture");
+			parser.ReadString(transp_tex_path, MAX_PATH);
+
+			parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_CLOSE_BRACE);
+		}
+		catch(ParserException& e)
+		{
+			Console::PrintError(e.GetDesc());
 			return false;
 		}
-
-		if(!parser.ExpectTokenString("globalTransparency"))
-			return false;
-		if(!parser.ReadFloat(_globalOpacity))
-			return false;
-
-		if(!parser.ExpectTokenString("transparencyTexture"))
-			return false;
-		if(!parser.ReadString(transp_tex_path, MAX_PATH))
-			return false;
-
-		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_CLOSE_BRACE))
-			return false;
 
 		// create texture objects
 		tchar* path;
@@ -193,7 +174,7 @@ namespace Engine
 
 	bool Material::Save(const tchar* file_name) const
 	{
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(file_name, _t("wt"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(file_name, _t("wt"));
 		if(!file)
 		{
 			Console::PrintError("Failed to write material file: %ls", file_name);

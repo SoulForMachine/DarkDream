@@ -6,7 +6,7 @@
 #include "String.h"
 
 
-namespace FileSys
+namespace FileUtil
 {
 	class File;
 }
@@ -80,9 +80,9 @@ public:
 	~Image();
 
 	bool Load(const tchar* fname);
-	bool Load(FileSys::File& file);
+	bool Load(FileUtil::File& file);
 	bool Load(const tchar* fname, ImageFileFormat fformat);
-	bool Load(FileSys::File& file, ImageFileFormat fformat);
+	bool Load(FileUtil::File& file, ImageFileFormat fformat);
 	bool Save(const tchar* fname, ImageFileFormat fformat);
 	void Unload();
 
@@ -90,10 +90,10 @@ public:
 		{ return _data; }
 
 private:
-	bool LoadBmp(FileSys::File& file);
-	bool LoadTga(FileSys::File& file);
-	bool LoadDDS(FileSys::File& file);
-	ImageFileFormat DetermineFileFormat(FileSys::File& file);
+	bool LoadBmp(FileUtil::File& file);
+	bool LoadTga(FileUtil::File& file);
+	bool LoadDDS(FileUtil::File& file);
+	ImageFileFormat DetermineFileFormat(FileUtil::File& file);
 
 	ImageData _data;
 	bool _loaded;

@@ -56,7 +56,7 @@ namespace Engine
 		if(!file_name)
 			return false;
 
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(file_name, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(file_name, _t("rb"));
 		if(!file)
 			return false;
 
@@ -67,253 +67,165 @@ namespace Engine
 
 		Unload();
 
-		if(!parser.ExpectTokenString("particleSystem"))
-			return false;
-		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
-			return false;
-
-		if(!parser.ExpectTokenString("boundingBox"))
-			return false;
-		AABBox bbox;
-		if(!parser.ReadVec3f(bbox.minPt))
-			return false;
-		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_COMMA))
-			return false;
-		if(!parser.ReadVec3f(bbox.maxPt))
-			return false;
-		SetObjectBoundingBox(bbox);
-
-		const int MAX_IDENT_LEN = 64;
-		char buf[MAX_IDENT_LEN];
-		char path[MAX_PATH];
-		float ftmp;
-		int itmp;
-
-		Parser::Token token;
-		while(1)
+		try
 		{
-			if(!parser.ReadToken(token))
-				{ Unload(); return false; }
-			if(	token.type == Parser::TOK_PUNCTUATION &&
-				token.subTypePunct == Parser::PUNCT_CLOSE_BRACE )
+			parser.ExpectTokenString("particleSystem");
+			parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE);
+
+			parser.ExpectTokenString("boundingBox");
+			AABBox bbox;
+			parser.ReadVec3f(bbox.minPt);
+			parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_COMMA);
+			parser.ReadVec3f(bbox.maxPt);
+			SetObjectBoundingBox(bbox);
+
+			const int MAX_IDENT_LEN = 64;
+			char buf[MAX_IDENT_LEN];
+			char path[MAX_PATH];
+			float ftmp;
+			int itmp;
+			bool btmp;
+
+			Parser::Token token;
+			Emitter* emitter = 0;
+
+			while(1)
 			{
-				break;
+				parser.ReadToken(token);
+				if(	token.type == Parser::TOK_PUNCTUATION &&
+					token.subTypePunct == Parser::PUNCT_CLOSE_BRACE )
+				{
+					break;
+				}
+				else if(token.type == Parser::TOK_IDENTIFIER &&
+					!strcmp(token.str, "emitter"))
+				{
+					emitter = new(mapPool) Emitter;
+
+					char name[Emitter::EMITTER_NAME_MAX_LEN];
+					parser.ReadIdentifier(name, Emitter::EMITTER_NAME_MAX_LEN);
+					emitter->SetName(name);
+
+					parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE);
+
+					parser.ExpectTokenString("emitterType");
+					parser.ReadIdentifier(buf, MAX_IDENT_LEN);
+					Emitter::EmitterType em_type = Emitter::GetEmitterTypeByString(buf);
+					if(em_type == Emitter::EMITTER_TYPE_COUNT)
+					{
+						Console::PrintError("Invalid value for emitter type: \'%s\'.", buf);
+						delete emitter;
+						Unload();
+						return false;
+					}
+					emitter->SetEmitterType(em_type);
+
+					parser.ExpectTokenString("emitterShader");
+					parser.ReadIdentifier(buf, MAX_IDENT_LEN);
+					Emitter::EmitterShader em_shader = Emitter::GetEmitterShaderByString(buf);
+					if(em_shader == Emitter::EMITTER_SHADER_COUNT)
+					{
+						Console::PrintError("Invalid value for emitter shader: \'%s\'.", buf);
+						delete emitter;
+						Unload();
+						return false;
+					}
+					emitter->SetShader(em_shader);
+
+					parser.ExpectTokenString("particleType");
+					parser.ReadIdentifier(buf, MAX_IDENT_LEN);
+					Emitter::ParticleType part_type = Emitter::GetParticleTypeByString(buf);
+					if(part_type == Emitter::PARTICLE_TYPE_COUNT)
+					{
+						Console::PrintError("Invalid value for particle type: \'%s\'.", buf);
+						delete emitter;
+						Unload();
+						return false;
+					}
+
+					parser.ExpectTokenString("resource");
+					parser.ReadString(path, MAX_PATH);
+					tchar* tpath = CharToWideChar(path);
+
+					if(part_type == Emitter::PARTICLE_TYPE_TEXTURE)
+						emitter->SetTexture(tpath, false);
+					delete[] tpath;
+
+					parser.ExpectTokenString("life");
+					parser.ReadFloat(ftmp);
+					emitter->SetLife(ftmp);
+
+					parser.ExpectTokenString("loop");
+					parser.ReadBool(btmp);
+					emitter->SetLoop(btmp);
+
+					parser.ExpectTokenString("implode");
+					parser.ReadBool(btmp);
+					emitter->SetImplode(btmp);
+
+					parser.ExpectTokenString("emitFromEdge");
+					parser.ReadBool(btmp);
+					emitter->SetEmitFromEdge(btmp);
+
+					parser.ExpectTokenString("animatedTexture");
+					parser.ReadBool(btmp);
+					emitter->SetAnimatedTex(btmp);
+
+					parser.ExpectTokenString("animatedTextureFPS");
+					parser.ReadInt(itmp);
+					emitter->SetAnimatedTexFPS(itmp);
+
+					parser.ExpectTokenString("initialRotation");
+					vec3f init_rot;
+					parser.ReadVec3f(init_rot);
+					emitter->SetInitialRotation(init_rot);
+
+					parser.ExpectTokenString("particleLife");
+					parser.ReadFloat(ftmp);
+					emitter->SetParticleLife(ftmp);
+
+					parser.ExpectTokenString("particleRandomOrient");
+					parser.ReadBool(btmp);
+					emitter->SetParticleRandomOrient(btmp);
+
+					parser.ExpectTokenString("particleRandomRotDir");
+					parser.ReadBool(btmp);
+					emitter->SetParticleRandomRotDir(btmp);
+
+					// attributes
+					parser.ExpectTokenString("attributes");
+
+					parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE);
+
+					Attribute** attribs = emitter->GetAttributeArray();
+					for(int i = 0; i < Emitter::ATTRIB_COUNT; ++i)
+					{
+						if(!ReadAttribute(parser, *attribs[i], Emitter::GetAttributeName(i)))
+							{ delete emitter; Unload(); return false; }
+					}
+
+					// attributes close brace
+					parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_CLOSE_BRACE);
+
+					// emitter close brace
+					parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_CLOSE_BRACE);
+
+					_emitters.PushBack(emitter);
+				}
+				else
+				{
+					Console::PrintError("Expected \'emitter\' keyword, found \'%s\'", token.str);
+					delete emitter;
+					Unload();
+					return false;
+				}
 			}
-			else if(token.type == Parser::TOK_IDENTIFIER &&
-				!strcmp(token.str, "emitter"))
-			{
-				Emitter* emitter = new(mapPool) Emitter;
-
-				char name[Emitter::EMITTER_NAME_MAX_LEN];
-				if(!parser.ReadIdentifier(name, Emitter::EMITTER_NAME_MAX_LEN))
-					{ delete emitter; Unload(); return false; }
-				emitter->SetName(name);
-
-				if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
-					{ delete emitter; Unload(); return false; }
-
-				if(!parser.ExpectTokenString("emitterType"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
-					{ delete emitter; Unload(); return false; }
-				Emitter::EmitterType em_type = Emitter::GetEmitterTypeByString(buf);
-				if(em_type == Emitter::EMITTER_TYPE_COUNT)
-				{
-					Console::PrintError("Invalid value for emitter type: \'%s\'.", buf);
-					delete emitter;
-					Unload();
-					return false;
-				}
-				emitter->SetEmitterType(em_type);
-
-				if(!parser.ExpectTokenString("emitterShader"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
-					{ delete emitter; Unload(); return false; }
-				Emitter::EmitterShader em_shader = Emitter::GetEmitterShaderByString(buf);
-				if(em_shader == Emitter::EMITTER_SHADER_COUNT)
-				{
-					Console::PrintError("Invalid value for emitter shader: \'%s\'.", buf);
-					delete emitter;
-					Unload();
-					return false;
-				}
-				emitter->SetShader(em_shader);
-
-				if(!parser.ExpectTokenString("particleType"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
-					{ delete emitter; Unload(); return false; }
-				Emitter::ParticleType part_type = Emitter::GetParticleTypeByString(buf);
-				if(part_type == Emitter::PARTICLE_TYPE_COUNT)
-				{
-					Console::PrintError("Invalid value for particle type: \'%s\'.", buf);
-					delete emitter;
-					Unload();
-					return false;
-				}
-
-				if(!parser.ExpectTokenString("resource"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadString(path, MAX_PATH))
-					{ delete emitter; Unload(); return false; }
-				tchar* tpath = CharToWideChar(path);
-
-				if(part_type == Emitter::PARTICLE_TYPE_TEXTURE)
-					emitter->SetTexture(tpath, false);
-				delete[] tpath;
-
-				if(!parser.ExpectTokenString("life"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadFloat(ftmp))
-					{ delete emitter; Unload(); return false; }
-				emitter->SetLife(ftmp);
-
-				if(!parser.ExpectTokenString("loop"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
-					return false;
-				if(!strcmp(buf, "True"))
-					emitter->SetLoop(true);
-				else if(!strcmp(buf, "False"))
-					emitter->SetLoop(false);
-				else
-				{
-					Console::PrintError("Invalid value for \'loop\': %s", buf);
-					delete emitter;
-					Unload();
-					return false;
-				}
-
-				if(!parser.ExpectTokenString("implode"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
-					return false;
-				if(!strcmp(buf, "True"))
-					emitter->SetImplode(true);
-				else if(!strcmp(buf, "False"))
-					emitter->SetImplode(false);
-				else
-				{
-					Console::PrintError("Invalid value for \'implode\': %s", buf);
-					delete emitter;
-					Unload();
-					return false;
-				}
-
-				if(!parser.ExpectTokenString("emitFromEdge"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
-					return false;
-				if(!strcmp(buf, "True"))
-					emitter->SetEmitFromEdge(true);
-				else if(!strcmp(buf, "False"))
-					emitter->SetEmitFromEdge(false);
-				else
-				{
-					Console::PrintError("Invalid value for \'emitFromEdge\': %s", buf);
-					delete emitter;
-					Unload();
-					return false;
-				}
-
-				if(!parser.ExpectTokenString("animatedTexture"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
-					return false;
-				if(!strcmp(buf, "True"))
-					emitter->SetAnimatedTex(true);
-				else if(!strcmp(buf, "False"))
-					emitter->SetAnimatedTex(false);
-				else
-				{
-					Console::PrintError("Invalid value for \'animatedTexture\': %s", buf);
-					delete emitter;
-					Unload();
-					return false;
-				}
-
-				if(!parser.ExpectTokenString("animatedTextureFPS"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadInt(itmp))
-					{ delete emitter; Unload(); return false; }
-				emitter->SetAnimatedTexFPS(itmp);
-
-				if(!parser.ExpectTokenString("initialRotation"))
-					{ delete emitter; Unload(); return false; }
-				vec3f init_rot;
-				if(!parser.ReadVec3f(init_rot))
-					{ delete emitter; Unload(); return false; }
-				emitter->SetInitialRotation(init_rot);
-
-				if(!parser.ExpectTokenString("particleLife"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadFloat(ftmp))
-					{ delete emitter; Unload(); return false; }
-				emitter->SetParticleLife(ftmp);
-
-				if(!parser.ExpectTokenString("particleRandomOrient"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
-					return false;
-				if(!strcmp(buf, "True"))
-					emitter->SetParticleRandomOrient(true);
-				else if(!strcmp(buf, "False"))
-					emitter->SetParticleRandomOrient(false);
-				else
-				{
-					Console::PrintError("Invalid value for \'particleRandomOrient\': %s", buf);
-					delete emitter;
-					Unload();
-					return false;
-				}
-
-				if(!parser.ExpectTokenString("particleRandomRotDir"))
-					{ delete emitter; Unload(); return false; }
-				if(!parser.ReadIdentifier(buf, MAX_IDENT_LEN))
-					return false;
-				if(!strcmp(buf, "True"))
-					emitter->SetParticleRandomRotDir(true);
-				else if(!strcmp(buf, "False"))
-					emitter->SetParticleRandomRotDir(false);
-				else
-				{
-					Console::PrintError("Invalid value for \'particleRandomRotDir\': %s", buf);
-					delete emitter;
-					Unload();
-					return false;
-				}
-
-				// attributes
-				if(!parser.ExpectTokenString("attributes"))
-					{ delete emitter; Unload(); return false; }
-
-				if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
-					return false;
-
-				Attribute** attribs = emitter->GetAttributeArray();
-				for(int i = 0; i < Emitter::ATTRIB_COUNT; ++i)
-				{
-					if(!ReadAttribute(parser, *attribs[i], Emitter::GetAttributeName(i)))
-						{ delete emitter; Unload(); return false; }
-				}
-
-				// attributes close brace
-				if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_CLOSE_BRACE))
-					{ delete emitter; Unload(); return false; }
-
-				// emitter close brace
-				if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_CLOSE_BRACE))
-					{ delete emitter; Unload(); return false; }
-
-				_emitters.PushBack(emitter);
-			}
-			else
-			{
-				Console::PrintError("Expected \'emitter\' keyword, found \'%s\'", token.str);
-				Unload();
-				return false;
-			}
+		}
+		catch(ParserException& e)
+		{
+			Console::PrintError(e.GetDesc());
+			Unload();
+			return false;
 		}
 
 		Reset();
@@ -322,7 +234,7 @@ namespace Engine
 
 	bool ParticleSystem::Save(const tchar* file_name) const
 	{
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(file_name, _t("wt"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(file_name, _t("wt"));
 		if(!file)
 		{
 			Console::PrintError("Failed to write particle system file: %ls", file_name);
@@ -490,39 +402,32 @@ namespace Engine
 
 	bool ParticleSystem::ReadAttribute(Parser& parser, Attribute& attrib, const char* attr_name)
 	{
-		if(!parser.ExpectTokenString(attr_name))
-			return false;
+		parser.ExpectTokenString(attr_name);
 		int count;
-		if(!parser.ReadInt(count))
-			return false;
+		parser.ReadInt(count);
 
-		if(!parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE))
-			return false;
+		parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE);
 
-		Attribute::Value* values = new(tempPool) Attribute::Value[count];
+		SmartPtr<Attribute::Value> values = new(tempPool) Attribute::Value[count];
 		Parser::Token token;
 
 		for(int i = 0; i < count; ++i)
 		{
 			float vec[2];
-			if(!parser.ReadVec2f(vec))
-				{ delete[] values; return false; }
+			parser.ReadVec2f(vec);
 			values[i].variable = vec[0];
 			values[i].value = vec[1];
 
-			if(!parser.ReadToken(token))
-				{ delete[] values; return false; }
+			parser.ReadToken(token);
 
 			if(	token.type != Parser::TOK_PUNCTUATION ||
 				(token.subTypePunct != Parser::PUNCT_COMMA && token.subTypePunct != Parser::PUNCT_CLOSE_BRACE) )
 			{
-				delete[] values;
 				return false;
 			}
 		}
 
 		attrib.SetValues(values, count);
-		delete[] values;
 
 		return true;
 	}

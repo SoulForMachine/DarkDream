@@ -6,7 +6,7 @@
 #include "BaseLib/GL/GLRenderer.h"
 #include "BaseLib/StaticArray.h"
 #include "BaseLib/Bounds.h"
-#include "BaseLib/FileSys.h"
+#include "BaseLib/FileUtil.h"
 #include "Engine/Common.h"
 
 
@@ -134,7 +134,7 @@ namespace Engine
 			{ return _numIndices; }
 
 	private:
-		bool ReadMesh(FileSys::File* file, Mesh& mesh, const tchar* file_name, int mesh_index);
+		bool ReadMesh(FileUtil::File* file, Mesh& mesh, const tchar* file_name, int mesh_index);
 		void CreateJointHierarchy();
 
 		StaticArray<Mesh> _meshes;

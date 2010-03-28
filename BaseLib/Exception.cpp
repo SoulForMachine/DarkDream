@@ -5,6 +5,7 @@
 #include <ctime>
 #include <cstdio>
 #include <dbghelp.h>
+#include <cstdarg>
 #include "Exception.h"
 
 #pragma comment(lib, "dbghelp.lib")
@@ -13,6 +14,26 @@
 #ifndef _countof
 #define _countof(array) (sizeof(array)/sizeof(array[0]))
 #endif
+
+
+Exception::Exception(const char* desc)
+{
+	strncpy(_desc, desc, MAX_DESC_LEN);
+	_desc[MAX_DESC_LEN - 1] = '\0';
+}
+
+void Exception::SetDesc(const char* fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+
+	if(_vscprintf(fmt, args) < MAX_DESC_LEN)
+		vsprintf(_desc, fmt, args);
+	else
+		_desc[0] = '\0';
+
+	va_end(args);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // lstrrchr (avoid the C Runtime )

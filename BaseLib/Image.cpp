@@ -8,7 +8,7 @@
 #include <ddraw.h>
 
 #include "Memory.h"
-#include "FileSys.h"
+#include "FileUtil.h"
 #include "Image.h"
 
 
@@ -54,7 +54,7 @@ struct TgaHeader
 
 
 using namespace Memory;
-using namespace FileSys;
+using namespace FileUtil;
 
 static void DDSRead2DTex(File& file, int width, int height, int bytes_per_pixel, int mipmap_count, MipLevelData* images);
 static void DDSRead2DTexCompressed(File& file, int width, int height, ImagePixelFormat format, int mipmap_count, MipLevelData* images);
@@ -590,7 +590,7 @@ bool Image::LoadDDS(File& file)
 	return true;
 }
 
-ImageFileFormat Image::DetermineFileFormat(FileSys::File& file)
+ImageFileFormat Image::DetermineFileFormat(FileUtil::File& file)
 {
 	long oldpos = file.GetPos();
 

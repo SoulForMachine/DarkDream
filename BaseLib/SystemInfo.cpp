@@ -1,5 +1,5 @@
 
-#include "FileSys.h"
+#include "FileUtil.h"
 #include "SystemInfo.h"
 
 
@@ -18,6 +18,6 @@ bool SystemInfo::GetApplicationDirectory(tchar* dir)
 	if(!result)
 		return false;
 
-	FileSys::ExtractDir(dir, fname);
+	FileUtil::ExtractDir(dir, fname);
 	return true;
 }

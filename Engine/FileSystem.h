@@ -3,7 +3,7 @@
 #define _FILE_SYSTEM_H_
 
 #include "BaseLib/Types.h"
-#include "BaseLib/FileSys.h"
+#include "BaseLib/FileUtil.h"
 #include "Common.h"
 
 #ifdef _WIN32
@@ -24,7 +24,7 @@ namespace Engine
 		const tchar* GetBaseDirPath();
 		const tchar* GetBinDirPath();
 		void MakeFullPath(tchar* dest, const tchar* src);
-		FileSys::File* Open(const tchar* fname, const tchar* mode);
+		FileUtil::File* Open(const tchar* fname, const tchar* mode);
 
 	private:
 		tchar _baseDir[MAX_PATH];

@@ -6,13 +6,14 @@
 #include "BaseLib/Image.h"
 #include "FileSystem.h"
 #include "EngineInternal.h"
-#include "Resource.h"
 #include "RenderSystem.h"
 #include "Model.h"
 #include "Material.h"
 #include "Animation.h"
 #include "ParticleSystem.h"
 #include "ModelEntity.h"
+#include "StaticEntity.h"
+#include "Resource.h"
 
 
 using namespace Memory;
@@ -124,7 +125,7 @@ namespace Engine
 		Console::PrintLn("Loading 2D texture: %ls", _fileName);
 
 		// load the texture from file
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
 		if(!file)
 		{
 			Console::PrintError("Failed to open texture file: %ls", _fileName);
@@ -322,7 +323,7 @@ namespace Engine
 		Console::PrintLn("Loading 3D texture: %ls", _fileName);
 
 		// load the texture from file
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
 		if(!file)
 		{
 			Console::PrintError("Failed to open texture file: %ls", _fileName);
@@ -524,7 +525,7 @@ namespace Engine
 		Console::PrintLn("Loading cube texture: %ls", _fileName);
 
 		// load the texture from file
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
 		if(!file)
 		{
 			Console::PrintError("Failed to open texture file: %ls", _fileName);
@@ -747,7 +748,7 @@ namespace Engine
 			return false;
 
 		// load the shader from file
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
 		if(!file)
 		{
 			Console::PrintError("Failed to open shader file: %ls", _fileName);
@@ -1061,7 +1062,7 @@ namespace Engine
 			return false;
 
 		// load the shader from file
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
 		if(!file)
 		{
 			Console::PrintError("Failed to open program file: %ls", _fileName);
@@ -1482,7 +1483,7 @@ namespace Engine
 		Resource(res._fileName)
 	{
 		if(res._resource)
-			_resource = new(mapPool) ModelEntity(*res._resource);
+			_resource = res._resource->CreateCopy();
 	}
 
 	ModelEntityRes::~ModelEntityRes()
@@ -1498,15 +1499,14 @@ namespace Engine
 			return false;
 
 		Console::PrintLn("Loading entity: %ls", _fileName);
-		_resource = new(mapPool) ModelEntity;
-		bool result = _resource->Load(_fileName);
-		if(!result)
+		_resource = ModelEntity::CreateFromFile(_fileName);
+		if(!_resource)
 		{
-			delete _resource;
 			_resource = _null;
 			Console::PrintError("Failed to load entity: %ls", _fileName);
 		}
-		return result;
+
+		return IsLoaded();
 	}
 
 	bool ModelEntityRes::LoadDefault()
@@ -1529,14 +1529,8 @@ namespace Engine
 
 	ModelEntity* ModelEntityRes::CreateDefault()
 	{
-		ModelEntity* entity = new(mapPool) ModelEntity;
-		bool result = entity->Load(_t("Entities/null.entity"));
-		if(!result)
-		{
-			delete entity;
-			entity = 0;
-		}
-		return entity;
+		ModelEntity* entity = ModelEntity::CreateFromFile(_t("Entities/null.entity"));
+		return entity? entity: new(mapPool) StaticEntity;
 	}
 
 	bool ModelEntityRes::CreateNull()

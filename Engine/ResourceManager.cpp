@@ -598,7 +598,7 @@ namespace Engine
 		};
 
 		ModelEntityRes* ent = (ModelEntityRes*)ResourceManager::CreateRes(file_name, CreateModelEntityObj(file_name), true);
-		return new(mapPool) ModelEntity(*ent->GetResource());
+		return ent->GetResource()->CreateCopy();
 	}
 
 	ModelEntityResPtr ModelEntityManager::CreateCopy(ModelEntityResPtr model_entity)

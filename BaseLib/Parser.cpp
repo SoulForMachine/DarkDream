@@ -1,12 +1,12 @@
 
 #include "Memory.h"
 #include "Algorithm.h"
-#include "FileSys.h"
+#include "FileUtil.h"
 #include "Console.h"
 #include "Parser.h"
 
 using namespace Memory;
-using namespace FileSys;
+using namespace FileUtil;
 
 
 const Parser::Operator Parser::_operators[OP_COUNT] =
@@ -85,7 +85,7 @@ bool Parser::LoadFile(const tchar* file_name)
 	return LoadFile(file);
 }
 
-bool Parser::LoadFile(FileSys::File& file)
+bool Parser::LoadFile(FileUtil::File& file)
 {
 	Unload();
 
@@ -140,34 +140,29 @@ void Parser::Unload()
 	DeleteTokens();
 }
 
-Parser::Error Parser::Parse()
+void Parser::Parse()
 {
-	if(!_buffer)
-		return ERR_NO_INPUT_LOADED;
-
 	DeleteTokens();
 	Token token;
 
 	while(1)
 	{
-		Error err = GetToken(token);
-
-		if(err == ERR_END_OF_INPUT)
+		try
+		{
+			GetToken(token);
+		}
+		catch(ParserEndOfInputException&)
 		{
 			break;
 		}
-		else if(err != ERR_NO_ERROR)
+		catch(...)
 		{
 			DeleteTokens();
-			return err;
+			throw;
 		}
-		else
-		{
-			_tokens.PushBack(token);
-		}
-	}
 
-	return ERR_NO_ERROR;
+		_tokens.PushBack(token);
+	}
 }
 
 void Parser::SetKeywords(const char** keywords, size_t count)
@@ -182,44 +177,20 @@ void Parser::SetKeywords(const char** keywords, size_t count)
 	QSortStrings((const char**)_keywords.GetData(), count);
 }
 
-bool Parser::ExpectTokenString(const char* str)
+void Parser::ExpectTokenString(const char* str)
 {
-	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
-
 	Token token;
-	Error err = GetToken(token);
-	if(err != ERR_NO_ERROR)
-	{
-		PrintError(err);
-		return false;
-	}
+	GetToken(token);
 
 	bool result = !strcmp(str, token.str);
 	if(!result)
-		Console::PrintError("Parse error on line %d: expected \'%s\', found \'%s\'", _line, str, token.str);
-
-	return result;
+		throw ParserUnexpectedException(_line, str, token.str);
 }
 
-bool Parser::ExpectTokenType(TokenType type, int sub_type)
+void Parser::ExpectTokenType(TokenType type, int sub_type)
 {
-	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
-
 	Token token;
-	Error err = GetToken(token);
-	if(err != ERR_NO_ERROR)
-	{
-		PrintError(err);
-		return false;
-	}
+	GetToken(token);
 
 	bool result = (token.type == type);
 
@@ -261,303 +232,182 @@ bool Parser::ExpectTokenType(TokenType type, int sub_type)
 			break;
 		}
 
-		Console::PrintError("Parse error on line %d: expected %s, found %s", _line, str, token.str);
+		throw ParserUnexpectedException(_line, str, token.str);
 	}
-
-	return result;
 }
 
-bool Parser::ReadInt(int& i)
+void Parser::ReadInt(int& i)
 {
-	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
-
 	Token token;
-	Error err = GetToken(token);
-	if(err != ERR_NO_ERROR)
-	{
-		PrintError(err);
-		return false;
-	}
+	GetToken(token);
 
 	if(token.type != TOK_LITERAL || token.subTypeLiteral != LIT_INTEGER)
 	{
-		Console::PrintError("Parse error on line %d: integer expected", _line);
-		return false;
+		throw ParserUnexpectedException(_line, "integer", 0);
 	}
 
 	i = atoi(token.str);
-	return true;
 }
 
-bool Parser::ReadFloat(float& f)
+void Parser::ReadFloat(float& f)
 {
-	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
-
 	Token token;
-	Error err = GetToken(token);
-	if(err != ERR_NO_ERROR)
-	{
-		PrintError(err);
-		return false;
-	}
+	GetToken(token);
 
 	if(token.type != TOK_LITERAL || token.subTypeLiteral != LIT_FLOAT)
 	{
-		Console::PrintError("Parse error on line %d: float expected", _line);
-		return false;
+		throw ParserUnexpectedException(_line, "float", 0);
 	}
 
 	f = (float)atof(token.str);
-	return true;
 }
 
-bool Parser::ReadVec2f(float* v)
+void Parser::ReadVec2f(float* v)
 {
-	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
+	ExpectTokenType(TOK_PUNCTUATION, PUNCT_OPEN_BRACKET);
 
-	if(!ExpectTokenType(TOK_PUNCTUATION, PUNCT_OPEN_BRACKET))
-		return false;
+	ReadFloat(v[0]);
+	ReadFloat(v[1]);
 
-	if(!ReadFloat(v[0]) || !ReadFloat(v[1]))
-		return false;
-
-	if(!ExpectTokenType(TOK_PUNCTUATION, PUNCT_CLOSE_BRACKET))
-		return false;
-
-	return true;
+	ExpectTokenType(TOK_PUNCTUATION, PUNCT_CLOSE_BRACKET);
 }
 
-bool Parser::ReadVec3f(float* v)
+void Parser::ReadVec3f(float* v)
 {
-	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
+	ExpectTokenType(TOK_PUNCTUATION, PUNCT_OPEN_BRACKET);
 
-	if(!ExpectTokenType(TOK_PUNCTUATION, PUNCT_OPEN_BRACKET))
-		return false;
+	ReadFloat(v[0]);
+	ReadFloat(v[1]);
+	ReadFloat(v[2]);
 
-	if(!ReadFloat(v[0]) || !ReadFloat(v[1]) || !ReadFloat(v[2]))
-		return false;
-
-	if(!ExpectTokenType(TOK_PUNCTUATION, PUNCT_CLOSE_BRACKET))
-		return false;
-
-	return true;
+	ExpectTokenType(TOK_PUNCTUATION, PUNCT_CLOSE_BRACKET);
 }
 
-bool Parser::ReadVec4f(float* v)
+void Parser::ReadVec4f(float* v)
 {
-	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
+	ExpectTokenType(TOK_PUNCTUATION, PUNCT_OPEN_BRACKET);
 
-	if(!ExpectTokenType(TOK_PUNCTUATION, PUNCT_OPEN_BRACKET))
-		return false;
+	ReadFloat(v[0]);
+	ReadFloat(v[1]);
+	ReadFloat(v[2]);
+	ReadFloat(v[3]);
 
-	if(!ReadFloat(v[0]) || !ReadFloat(v[1]) || !ReadFloat(v[2]) || !ReadFloat(v[3]))
-		return false;
-
-	if(!ExpectTokenType(TOK_PUNCTUATION, PUNCT_CLOSE_BRACKET))
-		return false;
-
-	return true;
+	ExpectTokenType(TOK_PUNCTUATION, PUNCT_CLOSE_BRACKET);
 }
 
-bool Parser::ReadVec2i(int* v)
+void Parser::ReadVec2i(int* v)
 {
-	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
+	ExpectTokenType(TOK_PUNCTUATION, PUNCT_OPEN_BRACKET);
 
-	if(!ExpectTokenType(TOK_PUNCTUATION, PUNCT_OPEN_BRACKET))
-		return false;
+	ReadInt(v[0]);
+	ReadInt(v[1]);
 
-	if(!ReadInt(v[0]) || !ReadInt(v[1]))
-		return false;
-
-	if(!ExpectTokenType(TOK_PUNCTUATION, PUNCT_CLOSE_BRACKET))
-		return false;
-
-	return true;
+	ExpectTokenType(TOK_PUNCTUATION, PUNCT_CLOSE_BRACKET);
 }
 
-bool Parser::ReadVec3i(int* v)
+void Parser::ReadVec3i(int* v)
 {
-	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
+	ExpectTokenType(TOK_PUNCTUATION, PUNCT_OPEN_BRACKET);
 
-	if(!ExpectTokenType(TOK_PUNCTUATION, PUNCT_OPEN_BRACKET))
-		return false;
+	ReadInt(v[0]);
+	ReadInt(v[1]);
+	ReadInt(v[2]);
 
-	if(!ReadInt(v[0]) || !ReadInt(v[1]) || !ReadInt(v[2]))
-		return false;
-
-	if(!ExpectTokenType(TOK_PUNCTUATION, PUNCT_CLOSE_BRACKET))
-		return false;
-
-	return true;
+	ExpectTokenType(TOK_PUNCTUATION, PUNCT_CLOSE_BRACKET);
 }
 
-bool Parser::ReadVec4i(int* v)
+void Parser::ReadVec4i(int* v)
 {
-	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
+	ExpectTokenType(TOK_PUNCTUATION, PUNCT_OPEN_BRACKET);
 
-	if(!ExpectTokenType(TOK_PUNCTUATION, PUNCT_OPEN_BRACKET))
-		return false;
+	ReadInt(v[0]);
+	ReadInt(v[1]);
+	ReadInt(v[2]);
+	ReadInt(v[3]);
 
-	if(!ReadInt(v[0]) || !ReadInt(v[1]) || !ReadInt(v[2]) || !ReadInt(v[3]))
-		return false;
-
-	if(!ExpectTokenType(TOK_PUNCTUATION, PUNCT_CLOSE_BRACKET))
-		return false;
-
-	return true;
+	ExpectTokenType(TOK_PUNCTUATION, PUNCT_CLOSE_BRACKET);
 }
 
-bool Parser::ReadString(char* str, size_t max_char)
+void Parser::ReadString(char* str, size_t max_char)
 {
-	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
-
 	Token token;
-	Error err = GetToken(token);
-	if(err != ERR_NO_ERROR)
-	{
-		PrintError(err);
-		return false;
-	}
+	GetToken(token);
 
 	if(token.type != TOK_LITERAL || token.subTypeLiteral != LIT_STRING)
 	{
-		Console::PrintError("Parse error on line %d: string expected", _line);
-		return false;
+		throw ParserUnexpectedException(_line, "string", 0);
 	}
 
 	// copy the string, exclude quotes
 	size_t len = strlen(token.str);
 	if(len - 2 >= max_char)
 	{
-		Console::PrintError("Parse error on line %d: string too long", _line);
-		return false;
+		throw ParserTooLongException(_line, "string", max_char);
 	}
 
 	token.str[len - 1] = '\0';
 	strcpy(str, token.str + 1);
-	return true;
 }
 
-bool Parser::ReadIdentifier(char* str, size_t max_char)
+void Parser::ReadBool(bool& b)
 {
-	if(!_buffer)
+	Token token;
+	GetToken(token);
+
+	if(token.type != TOK_LITERAL || token.subTypeLiteral != LIT_BOOL)
 	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
+		throw ParserUnexpectedException(_line, "bool", 0);
 	}
 
+	b = (strcmp(token.str, "True") == 0);
+}
+
+void Parser::ReadIdentifier(char* str, size_t max_char)
+{
 	Token token;
-	Error err = GetToken(token);
-	if(err != ERR_NO_ERROR)
-	{
-		PrintError(err);
-		return false;
-	}
+	GetToken(token);
 
 	if(token.type != TOK_IDENTIFIER)
 	{
-		Console::PrintError("Parse error on line %d: identifier expected", _line);
-		return false;
+		throw ParserUnexpectedException(_line, "identifier", 0);
 	}
 
 	// copy the string
 	size_t len = strlen(token.str);
 	if(len >= max_char)
 	{
-		Console::PrintError("Parse error on line %d: identifier too long", _line);
-		return false;
+		throw ParserTooLongException(_line, "identifier", max_char);
 	}
 
 	strcpy(str, token.str);
-	return true;
 }
 
-bool Parser::ReadOperator(OperatorType& op_type)
+void Parser::ReadOperator(OperatorType& op_type)
 {
-	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
-
 	Token token;
-	Error err = GetToken(token);
-	if(err != ERR_NO_ERROR)
-	{
-		PrintError(err);
-		return false;
-	}
+	GetToken(token);
 
 	if(token.type != TOK_OPERATOR)
 	{
-		Console::PrintError("Parse error on line %d: operator expected", _line);
-		return false;
+		throw ParserUnexpectedException(_line, "operator", 0);
 	}
 
 	op_type = GetOperatorType(token.str);
-
-	return true;
 }
 
-bool Parser::ReadToken(Token& token)
+void Parser::ReadToken(Token& token)
+{
+	GetToken(token);
+}
+
+
+void Parser::GetToken(Token& token)
 {
 	if(!_buffer)
-	{
-		PrintError(ERR_NO_INPUT_LOADED);
-		return false;
-	}
+		throw ParserNoInputException();
 
-	Error err = GetToken(token);
-	if(err != ERR_NO_ERROR)
-	{
-		PrintError(err);
-		return false;
-	}
-
-	return true;
-}
-
-
-Parser::Error Parser::GetToken(Token& token)
-{
 	if(IsEndOfInput())
-		return ERR_END_OF_INPUT;
+		throw ParserEndOfInputException();
 
 	char* p = _ptr;
 
@@ -568,7 +418,7 @@ Parser::Error Parser::GetToken(Token& token)
 			++_line;
 		++p;
 		if(*p == 0)
-			return ERR_END_OF_INPUT;
+			throw ParserEndOfInputException();
 	}
 
 	// skip comments
@@ -587,7 +437,7 @@ Parser::Error Parser::GetToken(Token& token)
 				}
 				else if(*p == 0)
 				{
-					return ERR_END_OF_INPUT;
+					throw ParserEndOfInputException();
 				}
 				++p;
 			}
@@ -604,7 +454,7 @@ Parser::Error Parser::GetToken(Token& token)
 				}
 				else if(*p == 0)
 				{
-					return ERR_END_OF_INPUT;
+					throw ParserEndOfInputException();
 				}
 				else if(*p == '\n')
 				{
@@ -625,7 +475,7 @@ Parser::Error Parser::GetToken(Token& token)
 				++_line;
 			++p;
 			if(*p == 0)
-				return ERR_END_OF_INPUT;
+				throw ParserEndOfInputException();
 		}
 	}
 
@@ -669,7 +519,7 @@ Parser::Error Parser::GetToken(Token& token)
 			else if(isalpha(*p))
 			{
 				_invalidChar = *p;
-				return ERR_INVALID_CHARACTER;
+				throw ParserInvalidCharException(_invalidChar, _line);
 			}
 			else if(!isdigit(*p))
 			{
@@ -688,7 +538,7 @@ Parser::Error Parser::GetToken(Token& token)
 			++p;
 			if(*p == '\n' || *p == '\0')
 			{
-				return ERR_STRING_MISSING_CLOSING_QUOTE;
+				throw ParserStrMissQuoteException(_line);
 			}
 			else if(*p == '\\')
 			{
@@ -736,7 +586,7 @@ Parser::Error Parser::GetToken(Token& token)
 	else
 	{
 		_invalidChar = *p;
-		return ERR_INVALID_CHARACTER;
+		throw ParserInvalidCharException(_invalidChar, _line);
 	}
 
 	int len = p - t;
@@ -751,6 +601,13 @@ Parser::Error Parser::GetToken(Token& token)
 		int index = BinSearch(token.str, (const char**)_keywords.GetData(), _keywords.GetCount());
 		if(index != -1)
 			token.type = TOK_KEYWORD;
+
+		// check if it's a bool literal
+		if(!strcmp(token.str, "True") || !strcmp(token.str, "False"))
+		{
+			token.type = TOK_LITERAL;
+			token.subTypeLiteral = LIT_BOOL;
+		}
 	}
 	else if(token.type == TOK_OPERATOR)
 	{
@@ -762,8 +619,6 @@ Parser::Error Parser::GetToken(Token& token)
 	}
 
 	_ptr = p;
-
-	return ERR_NO_ERROR;
 }
 
 Parser::OperatorType Parser::GetOperatorType(const char* op_str)
@@ -813,23 +668,4 @@ const char* Parser::GetPunctStr(PunctType type)
 void Parser::DeleteTokens()
 {
 	_tokens.Clear();
-}
-
-void Parser::PrintError(Error err)
-{
-	switch(err)
-	{
-	case ERR_NO_INPUT_LOADED:
-		Console::PrintError("Parser error: no input.");
-		break;
-	case ERR_END_OF_INPUT:
-		Console::PrintError("Parser error: end of input.");
-		break;
-	case ERR_INVALID_CHARACTER:
-		Console::PrintError("Parser error: invalid character \'%c\' on line %d.", _invalidChar, _line);
-		break;
-	case ERR_STRING_MISSING_CLOSING_QUOTE:
-		Console::PrintError("Parser error: string missing closing quote.");
-		break;
-	}
 }

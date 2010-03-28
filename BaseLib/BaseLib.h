@@ -14,7 +14,7 @@
 #include "GL/GLRenderer.h"
 #include "Math/Math3d.h"
 #include "Console.h"
-#include "FileSys.h"
+#include "FileUtil.h"
 #include "FreeList.h"
 #include "FreePool.h"
 #include "FreeStackPool.h"

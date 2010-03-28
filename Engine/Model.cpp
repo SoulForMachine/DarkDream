@@ -37,7 +37,7 @@ namespace Engine
 
 		Unload();
 
-		SmartPtr<FileSys::File> file = engineAPI.fileSystem->Open(file_name, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(file_name, _t("rb"));
 		if(!file)
 			return false;
 
@@ -142,7 +142,7 @@ namespace Engine
 		_numIndices = 0;
 	}
 
-	bool Model::ReadMesh(FileSys::File* file, Mesh& mesh, const tchar* file_name, int mesh_index)
+	bool Model::ReadMesh(FileUtil::File* file, Mesh& mesh, const tchar* file_name, int mesh_index)
 	{
 		mesh.numVertices = file->ReadInt();
 		mesh.numIndices = file->ReadInt();

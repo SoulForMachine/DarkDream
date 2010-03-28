@@ -49,12 +49,12 @@ namespace EntityEditor
 
 	void MaterialForm::DeleteCopiedMaterial()
 	{
-		delete _copiedMaterial;
+		ObjectFactory::DeleteMaterial(_copiedMaterial);
 	}
 
 	System::Void MaterialForm::MaterialForm_Load(System::Object^  sender, System::EventArgs^  e)
 	{
-		_copiedMaterial = new(mainPool) Material;
+		_copiedMaterial = ObjectFactory::NewMaterial();
 		UpdateControls();
 	}
 

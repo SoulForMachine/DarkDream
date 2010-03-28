@@ -421,11 +421,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\FileSys.cpp"
+			RelativePath=".\FileUtil.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\FileSys.h"
+			RelativePath=".\FileUtil.h"
 			>
 		</File>
 		<File

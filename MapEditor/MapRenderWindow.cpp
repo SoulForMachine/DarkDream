@@ -83,7 +83,7 @@ namespace MapEditor
 		{
 			CreateHandle(cp);
 		}
-		catch(Exception^)
+		catch(System::Exception^)
 		{
 			throw "Failed to create handle.";
 		}
@@ -115,7 +115,7 @@ namespace MapEditor
 
 	bool MapRenderWindow::CreateResources()
 	{
-		_font = new(mainPool) Font;
+		_font = ObjectFactory::NewFont();
 		_font->Create(_renderer, _t("Verdana"), 11);
 
 		_vpSimple = engineAPI->asmProgManager->CreateVertexASMProgram(_t("Programs/Simple.vp"), true);
@@ -134,7 +134,7 @@ namespace MapEditor
 	{
 		if(_font)
 			_font->Destroy();
-		delete _font;
+		ObjectFactory::DeleteFont(_font);
 
 		if(_vpSimple)
 		{

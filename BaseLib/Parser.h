@@ -5,12 +5,97 @@
 #include "List.h"
 #include "StaticArray.h"
 #include "SmartPtr.h"
+#include "Exception.h"
 
 
-namespace FileSys
+namespace FileUtil
 {
 	class File;
 }
+
+
+class BASELIB_API ParserException: public Exception
+{
+public:
+	ParserException(const char* desc)
+		: Exception(desc) {}
+
+protected:
+	ParserException() {}
+};
+
+class BASELIB_API ParserNoInputException: public ParserException
+{
+public:
+	ParserNoInputException()
+		: ParserException("No input is loaded for parsing.") {}
+};
+
+class BASELIB_API ParserEndOfInputException: public ParserException
+{
+public:
+	ParserEndOfInputException()
+		: ParserException("Parsing reached the end of input buffer.") {}
+};
+
+class BASELIB_API ParserInvalidCharException: public ParserException
+{
+public:
+	ParserInvalidCharException(char c, int line)
+	{
+		_c = c;
+		_line = line;
+		SetDesc("Invalid character \'%c\' on line %d.", c, line);
+	}
+
+	char GetChar() const
+		{ return _c; }
+	int GetLine() const
+		{ return _line; }
+
+private:
+	char _c;
+	int _line;
+};
+
+class BASELIB_API ParserStrMissQuoteException: public ParserException
+{
+public:
+	ParserStrMissQuoteException(int line)
+	{
+		_line = line;
+		SetDesc("String missing closing quote on line %d.", line);
+	}
+
+	int GetLine() const
+		{ return _line; }
+
+private:
+	int _line;
+};
+
+class BASELIB_API ParserUnexpectedException: public ParserException
+{
+public:
+	ParserUnexpectedException(int line, const char* expected, const char* found)
+	{
+		if(found)
+			SetDesc("Parse error on line %d: expected \'%s\', found \'%s\'.", line, expected, found);
+		else
+			SetDesc("Parse error on line %d: expected \'%s\'.", line, expected);
+	}
+};
+
+class BASELIB_API ParserTooLongException: public ParserException
+{
+public:
+	ParserTooLongException(int line, const char* what, size_t max_size)
+	{
+		SetDesc("Parse error on line %d: %s too long, max size is %u.", line, what, max_size);
+	}
+};
+
+
 
 class BASELIB_API Parser
 {
@@ -29,6 +114,7 @@ public:
 		LIT_STRING,
 		LIT_INTEGER,
 		LIT_FLOAT,
+		LIT_BOOL
 	};
 
 	enum OperatorType
@@ -68,15 +154,6 @@ public:
 		PUNCT_COUNT
 	};
 
-	enum Error
-	{
-		ERR_NO_ERROR,
-		ERR_NO_INPUT_LOADED,
-		ERR_END_OF_INPUT,
-		ERR_INVALID_CHARACTER,
-		ERR_STRING_MISSING_CLOSING_QUOTE,
-	};
-
 	struct Token
 	{
 		SmartPtr<char> str;
@@ -94,11 +171,11 @@ public:
 	~Parser();
 
 	bool LoadFile(const tchar* file_name);
-	bool LoadFile(FileSys::File& file);
+	bool LoadFile(FileUtil::File& file);
 	void LoadMem(const char* buf, size_t size);
 	void Unload();
 
-	Error Parse();
+	void Parse();
 	void SetKeywords(const char** keywords, size_t count);
 	const List<Token>& GetTokenList() const
 		{ return _tokens; }
@@ -109,20 +186,21 @@ public:
 	char GetInvalidChar() const
 		{ return _invalidChar; }
 
-	bool ExpectTokenString(const char* str);
-	bool ExpectTokenType(TokenType type, int sub_type);
-	bool ReadInt(int& i);
-	bool ReadFloat(float& f);
-	bool ReadVec2f(float* v);
-	bool ReadVec3f(float* v);
-	bool ReadVec4f(float* v);
-	bool ReadVec2i(int* v);
-	bool ReadVec3i(int* v);
-	bool ReadVec4i(int* v);
-	bool ReadString(char* str, size_t max_char);
-	bool ReadIdentifier(char* str, size_t max_char);
-	bool ReadOperator(OperatorType& op_type);
-	bool ReadToken(Token& token);
+	void ExpectTokenString(const char* str);
+	void ExpectTokenType(TokenType type, int sub_type);
+	void ReadInt(int& i);
+	void ReadFloat(float& f);
+	void ReadVec2f(float* v);
+	void ReadVec3f(float* v);
+	void ReadVec4f(float* v);
+	void ReadVec2i(int* v);
+	void ReadVec3i(int* v);
+	void ReadVec4i(int* v);
+	void ReadString(char* str, size_t max_char);
+	void ReadBool(bool& b);
+	void ReadIdentifier(char* str, size_t max_char);
+	void ReadOperator(OperatorType& op_type);
+	void ReadToken(Token& token);
 
 private:
 	struct Operator
@@ -137,13 +215,12 @@ private:
 		const char* str;
 	};
 
-	Error GetToken(Token& token);
+	void GetToken(Token& token);
 	OperatorType GetOperatorType(const char* op_str);
 	const char* GetOperatorStr(OperatorType type);
 	PunctType GetPunctType(const char* p_str);
 	const char* GetPunctStr(PunctType type);
 	void DeleteTokens();
-	void PrintError(Error err);
 
 	char* _buffer;
 	char* _ptr;

@@ -3,7 +3,7 @@
 #include <cassert>
 #include "Win32Common.h"
 #include "Console.h"
-#include "FileSys.h"
+#include "FileUtil.h"
 #include "SystemInfo.h"
 #include "String.h"
 #include "Memory.h"
@@ -520,7 +520,7 @@ namespace Memory
 		if(file_name && *file_name)
 		{
 			// dump to a file
-			FileSys::FsysFile file;
+			FileUtil::FsysFile file;
 			tchar fn[MAX_PATH];
 			_stprintf(fn, _t("%hs"), file_name);
 			// if we do not have full path, create file in application directory

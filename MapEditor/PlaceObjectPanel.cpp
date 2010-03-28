@@ -45,7 +45,7 @@ namespace MapEditor
 		_objViewFrameBuf->AttachRenderbuffer(GL::BUFFER_DEPTH, _objViewDepthBuf);
 		_fbufOk = (_objViewFrameBuf->CheckStatus() == GL::FBUF_STATUS_COMPLETE);
 
-		_world = new(mainPool) World;
+		_world = ObjectFactory::NewWorld();
 		float ratio = float(cl_width) / cl_height;
 		_world->GetCamera().Perspective(deg2rad(70.0f), ratio, 0.1f, 1000.0f);
 		_objViewBmp = gcnew Bitmap(cl_width, cl_height, PixelFormat::Format32bppArgb);
@@ -53,7 +53,6 @@ namespace MapEditor
 		_objRotY = 0.0f;
 
 		_entity = 0;
-		_entityLoaded = false;
 		_filterText = "";
 		RefreshObjectTree();
 		SetMode(Mode::PLACE_OBJECT);
@@ -70,8 +69,7 @@ namespace MapEditor
 		_renderer->DestroyRenderbuffer(_objViewDepthBuf);
 		_renderer->DestroyFramebuffer(_objViewFrameBuf);
 		DeleteEntity();		
-		_world->World::~World();
-		::operator delete(_world);
+		ObjectFactory::DeleteWorld(_world);
 		delete _objViewBmp;
 	}
 
@@ -176,13 +174,8 @@ namespace MapEditor
 	{
 		if(_entity)
 		{
-			if(_entity->GetType() == ENTITY_TYPE_MODEL)
-				((ModelEntity*)_entity)->ModelEntity::~ModelEntity();
-			else
-				((ParticleSystem*)_entity)->ParticleSystem::~ParticleSystem();
-			::operator delete(_entity);
+			ObjectFactory::DeleteEntity(_entity);
 			_entity = 0;
-			_entityLoaded = false;
 		}
 	}
 
@@ -201,10 +194,9 @@ namespace MapEditor
 			if(node->GetNodeType() == ObjectTreeNode::NodeType::MODEL)
 			{
 				DeleteEntity();
-				_entity = new(mainPool) ModelEntity;
-				_entityLoaded = ((ModelEntity*)_entity)->Load(path);
+				_entity = engineAPI->modelEntityManager->CreateEntityObject(path);
 
-				if(_entityLoaded)
+				if(_entity)
 				{
 					engineAPI->materialManager->LoadAll();
 					engineAPI->textureManager->LoadAll();
@@ -223,10 +215,9 @@ namespace MapEditor
 			else
 			{
 				DeleteEntity();
-				_entity = new(mainPool) ParticleSystem;
-				_entityLoaded = ((ParticleSystem*)_entity)->Load(path);
+				_entity = engineAPI->partSysManager->CreateParticleSystemObject(path);
 
-				if(_entityLoaded)
+				if(_entity)
 				{
 					engineAPI->textureManager->LoadAll();
 					_objRotX = 0.0f;
@@ -246,7 +237,7 @@ namespace MapEditor
 
 	System::Void PlaceObjectPanel::_panelObjectView_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e)
 	{
-		if(_entity && _entityLoaded && _fbufOk)
+		if(_entity && _fbufOk)
 		{
 			int cl_width = _panelObjectView->ClientRectangle.Width;
 			int cl_height = _panelObjectView->ClientRectangle.Height;
@@ -338,7 +329,7 @@ namespace MapEditor
 
 	String^ PlaceObjectPanel::GetSelObjectPath()
 	{
-		if(_treeObjects->SelectedNode == nullptr || !_entityLoaded)
+		if(_treeObjects->SelectedNode == nullptr || !_entity)
 			return nullptr;
 
 		ObjectTreeNode^ node = (ObjectTreeNode^)_treeObjects->SelectedNode;

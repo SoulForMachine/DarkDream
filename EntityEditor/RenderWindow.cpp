@@ -77,7 +77,7 @@ namespace EntityEditor
 		{
 			CreateHandle(cp);
 		}
-		catch(Exception^)
+		catch(System::Exception^)
 		{
 			throw "Failed to create handle.";
 		}
@@ -137,7 +137,7 @@ namespace EntityEditor
 
 	bool RenderWindow::CreateResources()
 	{
-		_font = new(mainPool) Font;
+		_font = ObjectFactory::NewFont();
 		_font->Create(_renderer, _t("Verdana"), 11);
 
 		size_t size = (_gridVertCount + _gridHorizCount) * sizeof(LineVert3D) * 2;
@@ -235,7 +235,7 @@ namespace EntityEditor
 	{
 		if(_font)
 			_font->Destroy();
-		delete _font;
+		ObjectFactory::DeleteFont(_font);
 
 		if(_vpSimple)
 		{

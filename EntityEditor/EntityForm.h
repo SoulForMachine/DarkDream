@@ -67,9 +67,9 @@ namespace EntityEditor {
 	private: System::Windows::Forms::Panel^  _panelScroll;
 
 	private: Salamander::Windows::Forms::CollapsiblePanelBar^  _panelEntity;
-	private: Salamander::Windows::Forms::CollapsiblePanel^  _panelAIScript;
-	private: System::Windows::Forms::Button^  _btnBrowseAIScript;
-	private: System::Windows::Forms::TextBox^  _textAIScript;
+
+
+
 	private: Salamander::Windows::Forms::CollapsiblePanel^  _panelSounds;
 	private: System::Windows::Forms::ListView^  _listSounds;
 	private: System::Windows::Forms::ColumnHeader^  columnHeader1;
@@ -129,9 +129,6 @@ namespace EntityEditor {
 			this->_mnuViewCollapseAll = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_panelScroll = (gcnew System::Windows::Forms::Panel());
 			this->_panelEntity = (gcnew Salamander::Windows::Forms::CollapsiblePanelBar());
-			this->_panelAIScript = (gcnew Salamander::Windows::Forms::CollapsiblePanel());
-			this->_textAIScript = (gcnew System::Windows::Forms::TextBox());
-			this->_btnBrowseAIScript = (gcnew System::Windows::Forms::Button());
 			this->_imageList = (gcnew System::Windows::Forms::ImageList(this->components));
 			this->_panelSounds = (gcnew Salamander::Windows::Forms::CollapsiblePanel());
 			this->_listSounds = (gcnew System::Windows::Forms::ListView());
@@ -146,8 +143,8 @@ namespace EntityEditor {
 			this->_colHdrAnimation = (gcnew System::Windows::Forms::ColumnHeader());
 			this->_btnAddAnim = (gcnew System::Windows::Forms::Button());
 			this->_btnRemoveAnim = (gcnew System::Windows::Forms::Button());
-			this->_btnTPose = (gcnew System::Windows::Forms::Button());
 			this->_btnPlayAnim = (gcnew System::Windows::Forms::Button());
+			this->_btnTPose = (gcnew System::Windows::Forms::Button());
 			this->_panelSkeleton = (gcnew Salamander::Windows::Forms::CollapsiblePanel());
 			this->_btnCollapseAllSkelet = (gcnew System::Windows::Forms::Button());
 			this->_btnExpandAllSkelet = (gcnew System::Windows::Forms::Button());
@@ -166,7 +163,6 @@ namespace EntityEditor {
 			this->_panelScroll->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_panelEntity))->BeginInit();
 			this->_panelEntity->SuspendLayout();
-			this->_panelAIScript->SuspendLayout();
 			this->_panelSounds->SuspendLayout();
 			this->_panelAnimations->SuspendLayout();
 			this->_panelSkeleton->SuspendLayout();
@@ -201,7 +197,7 @@ namespace EntityEditor {
 			this->_mnuViewExpandAll->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_mnuViewExpandAll.Image")));
 			this->_mnuViewExpandAll->ImageTransparentColor = System::Drawing::Color::White;
 			this->_mnuViewExpandAll->Name = L"_mnuViewExpandAll";
-			this->_mnuViewExpandAll->Size = System::Drawing::Size(152, 22);
+			this->_mnuViewExpandAll->Size = System::Drawing::Size(139, 22);
 			this->_mnuViewExpandAll->Text = L"&Expand All";
 			this->_mnuViewExpandAll->Click += gcnew System::EventHandler(this, &EntityForm::_mnuViewExpandAll_Click);
 			// 
@@ -210,7 +206,7 @@ namespace EntityEditor {
 			this->_mnuViewCollapseAll->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_mnuViewCollapseAll.Image")));
 			this->_mnuViewCollapseAll->ImageTransparentColor = System::Drawing::Color::White;
 			this->_mnuViewCollapseAll->Name = L"_mnuViewCollapseAll";
-			this->_mnuViewCollapseAll->Size = System::Drawing::Size(152, 22);
+			this->_mnuViewCollapseAll->Size = System::Drawing::Size(139, 22);
 			this->_mnuViewCollapseAll->Text = L"&Collapse All";
 			this->_mnuViewCollapseAll->Click += gcnew System::EventHandler(this, &EntityForm::_mnuViewCollapseAll_Click);
 			// 
@@ -231,7 +227,6 @@ namespace EntityEditor {
 			this->_panelEntity->AutoSizeMode = System::Windows::Forms::AutoSizeMode::GrowAndShrink;
 			this->_panelEntity->BackColor = System::Drawing::SystemColors::Control;
 			this->_panelEntity->Border = 8;
-			this->_panelEntity->Controls->Add(this->_panelAIScript);
 			this->_panelEntity->Controls->Add(this->_panelSounds);
 			this->_panelEntity->Controls->Add(this->_panelAnimations);
 			this->_panelEntity->Controls->Add(this->_panelSkeleton);
@@ -239,51 +234,9 @@ namespace EntityEditor {
 			this->_panelEntity->Dock = System::Windows::Forms::DockStyle::Top;
 			this->_panelEntity->Location = System::Drawing::Point(0, 0);
 			this->_panelEntity->Name = L"_panelEntity";
-			this->_panelEntity->Size = System::Drawing::Size(482, 1221);
+			this->_panelEntity->Size = System::Drawing::Size(482, 1113);
 			this->_panelEntity->Spacing = 8;
 			this->_panelEntity->TabIndex = 2;
-			// 
-			// _panelAIScript
-			// 
-			this->_panelAIScript->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
-				| System::Windows::Forms::AnchorStyles::Right));
-			this->_panelAIScript->BackColor = System::Drawing::SystemColors::Control;
-			this->_panelAIScript->Controls->Add(this->_textAIScript);
-			this->_panelAIScript->Controls->Add(this->_btnBrowseAIScript);
-			this->_panelAIScript->EndColour = System::Drawing::Color::LightGray;
-			this->_panelAIScript->Image = nullptr;
-			this->_panelAIScript->Location = System::Drawing::Point(8, 1118);
-			this->_panelAIScript->Name = L"_panelAIScript";
-			this->_panelAIScript->PanelState = Salamander::Windows::Forms::PanelState::Expanded;
-			this->_panelAIScript->Size = System::Drawing::Size(466, 100);
-			this->_panelAIScript->StartColour = System::Drawing::SystemColors::ControlDarkDark;
-			this->_panelAIScript->TabIndex = 5;
-			this->_panelAIScript->TitleFont = (gcnew System::Drawing::Font(L"Tahoma", 9, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
-				static_cast<System::Byte>(0)));
-			this->_panelAIScript->TitleFontColour = System::Drawing::Color::White;
-			this->_panelAIScript->TitleText = L"AI Script";
-			// 
-			// _textAIScript
-			// 
-			this->_textAIScript->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
-				| System::Windows::Forms::AnchorStyles::Right));
-			this->_textAIScript->Location = System::Drawing::Point(27, 53);
-			this->_textAIScript->Name = L"_textAIScript";
-			this->_textAIScript->ReadOnly = true;
-			this->_textAIScript->Size = System::Drawing::Size(369, 20);
-			this->_textAIScript->TabIndex = 24;
-			// 
-			// _btnBrowseAIScript
-			// 
-			this->_btnBrowseAIScript->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
-			this->_btnBrowseAIScript->ImageIndex = 0;
-			this->_btnBrowseAIScript->ImageList = this->_imageList;
-			this->_btnBrowseAIScript->Location = System::Drawing::Point(402, 51);
-			this->_btnBrowseAIScript->Name = L"_btnBrowseAIScript";
-			this->_btnBrowseAIScript->Size = System::Drawing::Size(25, 23);
-			this->_btnBrowseAIScript->TabIndex = 25;
-			this->_btnBrowseAIScript->UseVisualStyleBackColor = true;
-			this->_btnBrowseAIScript->Click += gcnew System::EventHandler(this, &EntityForm::_btnBrowseAIScript_Click);
 			// 
 			// _imageList
 			// 
@@ -464,18 +417,6 @@ namespace EntityEditor {
 			this->_btnRemoveAnim->UseVisualStyleBackColor = true;
 			this->_btnRemoveAnim->Click += gcnew System::EventHandler(this, &EntityForm::_btnRemoveAnim_Click);
 			// 
-			// _btnTPose
-			// 
-			this->_btnTPose->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
-			this->_btnTPose->ImageIndex = 8;
-			this->_btnTPose->ImageList = this->_imageList;
-			this->_btnTPose->Location = System::Drawing::Point(283, 253);
-			this->_btnTPose->Name = L"_btnTPose";
-			this->_btnTPose->Size = System::Drawing::Size(25, 23);
-			this->_btnTPose->TabIndex = 18;
-			this->_btnTPose->UseVisualStyleBackColor = true;
-			this->_btnTPose->Click += gcnew System::EventHandler(this, &EntityForm::_btnTPose_Click);
-			// 
 			// _btnPlayAnim
 			// 
 			this->_btnPlayAnim->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
@@ -487,6 +428,18 @@ namespace EntityEditor {
 			this->_btnPlayAnim->TabIndex = 15;
 			this->_btnPlayAnim->UseVisualStyleBackColor = true;
 			this->_btnPlayAnim->Click += gcnew System::EventHandler(this, &EntityForm::_btnPlayAnim_Click);
+			// 
+			// _btnTPose
+			// 
+			this->_btnTPose->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
+			this->_btnTPose->ImageIndex = 8;
+			this->_btnTPose->ImageList = this->_imageList;
+			this->_btnTPose->Location = System::Drawing::Point(283, 253);
+			this->_btnTPose->Name = L"_btnTPose";
+			this->_btnTPose->Size = System::Drawing::Size(25, 23);
+			this->_btnTPose->TabIndex = 18;
+			this->_btnTPose->UseVisualStyleBackColor = true;
+			this->_btnTPose->Click += gcnew System::EventHandler(this, &EntityForm::_btnTPose_Click);
 			// 
 			// _panelSkeleton
 			// 
@@ -678,6 +631,8 @@ namespace EntityEditor {
 			this->Controls->Add(this->_panelScroll);
 			this->Controls->Add(this->_mainToolbar);
 			this->Controls->Add(this->_menuEntity);
+			this->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
 			this->HideOnClose = true;
 			this->MainMenuStrip = this->_menuEntity;
 			this->Name = L"EntityForm";
@@ -690,8 +645,6 @@ namespace EntityEditor {
 			this->_panelScroll->PerformLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_panelEntity))->EndInit();
 			this->_panelEntity->ResumeLayout(false);
-			this->_panelAIScript->ResumeLayout(false);
-			this->_panelAIScript->PerformLayout();
 			this->_panelSounds->ResumeLayout(false);
 			this->_panelAnimations->ResumeLayout(false);
 			this->_panelSkeleton->ResumeLayout(false);
@@ -713,7 +666,6 @@ namespace EntityEditor {
 	System::Void _btnPlaySound_Click(System::Object^  sender, System::EventArgs^  e);
 	System::Void _btnAddSound_Click(System::Object^  sender, System::EventArgs^  e);
 	System::Void _btnRemoveSound_Click(System::Object^  sender, System::EventArgs^  e);
-	System::Void _btnBrowseAIScript_Click(System::Object^  sender, System::EventArgs^  e);
 	System::Void _openFileDialog_FileOk(System::Object^  sender, System::ComponentModel::CancelEventArgs^  e);
 	System::Void _treeSkelet_AfterSelect(System::Object^  sender, System::Windows::Forms::TreeViewEventArgs^  e);
 	System::Void _btnRemoveAttachment_Click(System::Object^  sender, System::EventArgs^  e);

@@ -5,7 +5,7 @@
 #include <cstring>
 #include "Memory.h"
 #include "Parser.h"
-#include "FileSys.h"
+#include "FileUtil.h"
 #include "SystemInfo.h"
 #include "Console.h"
 
@@ -832,7 +832,7 @@ void Console::Dump(char* args)
 		return;
 	}
 
-	FileSys::FsysFile file;
+	FileUtil::FsysFile file;
 	tchar fn[MAX_PATH];
 	_stprintf(fn, _t("%hs"), file_name);
 	// if we do not have full path, create file in application directory

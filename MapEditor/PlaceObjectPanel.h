@@ -97,7 +97,6 @@ namespace MapEditor {
 		EM_PlaceObject^ _editMode;
 		String^ _filterText;
 		Engine::RenderableEntity* _entity;
-		bool _entityLoaded;
 		GL::Renderer* _renderer;
 		GL::Renderbuffer* _objViewColorBuf;
 		GL::Renderbuffer* _objViewDepthBuf;

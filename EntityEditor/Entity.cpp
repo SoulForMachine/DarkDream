@@ -12,7 +12,7 @@ namespace EntityEditor
 
 	Entity::Entity()
 	{
-		_entity = new(mainPool) ModelEntity;
+		_entity = ObjectFactory::NewStaticEntity();
 		_properties = gcnew EntityProperties;
 		LoadProperties();
 		_modified = false;
@@ -22,18 +22,18 @@ namespace EntityEditor
 	Entity::~Entity()
 	{
 		Unload();
-		_entity->ModelEntity::~ModelEntity();
-		::operator delete(_entity);
 	}
 
 	bool Entity::Load(String^ file_name)
 	{
+		Unload();
+
 		tchar* fn = GetRelativePath(file_name);
 		::Console::PrintLn("Loading entity: %ls", fn);
-		bool result = _entity->Load(fn);
+		_entity = engineAPI->modelEntityManager->CreateEntityObject(fn);
 		LoadProperties();
 
-		if(result)
+		if(_entity != 0)
 		{
 			engineAPI->materialManager->LoadAll();
 			engineAPI->textureManager->LoadAll();
@@ -42,12 +42,15 @@ namespace EntityEditor
 			_entity->SetupModelData();
 			_modified = false;
 			_fileName = file_name;
+			delete[] fn;
+			return true;
 		}
 		else
+		{
 			::Console::PrintError("Failed to load entity: %ls", fn);
-		delete[] fn;
-
-		return result;
+			delete[] fn;
+			return false;
+		}
 	}
 
 	// if file_name is nullptr or empty string, save with current file name
@@ -79,6 +82,8 @@ namespace EntityEditor
 		if(_entity)
 		{
 			_entity->Unload();
+			ObjectFactory::DeleteEntity(_entity);
+			_entity = 0;
 			_modified = false;
 			_fileName = nullptr;
 			LoadProperties();
@@ -89,17 +94,11 @@ namespace EntityEditor
 	{
 		if(_entity)
 		{
-			_properties->Class = (EntityClass)(int)_entity->GetClass();
 			_properties->Name = gcnew String(_entity->GetName());
-			_properties->Clip = _entity->GetClip();
-			_properties->LifePoints = _entity->GetLifePoints();
 		}
 		else
 		{
-			_properties->Class = EntityClass::Generic;
 			_properties->Name = "";
-			_properties->Clip = true;
-			_properties->LifePoints = 100;
 		}
 	}
 
@@ -107,12 +106,9 @@ namespace EntityEditor
 	{
 		if(_entity)
 		{
-			_entity->SetClass((Engine::ModelClass)(int)_properties->Class);
 			char* name = ConvertString<char>(_properties->Name);
 			_entity->SetName(name);
 			delete[] name;
-			_entity->SetClip(_properties->Clip);
-			_entity->SetLifePoints(_properties->LifePoints);
 		}
 	}
 

@@ -102,16 +102,6 @@ namespace EntityEditor
 				_listSounds->Items->Add(item);
 			}
 		}
-
-		// ai script
-		String^ ai_path = "";
-		if(_entity)
-		{
-			AIScriptResPtr script = _entity->GetAIScriptRes();
-			if(script)
-				ai_path = gcnew String(script.GetFileRes()->GetFileName());
-		}
-		_textAIScript->Text = ai_path;
 	}
 
 	void EntityForm::InsertJoint(TreeNodeCollection^ nodes, const Engine::Joint* joint)
@@ -324,10 +314,6 @@ namespace EntityEditor
 	}
 
 	System::Void EntityForm::_btnRemoveSound_Click(System::Object^  sender, System::EventArgs^  e)
-	{
-	}
-
-	System::Void EntityForm::_btnBrowseAIScript_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 	}
 

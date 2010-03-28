@@ -5,7 +5,7 @@
 #include "FileSystem.h"
 
 using namespace Memory;
-using namespace FileSys;
+using namespace FileUtil;
 
 
 namespace Engine
@@ -88,7 +88,7 @@ namespace Engine
 		tstrncat(dest, src, MAX_PATH);
 	}
 
-	FileSys::File* FileSystem::Open(const tchar* fname, const tchar* mode)
+	FileUtil::File* FileSystem::Open(const tchar* fname, const tchar* mode)
 	{
 		tchar path[MAX_PATH];
 		MakeFullPath(path, fname);

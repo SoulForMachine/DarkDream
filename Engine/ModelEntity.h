@@ -11,6 +11,13 @@
 #include "Entity.h"
 
 
+class Parser;
+
+namespace FileUtil
+{
+	class File;
+}
+
 
 namespace Engine
 {
@@ -25,23 +32,19 @@ namespace Engine
 	class Material;
 
 
-	enum ModelClass
-	{
-		MODEL_CLASS_GENERIC,
-		MODEL_CLASS_NPC,
-		MODEL_CLASS_MONSTER,
-		MODEL_CLASS_BOSS,
-		MODEL_CLASS_BUILDING,
-		MODEL_CLASS_FOLIAGE,
-		MODEL_CLASS_DEBRIS,
-
-		MODEL_CLASS_COUNT,
-	};
-
 
 	class ENGINE_API ModelEntity: public RenderableEntity
 	{
 	public:
+		enum ModelEntityType
+		{
+			ME_TYPE_STATIC,
+			ME_TYPE_PLAYER,
+			ME_TYPE_AI,
+			ME_TYPE_WEAPON,
+			ME_TYPE_ITEM,
+		};
+
 		enum JointAttachType
 		{
 			JOINT_ATTACH_UNKNOWN = -1,
@@ -92,16 +95,18 @@ namespace Engine
 
 		ModelEntity();
 		ModelEntity(const ModelEntity& entity);
-		~ModelEntity();
+		~ModelEntity() = 0;
 		ModelEntity& operator = (const ModelEntity& entity);
 
 		virtual EntityType GetType() const
 			{ return ENTITY_TYPE_MODEL; }
 
+		static ModelEntity* CreateFromFile(const tchar* file_name);
+		virtual ModelEntity* CreateCopy() const = 0;
 		bool Load(const tchar* file_name);
 		void SetupModelData(); // call after model resources have been loaded
 		bool Save(const tchar* file_name);
-		void Unload();
+		virtual void Unload();
 
 		const StaticArray<math3d::mat4f>& GetJointTransforms() const
 			{ return _jointMatPalette; }
@@ -118,8 +123,6 @@ namespace Engine
 
 		ModelResPtr GetModelRes() const
 			{ return _model; }
-		AIScriptResPtr GetAIScriptRes() const
-			{ return _aiScript; }
 		const MeshDataArray& GetMeshDataArray() const
 			{ return _meshDataArray; }
 		const MaterialMap& GetMaterials() const
@@ -134,7 +137,6 @@ namespace Engine
 			{ return _curAnim; }
 
 		bool SetModel(const tchar* file_name);
-		bool SetAIScript(const tchar* file_name);
 		bool SetMaterial(const char* mat_name, const tchar* file_name);
 		bool SetJointAttachment(const char* joint_name, const tchar* file_name);
 		bool RemoveJointAttachment(const char* joint_name);
@@ -143,10 +145,8 @@ namespace Engine
 		bool AddSound(const char* snd_name, const tchar* file_name);
 		bool RemoveSound(const char* snd_name);
 
-		ModelClass GetClass() const
-			{ return _class; }
-		void SetClass(ModelClass cls)
-			{ _class = cls; }
+		virtual ModelEntityType GetModelEntityType() const = 0;
+
 		const char* GetName() const
 			{ return _name; }
 		void SetName(const char* name)
@@ -154,22 +154,17 @@ namespace Engine
 			strncpy(_name, name, MAX_NAME_LENGTH);
 			_name[MAX_NAME_LENGTH - 1] = '\0';
 		}
-		bool GetClip() const
-			{ return _clip; }
-		void SetClip(bool clip)
-			{ _clip = clip; }
-		int GetLifePoints() const
-			{ return _lifePoints; }
-		void SetLifePoints(int pts)
-			{ _lifePoints = pts; }
 
 		static JointAttachType GetJointAttachTypeByExt(const tchar* file_name);
 
+	protected:
+		virtual void ReadProperties(Parser& parser) = 0;
+		virtual void WriteProperties(FileUtil::File& file, const char* indent) = 0;
+
 	private:
+		bool Load(Parser& parser);
 		void ClearModelData();
 		void CalcWorldBBox();
-		ModelClass GetClassFromString(const char* name);
-		const char* GetClassString(ModelClass c);
 		void BindPoseTransforms();
 		int GetShaderIndex(uint vert_flags, const Material* material);
 		bool IsAnimCompatible(const Animation& anim);
@@ -180,7 +175,6 @@ namespace Engine
 		bool _animPlaying;
 
 		ModelResPtr _model;
-		AIScriptResPtr _aiScript;
 		MaterialMap _materials;
 		MeshDataArray _meshDataArray;
 		JointAttachMap _jointAttachments;
@@ -188,13 +182,8 @@ namespace Engine
 		AnimMap _animations;
 		SoundMap _sounds;
 
-		ModelClass _class;
 		static const int MAX_NAME_LENGTH = 64;
 		char _name[MAX_NAME_LENGTH];
-		bool _clip;
-		int _lifePoints;
-
-		static const char* _classNames[MODEL_CLASS_COUNT];
 	};
 
 }
