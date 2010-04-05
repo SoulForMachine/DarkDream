@@ -203,12 +203,12 @@
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\WeifenLuo.WinFormsUI.Docking.dll"
-			AssemblyName="WeifenLuo.WinFormsUI.Docking, Version=2.2.2864.18696, PublicKeyToken=d481317c817cec47, processorArchitecture=MSIL"
+			AssemblyName="WeifenLuo.WinFormsUI.Docking, Version=2.3.1.24483, processorArchitecture=MSIL"
 			MinFrameworkVersion="131072"
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\EditorCommon.dll"
-			AssemblyName="EditorCommon, Version=1.0.3566.37612, processorArchitecture=x86"
+			AssemblyName="EditorCommon, Version=1.0.3745.42411, processorArchitecture=x86"
 			MinFrameworkVersion="131072"
 		/>
 	</References>
@@ -385,14 +385,6 @@
 		</File>
 		<File
 			RelativePath=".\stdafx.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Utility.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Utility.h"
 			>
 		</File>
 	</Files>

@@ -1,10 +1,10 @@
 #include "StdAfx.h"
-#include "Utility.h"
+#include "EditorCommon/UtilityTempl.h"
 #include "GrassPanel.h"
 
 using namespace Memory;
-using namespace EditorCommon;
 using namespace Engine;
+using namespace EditorCommon;
 
 
 namespace MapEditor
@@ -119,7 +119,7 @@ namespace MapEditor
 		_selectTextureDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Textures";
 		if(_selectTextureDialog->ShowDialog() == DialogResult::OK)
 		{
-			tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
+			tchar* file_name = EditorUtil::GetRelativePath(_selectTextureDialog->FileName);
 			_textTexture->Text = gcnew String(file_name);
 			Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
 			if(FillTextureList(tex))
@@ -134,7 +134,7 @@ namespace MapEditor
 	{
 		// the file must be within game's base directory
 		FileDialog^ dlg = (FileDialog^)sender;
-		if(!IsInGameBaseDir(dlg->FileName))
+		if(!EditorUtil::IsInGameBaseDir(dlg->FileName))
 		{
 			MessageBox::Show(
 				this, "File must be within game's base directory.", GetAppName(),

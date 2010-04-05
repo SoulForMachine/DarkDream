@@ -17,6 +17,36 @@ namespace Engine
 		"Key",
 	};
 
+
+	ItemEntity::ItemEntity()
+	{
+		_itemType = ITEM_TYPE_HEALTH;
+		_amount = 25;
+	}
+
+	ItemEntity::ItemEntity(const ItemEntity& rhs)
+	{
+		*this = rhs;
+	}
+	
+	ItemEntity::~ItemEntity()
+	{
+		Unload();
+	}
+
+	ItemEntity& ItemEntity::operator = (const ItemEntity& rhs)
+	{
+		if(&rhs != this)
+		{
+			ModelEntity::operator = (rhs);
+
+			_itemType = rhs._itemType;
+			_amount = rhs._amount;
+		}
+
+		return *this;
+	}
+
 	ItemEntity* ItemEntity::CreateCopy() const
 	{
 		return new(mapPool) ItemEntity(*this);

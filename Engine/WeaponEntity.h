@@ -41,10 +41,49 @@ namespace Engine
 			DIST_ATTEN_COUNT
 		};
 
+		WeaponEntity();
+		WeaponEntity(const WeaponEntity& rhs);
+		~WeaponEntity();
+		WeaponEntity& operator = (const WeaponEntity& rhs);
+
 		WeaponEntity* CreateCopy() const;
 		void Unload();
 		ModelEntityType GetModelEntityType() const
 			{ return ME_TYPE_WEAPON; }
+
+		int GetMaxAmmo() const
+			{ return _maxAmmo; }
+		void SetMaxAmmo(int ammo)
+			{ _maxAmmo = ammo; }
+
+		int GetDamage() const
+			{ return _damage; }
+		void SetDamage(int damage)
+			{ _damage = damage; }
+
+		float GetRange() const
+			{ return _range; }
+		void SetRange(float range)
+			{ _range = range; }
+
+		float GetEffectiveAngle() const
+			{ return _effectiveAngle; }
+		void SetEffectiveAngle(float angle)
+			{ _effectiveAngle = angle; }
+
+		DistanceAttenuation GetDistanceAttenuation() const
+			{ return _distAtten; }
+		void SetDistanceAttenuation(DistanceAttenuation atten)
+			{ _distAtten = atten; }
+
+		WeaponType GetWeaponType() const
+			{ return _weaponType; }
+		void SetWeaponType(WeaponType type)
+			{ _weaponType = type; }
+
+		PartSysResPtr GetMuzzleEffect() const
+			{ return _muzzleEffect; }
+		bool SetMuzzleEffect(const tchar* file_name);
 
 	protected:
 		void ReadProperties(Parser& parser);
@@ -59,6 +98,7 @@ namespace Engine
 		int _maxAmmo;
 		int _damage;
 		float _range;
+		float _effectiveAngle;
 		DistanceAttenuation _distAtten;
 		WeaponType _weaponType;
 		PartSysResPtr _muzzleEffect;

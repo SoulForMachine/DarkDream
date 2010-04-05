@@ -184,7 +184,7 @@
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\WeifenLuo.WinFormsUI.Docking.dll"
-			AssemblyName="WeifenLuo.WinFormsUI.Docking, Version=2.2.2864.18696, PublicKeyToken=d481317c817cec47, processorArchitecture=MSIL"
+			AssemblyName="WeifenLuo.WinFormsUI.Docking, Version=2.3.1.24483, processorArchitecture=MSIL"
 			MinFrameworkVersion="131072"
 		/>
 		<AssemblyReference
@@ -236,6 +236,10 @@
 				RelativePath=".\TextureListView.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\Utility.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -273,6 +277,14 @@
 					SubType="Designer"
 					>
 				</File>
+			</File>
+			<File
+				RelativePath=".\Utility.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UtilityTempl.h"
+				>
 			</File>
 		</Filter>
 		<Filter

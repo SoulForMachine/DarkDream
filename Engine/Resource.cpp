@@ -1482,7 +1482,7 @@ namespace Engine
 	ModelEntityRes::ModelEntityRes(const ModelEntityRes& res):
 		Resource(res._fileName)
 	{
-		if(res._resource)
+		if(res.IsLoaded())
 			_resource = res._resource->CreateCopy();
 	}
 
@@ -1762,7 +1762,7 @@ namespace Engine
 	PartSysRes::PartSysRes(const PartSysRes& res):
 		Resource(res._fileName)
 	{
-		if(res._resource)
+		if(res.IsLoaded())
 			_resource = new(mapPool) ParticleSystem(*res._resource);
 	}
 

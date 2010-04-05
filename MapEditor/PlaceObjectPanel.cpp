@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "Utility.h"
 #include "EM_PlaceObject.h"
+#include "EditorCommon/UtilityTempl.h"
 #include "PlaceObjectPanel.h"
 
 using namespace System;
@@ -12,6 +12,7 @@ using namespace System::Drawing::Drawing2D;
 using namespace math3d;
 using namespace Memory;
 using namespace Engine;
+using namespace EditorCommon;
 
 
 namespace MapEditor
@@ -123,7 +124,7 @@ namespace MapEditor
 
 			if(MatchFilter(name))
 			{
-				tchar* rel_path = GetRelativePath(fi->FullName);
+				tchar* rel_path = EditorUtil::GetRelativePath(fi->FullName);
 				ObjectTreeNode^ node = gcnew ObjectTreeNode(name, gcnew String(rel_path), type);
 				delete[] rel_path;
 				dir_node->Nodes->Add(node);

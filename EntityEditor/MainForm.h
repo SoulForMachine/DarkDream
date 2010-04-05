@@ -32,7 +32,7 @@ namespace EntityEditor {
 	public:
 		MainForm();
 
-		virtual void FormNotify(Form^ form, EditorCommon::NotifyMessage msg);
+		virtual void FormNotify(Form^ form, EditorCommon::NotifyMessage msg, Object^ param);
 
 	protected:
 		/// <summary>

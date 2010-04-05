@@ -70,6 +70,7 @@ namespace EntityEditor {
 			this->_propertyGrid->Name = L"_propertyGrid";
 			this->_propertyGrid->Size = System::Drawing::Size(292, 572);
 			this->_propertyGrid->TabIndex = 0;
+			this->_propertyGrid->PropertyValueChanged += gcnew System::Windows::Forms::PropertyValueChangedEventHandler(this, &PropertyForm::_propertyGrid_PropertyValueChanged);
 			// 
 			// PropertyForm
 			// 
@@ -77,6 +78,8 @@ namespace EntityEditor {
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(292, 572);
 			this->Controls->Add(this->_propertyGrid);
+			this->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
 			this->HideOnClose = true;
 			this->Name = L"PropertyForm";
 			this->ShowHint = WeifenLuo::WinFormsUI::Docking::DockState::DockRight;
@@ -87,5 +90,6 @@ namespace EntityEditor {
 
 		}
 #pragma endregion
+	private: System::Void _propertyGrid_PropertyValueChanged(System::Object^  s, System::Windows::Forms::PropertyValueChangedEventArgs^  e);
 	};
 }

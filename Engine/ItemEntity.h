@@ -29,10 +29,25 @@ namespace Engine
 			ITEM_TYPE_COUNT
 		};
 
+		ItemEntity();
+		ItemEntity(const ItemEntity& rhs);
+		~ItemEntity();
+		ItemEntity& operator = (const ItemEntity& rhs);
+
 		ItemEntity* CreateCopy() const;
 		void Unload();
 		ModelEntityType GetModelEntityType() const
 			{ return ME_TYPE_ITEM; }
+
+		ItemType GetItemType() const
+			{ return _itemType; }
+		void SetItemType(ItemType type)
+			{ _itemType = type; }
+
+		int GetAmount() const
+			{ return _amount; }
+		void SetAmount(int amount)
+			{ _amount = amount; }
 
 	protected:
 		void ReadProperties(Parser& parser);
@@ -44,6 +59,7 @@ namespace Engine
 
 		ItemType _itemType;
 		int _amount;
+
 		static const char* _itemTypeNames[];
 	};
 

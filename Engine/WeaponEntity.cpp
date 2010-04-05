@@ -30,6 +30,50 @@ namespace Engine
 	};
 
 
+	WeaponEntity::WeaponEntity()
+	{
+		_maxAmmo = 200;
+		_damage = 10;
+		_range = 500.0f;
+		_effectiveAngle = 0.0f;
+		_distAtten = DIST_ATTEN_NONE;
+		_weaponType = WPN_TYPE_GUN;
+		_muzzleEffect = PartSysResPtr::null;
+	}
+
+	WeaponEntity::WeaponEntity(const WeaponEntity& rhs)
+	{
+		_muzzleEffect = PartSysResPtr::null;
+		*this = rhs;
+	}
+
+	WeaponEntity::~WeaponEntity()
+	{
+		Unload();
+	}
+
+	WeaponEntity& WeaponEntity::operator = (const WeaponEntity& rhs)
+	{
+		if(&rhs != this)
+		{
+			ModelEntity::operator = (rhs);
+
+			_maxAmmo = rhs._maxAmmo;
+			_damage = rhs._damage;
+			_range = rhs._range;
+			_effectiveAngle = rhs._effectiveAngle;
+			_distAtten = rhs._distAtten;
+			_weaponType = rhs._weaponType;
+
+			if(rhs._muzzleEffect)
+				_muzzleEffect = engineAPI.partSysManager->CreateCopy(_muzzleEffect);
+			else
+				_muzzleEffect = PartSysResPtr::null;
+		}
+
+		return *this;
+	}
+
 	WeaponEntity* WeaponEntity::CreateCopy() const
 	{
 		return new(mapPool) WeaponEntity(*this);
@@ -60,6 +104,9 @@ namespace Engine
 
 		parser.ExpectTokenString("range");
 		parser.ReadFloat(_range);
+
+		parser.ExpectTokenString("effectiveAngle");
+		parser.ReadFloat(_effectiveAngle);
 
 		parser.ExpectTokenString("distAttenuation");
 		parser.ReadIdentifier(buf, MAX_IDENT_LEN);
@@ -92,9 +139,23 @@ namespace Engine
 		file.Printf("%smaxAmmo\t\t%d\n", indent, _maxAmmo);
 		file.Printf("%sdamage\t\t%d\n", indent, _damage);
 		file.Printf("%srange\t\t%f\n", indent, _range);
+		file.Printf("%seffectiveAngle\t\t%f\n", indent, _effectiveAngle);
 		file.Printf("%sdistAttenuation\t\t%s\n", indent, GetDistAttenName(_distAtten));
 		file.Printf("%sweaponType\t\t%s\n", indent, GetWeaponTypeName(_weaponType));
-		file.Printf("%smuzzleEffect\t\t\"%ls\"\n", indent, _muzzleEffect.GetFileRes()->GetFileName());
+		file.Printf("%smuzzleEffect\t\t\"%ls\"\n", indent, _muzzleEffect.GetRes()->GetFileName());
+	}
+
+	bool WeaponEntity::SetMuzzleEffect(const tchar* file_name)
+	{
+		PartSysResPtr part_sys = engineAPI.partSysManager->CreateParticleSystem(file_name);
+		if(part_sys)
+		{
+			engineAPI.partSysManager->ReleasePartSys(_muzzleEffect);
+			_muzzleEffect = part_sys;
+			return true;
+		}
+		else
+			return false;
 	}
 
 	WeaponEntity::DistanceAttenuation

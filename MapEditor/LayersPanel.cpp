@@ -1,9 +1,10 @@
 #include "StdAfx.h"
-#include "Utility.h"
+#include "EditorCommon/UtilityTempl.h"
 #include "LayersPanel.h"
 
 using namespace math3d;
 using namespace Engine;
+using namespace EditorCommon;
 
 
 namespace MapEditor
@@ -127,7 +128,7 @@ namespace MapEditor
 		_selectTextureDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Textures";
 		if(_selectTextureDialog->ShowDialog(this) == Windows::Forms::DialogResult::OK)
 		{
-			tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
+			tchar* file_name = EditorUtil::GetRelativePath(_selectTextureDialog->FileName);
 			Texture2DResPtr tex_res = engineAPI->textureManager->CreateTexture2D(file_name, true);
 			delete[] file_name;
 			if(tex_res)
@@ -251,7 +252,7 @@ namespace MapEditor
 	{
 		// the file must be within game's base directory
 		FileDialog^ dlg = (FileDialog^)sender;
-		if(!IsInGameBaseDir(dlg->FileName))
+		if(!EditorUtil::IsInGameBaseDir(dlg->FileName))
 		{
 			MessageBox::Show(
 				this, "File must be within game's base directory.", GetAppName(),
@@ -343,7 +344,7 @@ namespace MapEditor
 
 	void LayersPanel::AddSpriteToList(BgLayer::Sprite* sprite)
 	{
-		String^ text = gcnew String(sprite->texture.GetFileRes()->GetFileName());
+		String^ text = gcnew String(sprite->texture.GetRes()->GetFileName());
 		int dot = text->LastIndexOf('.');
 		if(dot == -1)
 			dot = 0;

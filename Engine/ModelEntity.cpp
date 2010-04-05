@@ -13,6 +13,7 @@
 #include "PlayerEntity.h"
 #include "ItemEntity.h"
 #include "WeaponEntity.h"
+#include "StaticEntity.h"
 
 
 using namespace Memory;
@@ -21,6 +22,16 @@ using namespace math3d;
 
 namespace Engine
 {
+
+	const char* ModelEntity::_mdlEntTypeNames[] =
+	{
+		"Static",
+		"Player",
+		"AI",
+		"Weapon",
+		"Item"
+	};
+
 
 	ModelEntity::ModelEntity()
 	{
@@ -42,7 +53,6 @@ namespace Engine
 
 	ModelEntity::~ModelEntity()
 	{
-		Unload();
 	}
 
 	ModelEntity& ModelEntity::operator = (const ModelEntity& entity)
@@ -58,13 +68,15 @@ namespace Engine
 
 		// resources
 		if(entity._model)
-			_model = engineAPI.modelManager->CreateModel(entity._model.GetFileRes()->GetFileName());
+			_model = engineAPI.modelManager->CreateModel(entity._model.GetRes()->GetFileName());
+		else
+			_model = ModelResPtr::null;
 
 		for(MaterialMap::ConstIterator it = entity._materials.Begin(); it != entity._materials.End(); ++it)
 		{
 			MaterialData md;
 			md.name = StringDup(it->name);
-			md.materialRes = engineAPI.materialManager->CreateMaterial(it->materialRes.GetFileRes()->GetFileName());
+			md.materialRes = engineAPI.materialManager->CreateMaterial(it->materialRes.GetRes()->GetFileName());
 			_materials[it->name] = md;
 		}
 
@@ -76,12 +88,12 @@ namespace Engine
 			if(jd.type == JOINT_ATTACH_MODEL)
 			{
 				ModelEntityResPtr ptr = ModelEntityResPtr((const ModelEntityRes*)it->attachment);
-				jd.attachment = engineAPI.modelEntityManager->CreateCopy(ptr).GetFileRes();
+				jd.attachment = engineAPI.modelEntityManager->CreateCopy(ptr).GetRes();
 			}
 			else if(jd.type == JOINT_ATTACH_PARTICLE_SYSTEM)
 			{
 				PartSysResPtr ptr = PartSysResPtr((const PartSysRes*)it->attachment);
-				jd.attachment = engineAPI.partSysManager->CreateCopy(ptr).GetFileRes();
+				jd.attachment = engineAPI.partSysManager->CreateCopy(ptr).GetRes();
 			}
 			jd.jointIndex = it->jointIndex;
 			_jointAttachments[it->name] = jd;
@@ -92,7 +104,7 @@ namespace Engine
 			AnimData ad;
 			ad.name = StringDup(it->name);
 			ad.type = it->type;
-			ad.animation = engineAPI.animationManager->CreateAnimation(it->animation.GetFileRes()->GetFileName());
+			ad.animation = engineAPI.animationManager->CreateAnimation(it->animation.GetRes()->GetFileName());
 			_animations[it->name] = ad;
 		}
 
@@ -100,7 +112,7 @@ namespace Engine
 		{
 			SoundData sd;
 			sd.name = StringDup(it->name);
-			sd.sound = engineAPI.soundManager->CreateSound(it->sound.GetFileRes()->GetFileName());
+			sd.sound = engineAPI.soundManager->CreateSound(it->sound.GetRes()->GetFileName());
 			_sounds[it->name] = sd;
 		}
 
@@ -138,19 +150,23 @@ namespace Engine
 		}
 
 		ModelEntity* ent = 0;
-		if(!strcmp(buf, "AI"))
+		if(!strcmp(buf, _mdlEntTypeNames[ME_TYPE_STATIC]))
+		{
+			ent = new(mapPool) StaticEntity;
+		}
+		else if(!strcmp(buf, _mdlEntTypeNames[ME_TYPE_AI]))
 		{
 			ent = new(mapPool) AIEntity;
 		}
-		else if(!strcmp(buf, "Item"))
+		else if(!strcmp(buf, _mdlEntTypeNames[ME_TYPE_ITEM]))
 		{
 			ent = new(mapPool) ItemEntity;
 		}
-		else if(!strcmp(buf, "Weapon"))
+		else if(!strcmp(buf, _mdlEntTypeNames[ME_TYPE_WEAPON]))
 		{
 			ent = new(mapPool) WeaponEntity;
 		}
-		else if(!strcmp(buf, "Player"))
+		else if(!strcmp(buf, _mdlEntTypeNames[ME_TYPE_PLAYER]))
 		{
 			ent = new(mapPool) PlayerEntity;
 		}
@@ -162,34 +178,6 @@ namespace Engine
 		}
 
 		return ent;
-	}
-
-	bool ModelEntity::Load(const tchar* file_name)
-	{
-		if(!file_name)
-			return false;
-
-		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(file_name, _t("rb"));
-		if(!file)
-			return false;
-
-		Parser parser;
-		if(!parser.LoadFile(*file))
-			return false;
-		file->Close();
-
-		try
-		{
-			parser.ExpectTokenString("entity");
-			parser.ExpectTokenType(Parser::TOK_IDENTIFIER, 0);
-		}
-		catch(ParserException& e)
-		{
-			Console::PrintError(e.GetDesc());
-			return false;
-		}
-
-		return Load(parser);
 	}
 
 	bool ModelEntity::Load(Parser& parser)
@@ -296,11 +284,11 @@ namespace Engine
 					jd.type = GetJointAttachTypeByExt(p);
 					if(jd.type == JOINT_ATTACH_MODEL)
 					{
-						jd.attachment = engineAPI.modelEntityManager->CreateEntity(p).GetFileRes();
+						jd.attachment = engineAPI.modelEntityManager->CreateEntity(p).GetRes();
 					}
 					else if(jd.type == JOINT_ATTACH_PARTICLE_SYSTEM)
 					{
-						jd.attachment = engineAPI.partSysManager->CreateParticleSystem(p).GetFileRes();
+						jd.attachment = engineAPI.partSysManager->CreateParticleSystem(p).GetRes();
 					}
 					delete[] p;
 					JointAttachMap::ConstIterator it = _jointAttachments.Find(jd.name);
@@ -424,7 +412,7 @@ namespace Engine
 		}
 
 		file->Printf("// Daemonium engine entity file\n\n");
-		file->Printf("entity\n{\n");
+		file->Printf("entity %s\n{\n", _mdlEntTypeNames[GetModelEntityType()]);
 
 		// properties
 		file->Printf("\tproperties\n\t{\n");
@@ -436,14 +424,14 @@ namespace Engine
 
 		const tchar* fn;
 
-		fn = _model? _model.GetFileRes()->GetFileName(): _T("");
-		file->Printf("\tmodel\t\t\"%ls\"\n", fn);
+		fn = _model? _model.GetRes()->GetFileName(): _T("");
+		file->Printf("\tmodel\t\t\"%ls\"\n\n", fn);
 
 		// materials
 		file->Printf("\tmaterials\n\t{\n");
 		for(MaterialMap::ConstIterator it = _materials.Begin(); it != _materials.End(); ++it)
 		{
-			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->materialRes.GetFileRes()->GetFileName());
+			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->materialRes.GetRes()->GetFileName());
 		}
 		file->Printf("\t}\n\n");
 
@@ -459,7 +447,7 @@ namespace Engine
 		file->Printf("\tanimations\n\t{\n");
 		for(AnimMap::ConstIterator it = _animations.Begin(); it != _animations.End(); ++it)
 		{
-			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->animation.GetFileRes()->GetFileName());
+			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->animation.GetRes()->GetFileName());
 		}
 		file->Printf("\t}\n\n");
 
@@ -467,7 +455,7 @@ namespace Engine
 		file->Printf("\tsounds\n\t{\n");
 		for(SoundMap::ConstIterator it = _sounds.Begin(); it != _sounds.End(); ++it)
 		{
-			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->sound.GetFileRes()->GetFileName());
+			file->Printf("\t\t%s\t\t\"%ls\"\n", it->name, it->sound.GetRes()->GetFileName());
 		}
 		file->Printf("\t}\n\n");
 
@@ -632,7 +620,7 @@ namespace Engine
 	*/
 	void ModelEntity::SetupModelData()
 	{
-		if(!_model || !_model.GetFileRes()->IsLoaded())
+		if(!_model || !_model.GetRes()->IsLoaded())
 			return;
 
 		// Bind meshes to their data (materials and gpu program indices)
@@ -706,7 +694,7 @@ namespace Engine
 
 	bool ModelEntity::SetMaterial(const char* mat_name, const tchar* file_name)
 	{
-		if(!_model || !_model.GetFileRes()->IsLoaded())
+		if(!_model || !_model.GetRes()->IsLoaded())
 			return false;
 
 		MaterialMap::Iterator it = _materials.Find(mat_name);
@@ -739,7 +727,7 @@ namespace Engine
 
 	bool ModelEntity::SetJointAttachment(const char* joint_name, const tchar* file_name)
 	{
-		if(!_model || !_model.GetFileRes()->IsLoaded())
+		if(!_model || !_model.GetRes()->IsLoaded())
 			return false;
 
 		// find joint with this name in model skelet
@@ -765,7 +753,7 @@ namespace Engine
 		if(type == JOINT_ATTACH_MODEL)
 		{
 			ModelEntityResPtr ent = engineAPI.modelEntityManager->CreateEntity(file_name);
-			if(ent.GetFileRes() && ent.GetFileRes()->IsLoaded())
+			if(ent.GetRes() && ent.GetRes()->IsLoaded())
 			{
 				// This entity must not have attachments; only 1 level allowed.
 				if(ent->_jointAttachments.GetCount())
@@ -774,11 +762,11 @@ namespace Engine
 					return false;
 				}
 			}
-			res = ent.GetFileRes();
+			res = ent.GetRes();
 		}
 		else if(type == JOINT_ATTACH_PARTICLE_SYSTEM)
 		{
-			res = engineAPI.partSysManager->CreateParticleSystem(file_name).GetFileRes();
+			res = engineAPI.partSysManager->CreateParticleSystem(file_name).GetRes();
 		}
 
 		if(res)
@@ -964,7 +952,7 @@ namespace Engine
 
 	bool ModelEntity::IsAnimCompatible(const Animation& anim)
 	{
-		if(!_model.GetFileRes() || !_model.GetFileRes()->IsLoaded() || !_model->GetRootJoint())
+		if(!_model.GetRes() || !_model.GetRes()->IsLoaded() || !_model->GetRootJoint())
 			return false;
 
 		return anim.IsSkeletCompatible(_model->GetJoints());

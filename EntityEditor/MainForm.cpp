@@ -1,10 +1,10 @@
 
 #include "stdafx.h"
-#include "Utility.h"
 #include "ModelForm.h"
 #include "EntityForm.h"
 #include "MaterialForm.h"
 #include "PropertyForm.h"
+#include "EditorCommon/UtilityTempl.h"
 #include "MainForm.h"
 
 #define DOCK_PANEL_XML_FILE		"EntityEditorDocking.xml"
@@ -71,7 +71,7 @@ namespace EntityEditor
 		}
 	}
 
-	void MainForm::FormNotify(Form^ form, NotifyMessage msg)
+	void MainForm::FormNotify(Form^ form, NotifyMessage msg, Object^ param)
 	{
 		if(form == _entityForm)
 		{
@@ -102,6 +102,24 @@ namespace EntityEditor
 			case NotifyMessage::MaterialChanged:
 				_consoleForm->RedrawAsync();
 				_modelForm->RedrawAsync();
+				_entity->SetModified(true);
+				break;
+			}
+		}
+		else if(form == _propertyForm)
+		{
+			switch(msg)
+			{
+			case NotifyMessage::PropertyChanged:
+				_entity->SetModified(true);
+				break;
+			case NotifyMessage::ClassPropertyChanged:
+				_entity->ChangeEntityClass((EntityProperties::EntityClass)param);
+				_entityForm->SetEntity(_entity->GetEntity());
+				_materialForm->SetEntity(_entity->GetEntity());
+				_modelForm->SetEntity(_entity->GetEntity());
+				_propertyForm->SetProperties(_entity->GetProperties());
+				_entity->SetModified(true);
 				break;
 			}
 		}
@@ -400,7 +418,7 @@ namespace EntityEditor
 	{
 		// the file must be within game's base directory
 		FileDialog^ dlg = (FileDialog^)sender;
-		if(!IsInGameBaseDir(dlg->FileName))
+		if(!EditorUtil::IsInGameBaseDir(dlg->FileName))
 		{
 			MessageBox::Show(
 				this, "File must be within game's base directory.", GetAppName(),

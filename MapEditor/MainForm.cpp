@@ -3,7 +3,6 @@
 #include "MapForm.h"
 #include "ToolPanel.h"
 #include "TerrainEditPanel.h"
-#include "Utility.h"
 #include "UndoManager.h"
 #include "MainForm.h"
 
@@ -70,7 +69,7 @@ namespace MapEditor
 		_panelCamPosBar->Hide();
 	}
 
-	void MainForm::FormNotify(Form^ form, EditorCommon::NotifyMessage msg)
+	void MainForm::FormNotify(Form^ form, EditorCommon::NotifyMessage msg, Object^ param)
 	{
 		if(form == _mapForm)
 		{

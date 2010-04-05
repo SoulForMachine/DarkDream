@@ -576,7 +576,7 @@ namespace MapEditor
 		g_camForward = vec3f(g_camPos.x, elev + 1.0f, Terrain::PATCH_HEIGHT * 4.0f / 5.0f) - g_camPos;
 
 		if(_panX != 0.0f)
-			_director->FormNotify(_parent, EditorCommon::NotifyMessage::CameraMoved);
+			_director->FormNotify(_parent, EditorCommon::NotifyMessage::CameraMoved, nullptr);
 		g_camPos.x += _panX;
 		_panX = 0.0f;
 

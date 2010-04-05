@@ -28,7 +28,7 @@ namespace ParticleEditor {
 	public:
 		MainForm();
 
-		virtual void FormNotify(System::Windows::Forms::Form^ form, EditorCommon::NotifyMessage msg);
+		virtual void FormNotify(System::Windows::Forms::Form^ form, EditorCommon::NotifyMessage msg, Object^ param);
 
 	protected:
 		/// <summary>

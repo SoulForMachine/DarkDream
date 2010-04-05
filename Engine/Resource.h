@@ -34,40 +34,40 @@ namespace Engine
 
 	//=================================================================================
 
-	template <class _FRes>
+	template <class _Res>
 	class ResourcePtr
 	{
 	public:
 		ResourcePtr() { }
-		explicit ResourcePtr(const _FRes* res)
-			{ _fileRes = res; }
+		explicit ResourcePtr(const _Res* res)
+			{ _resource = res; }
 
-		operator const typename _FRes::ResType* () const
-			{ assert(_fileRes); return _fileRes->GetResource(); }
-		const typename _FRes::ResType* operator -> () const
-			{ assert(_fileRes); return _fileRes->GetResource(); }
-		const _FRes* GetFileRes() const
-			{ return _fileRes; }
+		operator const typename _Res::ResType* () const
+			{ assert(_resource); return _resource->GetResource(); }
+		const typename _Res::ResType* operator -> () const
+			{ assert(_resource); return _resource->GetResource(); }
+		const _Res* GetRes() const
+			{ return _resource; }
 		bool IsValid() const
-			{ return (_fileRes && _fileRes->GetResource()); }
+			{ return (_resource && _resource->GetResource()); }
 
 		operator bool () const
-			{ return (_fileRes != 0); }
+			{ return (_resource != 0); }
 
 		static const ResourcePtr null;
 
-	private:
 		friend bool operator == (const ResourcePtr& lhs, const ResourcePtr& rhs)
-			{ return lhs._fileRes == rhs._fileRes; }
+			{ return lhs._resource == rhs._resource; }
 		friend bool operator != (const ResourcePtr& lhs, const ResourcePtr& rhs)
-			{ return lhs._fileRes != rhs._fileRes; }
+			{ return lhs._resource != rhs._resource; }
 
-		const _FRes* _fileRes;
+	private:
+		const _Res* _resource;
 	};
 
 
-	template <class _FRes>
-	const ResourcePtr<_FRes> ResourcePtr<_FRes>::null(0);
+	template <class _Res>
+	const ResourcePtr<_Res> ResourcePtr<_Res>::null(0);
 
 
 	//=================================================================================

@@ -1,12 +1,13 @@
 
 #include "stdafx.h"
-#include "Utility.h"
+#include "EditorCommon/UtilityTempl.h"
 #include "ActionAddObject.h"
 
 using namespace System;
 using namespace math3d;
 using namespace Memory;
 using namespace Engine;
+using namespace EditorCommon;
 
 
 namespace MapEditor

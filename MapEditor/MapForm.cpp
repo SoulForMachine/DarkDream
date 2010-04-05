@@ -137,12 +137,12 @@ namespace MapEditor
 		if(	_currentEditMode->GetModeEnum() == EditMode::EditModeEnum::ADD_PATCH &&
 			ev == EditModeEventListener::EMEvent::EDIT_COMPLETE)
 		{
-			_director->FormNotify(this, EditorCommon::NotifyMessage::PatchAdded);
+			_director->FormNotify(this, EditorCommon::NotifyMessage::PatchAdded, nullptr);
 		}
 		else if(_currentEditMode->GetModeEnum() == EditMode::EditModeEnum::REMOVE_PATCH &&
 			ev == EditModeEventListener::EMEvent::EDIT_COMPLETE)
 		{
-			_director->FormNotify(this, EditorCommon::NotifyMessage::PatchRemoved);
+			_director->FormNotify(this, EditorCommon::NotifyMessage::PatchRemoved, nullptr);
 		}
 
 		if(	ev == EditModeEventListener::EMEvent::EDIT_COMPLETE ||

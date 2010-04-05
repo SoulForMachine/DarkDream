@@ -103,7 +103,6 @@ namespace Engine
 
 		static ModelEntity* CreateFromFile(const tchar* file_name);
 		virtual ModelEntity* CreateCopy() const = 0;
-		bool Load(const tchar* file_name);
 		void SetupModelData(); // call after model resources have been loaded
 		bool Save(const tchar* file_name);
 		virtual void Unload();
@@ -184,6 +183,8 @@ namespace Engine
 
 		static const int MAX_NAME_LENGTH = 64;
 		char _name[MAX_NAME_LENGTH];
+
+		static const char* _mdlEntTypeNames[];
 	};
 
 }

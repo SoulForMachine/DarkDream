@@ -21,6 +21,9 @@ namespace Engine
 	{
 	public:
 		PlayerEntity();
+		PlayerEntity(const PlayerEntity& rhs);
+		~PlayerEntity();
+		PlayerEntity& operator = (const PlayerEntity& rhs);
 
 		PlayerEntity* CreateCopy() const;
 		void Unload();

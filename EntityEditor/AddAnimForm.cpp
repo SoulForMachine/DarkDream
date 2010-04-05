@@ -1,8 +1,9 @@
 #include "StdAfx.h"
-#include "Utility.h"
+#include "EditorCommon/UtilityTempl.h"
 #include "AddAnimForm.h"
 
 using namespace Engine;
+using namespace EditorCommon;
 
 
 namespace EntityEditor
@@ -38,7 +39,7 @@ namespace EntityEditor
 		_openFileDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Animations";
 		if(_openFileDialog->ShowDialog(this) == Forms::DialogResult::OK)
 		{
-			tchar* file_name = GetRelativePath(_openFileDialog->FileName);
+			tchar* file_name = EditorUtil::GetRelativePath(_openFileDialog->FileName);
 			_textAnimationFile->Text = gcnew String(file_name);
 			delete[] file_name;
 		}
@@ -79,7 +80,7 @@ namespace EntityEditor
 	System::Void AddAnimForm::_openFileDialog_FileOk(System::Object^  sender, System::ComponentModel::CancelEventArgs^  e)
 	{
 		// the file must be within game's base directory
-		if(!IsInGameBaseDir(_openFileDialog->FileName))
+		if(!EditorUtil::IsInGameBaseDir(_openFileDialog->FileName))
 		{
 			MessageBox::Show(
 				this, "File must be within game's base directory.", GetAppName(),

@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "Utility.h"
+#include "EditorCommon/UtilityTempl.h"
 #include "MaterialForm.h"
 
 
@@ -80,14 +80,14 @@ namespace EntityEditor
 			EnableControls(true);
 
 			Texture2DResPtr tex = _material->GetEmissionTexture();
-			_textEmissionTex->Text = gcnew String(tex? tex.GetFileRes()->GetFileName(): _t(""));
+			_textEmissionTex->Text = gcnew String(tex? tex.GetRes()->GetFileName(): _t(""));
 
 			_clrDiffuse->BackColor = Color::FromArgb(PackColor(_material->GetDiffuseColor()));
 			tex = _material->GetDiffuseTexture();
-			_textDiffuseTex->Text = gcnew String(tex? tex.GetFileRes()->GetFileName(): _t(""));
+			_textDiffuseTex->Text = gcnew String(tex? tex.GetRes()->GetFileName(): _t(""));
 
 			tex = _material->GetNormalMap();
-			_textNormalMap->Text = gcnew String(tex? tex.GetFileRes()->GetFileName(): _t(""));
+			_textNormalMap->Text = gcnew String(tex? tex.GetRes()->GetFileName(): _t(""));
 
 			_checkTransparency->Checked = _material->UsesTransparency();
 			int opacity = int(_material->GetOpacity() * 100.0f);
@@ -95,7 +95,7 @@ namespace EntityEditor
 			_textOpacity->Text = opacity.ToString();
 
 			tex = _material->GetTransparencyTexture();
-			_textTransparencyMap->Text = gcnew String(tex? tex.GetFileRes()->GetFileName(): _t(""));
+			_textTransparencyMap->Text = gcnew String(tex? tex.GetRes()->GetFileName(): _t(""));
 		}
 		else
 		{
@@ -149,7 +149,7 @@ namespace EntityEditor
 				ListViewItem^ item = FindListItem(_listMaterials, gcnew String(md.name));
 				if(item != nullptr)
 				{
-					const tchar* file_name = md.materialRes.GetFileRes()->GetFileName();
+					const tchar* file_name = md.materialRes.GetRes()->GetFileName();
 					bool modified = (!file_name || !*file_name);
 					item->Tag = modified;
 					String^ text = modified? "<Unsaved>": gcnew String(file_name);
@@ -177,7 +177,7 @@ namespace EntityEditor
 		if(_saveFileDialog->ShowDialog(this) == Forms::DialogResult::OK)
 		{
 			char* mat_name = ConvertString<char>(_listMaterials->SelectedItems[0]->Text);
-			tchar* file_name = GetRelativePath(_saveFileDialog->FileName);
+			tchar* file_name = EditorUtil::GetRelativePath(_saveFileDialog->FileName);
 			Material mat;
 			if(mat.Save(file_name))
 			{
@@ -223,7 +223,7 @@ namespace EntityEditor
 		if(_openFileDialog->ShowDialog(this) == Forms::DialogResult::OK)
 		{
 			char* mat_name = ConvertString<char>(_listMaterials->SelectedItems[0]->Text);
-			tchar* file_name = GetRelativePath(_openFileDialog->FileName);
+			tchar* file_name = EditorUtil::GetRelativePath(_openFileDialog->FileName);
 
 			// if material with this file name is already loaded, force it's reload
 			MaterialResPtr matres = engineAPI->materialManager->FindMaterial(file_name);
@@ -270,7 +270,7 @@ namespace EntityEditor
 		if(_saveFileDialog->ShowDialog(this) == Forms::DialogResult::OK)
 		{
 			char* mat_name = ConvertString<char>(_listMaterials->SelectedItems[0]->Text);
-			tchar* file_name = GetRelativePath(_saveFileDialog->FileName);
+			tchar* file_name = EditorUtil::GetRelativePath(_saveFileDialog->FileName);
 			if(_material->Save(file_name))
 			{
 				if(_entity->SetMaterial(mat_name, file_name))
@@ -309,7 +309,7 @@ namespace EntityEditor
 		{
 			// save material to file
 			const Material* mat = it->materialRes;
-			const tchar* file_name = it->materialRes.GetFileRes()->GetFileName();
+			const tchar* file_name = it->materialRes.GetRes()->GetFileName();
 			if(file_name && *file_name)
 			{
 				if(mat->Save(file_name))
@@ -330,7 +330,7 @@ namespace EntityEditor
 				_saveFileDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Materials";
 				if(_saveFileDialog->ShowDialog(this) == Forms::DialogResult::OK)
 				{
-					tchar* file_name = GetRelativePath(_saveFileDialog->FileName);
+					tchar* file_name = EditorUtil::GetRelativePath(_saveFileDialog->FileName);
 					if(_material->Save(file_name))
 					{
 						result = true;
@@ -379,7 +379,7 @@ namespace EntityEditor
 	*/
 	void MaterialForm::MaterialChangedNotify(bool modified)
 	{
-		_director->FormNotify(this, NotifyMessage::MaterialChanged);
+		_director->FormNotify(this, NotifyMessage::MaterialChanged, nullptr);
 		_listMaterials->SelectedItems[0]->Tag = modified;
 		if(modified)
 			_entity->MaterialChanged(_material);
@@ -478,13 +478,13 @@ namespace EntityEditor
 			_selectTextureDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Textures";
 			if(_selectTextureDialog->ShowDialog(this) == Forms::DialogResult::OK)
 			{
-				tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
+				tchar* file_name = EditorUtil::GetRelativePath(_selectTextureDialog->FileName);
 				Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
 				delete[] file_name;
 				if(tex)
 				{
 					_material->SetDiffuseTexture(tex);
-					_textDiffuseTex->Text = gcnew String(tex.GetFileRes()->GetFileName());
+					_textDiffuseTex->Text = gcnew String(tex.GetRes()->GetFileName());
 					MaterialChangedNotify(true);
 				}
 			}
@@ -498,13 +498,13 @@ namespace EntityEditor
 			_selectTextureDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Textures";
 			if(_selectTextureDialog->ShowDialog(this) == Forms::DialogResult::OK)
 			{
-				tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
+				tchar* file_name = EditorUtil::GetRelativePath(_selectTextureDialog->FileName);
 				Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
 				delete[] file_name;
 				if(tex)
 				{
 					_material->SetNormalMap(tex);
-					_textNormalMap->Text = gcnew String(tex.GetFileRes()->GetFileName());
+					_textNormalMap->Text = gcnew String(tex.GetRes()->GetFileName());
 					MaterialChangedNotify(true);
 				}
 			}
@@ -539,7 +539,7 @@ namespace EntityEditor
 	{
 		// the file must be within game's base directory
 		FileDialog^ dlg = (FileDialog^)sender;
-		if(!IsInGameBaseDir(dlg->FileName))
+		if(!EditorUtil::IsInGameBaseDir(dlg->FileName))
 		{
 			MessageBox::Show(
 				this, "File must be within game's base directory.", GetAppName(),
@@ -575,13 +575,13 @@ namespace EntityEditor
 			_selectTextureDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Textures";
 			if(_selectTextureDialog->ShowDialog(this) == Forms::DialogResult::OK)
 			{
-				tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
+				tchar* file_name = EditorUtil::GetRelativePath(_selectTextureDialog->FileName);
 				Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
 				delete[] file_name;
 				if(tex)
 				{
 					_material->SetEmissionTexture(tex);
-					_textEmissionTex->Text = gcnew String(tex.GetFileRes()->GetFileName());
+					_textEmissionTex->Text = gcnew String(tex.GetRes()->GetFileName());
 					MaterialChangedNotify(true);
 				}
 			}
@@ -614,13 +614,13 @@ namespace EntityEditor
 			_selectTextureDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Textures";
 			if(_selectTextureDialog->ShowDialog(this) == Forms::DialogResult::OK)
 			{
-				tchar* file_name = GetRelativePath(_selectTextureDialog->FileName);
+				tchar* file_name = EditorUtil::GetRelativePath(_selectTextureDialog->FileName);
 				Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
 				delete[] file_name;
 				if(tex)
 				{
 					_material->SetTransparencyTexture(tex);
-					_textTransparencyMap->Text = gcnew String(tex.GetFileRes()->GetFileName());
+					_textTransparencyMap->Text = gcnew String(tex.GetRes()->GetFileName());
 					MaterialChangedNotify(true);
 				}
 			}

@@ -9,6 +9,8 @@ namespace EditorCommon
 		AttachmentChanged,
 		AnimationChanged,
 		MaterialChanged,
+		ClassPropertyChanged,
+		PropertyChanged,
 		PatchAdded,
 		PatchRemoved,
 		CameraMoved,
@@ -18,7 +20,7 @@ namespace EditorCommon
 	public interface class FormDirector
 	{
 	public:
-		void FormNotify(System::Windows::Forms::Form^ form, NotifyMessage msg);
+		void FormNotify(System::Windows::Forms::Form^ form, NotifyMessage msg, Object^ param);
 	};
 
 }

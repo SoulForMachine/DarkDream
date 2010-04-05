@@ -3,7 +3,7 @@
 #include "ViewportForm.h"
 #include "EmitterPanel.h"
 #include "PropertiesPanel.h"
-#include "Utility.h"
+#include "EditorCommon/UtilityTempl.h"
 #include "MainForm.h"
 
 #define DOCK_PANEL_XML_FILE		"ParticleEditorDocking.xml"
@@ -67,7 +67,7 @@ namespace ParticleEditor
 		}
 	}
 
-	void MainForm::FormNotify(System::Windows::Forms::Form^ form, NotifyMessage msg)
+	void MainForm::FormNotify(System::Windows::Forms::Form^ form, NotifyMessage msg, Object^ param)
 	{
 		if(form == _emitterPanel || form == _propertyPanel)
 			_modified = true;
@@ -216,7 +216,7 @@ namespace ParticleEditor
 			if(dlg_result == Forms::DialogResult::OK)
 			{
 				_particleSystem->Unload();
-				tchar* fn = GetRelativePath(_openPartSysDialog->FileName);
+				tchar* fn = EditorUtil::GetRelativePath(_openPartSysDialog->FileName);
 				::Console::PrintLn("Loading particle system: %ls", fn);
 				bool result = _particleSystem->Load(fn);
 
@@ -271,7 +271,7 @@ namespace ParticleEditor
 		if(!_particleSystem)
 			return false;
 
-		tchar* fn = GetRelativePath(file_name);
+		tchar* fn = EditorUtil::GetRelativePath(file_name);
 		::Console::PrintLn("Saving particle system: %ls", fn);
 		bool result = _particleSystem->Save(fn);
 		if(result)

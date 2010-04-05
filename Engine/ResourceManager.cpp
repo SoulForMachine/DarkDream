@@ -185,21 +185,21 @@ namespace Engine
 	{
 		if(!texture)
 			return false;
-		return ReleaseRes(texture.GetFileRes()->GetFileName(), texture.GetFileRes());
+		return ReleaseRes(texture.GetRes()->GetFileName(), texture.GetRes());
 	}
 
 	bool TextureManager::ReleaseTexture(Texture3DResPtr texture)
 	{
 		if(!texture)
 			return false;
-		return ReleaseRes(texture.GetFileRes()->GetFileName(), texture.GetFileRes());
+		return ReleaseRes(texture.GetRes()->GetFileName(), texture.GetRes());
 	}
 
 	bool TextureManager::ReleaseTexture(TextureCubeResPtr texture)
 	{
 		if(!texture)
 			return false;
-		return ReleaseRes(texture.GetFileRes()->GetFileName(), texture.GetFileRes());
+		return ReleaseRes(texture.GetRes()->GetFileName(), texture.GetRes());
 	}
 
 	Texture2DResPtr TextureManager::FindTexture2D(const tchar* file_name)
@@ -299,8 +299,8 @@ namespace Engine
 		if(!shader)
 			return false;
 
-		tchar* key = MakeKey(shader.GetFileRes()->GetFileName(), shader.GetFileRes()->GetMacros());
-		bool result = ReleaseRes(key, shader.GetFileRes());
+		tchar* key = MakeKey(shader.GetRes()->GetFileName(), shader.GetRes()->GetMacros());
+		bool result = ReleaseRes(key, shader.GetRes());
 		delete[] key;
 		return result;
 	}
@@ -310,8 +310,8 @@ namespace Engine
 		if(!shader)
 			return false;
 
-		tchar* key = MakeKey(shader.GetFileRes()->GetFileName(), shader.GetFileRes()->GetMacros());
-		bool result = ReleaseRes(key, shader.GetFileRes());
+		tchar* key = MakeKey(shader.GetRes()->GetFileName(), shader.GetRes()->GetMacros());
+		bool result = ReleaseRes(key, shader.GetRes());
 		delete[] key;
 		return result;
 	}
@@ -321,8 +321,8 @@ namespace Engine
 		if(!shader)
 			return false;
 
-		tchar* key = MakeKey(shader.GetFileRes()->GetFileName(), shader.GetFileRes()->GetMacros());
-		bool result = ReleaseRes(key, shader.GetFileRes());
+		tchar* key = MakeKey(shader.GetRes()->GetFileName(), shader.GetRes()->GetMacros());
+		bool result = ReleaseRes(key, shader.GetRes());
 		delete[] key;
 		return result;
 	}
@@ -425,7 +425,7 @@ namespace Engine
 		if(!program)
 			return false;
 
-		return ReleaseRes(program.GetFileRes()->GetFileName(), program.GetFileRes());
+		return ReleaseRes(program.GetRes()->GetFileName(), program.GetRes());
 	}
 
 	bool ASMProgManager::ReleaseASMProgram(FragmentASMProgResPtr program)
@@ -433,7 +433,7 @@ namespace Engine
 		if(!program)
 			return false;
 
-		return ReleaseRes(program.GetFileRes()->GetFileName(), program.GetFileRes());
+		return ReleaseRes(program.GetRes()->GetFileName(), program.GetRes());
 	}
 
 	bool ASMProgManager::ReleaseASMProgram(GeometryASMProgResPtr program)
@@ -441,7 +441,7 @@ namespace Engine
 		if(!program)
 			return false;
 
-		return ReleaseRes(program.GetFileRes()->GetFileName(), program.GetFileRes());
+		return ReleaseRes(program.GetRes()->GetFileName(), program.GetRes());
 	}
 
 	VertexASMProgResPtr ASMProgManager::FindVertexASMProgram(const tchar* file_name)
@@ -491,7 +491,7 @@ namespace Engine
 		if(!material)
 			return false;
 
-		return ReleaseRes(material.GetFileRes()->GetFileName(), material.GetFileRes());
+		return ReleaseRes(material.GetRes()->GetFileName(), material.GetRes());
 	}
 
 	MaterialResPtr MaterialManager::FindMaterial(const tchar* file_name)
@@ -523,7 +523,7 @@ namespace Engine
 		if(!Model)
 			return false;
 
-		return ReleaseRes(Model.GetFileRes()->GetFileName(), Model.GetFileRes());
+		return ReleaseRes(Model.GetRes()->GetFileName(), Model.GetRes());
 	}
 
 	ModelResPtr ModelManager::FindModel(const tchar* file_name)
@@ -555,7 +555,7 @@ namespace Engine
 		if(!Animation)
 			return false;
 
-		return ReleaseRes(Animation.GetFileRes()->GetFileName(), Animation.GetFileRes());
+		return ReleaseRes(Animation.GetRes()->GetFileName(), Animation.GetRes());
 	}
 
 	AnimationResPtr AnimationManager::FindAnimation(const tchar* file_name)
@@ -603,15 +603,15 @@ namespace Engine
 
 	ModelEntityResPtr ModelEntityManager::CreateCopy(ModelEntityResPtr model_entity)
 	{
-		if(!model_entity || !model_entity.GetFileRes()->IsLoaded())
+		if(!model_entity || !model_entity.GetRes()->IsLoaded())
 			return ModelEntityResPtr::null;
 
-		return ModelEntityResPtr(new(mapPool) ModelEntityRes(*model_entity.GetFileRes()));
+		return ModelEntityResPtr(new(mapPool) ModelEntityRes(*model_entity.GetRes()));
 	}
 
 	void ModelEntityManager::ReleaseModelEntity(ModelEntityResPtr model_entity)
 	{
-		if(model_entity.GetFileRes())
+		if(model_entity.GetRes())
 			delete model_entity;
 	}
 
@@ -655,15 +655,15 @@ namespace Engine
 
 	PartSysResPtr PartSysManager::CreateCopy(PartSysResPtr part_sys)
 	{
-		if(!part_sys || !part_sys.GetFileRes()->IsLoaded())
+		if(!part_sys || !part_sys.GetRes()->IsLoaded())
 			return PartSysResPtr::null;
 
-		return PartSysResPtr(new(mapPool) PartSysRes(*part_sys.GetFileRes()));
+		return PartSysResPtr(new(mapPool) PartSysRes(*part_sys.GetRes()));
 	}
 
 	void PartSysManager::ReleasePartSys(PartSysResPtr part_sys)
 	{
-		if(part_sys.GetFileRes())
+		if(part_sys.GetRes())
 			delete part_sys;
 	}
 
@@ -691,7 +691,7 @@ namespace Engine
 		if(!Sound)
 			return false;
 
-		return ReleaseRes(Sound.GetFileRes()->GetFileName(), Sound.GetFileRes());
+		return ReleaseRes(Sound.GetRes()->GetFileName(), Sound.GetRes());
 	}
 
 	SoundResPtr SoundManager::FindSound(const tchar* file_name)
@@ -723,7 +723,7 @@ namespace Engine
 		if(!AIScript)
 			return false;
 
-		return ReleaseRes(AIScript.GetFileRes()->GetFileName(), AIScript.GetFileRes());
+		return ReleaseRes(AIScript.GetRes()->GetFileName(), AIScript.GetRes());
 	}
 
 	AIScriptResPtr AIScriptManager::FindAIScript(const tchar* file_name)

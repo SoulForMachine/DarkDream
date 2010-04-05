@@ -1,12 +1,12 @@
 #include "StdAfx.h"
-#include "Utility.h"
 #include "Entity.h"
 #include "AddAnimForm.h"
+#include "EditorCommon/UtilityTempl.h"
 #include "EntityForm.h"
 
 
-using namespace EditorCommon;
 using namespace Engine;
+using namespace EditorCommon;
 
 
 namespace EntityEditor
@@ -37,7 +37,7 @@ namespace EntityEditor
 			model = _entity->GetModelRes();
 			if(model)
 			{
-				const tchar* file_name = model.GetFileRes()->GetFileName();
+				const tchar* file_name = model.GetRes()->GetFileName();
 				if(file_name)
 					model_file = gcnew String(file_name);
 			}
@@ -84,7 +84,7 @@ namespace EntityEditor
 			{
 				const ModelEntity::AnimData& ad = *it;
 				ListViewItem^ item = gcnew ListViewItem(gcnew String(ad.name));
-				item->SubItems->Add(gcnew String(ad.animation.GetFileRes()->GetFileName()));
+				item->SubItems->Add(gcnew String(ad.animation.GetRes()->GetFileName()));
 				_listAnimations->Items->Add(item);
 			}
 		}
@@ -98,7 +98,7 @@ namespace EntityEditor
 			{
 				const ModelEntity::SoundData& sd = *it;
 				ListViewItem^ item = gcnew ListViewItem(gcnew String(sd.name));
-				item->SubItems->Add(gcnew String(sd.sound.GetFileRes()->GetFileName()));
+				item->SubItems->Add(gcnew String(sd.sound.GetRes()->GetFileName()));
 				_listSounds->Items->Add(item);
 			}
 		}
@@ -130,11 +130,11 @@ namespace EntityEditor
 		_openFileDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath()) + "Models";
 		if(_openFileDialog->ShowDialog(this) == Forms::DialogResult::OK)
 		{
-			tchar* file_name = GetRelativePath(_openFileDialog->FileName);
+			tchar* file_name = EditorUtil::GetRelativePath(_openFileDialog->FileName);
 			if(_entity->SetModel(file_name))
 			{
 				UpdateControls();
-				_director->FormNotify(this, NotifyMessage::ModelChanged);
+				_director->FormNotify(this, NotifyMessage::ModelChanged, nullptr);
 			}
 			else
 			{
@@ -158,7 +158,7 @@ namespace EntityEditor
 			_openFileDialog->InitialDirectory = gcnew String(engineAPI->fileSystem->GetBaseDirPath());
 			if(_openFileDialog->ShowDialog(this) == Forms::DialogResult::OK)
 			{
-				tchar* file_name = GetRelativePath(_openFileDialog->FileName);
+				tchar* file_name = EditorUtil::GetRelativePath(_openFileDialog->FileName);
 				char* name = ConvertString<char>(node->Text);
 				if(_entity->SetJointAttachment(name, file_name))
 				{
@@ -183,7 +183,7 @@ namespace EntityEditor
 					node->ImageIndex = JOINT_ATT_IMAGE_INDEX;
 					node->SelectedImageIndex = JOINT_ATT_IMAGE_INDEX;
 					_btnRemoveAttachment->Enabled = true;
-					_director->FormNotify(this, NotifyMessage::AttachmentChanged);
+					_director->FormNotify(this, NotifyMessage::AttachmentChanged, nullptr);
 				}
 				else
 				{
@@ -209,7 +209,7 @@ namespace EntityEditor
 				node->ImageIndex = JOINT_IMAGE_INDEX;
 				node->SelectedImageIndex = JOINT_IMAGE_INDEX;
 				_btnRemoveAttachment->Enabled = false;
-				_director->FormNotify(this, NotifyMessage::AttachmentChanged);
+				_director->FormNotify(this, NotifyMessage::AttachmentChanged, nullptr);
 			}
 			delete[] name;
 		}
@@ -274,7 +274,7 @@ namespace EntityEditor
 					_listAnimations->Items->Add(item);
 				}
 
-				_director->FormNotify(this, NotifyMessage::AnimationChanged);
+				_director->FormNotify(this, NotifyMessage::AnimationChanged, nullptr);
 			}
 			else
 			{
@@ -302,7 +302,7 @@ namespace EntityEditor
 			_listAnimations->Items->Remove(item);
 		}
 		_btnRemoveAnim->Enabled = false;
-		_director->FormNotify(this, NotifyMessage::AnimationChanged);
+		_director->FormNotify(this, NotifyMessage::AnimationChanged, nullptr);
 	}
 
 	System::Void EntityForm::_btnPlaySound_Click(System::Object^  sender, System::EventArgs^  e)
@@ -320,7 +320,7 @@ namespace EntityEditor
 	System::Void EntityForm::_openFileDialog_FileOk(System::Object^  sender, System::ComponentModel::CancelEventArgs^  e)
 	{
 		// the file must be within game's base directory
-		if(!IsInGameBaseDir(_openFileDialog->FileName))
+		if(!EditorUtil::IsInGameBaseDir(_openFileDialog->FileName))
 		{
 			MessageBox::Show(
 				this, "File must be within game's base directory.", GetAppName(),

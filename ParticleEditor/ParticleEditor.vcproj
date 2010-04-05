@@ -201,7 +201,7 @@
 		/>
 		<AssemblyReference
 			RelativePath="..\ExternalLibs\EditorCommon.dll"
-			AssemblyName="EditorCommon, Version=1.0.3597.36516, processorArchitecture=x86"
+			AssemblyName="EditorCommon, Version=1.0.3745.42411, processorArchitecture=x86"
 			MinFrameworkVersion="131072"
 		/>
 		<AssemblyReference
@@ -339,14 +339,6 @@
 		</File>
 		<File
 			RelativePath=".\stdafx.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Utility.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Utility.h"
 			>
 		</File>
 	</Files>

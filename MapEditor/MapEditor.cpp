@@ -25,6 +25,7 @@ int main(array<System::String ^> ^args)
 		}
 
 		engineAPI = CreateEngineAPI();
+		EditorCommon::EditorUtil::Init(engineAPI);
 		if(!engineAPI->fileSystem->Init())
 		{
 			::Console::Deinit();

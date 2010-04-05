@@ -1,9 +1,10 @@
 #include "StdAfx.h"
-#include "Utility.h"
 #include "PropertiesPanel.h"
+#include "EditorCommon/UtilityTempl.h"
 #include "EmitterPanel.h"
 
 using namespace Engine;
+using namespace EditorCommon;
 
 
 namespace ParticleEditor
@@ -122,7 +123,7 @@ namespace ParticleEditor
 			
 			if(_selectedEmitter->GetTexture())
 			{
-				_textResource->Text = gcnew String(_selectedEmitter->GetTexture().GetFileRes()->GetFileName());
+				_textResource->Text = gcnew String(_selectedEmitter->GetTexture().GetRes()->GetFileName());
 			}
 			else
 			{
@@ -221,7 +222,7 @@ namespace ParticleEditor
 
 	void EmitterPanel::Modified()
 	{
-		_director->FormNotify(this, EditorCommon::NotifyMessage::Modified);
+		_director->FormNotify(this, EditorCommon::NotifyMessage::Modified, nullptr);
 	}
 
 	System::Void EmitterPanel::_listEmitters_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e)
@@ -401,7 +402,7 @@ namespace ParticleEditor
 
 			if(_openFileDialog->ShowDialog(this) == Windows::Forms::DialogResult::OK)
 			{
-				tchar* file_name = GetRelativePath(_openFileDialog->FileName);
+				tchar* file_name = EditorUtil::GetRelativePath(_openFileDialog->FileName);
 				_selectedEmitter->SetTexture(file_name);
 				_textResource->Text = gcnew String(file_name);
 				delete[] file_name;
@@ -500,7 +501,7 @@ namespace ParticleEditor
 	System::Void EmitterPanel::_openFileDialog_FileOk(System::Object^  sender, System::ComponentModel::CancelEventArgs^  e)
 	{
 		// the file must be within game's base directory
-		if(!IsInGameBaseDir(_openFileDialog->FileName))
+		if(!EditorUtil::IsInGameBaseDir(_openFileDialog->FileName))
 		{
 			MessageBox::Show(
 				this, "File must be within game's base directory.", GetAppName(),

@@ -261,7 +261,7 @@ namespace Engine
 			file->Printf("\t\tparticleType\t\t%s\n", Emitter::GetParticleTypeString(emitter.GetParticleType()));
 
 			if(emitter.GetParticleType() == Emitter::PARTICLE_TYPE_TEXTURE)
-				tstr = emitter.GetTexture()? emitter.GetTexture().GetFileRes()->GetFileName(): _t("");
+				tstr = emitter.GetTexture()? emitter.GetTexture().GetRes()->GetFileName(): _t("");
 			else
 				tstr = _t("");
 			file->Printf("\t\tresource\t\t\"%ls\"\n", tstr);
@@ -656,7 +656,7 @@ namespace Engine
 		_shader = emitter._shader;
 
 		if(emitter._texture)
-			_texture = engineAPI.textureManager->CreateTexture2D(emitter._texture.GetFileRes()->GetFileName(), true);
+			_texture = engineAPI.textureManager->CreateTexture2D(emitter._texture.GetRes()->GetFileName(), true);
 		else
 			_texture = Texture2DResPtr::null;
 

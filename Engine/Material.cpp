@@ -44,7 +44,7 @@ namespace Engine
 		if(mat._emissionTexture)
 		{
 			engineAPI.textureManager->ReleaseTexture(_emissionTexture);
-			_emissionTexture = engineAPI.textureManager->CreateTexture2D(mat._emissionTexture.GetFileRes()->GetFileName());
+			_emissionTexture = engineAPI.textureManager->CreateTexture2D(mat._emissionTexture.GetRes()->GetFileName());
 		}
 		else
 			_emissionTexture = Texture2DResPtr::null;
@@ -53,7 +53,7 @@ namespace Engine
 		if(mat._diffuseTexture)
 		{
 			engineAPI.textureManager->ReleaseTexture(_diffuseTexture);
-			_diffuseTexture = engineAPI.textureManager->CreateTexture2D(mat._diffuseTexture.GetFileRes()->GetFileName());
+			_diffuseTexture = engineAPI.textureManager->CreateTexture2D(mat._diffuseTexture.GetRes()->GetFileName());
 		}
 		else
 			_diffuseTexture = Texture2DResPtr::null;
@@ -61,7 +61,7 @@ namespace Engine
 		if(mat._normalMap)
 		{
 			engineAPI.textureManager->ReleaseTexture(_normalMap);
-			_normalMap = engineAPI.textureManager->CreateTexture2D(mat._normalMap.GetFileRes()->GetFileName());
+			_normalMap = engineAPI.textureManager->CreateTexture2D(mat._normalMap.GetRes()->GetFileName());
 		}
 		else
 			_normalMap = Texture2DResPtr::null;
@@ -71,7 +71,7 @@ namespace Engine
 		if(mat._transpTexture)
 		{
 			engineAPI.textureManager->ReleaseTexture(_transpTexture);
-			_transpTexture = engineAPI.textureManager->CreateTexture2D(mat._transpTexture.GetFileRes()->GetFileName());
+			_transpTexture = engineAPI.textureManager->CreateTexture2D(mat._transpTexture.GetRes()->GetFileName());
 		}
 		else
 			_transpTexture = Texture2DResPtr::null;
@@ -187,25 +187,25 @@ namespace Engine
 		file->Printf("// Daemonium engine material file\n\n");
 		file->Printf("material\n{\n");
 
-		tstr = _emissionTexture? _emissionTexture.GetFileRes()->GetFileName(): _t("");
+		tstr = _emissionTexture? _emissionTexture.GetRes()->GetFileName(): _t("");
 		if(!tstr)
 			tstr = _t("");
 		file->Printf("\temissionTexture\t\t\"%ls\"\n", tstr);
 
 		file->Printf("\tdiffuseColor\t\t[%f %f %f]\n", _diffuseColor.r, _diffuseColor.g, _diffuseColor.b);
-		tstr = _diffuseTexture? _diffuseTexture.GetFileRes()->GetFileName(): _t("");
+		tstr = _diffuseTexture? _diffuseTexture.GetRes()->GetFileName(): _t("");
 		if(!tstr)
 			tstr = _t("");
 		file->Printf("\tdiffuseTexture\t\t\"%ls\"\n", tstr);
 
-		tstr = _normalMap? _normalMap.GetFileRes()->GetFileName(): _t("");
+		tstr = _normalMap? _normalMap.GetRes()->GetFileName(): _t("");
 		if(!tstr)
 			tstr = _t("");
 		file->Printf("\tnormalMap\t\t\"%ls\"\n", tstr);
 
 		file->Printf("\tuseTransparency\t\t%s\n", _useTransparency? "True": "False");
 		file->Printf("\tglobalTransparency\t\t%f\n", _globalOpacity);
-		tstr = _transpTexture? _transpTexture.GetFileRes()->GetFileName(): _t("");
+		tstr = _transpTexture? _transpTexture.GetRes()->GetFileName(): _t("");
 		if(!tstr)
 			tstr = _t("");
 		file->Printf("\ttransparencyTexture\t\t\"%ls\"\n", tstr);

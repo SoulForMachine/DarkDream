@@ -554,6 +554,6 @@ namespace ParticleEditor
 
 	void PropertiesPanel::Modified()
 	{
-		_director->FormNotify(this, EditorCommon::NotifyMessage::Modified);
+		_director->FormNotify(this, EditorCommon::NotifyMessage::Modified, nullptr);
 	}
 }
