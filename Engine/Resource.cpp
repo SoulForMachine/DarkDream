@@ -1358,13 +1358,9 @@ namespace Engine
 
 	Model* ModelRes::CreateDefault()
 	{
+		// even if it fails to load null model from file, return an empty object
 		Model* model = new(mapPool) Model;
-		bool result = model->Load(_t("Models/null.model"));
-		if(!result)
-		{
-			delete model;
-			model = 0;
-		}
+		model->Load(_t("Models/null.model"));
 		return model;
 	}
 
@@ -1529,6 +1525,7 @@ namespace Engine
 
 	ModelEntity* ModelEntityRes::CreateDefault()
 	{
+		// even if it fails to load null entity from file, return an empty object
 		ModelEntity* entity = ModelEntity::CreateFromFile(_t("Entities/null.entity"));
 		return entity? entity: new(mapPool) StaticEntity;
 	}

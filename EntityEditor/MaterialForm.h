@@ -58,20 +58,6 @@ namespace EntityEditor {
 		Engine::Material* _copiedMaterial;
 		EditorCommon::FormDirector^ _director;
 
-	private: System::Windows::Forms::MenuStrip^  _menuMaterial;
-
-	private: System::Windows::Forms::ToolStripMenuItem^  fileToolStripMenuItem;
-	private: System::Windows::Forms::ToolStripMenuItem^  _mnuFileNew;
-	private: System::Windows::Forms::ToolStripMenuItem^  _mnuFileSave;
-	private: System::Windows::Forms::ToolStripMenuItem^  _mnuFileSaveAs;
-
-	private: System::Windows::Forms::ToolStripMenuItem^  editToolStripMenuItem;
-	private: System::Windows::Forms::ToolStripMenuItem^  _mnuEditCopy;
-	private: System::Windows::Forms::ToolStripMenuItem^  _mnuEditPaste;
-
-
-	private: System::Windows::Forms::ToolStripMenuItem^  _mnuFileOpen;
-
 
 	private: System::Windows::Forms::ColorDialog^  _colorDialog;
 	private: System::Windows::Forms::OpenFileDialog^  _openFileDialog;
@@ -123,6 +109,7 @@ namespace EntityEditor {
 	private: System::Windows::Forms::Button^  _btnRemoveTransparencyMap;
 	private: System::Windows::Forms::Button^  _btnBrowseTransparencyMap;
 	private: System::Windows::Forms::NumericUpDown^  _textOpacity;
+private: System::Windows::Forms::ToolStripButton^  _toolBtnSaveAs;
 
 	private: System::ComponentModel::IContainer^  components;
 
@@ -143,15 +130,6 @@ namespace EntityEditor {
 		{
 			this->components = (gcnew System::ComponentModel::Container());
 			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(MaterialForm::typeid));
-			this->_menuMaterial = (gcnew System::Windows::Forms::MenuStrip());
-			this->fileToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->_mnuFileNew = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->_mnuFileOpen = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->_mnuFileSave = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->_mnuFileSaveAs = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->editToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->_mnuEditCopy = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->_mnuEditPaste = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->_colorDialog = (gcnew System::Windows::Forms::ColorDialog());
 			this->_openFileDialog = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->_saveFileDialog = (gcnew System::Windows::Forms::SaveFileDialog());
@@ -188,10 +166,10 @@ namespace EntityEditor {
 			this->_toolBtnNew = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnOpen = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnSave = (gcnew System::Windows::Forms::ToolStripButton());
+			this->_toolBtnSaveAs = (gcnew System::Windows::Forms::ToolStripButton());
 			this->toolStripSeparator1 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->_toolBtnCopy = (gcnew System::Windows::Forms::ToolStripButton());
 			this->_toolBtnPaste = (gcnew System::Windows::Forms::ToolStripButton());
-			this->_menuMaterial->SuspendLayout();
 			this->tableLayoutPanel1->SuspendLayout();
 			this->_panelScroll->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_textOpacity))->BeginInit();
@@ -199,79 +177,6 @@ namespace EntityEditor {
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->_clrDiffuse))->BeginInit();
 			this->_mainToolbar->SuspendLayout();
 			this->SuspendLayout();
-			// 
-			// _menuMaterial
-			// 
-			this->_menuMaterial->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {this->fileToolStripMenuItem, 
-				this->editToolStripMenuItem});
-			this->_menuMaterial->Location = System::Drawing::Point(0, 0);
-			this->_menuMaterial->Name = L"_menuMaterial";
-			this->_menuMaterial->Size = System::Drawing::Size(543, 24);
-			this->_menuMaterial->TabIndex = 0;
-			this->_menuMaterial->Text = L"menuStrip1";
-			// 
-			// fileToolStripMenuItem
-			// 
-			this->fileToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(4) {this->_mnuFileNew, 
-				this->_mnuFileOpen, this->_mnuFileSave, this->_mnuFileSaveAs});
-			this->fileToolStripMenuItem->Name = L"fileToolStripMenuItem";
-			this->fileToolStripMenuItem->Size = System::Drawing::Size(35, 20);
-			this->fileToolStripMenuItem->Text = L"&File";
-			// 
-			// _mnuFileNew
-			// 
-			this->_mnuFileNew->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_mnuFileNew.Image")));
-			this->_mnuFileNew->Name = L"_mnuFileNew";
-			this->_mnuFileNew->Size = System::Drawing::Size(152, 22);
-			this->_mnuFileNew->Text = L"&New";
-			this->_mnuFileNew->Click += gcnew System::EventHandler(this, &MaterialForm::_mnuFileNew_Click);
-			// 
-			// _mnuFileOpen
-			// 
-			this->_mnuFileOpen->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_mnuFileOpen.Image")));
-			this->_mnuFileOpen->Name = L"_mnuFileOpen";
-			this->_mnuFileOpen->Size = System::Drawing::Size(152, 22);
-			this->_mnuFileOpen->Text = L"&Open";
-			this->_mnuFileOpen->Click += gcnew System::EventHandler(this, &MaterialForm::_mnuFileOpen_Click);
-			// 
-			// _mnuFileSave
-			// 
-			this->_mnuFileSave->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_mnuFileSave.Image")));
-			this->_mnuFileSave->Name = L"_mnuFileSave";
-			this->_mnuFileSave->Size = System::Drawing::Size(152, 22);
-			this->_mnuFileSave->Text = L"&Save";
-			this->_mnuFileSave->Click += gcnew System::EventHandler(this, &MaterialForm::_mnuFileSave_Click);
-			// 
-			// _mnuFileSaveAs
-			// 
-			this->_mnuFileSaveAs->Name = L"_mnuFileSaveAs";
-			this->_mnuFileSaveAs->Size = System::Drawing::Size(152, 22);
-			this->_mnuFileSaveAs->Text = L"Save &As";
-			this->_mnuFileSaveAs->Click += gcnew System::EventHandler(this, &MaterialForm::_mnuFileSaveAs_Click);
-			// 
-			// editToolStripMenuItem
-			// 
-			this->editToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {this->_mnuEditCopy, 
-				this->_mnuEditPaste});
-			this->editToolStripMenuItem->Name = L"editToolStripMenuItem";
-			this->editToolStripMenuItem->Size = System::Drawing::Size(37, 20);
-			this->editToolStripMenuItem->Text = L"&Edit";
-			// 
-			// _mnuEditCopy
-			// 
-			this->_mnuEditCopy->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_mnuEditCopy.Image")));
-			this->_mnuEditCopy->Name = L"_mnuEditCopy";
-			this->_mnuEditCopy->Size = System::Drawing::Size(152, 22);
-			this->_mnuEditCopy->Text = L"&Copy";
-			this->_mnuEditCopy->Click += gcnew System::EventHandler(this, &MaterialForm::_mnuEditCopy_Click);
-			// 
-			// _mnuEditPaste
-			// 
-			this->_mnuEditPaste->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_mnuEditPaste.Image")));
-			this->_mnuEditPaste->Name = L"_mnuEditPaste";
-			this->_mnuEditPaste->Size = System::Drawing::Size(152, 22);
-			this->_mnuEditPaste->Text = L"&Paste";
-			this->_mnuEditPaste->Click += gcnew System::EventHandler(this, &MaterialForm::_mnuEditPaste_Click);
 			// 
 			// _colorDialog
 			// 
@@ -336,12 +241,12 @@ namespace EntityEditor {
 			this->tableLayoutPanel1->Controls->Add(this->_listMaterials, 0, 0);
 			this->tableLayoutPanel1->Controls->Add(this->_panelScroll, 0, 1);
 			this->tableLayoutPanel1->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->tableLayoutPanel1->Location = System::Drawing::Point(0, 49);
+			this->tableLayoutPanel1->Location = System::Drawing::Point(0, 25);
 			this->tableLayoutPanel1->Name = L"tableLayoutPanel1";
 			this->tableLayoutPanel1->RowCount = 2;
 			this->tableLayoutPanel1->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 200)));
 			this->tableLayoutPanel1->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 300)));
-			this->tableLayoutPanel1->Size = System::Drawing::Size(543, 669);
+			this->tableLayoutPanel1->Size = System::Drawing::Size(543, 693);
 			this->tableLayoutPanel1->TabIndex = 4;
 			// 
 			// _panelScroll
@@ -374,7 +279,7 @@ namespace EntityEditor {
 			this->_panelScroll->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->_panelScroll->Location = System::Drawing::Point(3, 203);
 			this->_panelScroll->Name = L"_panelScroll";
-			this->_panelScroll->Size = System::Drawing::Size(537, 463);
+			this->_panelScroll->Size = System::Drawing::Size(537, 487);
 			this->_panelScroll->TabIndex = 2;
 			// 
 			// _textOpacity
@@ -616,9 +521,9 @@ namespace EntityEditor {
 			// 
 			// _mainToolbar
 			// 
-			this->_mainToolbar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {this->_toolBtnNew, this->_toolBtnOpen, 
-				this->_toolBtnSave, this->toolStripSeparator1, this->_toolBtnCopy, this->_toolBtnPaste});
-			this->_mainToolbar->Location = System::Drawing::Point(0, 24);
+			this->_mainToolbar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(7) {this->_toolBtnNew, this->_toolBtnOpen, 
+				this->_toolBtnSave, this->_toolBtnSaveAs, this->toolStripSeparator1, this->_toolBtnCopy, this->_toolBtnPaste});
+			this->_mainToolbar->Location = System::Drawing::Point(0, 0);
 			this->_mainToolbar->Name = L"_mainToolbar";
 			this->_mainToolbar->Size = System::Drawing::Size(543, 25);
 			this->_mainToolbar->TabIndex = 5;
@@ -632,7 +537,7 @@ namespace EntityEditor {
 			this->_toolBtnNew->Name = L"_toolBtnNew";
 			this->_toolBtnNew->Size = System::Drawing::Size(23, 22);
 			this->_toolBtnNew->Text = L"New Material";
-			this->_toolBtnNew->Click += gcnew System::EventHandler(this, &MaterialForm::_mnuFileNew_Click);
+			this->_toolBtnNew->Click += gcnew System::EventHandler(this, &MaterialForm::_toolBtnFileNew_Click);
 			// 
 			// _toolBtnOpen
 			// 
@@ -642,7 +547,7 @@ namespace EntityEditor {
 			this->_toolBtnOpen->Name = L"_toolBtnOpen";
 			this->_toolBtnOpen->Size = System::Drawing::Size(23, 22);
 			this->_toolBtnOpen->Text = L"Open Material";
-			this->_toolBtnOpen->Click += gcnew System::EventHandler(this, &MaterialForm::_mnuFileOpen_Click);
+			this->_toolBtnOpen->Click += gcnew System::EventHandler(this, &MaterialForm::_toolBtnFileOpen_Click);
 			// 
 			// _toolBtnSave
 			// 
@@ -652,7 +557,17 @@ namespace EntityEditor {
 			this->_toolBtnSave->Name = L"_toolBtnSave";
 			this->_toolBtnSave->Size = System::Drawing::Size(23, 22);
 			this->_toolBtnSave->Text = L"Save Material";
-			this->_toolBtnSave->Click += gcnew System::EventHandler(this, &MaterialForm::_mnuFileSave_Click);
+			this->_toolBtnSave->Click += gcnew System::EventHandler(this, &MaterialForm::_toolBtnFileSave_Click);
+			// 
+			// _toolBtnSaveAs
+			// 
+			this->_toolBtnSaveAs->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->_toolBtnSaveAs->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"_toolBtnSaveAs.Image")));
+			this->_toolBtnSaveAs->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->_toolBtnSaveAs->Name = L"_toolBtnSaveAs";
+			this->_toolBtnSaveAs->Size = System::Drawing::Size(23, 22);
+			this->_toolBtnSaveAs->Text = L"Save Material As";
+			this->_toolBtnSaveAs->Click += gcnew System::EventHandler(this, &MaterialForm::_toolBtnFileSaveAs_Click);
 			// 
 			// toolStripSeparator1
 			// 
@@ -667,7 +582,7 @@ namespace EntityEditor {
 			this->_toolBtnCopy->Name = L"_toolBtnCopy";
 			this->_toolBtnCopy->Size = System::Drawing::Size(23, 22);
 			this->_toolBtnCopy->Text = L"Copy Material";
-			this->_toolBtnCopy->Click += gcnew System::EventHandler(this, &MaterialForm::_mnuEditCopy_Click);
+			this->_toolBtnCopy->Click += gcnew System::EventHandler(this, &MaterialForm::_toolBtnEditCopy_Click);
 			// 
 			// _toolBtnPaste
 			// 
@@ -677,7 +592,7 @@ namespace EntityEditor {
 			this->_toolBtnPaste->Name = L"_toolBtnPaste";
 			this->_toolBtnPaste->Size = System::Drawing::Size(23, 22);
 			this->_toolBtnPaste->Text = L"Paste Material";
-			this->_toolBtnPaste->Click += gcnew System::EventHandler(this, &MaterialForm::_mnuEditPaste_Click);
+			this->_toolBtnPaste->Click += gcnew System::EventHandler(this, &MaterialForm::_toolBtnEditPaste_Click);
 			// 
 			// MaterialForm
 			// 
@@ -687,16 +602,14 @@ namespace EntityEditor {
 			this->ClientSize = System::Drawing::Size(543, 718);
 			this->Controls->Add(this->tableLayoutPanel1);
 			this->Controls->Add(this->_mainToolbar);
-			this->Controls->Add(this->_menuMaterial);
+			this->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
 			this->HideOnClose = true;
-			this->MainMenuStrip = this->_menuMaterial;
 			this->Name = L"MaterialForm";
 			this->ShowHint = WeifenLuo::WinFormsUI::Docking::DockState::DockRight;
 			this->TabText = L"Material";
 			this->Text = L"Material";
 			this->Load += gcnew System::EventHandler(this, &MaterialForm::MaterialForm_Load);
-			this->_menuMaterial->ResumeLayout(false);
-			this->_menuMaterial->PerformLayout();
 			this->tableLayoutPanel1->ResumeLayout(false);
 			this->_panelScroll->ResumeLayout(false);
 			this->_panelScroll->PerformLayout();
@@ -711,12 +624,12 @@ namespace EntityEditor {
 		}
 #pragma endregion
 		System::Void _listMaterials_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e);
-		System::Void _mnuFileNew_Click(System::Object^  sender, System::EventArgs^  e);
-		System::Void _mnuFileOpen_Click(System::Object^  sender, System::EventArgs^  e);
-		System::Void _mnuFileSave_Click(System::Object^  sender, System::EventArgs^  e);
-		System::Void _mnuFileSaveAs_Click(System::Object^  sender, System::EventArgs^  e);
-		System::Void _mnuEditCopy_Click(System::Object^  sender, System::EventArgs^  e);
-		System::Void _mnuEditPaste_Click(System::Object^  sender, System::EventArgs^  e);
+		System::Void _toolBtnFileNew_Click(System::Object^  sender, System::EventArgs^  e);
+		System::Void _toolBtnFileOpen_Click(System::Object^  sender, System::EventArgs^  e);
+		System::Void _toolBtnFileSave_Click(System::Object^  sender, System::EventArgs^  e);
+		System::Void _toolBtnFileSaveAs_Click(System::Object^  sender, System::EventArgs^  e);
+		System::Void _toolBtnEditCopy_Click(System::Object^  sender, System::EventArgs^  e);
+		System::Void _toolBtnEditPaste_Click(System::Object^  sender, System::EventArgs^  e);
 		System::Void _clrDiffuse_Click(System::Object^  sender, System::EventArgs^  e);
 		System::Void _btnBrowseDiffuseTex_Click(System::Object^  sender, System::EventArgs^  e);
 		System::Void _btnBrowseNormalMap_Click(System::Object^  sender, System::EventArgs^  e);

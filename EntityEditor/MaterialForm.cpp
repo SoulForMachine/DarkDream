@@ -166,7 +166,7 @@ namespace EntityEditor
 		UpdateControls();
 	}
 
-	System::Void MaterialForm::_mnuFileNew_Click(System::Object^  sender, System::EventArgs^  e)
+	System::Void MaterialForm::_toolBtnFileNew_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(!_material || !PromptSave())
 			return;
@@ -213,7 +213,7 @@ namespace EntityEditor
 		}
 	}
 
-	System::Void MaterialForm::_mnuFileOpen_Click(System::Object^  sender, System::EventArgs^  e)
+	System::Void MaterialForm::_toolBtnFileOpen_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(!_material || !PromptSave())
 			return;
@@ -251,7 +251,7 @@ namespace EntityEditor
 		}
 	}
 
-	System::Void MaterialForm::_mnuFileSave_Click(System::Object^  sender, System::EventArgs^  e)
+	System::Void MaterialForm::_toolBtnFileSave_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(!_material)
 			return;
@@ -259,7 +259,7 @@ namespace EntityEditor
 		SaveMaterial(_listMaterials->SelectedItems[0]);
 	}
 
-	System::Void MaterialForm::_mnuFileSaveAs_Click(System::Object^  sender, System::EventArgs^  e)
+	System::Void MaterialForm::_toolBtnFileSaveAs_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(!_material)
 			return;
@@ -425,15 +425,10 @@ namespace EntityEditor
 
 	void MaterialForm::EnableControls(bool enable)
 	{
-		_mnuFileNew->Enabled = enable;
-		_mnuFileOpen->Enabled = enable;
-		_mnuFileSave->Enabled = enable;
-		_mnuFileSaveAs->Enabled = enable;
-		_mnuEditCopy->Enabled = enable;
-		_mnuEditPaste->Enabled = enable;
 		_toolBtnNew->Enabled = enable;
 		_toolBtnOpen->Enabled = enable;
 		_toolBtnSave->Enabled = enable;
+		_toolBtnSaveAs->Enabled = enable;
 		_toolBtnCopy->Enabled = enable;
 		_toolBtnPaste->Enabled = enable;
 
@@ -441,13 +436,13 @@ namespace EntityEditor
 			c->Enabled = enable;
 	}
 
-	System::Void MaterialForm::_mnuEditCopy_Click(System::Object^  sender, System::EventArgs^  e)
+	System::Void MaterialForm::_toolBtnEditCopy_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_material)
 			*_copiedMaterial = *_material;
 	}
 
-	System::Void MaterialForm::_mnuEditPaste_Click(System::Object^  sender, System::EventArgs^  e)
+	System::Void MaterialForm::_toolBtnEditPaste_Click(System::Object^  sender, System::EventArgs^  e)
 	{
 		if(_material)
 		{

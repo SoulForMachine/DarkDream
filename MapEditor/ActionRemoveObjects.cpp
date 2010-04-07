@@ -3,6 +3,7 @@
 #include "ActionRemoveObjects.h"
 
 using namespace Memory;
+using namespace Engine;
 
 
 namespace MapEditor
@@ -19,7 +20,7 @@ namespace MapEditor
 		if(_ownObjects)
 		{
 			for(List<Engine::RenderableEntity*>::ConstIterator it = _objList->Begin(); it != _objList->End(); ++it)
-				delete *it;
+				ObjectFactory::DeleteEntity(*it);
 		}
 
 		delete _objList;

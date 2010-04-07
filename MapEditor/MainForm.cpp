@@ -99,6 +99,8 @@ namespace MapEditor
 
 	System::Void MainForm::MainForm_FormClosing(System::Object^  sender, System::Windows::Forms::FormClosingEventArgs^  e)
 	{
+		engineAPI->partSysManager->ReleaseAll();
+		engineAPI->modelEntityManager->ReleaseAll();
 		// save layout for dock panels to xml
 		_dockPanel->SaveAsXml(Application::StartupPath + "\\" + DOCK_PANEL_XML_FILE);
 	}

@@ -41,38 +41,32 @@ namespace Engine
 	{
 		_flags = mat._flags;
 
+		engineAPI.textureManager->ReleaseTexture(_emissionTexture);
 		if(mat._emissionTexture)
-		{
-			engineAPI.textureManager->ReleaseTexture(_emissionTexture);
 			_emissionTexture = engineAPI.textureManager->CreateTexture2D(mat._emissionTexture.GetRes()->GetFileName());
-		}
 		else
 			_emissionTexture = Texture2DResPtr::null;
 
 		_diffuseColor = mat._diffuseColor;
+
+		engineAPI.textureManager->ReleaseTexture(_diffuseTexture);
 		if(mat._diffuseTexture)
-		{
-			engineAPI.textureManager->ReleaseTexture(_diffuseTexture);
 			_diffuseTexture = engineAPI.textureManager->CreateTexture2D(mat._diffuseTexture.GetRes()->GetFileName());
-		}
 		else
 			_diffuseTexture = Texture2DResPtr::null;
 
+		engineAPI.textureManager->ReleaseTexture(_normalMap);
 		if(mat._normalMap)
-		{
-			engineAPI.textureManager->ReleaseTexture(_normalMap);
 			_normalMap = engineAPI.textureManager->CreateTexture2D(mat._normalMap.GetRes()->GetFileName());
-		}
 		else
 			_normalMap = Texture2DResPtr::null;
 
 		_useTransparency = mat._useTransparency;
 		_globalOpacity = mat._globalOpacity;
+
+		engineAPI.textureManager->ReleaseTexture(_transpTexture);
 		if(mat._transpTexture)
-		{
-			engineAPI.textureManager->ReleaseTexture(_transpTexture);
 			_transpTexture = engineAPI.textureManager->CreateTexture2D(mat._transpTexture.GetRes()->GetFileName());
-		}
 		else
 			_transpTexture = Texture2DResPtr::null;
 

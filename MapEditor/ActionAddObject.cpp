@@ -25,7 +25,7 @@ namespace MapEditor
 	{
 		delete _point;
 		if(_ownObject)
-			delete _entity;
+			ObjectFactory::DeleteEntity(_entity);
 	}
 
 	bool ActionAddObject::BeginAction()
@@ -36,12 +36,10 @@ namespace MapEditor
 		{
 		case ModelEntity::JOINT_ATTACH_MODEL:
 			_entity = engineAPI->modelEntityManager->CreateEntityObject(path);
-			engineAPI->modelEntityManager->ReleaseAll(); //!
 			((ModelEntity*)_entity)->SetActiveAnimation("Idle");
 			break;
 		case ModelEntity::JOINT_ATTACH_PARTICLE_SYSTEM:
 			_entity = engineAPI->partSysManager->CreateParticleSystemObject(path);
-			engineAPI->partSysManager->ReleaseAll(); //!
 			break;
 		default:
 			delete[] path;
@@ -56,7 +54,7 @@ namespace MapEditor
 		}
 		else
 		{
-			delete _entity;
+			ObjectFactory::DeleteEntity(_entity);
 			_entity = 0;
 			return false;
 		}
