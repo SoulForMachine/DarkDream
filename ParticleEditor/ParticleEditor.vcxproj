@@ -115,11 +115,6 @@
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
     </Reference>
-    <Reference Include="EditorCommon, Version=1.0.3749.37031, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\ExternalLibs\EditorCommon.dll</HintPath>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-    </Reference>
     <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.3.1.24483, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\ExternalLibs\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
@@ -187,7 +182,6 @@
     </ProjectReference>
     <ProjectReference Include="..\EditorCommon\EditorCommon.vcxproj">
       <Project>{269cece1-c8c3-4655-8c21-64deac906742}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\Engine\Engine.vcxproj">
       <Project>{f58c7e90-d832-4a9e-9fa7-020fbb802f33}</Project>
