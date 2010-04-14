@@ -1,62 +1,40 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BaseLib", "BaseLib\BaseLib.vcproj", "{D7E6C94E-9411-4ADA-9BD5-18CA86910803}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BaseLib", "BaseLib\BaseLib.vcxproj", "{D7E6C94E-9411-4ADA-9BD5-18CA86910803}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcproj", "{F58C7E90-D832-4A9E-9FA7-020FBB802F33}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D7E6C94E-9411-4ADA-9BD5-18CA86910803} = {D7E6C94E-9411-4ADA-9BD5-18CA86910803}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{F58C7E90-D832-4A9E-9FA7-020FBB802F33}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EditorCommon", "EditorCommon\EditorCommon.vcproj", "{269CECE1-C8C3-4655-8C21-64DEAC906742}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D7E6C94E-9411-4ADA-9BD5-18CA86910803} = {D7E6C94E-9411-4ADA-9BD5-18CA86910803}
-		{F58C7E90-D832-4A9E-9FA7-020FBB802F33} = {F58C7E90-D832-4A9E-9FA7-020FBB802F33}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EditorCommon", "EditorCommon\EditorCommon.vcxproj", "{269CECE1-C8C3-4655-8C21-64DEAC906742}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EntityEditor", "EntityEditor\EntityEditor.vcproj", "{CDD79CDB-B471-4211-BFBA-D72E0980D47C}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D7E6C94E-9411-4ADA-9BD5-18CA86910803} = {D7E6C94E-9411-4ADA-9BD5-18CA86910803}
-		{F58C7E90-D832-4A9E-9FA7-020FBB802F33} = {F58C7E90-D832-4A9E-9FA7-020FBB802F33}
-		{269CECE1-C8C3-4655-8C21-64DEAC906742} = {269CECE1-C8C3-4655-8C21-64DEAC906742}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EntityEditor", "EntityEditor\EntityEditor.vcxproj", "{CDD79CDB-B471-4211-BFBA-D72E0980D47C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MapEditor", "MapEditor\MapEditor.vcproj", "{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D7E6C94E-9411-4ADA-9BD5-18CA86910803} = {D7E6C94E-9411-4ADA-9BD5-18CA86910803}
-		{F58C7E90-D832-4A9E-9FA7-020FBB802F33} = {F58C7E90-D832-4A9E-9FA7-020FBB802F33}
-		{269CECE1-C8C3-4655-8C21-64DEAC906742} = {269CECE1-C8C3-4655-8C21-64DEAC906742}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MapEditor", "MapEditor\MapEditor.vcxproj", "{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParticleEditor", "ParticleEditor\ParticleEditor.vcproj", "{1752478B-DABC-4926-BF49-7D959872A574}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D7E6C94E-9411-4ADA-9BD5-18CA86910803} = {D7E6C94E-9411-4ADA-9BD5-18CA86910803}
-		{F58C7E90-D832-4A9E-9FA7-020FBB802F33} = {F58C7E90-D832-4A9E-9FA7-020FBB802F33}
-		{269CECE1-C8C3-4655-8C21-64DEAC906742} = {269CECE1-C8C3-4655-8C21-64DEAC906742}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParticleEditor", "ParticleEditor\ParticleEditor.vcxproj", "{1752478B-DABC-4926-BF49-7D959872A574}"
 EndProject
 Global
 	GlobalSection(SourceCodeControl) = preSolution
 		SccNumberOfProjects = 7
 		SccLocalPath0 = .
-		SccProjectUniqueName1 = BaseLib\\BaseLib.vcproj
-		SccLocalPath1 = .
-		SccProjectFilePathRelativizedFromConnection1 = BaseLib\\
-		SccProjectUniqueName2 = Engine\\Engine.vcproj
-		SccLocalPath2 = .
-		SccProjectFilePathRelativizedFromConnection2 = Engine\\
-		SccProjectUniqueName3 = EntityEditor\\EntityEditor.vcproj
-		SccLocalPath3 = .
-		SccProjectFilePathRelativizedFromConnection3 = EntityEditor\\
-		SccProjectUniqueName4 = EditorCommon\\EditorCommon.vcproj
-		SccLocalPath4 = .
-		SccProjectFilePathRelativizedFromConnection4 = EditorCommon\\
-		SccProjectUniqueName5 = MapEditor\\MapEditor.vcproj
-		SccLocalPath5 = .
-		SccProjectFilePathRelativizedFromConnection5 = MapEditor\\
-		SccProjectUniqueName6 = ParticleEditor\\ParticleEditor.vcproj
-		SccLocalPath6 = .
-		SccProjectFilePathRelativizedFromConnection6 = ParticleEditor\\
+		SccProjectUniqueName1 = BaseLib\\BaseLib.vcxproj
+		SccProjectName1 = \u0022$/DarkDream.root/DarkDream/BaseLib\u0022,\u0020FAAAAAAA
+		SccLocalPath1 = BaseLib
+		SccProjectUniqueName2 = Engine\\Engine.vcxproj
+		SccProjectName2 = \u0022$/DarkDream.root/DarkDream/Engine\u0022,\u0020ODAAAAAA
+		SccLocalPath2 = Engine
+		SccProjectUniqueName3 = EditorCommon\\EditorCommon.vcxproj
+		SccProjectName3 = \u0022$/DarkDream.root/DarkDream/EditorCommon\u0022,\u0020MFAAAAAA
+		SccLocalPath3 = EditorCommon
+		SccProjectUniqueName4 = EntityEditor\\EntityEditor.vcxproj
+		SccProjectName4 = \u0022$/DarkDream.root/DarkDream/EntityEditor\u0022,\u0020PFAAAAAA
+		SccLocalPath4 = EntityEditor
+		SccProjectUniqueName5 = MapEditor\\MapEditor.vcxproj
+		SccProjectName5 = \u0022$/DarkDream.root/DarkDream/MapEditor\u0022,\u0020IHAAAAAA
+		SccLocalPath5 = MapEditor
+		SccProjectUniqueName6 = ParticleEditor\\ParticleEditor.vcxproj
+		SccProjectName6 = \u0022$/DarkDream.root/DarkDream/ParticleEditor\u0022,\u0020SLAAAAAA
+		SccLocalPath6 = ParticleEditor
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32

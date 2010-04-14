@@ -47,7 +47,7 @@ namespace Engine
 	/*
 		Triggered when player or monsters walk into it.
 	*/
-	class ENGINE_API Tr_TriggerBox: public Trigger
+	class ENGINE_API TriggerBox: public Trigger
 	{
 	public:
 
@@ -58,7 +58,7 @@ namespace Engine
 	/*
 		Player can interact with the switch, it has an entity attached with animations for on and off.
 	*/
-	class ENGINE_API Tr_Switch: public Trigger
+	class ENGINE_API TriggerSwitch: public Trigger
 	{
 	public:
 		void SetState(bool state)
@@ -79,7 +79,7 @@ namespace Engine
 	/*
 		Activates after specified time interval.
 	*/
-	class ENGINE_API Tr_Timer: public Trigger
+	class ENGINE_API TriggerTimer: public Trigger
 	{
 	public:
 		void SetTimeInterval(float time)
@@ -105,7 +105,7 @@ namespace Engine
 	/*
 		Start value can increment and decrement, activates upon reaching the specified value.
 	*/
-	class ENGINE_API Tr_Counter: public Trigger
+	class ENGINE_API TriggerCounter: public Trigger
 	{
 	public:
 		void SetStartValue(int val)
@@ -127,7 +127,7 @@ namespace Engine
 		Takes health from player or monsters that walk into damage box.
 		If continuous flag is true, then health is constantly taken from the entity each second.
 	*/
-	class ENGINE_API Tr_DamageBox: public Trigger
+	class ENGINE_API TriggerDamageBox: public Trigger
 	{
 	public:
 		enum DamageFilter
@@ -160,7 +160,7 @@ namespace Engine
 	/*
 		Moves bound entity between specified points.
 	*/
-	class ENGINE_API Tr_MoveController: public Trigger
+	class ENGINE_API TriggerMoveController: public Trigger
 	{
 	public:
 		void SetEntity(ModelEntity* entity)
@@ -191,7 +191,7 @@ namespace Engine
 	/*
 		Blocks the path when closed, it has attached entity that can be any kind of door with open/close animations.
 	*/
-	class ENGINE_API Tr_Gate: public Trigger
+	class ENGINE_API TriggerGate: public Trigger
 	{
 	public:
 		void SetEntity(ModelEntity* entity)
@@ -212,7 +212,7 @@ namespace Engine
 	/*
 		Spawns the monsters.
 	*/
-	class ENGINE_API Tr_Spawner: public Trigger
+	class ENGINE_API TriggerSpawner: public Trigger
 	{
 	public:
 		void SetRadius(float radius)
@@ -225,7 +225,6 @@ namespace Engine
 			{ return _count; }
 
 	private:
-
 		float _radius;
 		int _count;
 	};
@@ -234,7 +233,7 @@ namespace Engine
 	/*
 		Shakes the camera when triggered.
 	*/
-	class ENGINE_API Tr_CameraShake: public Trigger
+	class ENGINE_API TriggerCameraShake: public Trigger
 	{
 	public:
 		void SetShake(float shake)
@@ -250,7 +249,7 @@ namespace Engine
 	/*
 		Plays a sound when triggered.
 	*/
-	class ENGINE_API Tr_SoundPlayer: public Trigger
+	class ENGINE_API TriggerSoundPlayer: public Trigger
 	{
 	public:
 
