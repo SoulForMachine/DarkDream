@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="GL">
+      <UniqueIdentifier>{9c4a0717-bde1-492e-9461-c516d750c418}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GL\Extensions">
+      <UniqueIdentifier>{ce9cf1f8-5fd1-4715-a425-da68894ec3cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{f30d0470-75ce-4d56-8a00-c2502d720da0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Containers">
+      <UniqueIdentifier>{7411d4ac-7a07-4a6d-906f-8372d8c78b9b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GL\GLASMProgram.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GL\GLBuffer.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GL\GLFramebuffer.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GL\GLQuery.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GL\GLRenderer.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GL\GLSLProgram.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GL\GLTexture.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GL\GLVertexFormat.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GL\Extensions\h_glext.cpp">
+      <Filter>GL\Extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm.cpp" />
+    <ClCompile Include="BaseLib.cpp" />
+    <ClCompile Include="Bounds.cpp" />
+    <ClCompile Include="Console.cpp" />
+    <ClCompile Include="Exception.cpp" />
+    <ClCompile Include="FileUtil.cpp" />
+    <ClCompile Include="Hashing.cpp" />
+    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Memory.cpp" />
+    <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="SSE.cpp" />
+    <ClCompile Include="String.cpp" />
+    <ClCompile Include="SystemInfo.cpp" />
+    <ClCompile Include="Video.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GL\GLASMProgram.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLBuffer.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLCommon.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLFramebuffer.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLObject.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLQuery.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLRenderer.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLSamplerState.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLSLProgram.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLTexture.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLVertexFormat.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\Extensions\glext_ptrs.h">
+      <Filter>GL\Extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\Extensions\h_glext.h">
+      <Filter>GL\Extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\Extensions\wglext_ptrs.h">
+      <Filter>GL\Extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\geometry.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\mat3.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\mat4.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\math3d.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\mathio.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\mathutil.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\quat.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\transform.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\vec2.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\vec3.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\vec4.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="FreeList.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="HashMap.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="List.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="SortedList.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stack.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticArray.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm.h" />
+    <ClInclude Include="BaseLib.h" />
+    <ClInclude Include="Bounds.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="Console.h" />
+    <ClInclude Include="Exception.h" />
+    <ClInclude Include="FileUtil.h" />
+    <ClInclude Include="FreePool.h" />
+    <ClInclude Include="FreeStackPool.h" />
+    <ClInclude Include="Hashing.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="Input.h" />
+    <ClInclude Include="Memory.h" />
+    <ClInclude Include="Parser.h" />
+    <ClInclude Include="PerfTimer.h" />
+    <ClInclude Include="Rect.h" />
+    <ClInclude Include="SmartPtr.h" />
+    <ClInclude Include="SSE.h" />
+    <ClInclude Include="String.h" />
+    <ClInclude Include="SystemInfo.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="Types.h" />
+    <ClInclude Include="Video.h" />
+    <ClInclude Include="Win32Common.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GL\Extensions\extensions.txt">
+      <Filter>GL\Extensions</Filter>
+    </None>
+    <None Include="GL\Extensions\glelcg.rb">
+      <Filter>GL\Extensions</Filter>
+    </None>
+    <None Include="GL\Extensions\glext_load.inc">
+      <Filter>GL\Extensions</Filter>
+    </None>
+    <None Include="GL\Extensions\glext_ptrs.inc">
+      <Filter>GL\Extensions</Filter>
+    </None>
+    <None Include="GL\Extensions\wgl_extensions.txt">
+      <Filter>GL\Extensions</Filter>
+    </None>
+    <None Include="GL\Extensions\wglext_load.inc">
+      <Filter>GL\Extensions</Filter>
+    </None>
+    <None Include="GL\Extensions\wglext_ptrs.inc">
+      <Filter>GL\Extensions</Filter>
+    </None>
+  </ItemGroup>
+</Project>

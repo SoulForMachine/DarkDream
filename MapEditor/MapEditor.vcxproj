@@ -1,0 +1,265 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}</ProjectGuid>
+    <RootNamespace>MapEditor</RootNamespace>
+    <SccProjectName>"$/DarkDream.root/DarkDream/MapEditor", IHAAAAAA</SccProjectName>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccLocalPath>.</SccLocalPath>
+    <SccProvider>MSSCCI:Microsoft Visual SourceSafe</SccProvider>
+    <Keyword>ManagedCProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>true</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>true</CLRSupport>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>true</AssemblyDebug>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>main</EntryPointSymbol>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>main</EntryPointSymbol>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System.Data">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System.Xml">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="CollapsiblePanelBar, Version=1.4.3361.29951, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\ExternalLibs\CollapsiblePanelBar.dll</HintPath>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.3.1.24483, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\ExternalLibs\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="EditorCommon, Version=1.0.3749.37031, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\ExternalLibs\EditorCommon.dll</HintPath>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GrassPanel.h">
+      <FileType>CppControl</FileType>
+    </ClInclude>
+    <ClInclude Include="LayersPanel.h">
+      <FileType>CppControl</FileType>
+    </ClInclude>
+    <ClInclude Include="MainForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="MapForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="MapRenderWindow.h" />
+    <ClInclude Include="PlaceObjectPanel.h">
+      <FileType>CppControl</FileType>
+    </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="TerrainEditPanel.h">
+      <FileType>CppControl</FileType>
+    </ClInclude>
+    <ClInclude Include="ToolPanel.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="TriggerPanel.h">
+      <FileType>CppControl</FileType>
+    </ClInclude>
+    <ClInclude Include="ViewPanel.h">
+      <FileType>CppControl</FileType>
+    </ClInclude>
+    <ClInclude Include="Action.h" />
+    <ClInclude Include="ActionAddObject.h" />
+    <ClInclude Include="ActionAddPatch.h" />
+    <ClInclude Include="ActionPaintGrass.h" />
+    <ClInclude Include="ActionPlaceObjects.h" />
+    <ClInclude Include="ActionRemoveObjects.h" />
+    <ClInclude Include="ActionRemovePatch.h" />
+    <ClInclude Include="ActionTerrainEdit.h" />
+    <ClInclude Include="EditMode.h" />
+    <ClInclude Include="EM_AddPatch.h" />
+    <ClInclude Include="EM_LayerEdit.h" />
+    <ClInclude Include="EM_PaintGrass.h" />
+    <ClInclude Include="EM_PlaceObject.h" />
+    <ClInclude Include="EM_RemovePatch.h" />
+    <ClInclude Include="EM_TerrainEdit.h" />
+    <ClInclude Include="EM_Triggers.h" />
+    <ClInclude Include="EM_View.h" />
+    <ClInclude Include="GrassBrush.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TerrainBrush.h" />
+    <ClInclude Include="UndoManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GrassPanel.cpp" />
+    <ClCompile Include="LayersPanel.cpp" />
+    <ClCompile Include="MainForm.cpp" />
+    <ClCompile Include="MapForm.cpp" />
+    <ClCompile Include="MapRenderWindow.cpp" />
+    <ClCompile Include="PlaceObjectPanel.cpp" />
+    <ClCompile Include="TerrainEditPanel.cpp" />
+    <ClCompile Include="ToolPanel.cpp" />
+    <ClCompile Include="TriggerPanel.cpp" />
+    <ClCompile Include="ViewPanel.cpp" />
+    <ClCompile Include="ActionAddObject.cpp" />
+    <ClCompile Include="ActionAddPatch.cpp" />
+    <ClCompile Include="ActionPaintGrass.cpp" />
+    <ClCompile Include="ActionPlaceObjects.cpp" />
+    <ClCompile Include="ActionRemoveObjects.cpp" />
+    <ClCompile Include="ActionRemovePatch.cpp" />
+    <ClCompile Include="ActionTerrainEdit.cpp" />
+    <ClCompile Include="EM_AddPatch.cpp" />
+    <ClCompile Include="EM_LayerEdit.cpp" />
+    <ClCompile Include="EM_PaintGrass.cpp" />
+    <ClCompile Include="EM_PlaceObject.cpp" />
+    <ClCompile Include="EM_RemovePatch.cpp" />
+    <ClCompile Include="EM_TerrainEdit.cpp" />
+    <ClCompile Include="EM_Triggers.cpp" />
+    <ClCompile Include="EM_View.cpp" />
+    <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="GrassBrush.cpp" />
+    <ClCompile Include="MapEditor.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="TerrainBrush.cpp" />
+    <ClCompile Include="UndoManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.ico" />
+    <None Include="Cursors\move.cur" />
+    <None Include="Cursors\move_ud.cur" />
+    <None Include="Cursors\rot.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="GrassPanel.resx">
+      <DependentUpon>GrassPanel.h</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LayersPanel.resx">
+      <DependentUpon>LayersPanel.h</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resX">
+      <DependentUpon>MainForm.h</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MapForm.resx">
+      <DependentUpon>MapForm.h</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PlaceObjectPanel.resx">
+      <DependentUpon>PlaceObjectPanel.h</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TerrainEditPanel.resx">
+      <DependentUpon>TerrainEditPanel.h</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ToolPanel.resx">
+      <DependentUpon>ToolPanel.h</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TriggerPanel.resx">
+      <DependentUpon>TriggerPanel.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ViewPanel.resx">
+      <DependentUpon>ViewPanel.h</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

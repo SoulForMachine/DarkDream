@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D7E6C94E-9411-4ADA-9BD5-18CA86910803}</ProjectGuid>
+    <RootNamespace>BaseLib</RootNamespace>
+    <SccProjectName>"$/DarkDream.root/DarkDream/BaseLib", FAAAAAAA</SccProjectName>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccLocalPath>.</SccLocalPath>
+    <SccProvider>MSSCCI:Microsoft Visual SourceSafe</SccProvider>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BASELIB_EXPORTS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BASELIB_EXPORTS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="GL\GLASMProgram.cpp" />
+    <ClCompile Include="GL\GLBuffer.cpp" />
+    <ClCompile Include="GL\GLFramebuffer.cpp" />
+    <ClCompile Include="GL\GLQuery.cpp" />
+    <ClCompile Include="GL\GLRenderer.cpp" />
+    <ClCompile Include="GL\GLSLProgram.cpp" />
+    <ClCompile Include="GL\GLTexture.cpp" />
+    <ClCompile Include="GL\GLVertexFormat.cpp" />
+    <ClCompile Include="GL\Extensions\h_glext.cpp" />
+    <ClCompile Include="Algorithm.cpp" />
+    <ClCompile Include="BaseLib.cpp" />
+    <ClCompile Include="Bounds.cpp" />
+    <ClCompile Include="Console.cpp" />
+    <ClCompile Include="Exception.cpp" />
+    <ClCompile Include="FileUtil.cpp" />
+    <ClCompile Include="Hashing.cpp" />
+    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Memory.cpp" />
+    <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="SSE.cpp" />
+    <ClCompile Include="String.cpp" />
+    <ClCompile Include="SystemInfo.cpp" />
+    <ClCompile Include="Video.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GL\GLASMProgram.h" />
+    <ClInclude Include="GL\GLBuffer.h" />
+    <ClInclude Include="GL\GLCommon.h" />
+    <ClInclude Include="GL\GLFramebuffer.h" />
+    <ClInclude Include="GL\GLObject.h" />
+    <ClInclude Include="GL\GLQuery.h" />
+    <ClInclude Include="GL\GLRenderer.h" />
+    <ClInclude Include="GL\GLSamplerState.h" />
+    <ClInclude Include="GL\GLSLProgram.h" />
+    <ClInclude Include="GL\GLTexture.h" />
+    <ClInclude Include="GL\GLVertexFormat.h" />
+    <ClInclude Include="GL\Extensions\glext_ptrs.h" />
+    <ClInclude Include="GL\Extensions\h_glext.h" />
+    <ClInclude Include="GL\Extensions\wglext_ptrs.h" />
+    <ClInclude Include="Math\geometry.h" />
+    <ClInclude Include="Math\mat3.h" />
+    <ClInclude Include="Math\mat4.h" />
+    <ClInclude Include="Math\math3d.h" />
+    <ClInclude Include="Math\mathio.h" />
+    <ClInclude Include="Math\mathutil.h" />
+    <ClInclude Include="Math\quat.h" />
+    <ClInclude Include="Math\transform.h" />
+    <ClInclude Include="Math\vec2.h" />
+    <ClInclude Include="Math\vec3.h" />
+    <ClInclude Include="Math\vec4.h" />
+    <ClInclude Include="FreeList.h" />
+    <ClInclude Include="HashMap.h" />
+    <ClInclude Include="List.h" />
+    <ClInclude Include="SortedList.h" />
+    <ClInclude Include="Stack.h" />
+    <ClInclude Include="StaticArray.h" />
+    <ClInclude Include="Algorithm.h" />
+    <ClInclude Include="BaseLib.h" />
+    <ClInclude Include="Bounds.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="Console.h" />
+    <ClInclude Include="Exception.h" />
+    <ClInclude Include="FileUtil.h" />
+    <ClInclude Include="FreePool.h" />
+    <ClInclude Include="FreeStackPool.h" />
+    <ClInclude Include="Hashing.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="Input.h" />
+    <ClInclude Include="Memory.h" />
+    <ClInclude Include="Parser.h" />
+    <ClInclude Include="PerfTimer.h" />
+    <ClInclude Include="Rect.h" />
+    <ClInclude Include="SmartPtr.h" />
+    <ClInclude Include="SSE.h" />
+    <ClInclude Include="String.h" />
+    <ClInclude Include="SystemInfo.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="Types.h" />
+    <ClInclude Include="Video.h" />
+    <ClInclude Include="Win32Common.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GL\Extensions\extensions.txt" />
+    <None Include="GL\Extensions\glelcg.rb" />
+    <None Include="GL\Extensions\glext_load.inc" />
+    <None Include="GL\Extensions\glext_ptrs.inc" />
+    <None Include="GL\Extensions\wgl_extensions.txt" />
+    <None Include="GL\Extensions\wglext_load.inc" />
+    <None Include="GL\Extensions\wglext_ptrs.inc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
