@@ -88,10 +88,11 @@ class FreeList<_Type>::ConstIterator
 public:
 	friend class FreeList<_Type>;
 
+	ConstIterator() { _node = 0; }
 	explicit ConstIterator(FreeListNode<_Type>* node) { _node = node; }
 
-	const _Type& operator * () { return _node->data; }
-	const _Type* operator -> () { return &_node->data; }
+	const _Type& operator * () const { return _node->data; }
+	const _Type* operator -> () const { return &_node->data; }
 
 	ConstIterator& operator ++ () 
 	{
@@ -130,6 +131,7 @@ class FreeList<_Type>::Iterator: public FreeList<_Type>::ConstIterator
 public:
 	friend class FreeList<_Type>;
 
+	Iterator() {}
 	explicit Iterator(FreeListNode<_Type>* node):
 		ConstIterator(node)
 	{ _node = node; }

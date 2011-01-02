@@ -73,8 +73,8 @@ namespace MapEditor
 		const Terrain::TerrainPatch* patches = terrain.GetPatches();
 
 		// save all entities on this patch for undo and remove them from world
-		const EntityHashMap& ents = engineAPI->world->GetEntities();
-		for(EntityHashMap::ConstIterator it = ents.Begin(); it != ents.End(); ++it)
+		EntityHashMap& ents = engineAPI->world->GetEntities();
+		for(EntityHashMap::Iterator it = ents.Begin(); it != ents.End(); ++it)
 		{
 			const vec3f& pos = (*it)->GetPosition();
 			if(	pos.x >= patches[_patchIndex].boundBox.minPt.x &&

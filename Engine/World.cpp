@@ -14,7 +14,8 @@ namespace Engine
 {
 
 	World::World():
-		_entities(mapPool, MAX_NUM_ENTITIES)
+		_entities(mapPool, MAX_NUM_ENTITIES),
+		_spl(MAX_NUM_ENTITIES)
 	{
 	}
 
@@ -35,11 +36,12 @@ namespace Engine
 	{
 		_terrain.Deinit();
 
-		for(EntityHashMap::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
+		for(auto it = _entities.Begin(); it != _entities.End(); ++it)
 		{
 			delete *it;
 		}
 		_entities.Clear();
+		_spl.RemoveAll();
 
 		_layerManager.Deinit();
 	}
@@ -59,66 +61,61 @@ namespace Engine
 		if(_entities.GetCount() == MAX_NUM_ENTITIES)
 			return false;
 
-		_entities.Insert(entity);
-		return true;
+		WorldEntity we;
+		we._entity = entity;
+		if(_spl.AddEntity(entity, we._splEntity))
+		{
+			entity->SetWorld(this);
+			_entities.Insert(we);
+			return true;
+		}
+		else
+			return false;
 	}
 
-	bool World::RemoveEntity(Entity* entity)
+	void World::RemoveEntity(Entity* entity)
 	{
-		_entities.Remove(entity);
-		return false;
+		auto it = _entities.Find(entity);
+		if(it != _entities.End())
+		{
+			_spl.RemoveEntity(it->_splEntity);
+			_entities.Remove(entity);
+			entity->SetWorld(0);
+		}
 	}
 
 	void World::RemoveAllEntities()
 	{
+		for(auto it = _entities.Begin(); it != _entities.End(); ++it)
+			(*it)->SetWorld(0);
+
+		_spl.RemoveAll();
 		_entities.Clear();
+	}
+
+	void World::EntityMoved(Entity* entity)
+	{
+		auto it = _entities.Find(entity);
+		if(it != _entities.End())
+		{
+			_spl.MoveEntity(it->_splEntity);
+		}
 	}
 
 	int World::GetVisibleRenderableEntities(RenderableEntity** entities, int max_entities)
 	{
-		if(!entities || max_entities <= 0)
-			return 0;
+		assert(entities && max_entities > 0);
 
-		int count = 0;
-		for(EntityHashMap::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
-		{
-			if(	(*it)->GetType() == ENTITY_TYPE_MODEL ||
-				(*it)->GetType() == ENTITY_TYPE_PARTICLE_SYS )
-			{
-				RenderableEntity* re = (RenderableEntity*)*it;
-				if(_camera.IsInsideFrustum(re->GetWorldBoundingBox()))
-				{
-					entities[count++] = re;
-					if(count == max_entities)
-						break;
-				}
-			}
-		}
-
-		return count;
+		EntityType types[] = { ENTITY_TYPE_MODEL, ENTITY_TYPE_PARTICLE_SYS, ENTITY_TYPE_UNDEFINED };
+		return _spl.GetVisibleEntities(_camera, (Entity**)entities, max_entities, types);
 	}
 
 	int World::GetVisibleModelEntities(ModelEntity** entities, int max_entities)
 	{
-		if(!entities || max_entities <= 0)
-			return 0;
+		assert(entities && max_entities > 0);
 
-		int count = 0;
-		for(EntityHashMap::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
-		{
-			if((*it)->GetType() == ENTITY_TYPE_MODEL)
-			{
-				ModelEntity* re = (ModelEntity*)*it;
-				if(_camera.IsInsideFrustum(re->GetWorldBoundingBox()))
-				{
-					entities[count++] = re;
-					if(count == max_entities)
-						break;
-				}
-			}
-		}
-
-		return count;
+		EntityType types[] = { ENTITY_TYPE_MODEL, ENTITY_TYPE_UNDEFINED };
+		return _spl.GetVisibleEntities(_camera, (Entity**)entities, max_entities, types);
 	}
 
 	int World::GetVisibleTerrainPatches(const Terrain::TerrainPatch** patches, int max_patches)
@@ -151,25 +148,10 @@ namespace Engine
 
 	int World::GetVisibleParticleSystems(ParticleSystem** part_sys, int max_ps)
 	{
-		if(!part_sys || max_ps <= 0)
-			return 0;
+		assert(part_sys && max_ps > 0);
 
-		int count = 0;
-		for(EntityHashMap::Iterator it = _entities.Begin(); it != _entities.End(); ++it)
-		{
-			if((*it)->GetType() == ENTITY_TYPE_PARTICLE_SYS)
-			{
-				ParticleSystem* ps = (ParticleSystem*)*it;
-				if(_camera.IsInsideFrustum(ps->GetWorldBoundingBox()))
-				{
-					part_sys[count++] = ps;
-					if(count == max_ps)
-						break;
-				}
-			}
-		}
-
-		return count;
+		EntityType types[] = { ENTITY_TYPE_PARTICLE_SYS, ENTITY_TYPE_UNDEFINED };
+		return _spl.GetVisibleEntities(_camera, (Entity**)part_sys, max_ps, types);
 	}
 
 }

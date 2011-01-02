@@ -560,7 +560,7 @@ namespace MapEditor
 		EntityHashMap& entities = engineAPI->world->GetEntities();
 		for(EntityHashMap::Iterator it = entities.Begin(); it != entities.End(); ++it)
 		{
-			if((*it)->GetType() == ENTITY_TYPE_MODEL && !((ModelEntity*)(*it))->IsDropped())
+			if((*it)->GetType() == ENTITY_TYPE_MODEL && !((ModelEntity*)(Entity*)(*it))->IsDropped())
 			{
 				continue;
 			}

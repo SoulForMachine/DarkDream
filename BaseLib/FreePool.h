@@ -89,10 +89,13 @@ private:
 template <class _Type>
 void FreePool<_Type>::Reset()
 {
-	m_top = 0;
+	if(m_top > 0)
+	{
+		m_top = 0;
 
-	for(size_t i = 0; i < m_size; ++i)
-		m_allocStack[i] = &m_buffer[i];
+		for(size_t i = 0; i < m_size; ++i)
+			m_allocStack[i] = &m_buffer[i];
+	}
 }
 
 

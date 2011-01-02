@@ -238,7 +238,7 @@ namespace MapEditor
 
 	System::Void PlaceObjectPanel::_panelObjectView_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e)
 	{
-		if(_entity && _fbufOk)
+		if(false && _entity && _fbufOk)
 		{
 			int cl_width = _panelObjectView->ClientRectangle.Width;
 			int cl_height = _panelObjectView->ClientRectangle.Height;

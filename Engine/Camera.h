@@ -41,15 +41,16 @@ namespace Engine
 			{ return _projectionTransform; }
 		const math3d::mat4f& GetViewProjectionTransform() const;
 		virtual void SetPosition(const math3d::vec3f& pos);
-		const math3d::vec4f& GetClipPlane(ClipPlane plane);
+		const math3d::vec4f& GetClipPlane(ClipPlane plane) const;
 		float GetFOV() const; // horizontal field of view angle
 		float GetAspectRatio() const; // width / height
 
 		virtual EntityType GetType() const
 			{ return ENTITY_TYPE_CAMERA; }
 
-		bool IsInsideFrustum(const AABBox& bbox);
-		bool IsInsideFrustum(const OBBox& bbox);
+		bool IsInsideFrustum(const AABBox& bbox) const;
+		bool IsInsideFrustum(const OBBox& bbox) const;
+		bool IsInsideFrustum(const math3d::vec3f& point) const;
 
 	private:
 		void UpdateViewProjectionMat() const;

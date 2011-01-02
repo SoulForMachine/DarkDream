@@ -37,10 +37,15 @@ namespace Engine
 		}
 		const char* GetName() const
 			{ return _name; }
+		void SetBounds(const math3d::vec2f& bounds)
+			{ _bounds = bounds; }
+		const math3d::vec2f& GetBounds() const
+			{ return _bounds; }
 
 	protected:
 		bool _enabled;
 		char _name[TRIGGER_NAME_MAX_LEN];
+		math3d::vec2f _bounds;
 	};
 
 

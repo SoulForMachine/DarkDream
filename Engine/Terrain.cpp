@@ -4,6 +4,7 @@
 #include "Engine/Common.h"
 #include "Engine/RenderSystem.h"
 #include "Engine/World.h"
+#include "Engine/EntityHashMap.h"
 #include "Terrain.h"
 
 using namespace Memory;

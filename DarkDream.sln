@@ -13,9 +13,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MapEditor", "MapEditor\MapE
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParticleEditor", "ParticleEditor\ParticleEditor.vcxproj", "{1752478B-DABC-4926-BF49-7D959872A574}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MayaAnimExporter", "MayaAnimExporter\MayaAnimExporter.vcxproj", "{56E48C36-4937-46C1-873F-3A026A72DC6B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MayaModelExporter", "MayaModelExporter\MayaModelExporter.vcxproj", "{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}"
+EndProject
 Global
 	GlobalSection(SourceCodeControl) = preSolution
-		SccNumberOfProjects = 7
+		SccNumberOfProjects = 9
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = BaseLib\\BaseLib.vcxproj
 		SccProjectName1 = \u0022$/DarkDream.root/DarkDream/BaseLib\u0022,\u0020FAAAAAAA
@@ -35,6 +39,12 @@ Global
 		SccProjectUniqueName6 = ParticleEditor\\ParticleEditor.vcxproj
 		SccProjectName6 = \u0022$/DarkDream.root/DarkDream/ParticleEditor\u0022,\u0020SLAAAAAA
 		SccLocalPath6 = ParticleEditor
+		SccProjectUniqueName7 = MayaAnimExporter\\MayaAnimExporter.vcxproj
+		SccLocalPath7 = .
+		SccProjectFilePathRelativizedFromConnection7 = MayaAnimExporter\\
+		SccProjectUniqueName8 = MayaModelExporter\\MayaModelExporter.vcxproj
+		SccLocalPath8 = .
+		SccProjectFilePathRelativizedFromConnection8 = MayaModelExporter\\
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -65,6 +75,14 @@ Global
 		{1752478B-DABC-4926-BF49-7D959872A574}.Debug|Win32.Build.0 = Debug|Win32
 		{1752478B-DABC-4926-BF49-7D959872A574}.Release|Win32.ActiveCfg = Release|Win32
 		{1752478B-DABC-4926-BF49-7D959872A574}.Release|Win32.Build.0 = Release|Win32
+		{56E48C36-4937-46C1-873F-3A026A72DC6B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{56E48C36-4937-46C1-873F-3A026A72DC6B}.Debug|Win32.Build.0 = Debug|Win32
+		{56E48C36-4937-46C1-873F-3A026A72DC6B}.Release|Win32.ActiveCfg = Release|Win32
+		{56E48C36-4937-46C1-873F-3A026A72DC6B}.Release|Win32.Build.0 = Release|Win32
+		{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}.Debug|Win32.Build.0 = Debug|Win32
+		{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}.Release|Win32.ActiveCfg = Release|Win32
+		{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

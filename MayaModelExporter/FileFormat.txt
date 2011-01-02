@@ -1,0 +1,45 @@
+
+Model file format
+===============================
+
+// header
+int		magic
+int		version
+int		meshCount
+int		materialCount
+int		jointCount
+vec3	bboxMin
+vec3	bboxMax
+
+meshData[meshCount]
+{
+	int		vertexCount
+	int		indexCount
+	int		materialIndex
+	int		flags		(bit0 = uvs, bit1 = tangents, bit2 = skinning data)
+	vec3	bboxMin
+	vec3	bboxMax
+	vec3	positions[vertexCount]
+	vec3	normals[vertexCount]
+	vec3	tangents[vertexCount]	(optional)
+	vec3	binormals[vertexCount]	(optional)
+	vec2	uvs[vertexCount]		(optional)
+	vec2	weights[vertexCount]	(optional)
+	uchar	boneIndices[vertexCount][2](optional)
+	ushort	indices[indexCount]
+}
+
+materials[materialCount]
+{
+	int		nameLen
+	char	name[nameLen]	// this name is referenced in effect file
+}
+
+joints[jointCount]	(optional)
+{
+	int		nameLen
+	char	name[nameLen]
+	int		parentIndex
+	mat4f	offsetMatrix	// bind space -> bone space
+	mat4f	localMatrix		// bone space -> parent bone space
+}

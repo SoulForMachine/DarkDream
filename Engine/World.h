@@ -13,11 +13,11 @@
 #include "Engine/BgLayer.h"
 #include "Engine/ParticleSystem.h"
 #include "Engine/EntityHashMap.h"
+#include "Engine/SpacePartList.h"
 
 
 namespace Engine
 {
-
 
 
 	class ENGINE_API World
@@ -33,8 +33,9 @@ namespace Engine
 		bool LoadMap(const tchar* file_name);
 		bool SaveMap(const tchar* file_name);
 		bool AddEntity(Entity* entity);
-		bool RemoveEntity(Entity* entity);
+		void RemoveEntity(Entity* entity);
 		void RemoveAllEntities();
+		void EntityMoved(Entity* entity);
 		int GetVisibleRenderableEntities(RenderableEntity** entities, int max_entities);
 		int GetVisibleModelEntities(ModelEntity** entities, int max_entities);
 		int GetVisibleTerrainPatches(const Terrain::TerrainPatch** patches, int max_patches);
@@ -52,6 +53,7 @@ namespace Engine
 	private:
 		Camera _camera;
 		EntityHashMap _entities;
+		SpacePartitionList _spl;
 		Terrain _terrain;
 		BgLayerManager _layerManager;
 	};

@@ -21,7 +21,7 @@ namespace Engine
 	{
 	}
 
-	bool Camera::IsInsideFrustum(const AABBox& bbox)
+	bool Camera::IsInsideFrustum(const AABBox& bbox) const
 	{
 		UpdateViewProjectionMat();
 
@@ -42,7 +42,7 @@ namespace Engine
 		return true;
 	}
 
-	bool Camera::IsInsideFrustum(const OBBox& bbox)
+	bool Camera::IsInsideFrustum(const OBBox& bbox) const
 	{
 		UpdateViewProjectionMat();
 
@@ -58,6 +58,19 @@ namespace Engine
 			if(point_to_plane_sgn_dist(bbox.points[7], _clipPlanes[i]) > 0) continue;
 
 			return false;
+		}
+
+		return true;
+	}
+
+	bool Camera::IsInsideFrustum(const vec3f& point) const
+	{
+		UpdateViewProjectionMat();
+
+		for(int i = 0; i < 6; ++i)
+		{
+			if(point_to_plane_sgn_dist(point, _clipPlanes[i]) <= 0)
+				return false;
 		}
 
 		return true;
@@ -115,7 +128,7 @@ namespace Engine
 		_viewProjDirty = true;
 	}
 
-	const vec4f& Camera::GetClipPlane(ClipPlane plane)
+	const vec4f& Camera::GetClipPlane(ClipPlane plane) const
 	{
 		UpdateViewProjectionMat();
 		return _clipPlanes[plane];

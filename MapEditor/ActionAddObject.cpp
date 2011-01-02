@@ -47,9 +47,10 @@ namespace MapEditor
 		}
 
 		delete[] path;
+		_entity->SetPosition(*_point);
+
 		if(engineAPI->world->AddEntity(_entity))
 		{
-			_entity->SetPosition(*_point);
 			return true;
 		}
 		else

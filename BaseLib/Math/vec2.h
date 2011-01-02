@@ -82,9 +82,9 @@ public:
 		struct{ _ST s, t; };
 	};
 
-	static vec2 x_axis;
-	static vec2 y_axis;
-	static vec2 null;
+	static const vec2 x_axis;
+	static const vec2 y_axis;
+	static const vec2 null;
 };
 
 typedef vec2<float> vec2f;
@@ -110,11 +110,11 @@ namespace math3d
 {
 
 template <class _ST>
-vec2<_ST> vec2<_ST>::x_axis(_ST(1), _ST(0));
+const vec2<_ST> vec2<_ST>::x_axis(_ST(1), _ST(0));
 template <class _ST>
-vec2<_ST> vec2<_ST>::y_axis(_ST(0), _ST(1));
+const vec2<_ST> vec2<_ST>::y_axis(_ST(0), _ST(1));
 template <class _ST>
-vec2<_ST> vec2<_ST>::null(_ST(0), _ST(0));
+const vec2<_ST> vec2<_ST>::null(_ST(0), _ST(0));
 
 
 template <class _ST>

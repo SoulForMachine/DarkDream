@@ -1,0 +1,25 @@
+
+Animation file format
+===============================
+
+// header
+int		magic
+int		version
+float	animationLength
+int		framesPerSec
+int		frameCount
+int		jointCount
+
+
+joints[jointCount]
+{
+	int		nameLen
+	char	name[]
+	int		parentIndex
+	int		channelCount
+	channels[channelCount]
+	{
+		uchar	channel		(translate_x, *_y, *_z, rotate_x, *_y, _z, scale_x, *_y, *_z)
+		float	values[frameCount]
+	}
+}

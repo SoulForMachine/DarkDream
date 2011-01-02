@@ -102,6 +102,7 @@
     <ClCompile Include="Trigger.cpp" />
     <ClCompile Include="WeaponEntity.cpp" />
     <ClCompile Include="World.cpp" />
+    <ClCompile Include="SpacePartList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AIEntity.h" />
@@ -138,5 +139,6 @@
     <ClInclude Include="Trigger.h" />
     <ClInclude Include="WeaponEntity.h" />
     <ClInclude Include="World.h" />
+    <ClInclude Include="SpacePartList.h" />
   </ItemGroup>
 </Project>
