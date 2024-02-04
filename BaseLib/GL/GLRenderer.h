@@ -165,12 +165,15 @@ namespace GL
 	class BASELIB_API Renderer
 	{
 	public:
+		Renderer();
+		~Renderer() {}
+
 		bool SetCurrentContext();
 		const ContextInfo& GetInfo() const
 			{ return _info; }
 
 		// vertex stream
-		void VertexSource(int stream, const Buffer* buffer, size_t stride, size_t offset);
+		void VertexSource(int stream, const Buffer* buffer, int stride, int offset);
 		void IndexSource(const Buffer* buffer, DataType index_type);
 		void ActiveVertexFormat(const VertexFormat* format);
 		void EnablePrimitiveRestart(bool enable);
@@ -205,7 +208,7 @@ namespace GL
 
 		// scissor test
 		void EnableScissorTest(bool enable);
-		void Scissor(int x, int y, size_t width, size_t height);
+		void Scissor(int x, int y, int width, int height);
 
 		// depth test
 		void EnableDepthTest(bool enable);
@@ -246,8 +249,8 @@ namespace GL
 		void EnableStencilWrite(PolygonFace face, uint mask);
 		void ClearColorBuffer(float r, float g, float b, float a);
 		void ClearDepthStencilBuffer(uint buffers, float d, int s);
-		void ReadPixels(int x, int y, size_t width, size_t height, ImageFormat format, DataType type, const PixelStore* pixel_store, void* buffer);
-		void ReadPixels(int x, int y, size_t width, size_t height, ImageFormat format, DataType type, const PixelStore* pixel_store, Buffer* buffer, size_t buffer_offset);
+		void ReadPixels(int x, int y, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, void* buffer);
+		void ReadPixels(int x, int y, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, Buffer* buffer, size_t buffer_offset);
 		void BlitFramebuffer(int src_x0, int src_y0, int src_x1, int src_y1, int dst_x0, int dst_y0, int dst_x1, int dst_y1, uint buffers, TexFilter filter);
 		void SwapBuffers();
 		void SwapInterval(int interval);
@@ -267,11 +270,11 @@ namespace GL
 		void SetSamplerState(int sampler, const SamplerState* state);
 
 		// drawing commands
-		void Draw(PrimitiveType prim, int first, size_t count);
-		void DrawInstanced(PrimitiveType prim, int first, size_t count, size_t inst_count);
-		void DrawIndexed(PrimitiveType prim, size_t index_start, size_t count);
-		void DrawIndexed(PrimitiveType prim, size_t start, size_t end, size_t index_start, size_t count);
-		void DrawIndexedInstanced(PrimitiveType prim, size_t count, size_t index_start, size_t inst_count);
+		void Draw(PrimitiveType prim, int first, int count);
+		void DrawInstanced(PrimitiveType prim, int first, int count, int inst_count);
+		void DrawIndexed(PrimitiveType prim, int index_start, int count);
+		void DrawIndexed(PrimitiveType prim, uint start, uint end, size_t index_start, int count);
+		void DrawIndexedInstanced(PrimitiveType prim, int count, size_t index_start, int inst_count);
 
 		// synchronization
 		void Flush();
@@ -309,7 +312,7 @@ namespace GL
 		void DestroyRenderbuffer(Renderbuffer* renderbuffer);
 		Query* CreateQuery(ObjectType type);
 		void DestroyQuery(Query* query);
-		GLSLShader* CreateShader(ObjectType type, size_t count, const char** source, const char*& error_string);
+		GLSLShader* CreateShader(ObjectType type, int count, const char** source, const char*& error_string);
 		void DestroyShader(GLSLShader* shader);
 		GLSLProgram* CreateProgram(size_t count, GLSLShader** shaders);
 		void DestroyProgram(GLSLProgram* program);
@@ -320,14 +323,12 @@ namespace GL
 		friend BASELIB_API Renderer* CreateRenderer(uint version, void* instance_handle, void* window_handle, const FramebufferFormat& format);
 		friend BASELIB_API void DestroyRenderer(Renderer* renderer);
 
-		Renderer();
-		~Renderer() {}
 		Renderer(const Renderer&);
 		bool Create(uint version, void* instance_handle, void* window_handle, const FramebufferFormat& format);
 		void Destroy();
 
 		bool InitOpenGL(uint version, HWND window_handle, const FramebufferFormat& format);
-		bool CreateContext(uint version, HWND window_handle, const FramebufferFormat& format);
+		bool CreateContext(int version, HWND window_handle, const FramebufferFormat& format);
 		void DeinitOpenGL();
 		void GetContextInfo();
 		bool LoadOpenGLExtensions();
@@ -345,8 +346,8 @@ namespace GL
 		struct VertexStream
 		{
 			const Buffer* buffer;
-			size_t stride;
-			size_t offset;
+			int stride;
+			int offset;
 		};
 
 		struct VertexAttrib

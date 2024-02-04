@@ -62,7 +62,7 @@ FixedStack<_Type>::~FixedStack()
 	Clear();
 
 	if(m_ownBuffer)
-		delete[] (ubyte*)m_buffer;
+		Memory::Delete((ubyte*)m_buffer);
 }
 
 

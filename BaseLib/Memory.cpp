@@ -12,6 +12,8 @@
 	#define PRINT_ERROR(text) Console::PrintError(text "\nFile: %s\nLine: %d", file, line)
 	#define PRINT_ERROR1(text, a) Console::PrintError(text "\nFile: %s\nLine: %d", a, file, line)
 	#define PRINT_ERROR2(text, a, b) Console::PrintError(text "\nFile: %s\nLine: %d", a, b, file, line)
+
+	constexpr int GuardBytes = 128; // Should be multiple of 32.
 #else
 	#define PRINT_ERROR(text) Console::PrintError(text)
 	#define PRINT_ERROR1(text, a) Console::PrintError(text, a)
@@ -43,19 +45,19 @@ namespace Memory
 		pageSize = sysinfo.dwPageSize;
 		allocGranularity = sysinfo.dwAllocationGranularity;
 
-		if(!mainPool.Init(64 * 1024 * 1024, 0, 1, 16))
+		if (!mainPool.Init(64 * 1024 * 1024, 0, 1, 16))
 			return false;
 
-		if(!mapPool.Init(64 * 1024 * 1024, 0, 1, 16))
+		if (!mapPool.Init(64 * 1024 * 1024, 0, 1, 16))
 			return false;
 
-		if(!stringPool.Init(16 * 1024 * 1024, 0, 1, 1))
+		if (!stringPool.Init(16 * 1024 * 1024, 0, 1, 1))
 			return false;
 
-		if(!glPool.Init(16 * 1024 * 1024, 0, 1, 16))
+		if (!glPool.Init(16 * 1024 * 1024, 0, 1, 16))
 			return false;
 
-		if(!tempPool.Init(64 * 1024 * 1024, 0, 1, 16))
+		if (!tempPool.Init(64 * 1024 * 1024, 0, 1, 16))
 			return false;
 
 		g_initialized = true;
@@ -76,11 +78,11 @@ namespace Memory
 	void Deinit()
 	{
 #ifdef _DEBUG
-		if(	mainPool.GetAllocatedBlockCount() ||
+		if (mainPool.GetAllocatedBlockCount() ||
 			mapPool.GetAllocatedBlockCount() ||
 			stringPool.GetAllocatedBlockCount() ||
 			glPool.GetAllocatedBlockCount() ||
-			tempPool.GetAllocatedBlockCount() )
+			tempPool.GetAllocatedBlockCount())
 		{
 			MessageBox(0, TEXT("Memory leaks detected! Check the log files."), TEXT("Daemonium"), MB_ICONWARNING | MB_OK);
 		}
@@ -99,7 +101,7 @@ namespace Memory
 	}
 
 
-	const uint GUARD_MAGIC = 0xDEADBEEF;
+	const uint32_t GUARD_MAGIC = 0xDEADBEEF;
 	const ubyte CLEAR_PATTERN = 0xAB;
 	const size_t BLOCK_SIZE_MINIMUM = 64;
 
@@ -116,21 +118,21 @@ namespace Memory
 	{
 		address_space = RoundUp(address_space, pageSize);
 
-		if(pages_to_grow * pageSize > address_space)
+		if (pages_to_grow * pageSize > address_space)
 			return false;
 
-		if(initial_size)
+		if (initial_size)
 			initial_size = RoundUp(initial_size, pageSize);
 
-		if(initial_size > address_space)
+		if (initial_size > address_space)
 			return false;
 
-		if(!IsPow2(align) || align > 16)
+		if (!IsPow2(align) || align > 16)
 			return false;
 
 		_firstBlock = (MemoryHeader*)VirtualAlloc(0, address_space, MEM_RESERVE, PAGE_READWRITE);
 
-		if(_firstBlock)
+		if (_firstBlock)
 		{
 			_reservedPages = address_space / pageSize;
 			_pagesToGrow = pages_to_grow;
@@ -147,7 +149,7 @@ namespace Memory
 
 	void	Allocator::Deinit()
 	{
-		if(_firstBlock)
+		if (_firstBlock)
 		{
 #if (_DEBUG_MEM_ALLOC)
 			char fname[MAX_PATH];
@@ -169,9 +171,22 @@ namespace Memory
 	}
 
 #if (_DEBUG_MEM_ALLOC)
-	void*	Allocator::Alloc(size_t bytes, const char* file, int line)
+	void* Allocator::Alloc(size_t bytes, const char* file, int line)
+	{
+		return AllocArray(bytes, 1, file, line);
+	}
 #else
-	void*	Allocator::Alloc(size_t bytes)
+	void* Allocator::Alloc(size_t bytes)
+	{
+		return AllocArray(bytes, 1);
+	}
+#endif
+
+
+#if (_DEBUG_MEM_ALLOC)
+	void*	Allocator::AllocArray(size_t bytes, size_t numElements, const char* file, int line)
+#else
+	void*	Allocator::AllocArray(size_t bytes, size_t numElements)
 #endif
 	{
 		if(!g_initialized)
@@ -187,14 +202,15 @@ namespace Memory
 			return 0;
 		}
 
-		if(!bytes)
+		if(!bytes || !numElements)
 			return 0;
 
-		size_t req_bytes = bytes;
+		bytes *= numElements;
+		size_t req_bytes = bytes;	// Requested bytes.
 
 		bytes += sizeof(MemoryHeader) + 1; // add space for header and header offset byte
 	#if (_DEBUG_MEM_ALLOC)
-		bytes += 4; // add space for 4 guard bytes
+		bytes += GuardBytes; // add space for guard bytes
 	#endif
 		bytes = RoundUp(bytes, 4); // round up to 4 byte boundary
 
@@ -217,9 +233,9 @@ namespace Memory
 		void* ptr;
 
 #if (_DEBUG_MEM_ALLOC)
-		ptr = AllocateBlock(block, bytes, req_bytes, file, line);
+		ptr = AllocateBlock(block, bytes, req_bytes, numElements, file, line);
 #else
-		ptr = AllocateBlock(block, bytes, req_bytes);
+		ptr = AllocateBlock(block, bytes, req_bytes, numElements);
 #endif
 
 		// if no single block large enough found, try to commit more memory
@@ -234,9 +250,9 @@ namespace Memory
 			}
 
 		#if (_DEBUG_MEM_ALLOC)
-			ptr = AllocateBlock(block, bytes, req_bytes, file, line);
+			ptr = AllocateBlock(block, bytes, req_bytes, numElements, file, line);
 		#else
-			ptr = AllocateBlock(block, bytes, req_bytes);
+			ptr = AllocateBlock(block, bytes, req_bytes, numElements);
 		#endif
 		}
 
@@ -287,6 +303,7 @@ namespace Memory
 
 		hdr->flags = 0; // mark as free
 		hdr->userSize = 0;
+		hdr->numElements = 0;
 		--_allocBlockCount;
 	}
 
@@ -341,9 +358,9 @@ namespace Memory
 	}
 
 #if (_DEBUG_MEM_ALLOC)
-	void* Allocator::AllocateBlock(MemoryHeader* start_block, size_t bytes, size_t req_bytes, const char* file, int line)
+	void* Allocator::AllocateBlock(MemoryHeader* start_block, size_t bytes, size_t req_bytes, size_t numElements, const char* file, int line)
 #else
-	void* Allocator::AllocateBlock(MemoryHeader* start_block, size_t bytes, size_t req_bytes)
+	void* Allocator::AllocateBlock(MemoryHeader* start_block, size_t bytes, size_t req_bytes, size_t numElements)
 #endif
 	{
 		MemoryHeader* block = start_block;
@@ -384,15 +401,17 @@ namespace Memory
 					}
 
 					block->userSize = req_bytes;
+					block->numElements = numElements;
 					block->flags = (ALLOCATED_BIT | (_index & ALLOCATOR_INDEX_MASK));
 
 		#if (_DEBUG_MEM_ALLOC)
 					block->file = file;
 					block->line = line;
 
-					// add 4 guard bytes after the end of user memory
+					// add guard bytes after the end of user memory
 					block->guard = (uint*)(user_ptr + req_bytes);
-					*block->guard = GUARD_MAGIC;
+					for (int i = 0; i < GuardBytes / 32; ++i)
+						block->guard[i] = GUARD_MAGIC;
 		#endif
 
 					_allocatedMemory += block->blockSize;
@@ -633,12 +652,17 @@ namespace Memory
 		{
 			if(hdr->flags & ALLOCATED_BIT)
 			{
-				if(*hdr->guard != GUARD_MAGIC)
+				for (int i = 0; i < GuardBytes / 32; ++i)
 				{
-					// written past allocated memory block
-					const char* file = hdr->file;
-					int line = hdr->line;
-					PRINT_ERROR2("Buffer overrun - block at %p, size: %u bytes.", hdr, hdr->blockSize);
+					if (hdr->guard[i] != GUARD_MAGIC)
+					{
+						// written past allocated memory block
+						Console::PrintError("Buffer overrun - allocator %s, block at %p, size: %u bytes, numElements: %u.",
+							pools[hdr->flags & ALLOCATOR_INDEX_MASK]->GetPoolName(),
+							hdr, hdr->blockSize, hdr->numElements);
+
+						Console::PrintError("    File: %s, line: %d", hdr->file, hdr->line);
+					}
 				}
 			}
 

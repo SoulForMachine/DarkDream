@@ -125,14 +125,14 @@ protected:
 
 
 template <class _Type>
-class List<_Type>::Iterator: public List<_Type>::ConstIterator
+class List<_Type>::Iterator : public List<_Type>::ConstIterator
 {
 public:
 	friend class List<_Type>;
 
 	explicit Iterator(ListNode<_Type>* node):
 		ConstIterator(node)
-	{ _node = node; }
+	{ }
 
 	_Type& operator * () { return _node->data; }
 	_Type* operator -> () { return &_node->data; }
@@ -159,6 +159,9 @@ public:
 		_node = _node->prev;
 		return oldval; 
 	}
+
+protected:
+	using List<_Type>::ConstIterator::_node;
 };
 
 
@@ -305,7 +308,7 @@ void List<_Type>::Clear()
 	{
 		Iterator next = it;
 		++next;
-		delete it._node;
+		Memory::Delete(it._node);
 		it = next;
 	}
 
@@ -330,7 +333,7 @@ _Type& List<_Type>::GetByIndex(size_t index)
 template <class _Type>
 void List<_Type>::_Insert(NodeType* where, const _Type& val)
 {
-	NodeType* new_node = new(_pool) NodeType(val);
+	NodeType* new_node = Memory::New<NodeType>(_pool, val);
 	assert(new_node);
 
 	new_node->next = where;
@@ -351,7 +354,7 @@ void List<_Type>::_Remove(NodeType* node)
 		next->prev = prev;
 		prev->next = next;
 
-		delete node;
+		Memory::Delete(node);
 
 		--_count;
 	}

@@ -33,9 +33,9 @@ namespace Engine
 			VERT_LAYOUT_POS_NRM,
 		};
 
-		size_t numVertices;
-		size_t numIndices;
-		size_t vertexSize; // size of one vertex in bytes
+		int numVertices;
+		int numIndices;
+		int vertexSize; // size of one vertex in bytes
 		GL::Buffer* vertBuf;
 		GL::Buffer* indexBuf;
 		const char* material;

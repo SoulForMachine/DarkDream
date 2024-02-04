@@ -1,0 +1,274 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CollapsiblePanelBar</name>
+    </assembly>
+    <members>
+        <member name="T:Salamander.Windows.Forms.PanelState">
+            <summary>
+            Defines the state of a <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see>.
+            </summary>
+        </member>
+        <member name="F:Salamander.Windows.Forms.PanelState.Expanded">
+            <summary>
+            The <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> is expanded.
+            </summary>
+        </member>
+        <member name="F:Salamander.Windows.Forms.PanelState.Collapsed">
+            <summary>
+            The <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> is collapsed.
+            </summary>
+        </member>
+        <member name="T:Salamander.Windows.Forms.PanelStateChangedEventHandler">
+            <summary>
+            A delegate type for hooking up panel state change notifications.
+            </summary>
+        </member>
+        <member name="T:Salamander.Windows.Forms.CollapsiblePanel">
+            <summary>
+            An extended <see cref="T:System.Windows.Forms.Panel">Panel</see> that provides collapsible panels like those provided in Windows XP.
+            </summary>
+        </member>
+        <member name="E:Salamander.Windows.Forms.CollapsiblePanel.PanelStateChanged">
+            <summary>
+            A <see cref="P:Salamander.Windows.Forms.CollapsiblePanel.PanelState">PanelState</see> changed event.
+            </summary>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanel.#ctor">
+            <summary>
+            Initialises a new instance of <a cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</a>.
+            </summary>
+        </member>
+        <member name="P:Salamander.Windows.Forms.CollapsiblePanel.PanelState">
+            <summary>
+            Gets/sets the <see cref="P:Salamander.Windows.Forms.CollapsiblePanel.PanelState">PanelState</see>.
+            </summary>
+        </member>
+        <member name="P:Salamander.Windows.Forms.CollapsiblePanel.TitleText">
+            <summary>
+            Gets/sets the text displayed as the panel title.
+            </summary>
+        </member>
+        <member name="P:Salamander.Windows.Forms.CollapsiblePanel.TitleFontColour">
+            <summary>
+            Gets/sets the foreground colour used for the title bar.
+            </summary>
+        </member>
+        <member name="P:Salamander.Windows.Forms.CollapsiblePanel.TitleFont">
+            <summary>
+            Gets/sets the font used for the title bar text.
+            </summary>
+        </member>
+        <member name="P:Salamander.Windows.Forms.CollapsiblePanel.ImageList">
+            <summary>
+            Gets/sets the image list used for the expand/collapse image.
+            </summary>
+        </member>
+        <member name="P:Salamander.Windows.Forms.CollapsiblePanel.StartColour">
+            <summary>
+            Gets/sets the starting colour for the background gradient of the header.
+            </summary>
+        </member>
+        <member name="P:Salamander.Windows.Forms.CollapsiblePanel.EndColour">
+            <summary>
+            Gets/sets the ending colour for the background gradient of the header.
+            </summary>
+        </member>
+        <member name="P:Salamander.Windows.Forms.CollapsiblePanel.Image">
+            <summary>
+            Gets/sets the image displayed in the header of the title bar.
+            </summary>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanel.IsOverTitle(System.Int32,System.Int32)">
+            <summary>
+            Helper function to determine if the mouse is currently over the title bar.
+            </summary>
+            <param name="xPos">The x-coordinate of the mouse position.</param>
+            <param name="yPos">The y-coordinate of the mouse position.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanel.UpdateDisplayedState">
+            <summary>
+            Helper function to update the displayed state of the panel.
+            </summary>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanel.OnPanelStateChanged(Salamander.Windows.Forms.PanelEventArgs)">
+            <summary>
+            Event handler for the <see cref="E:Salamander.Windows.Forms.CollapsiblePanel.PanelStateChanged">PanelStateChanged</see> event.
+            </summary>
+            <param name="e">A <see cref="T:Salamander.Windows.Forms.PanelEventArgs">PanelEventArgs</see> that contains the event data.</param>
+        </member>
+        <member name="T:Salamander.Windows.Forms.PanelEventArgs">
+            <summary>
+            Provides data for the <see cref="E:Salamander.Windows.Forms.CollapsiblePanel.PanelStateChanged">PanelStateChanged</see> event.
+            </summary>
+        </member>
+        <member name="M:Salamander.Windows.Forms.PanelEventArgs.#ctor(Salamander.Windows.Forms.CollapsiblePanel)">
+            <summary>
+            Initialises a new <see cref="T:Salamander.Windows.Forms.PanelEventArgs">PanelEventArgs</see>.
+            </summary>
+            <param name="sender">The originating <see cref="P:Salamander.Windows.Forms.PanelEventArgs.CollapsiblePanel">CollapsiblePanel</see>.</param>
+        </member>
+        <member name="P:Salamander.Windows.Forms.PanelEventArgs.CollapsiblePanel">
+            <summary>
+            Gets the <see cref="P:Salamander.Windows.Forms.PanelEventArgs.CollapsiblePanel">CollapsiblePanel</see> that triggered the event.
+            </summary>
+        </member>
+        <member name="P:Salamander.Windows.Forms.PanelEventArgs.PanelState">
+            <summary>
+            Gets the <see cref="P:Salamander.Windows.Forms.PanelEventArgs.PanelState">PanelState</see> of the <see cref="P:Salamander.Windows.Forms.PanelEventArgs.CollapsiblePanel">CollapsiblePanel</see> that triggered the event.
+            </summary>
+        </member>
+        <member name="T:Salamander.Windows.Forms.CollapsiblePanelBar">
+            <summary>
+            An ExplorerBar-type extended Panel for containing <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> objects.
+            </summary>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanelBar.#ctor">
+            <summary>
+            Initialises a new instance of <see cref="T:Salamander.Windows.Forms.CollapsiblePanelBar">CollapsiblePanelBar</see>.
+            </summary>
+        </member>
+        <member name="P:Salamander.Windows.Forms.CollapsiblePanelBar.CollapsiblePanelCollection">
+            <summary>
+            Gets the <see cref="P:Salamander.Windows.Forms.CollapsiblePanelBar.CollapsiblePanelCollection">CollapsiblePanelCollection</see> collection.
+            </summary>
+        </member>
+        <member name="P:Salamander.Windows.Forms.CollapsiblePanelBar.Border">
+            <summary>
+            Gets/sets the border around the panels. 
+            </summary>
+        </member>
+        <member name="P:Salamander.Windows.Forms.CollapsiblePanelBar.Spacing">
+            <summary>
+            Gets/sets the vertical spacing between adjacent panels.
+            </summary>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanelBar.BeginInit">
+            <summary>
+            Signals the object that initialization is starting.
+            </summary>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanelBar.EndInit">
+            <summary>
+            Signals the object that initialization is complete.
+            </summary>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanelBar.OnControlAdded(System.Windows.Forms.ControlEventArgs)">
+            <summary>
+            Event handler for the <see cref="E:System.Windows.Forms.Control.ControlAdded">ControlAdded</see> event.
+            </summary>
+            <param name="e">A <see cref="T:System.Windows.Forms.ControlEventArgs">ControlEventArgs</see> that contains the event data.</param>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanelBar.OnControlRemoved(System.Windows.Forms.ControlEventArgs)">
+            <summary>
+            Event handler for the <see cref="E:System.Windows.Forms.Control.ControlRemoved">ControlRemoved</see> event.
+            </summary>
+            <param name="e">A <see cref="T:System.Windows.Forms.ControlEventArgs">ControlEventArgs</see> that contains the event data.</param>
+        </member>
+        <member name="T:Salamander.Windows.Forms.CollapsiblePanelCollection">
+            <summary>
+            Summary description for CollapsiblePanelCollection.
+            </summary>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanelCollection.#ctor">
+            <summary>
+            Initialises a new instance of <see cref="T:Salamander.Windows.Forms.CollapsiblePanelCollection">CollapsiblePanelCollection</see>.
+            </summary>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanelCollection.Add(Salamander.Windows.Forms.CollapsiblePanel)">
+            <summary>
+            Adds a <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> to the end of the collection.
+            </summary>
+            <param name="panel">The <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> to add.</param>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanelCollection.Remove(System.Int32)">
+            <summary>
+            Removes the <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> from the collection at the specified index.
+            </summary>
+            <param name="index">The index of the <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> to remove.</param>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanelCollection.Item(System.Int32)">
+            <summary>
+            Gets a reference to the <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> at the specified index.
+            </summary>
+            <param name="index">The index of the <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> to retrieve.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanelCollection.Insert(System.Int32,Salamander.Windows.Forms.CollapsiblePanel)">
+            <summary>
+            Inserts a <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> at the specified position.
+            </summary>
+            <param name="index">The zero-based index at which <i>panel</i> should be inserted.</param>
+            <param name="panel">The <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> to insert into the collection.</param>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanelCollection.CopyTo(System.Array,System.Int32)">
+            <summary>
+            Copies the elements of the collection to a <see cref="T:System.Array">System.Array</see>, starting at a particular index.
+            </summary>
+            <param name="array">The one-dimensional <see cref="T:System.Array">System.Array</see> that is the destination of the elements. The array must have zero-based indexing.</param>
+            <param name="index">The zero-based index in <i>array</i> at which copying begins.</param>
+        </member>
+        <member name="M:Salamander.Windows.Forms.CollapsiblePanelCollection.IndexOf(Salamander.Windows.Forms.CollapsiblePanel)">
+            <summary>
+            Searches for the specified <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> and returns the zero-based index of the first occurrence.
+            </summary>
+            <param name="panel">The <see cref="T:Salamander.Windows.Forms.CollapsiblePanel">CollapsiblePanel</see> to search for.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Salamander.Drawing.Colour">
+            <summary>
+            Stores a colour and provides conversion between the RGB and HLS colour models
+            </summary>
+        </member>
+        <member name="M:Salamander.Drawing.Colour.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="P:Salamander.Drawing.Colour.CurrentColour">
+            <summary>
+            The current colour (RGB model)
+            </summary>
+        </member>
+        <member name="P:Salamander.Drawing.Colour.Red">
+            <summary>
+            The Red component of the current colour
+            </summary>
+        </member>
+        <member name="P:Salamander.Drawing.Colour.Green">
+            <summary>
+            The Green component of the current colour
+            </summary>
+        </member>
+        <member name="P:Salamander.Drawing.Colour.Blue">
+            <summary>
+            The Blue component of the current colour
+            </summary>
+        </member>
+        <member name="P:Salamander.Drawing.Colour.Hue">
+            <summary>
+            The Hue component of the current colour
+            </summary>
+        </member>
+        <member name="P:Salamander.Drawing.Colour.Saturation">
+            <summary>
+            The Saturation component of the current colour
+            </summary>
+        </member>
+        <member name="P:Salamander.Drawing.Colour.Brightness">
+            <summary>
+            The Brightness component of the current colour
+            </summary>
+        </member>
+        <member name="M:Salamander.Drawing.Colour.HSBToRGB(System.Int32,System.Single,System.Single)">
+            <summary>
+            Converts HSB colour components to an RGB System.Drawing.Color
+            </summary>
+            <param name="Hue">Hue component</param>
+            <param name="Saturation">Saturation component</param>
+            <param name="Brightness">Brightness component</param>
+            <returns>Returns the RGB value as a System.Drawing.Color</returns>
+        </member>
+    </members>
+</doc>

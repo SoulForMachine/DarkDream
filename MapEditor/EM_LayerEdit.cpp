@@ -19,7 +19,7 @@ namespace MapEditor
 		_panel = gcnew LayersPanel(this);
 		_undoManager = undo_manager;
 		_activeLayer = 0;
-		_moveStartPoint = new(mainPool) vec2f;
+		_moveStartPoint = New<vec2f>(mainPool);
 		_moving = false;
 		_selectedSprite = 0;
 
@@ -38,15 +38,15 @@ namespace MapEditor
 
 	EM_LayerEdit::~EM_LayerEdit()
 	{
-		delete _moveStartPoint;
+		Delete(_moveStartPoint);
 
 		_renderer->DestroyBuffer(_vertBufSelRect);
 		_renderer->DestroyVertexFormat(_vertFmtPos);
 		engineAPI->asmProgManager->ReleaseASMProgram(_vertpSimple);
 		engineAPI->asmProgManager->ReleaseASMProgram(_fragpConstColor);
 
-		delete &_vertpSimple;
-		delete &_fragpConstColor;
+		Delete(&_vertpSimple);
+		Delete(&_fragpConstColor);
 	}
 
 	System::Windows::Forms::UserControl^ EM_LayerEdit::GetPanel()

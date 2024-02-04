@@ -36,7 +36,7 @@ private:
 
 
 template <class _T>
-StaticArray<_T>::StaticArray(Memory::Allocator& allocator = Memory::mainPool)
+StaticArray<_T>::StaticArray(Memory::Allocator& allocator)
 	: _allocator(allocator)
 {
 	_count = 0;
@@ -72,7 +72,7 @@ StaticArray<_T>& StaticArray<_T>::operator = (const StaticArray& other)
 {
 	Clear();
 	_count = other._count;
-	_data = (_T*)new(_allocator) ubyte[_count * sizeof(_T)];
+	_data = reinterpret_cast<_T*>(NewArray<ubyte>(_allocator, _count * sizeof(_T)));
 	for(size_t i = 0; i < _count; ++i)
 		_data[i] = other._data[i];
 	return *this;
@@ -86,14 +86,14 @@ void StaticArray<_T>::SetCount(size_t count)
 		Clear();
 		_count = count;
 		if(count)
-			_data = new(_allocator) _T[count];
+			_data = Memory::NewArray<_T>(_allocator, count * sizeof(_T));
 	}
 }
 
 template <class _T>
 void StaticArray<_T>::Clear()
 {
-	delete[] _data;
+	Memory::Delete(_data);
 	_count = 0;
 	_data = 0;
 }

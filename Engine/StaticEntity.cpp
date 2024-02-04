@@ -39,7 +39,7 @@ namespace Engine
 
 	StaticEntity* StaticEntity::CreateCopy() const
 	{
-		return new(mapPool) StaticEntity(*this);
+		return New<StaticEntity>(mapPool, *this);
 	}
 
 	void StaticEntity::Unload()

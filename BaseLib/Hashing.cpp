@@ -154,7 +154,7 @@ uint GetHash(unsigned long val)
 
 uint GetHash(void* val)
 {
-	return (uint)val;
+	return static_cast<uint>(reinterpret_cast<uintptr_t>(val));
 }
 
 unsigned long GetCRC32(const void* data, int length)

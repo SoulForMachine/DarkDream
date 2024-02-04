@@ -45,7 +45,7 @@ namespace Engine
 
 	PlayerEntity* PlayerEntity::CreateCopy() const
 	{
-		return new(mapPool) PlayerEntity(*this);
+		return New<PlayerEntity>(mapPool, *this);
 	}
 
 	void PlayerEntity::Unload()

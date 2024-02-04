@@ -10,6 +10,9 @@ namespace GL
 	class BASELIB_API Query: public Object
 	{
 	public:
+		Query() {}
+		~Query() {}
+
 		void BeginQuery();
 		void EndQuery();
 		bool ResultAvailable();
@@ -18,8 +21,6 @@ namespace GL
 	private:
 		friend class Renderer;
 
-		Query() {}
-		~Query() {}
 		Query(const Query&);
 		Query& operator = (const Query&);
 

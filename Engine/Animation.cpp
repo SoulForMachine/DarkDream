@@ -95,7 +95,7 @@ namespace Engine
 	void Animation::Unload()
 	{
 		for(size_t i = 0; i < _tracks.GetCount(); ++i)
-			delete[] _tracks[i].name;
+			Memory::Delete(_tracks[i].name);
 		_tracks.Clear();
 		_combinedTransforms.Clear();
 	}

@@ -126,7 +126,7 @@ namespace Engine
 		_renderer->DestroyVertexFormat(_textVertFmt);
 		_renderer->DestroyVertexFormat(_rectVertFmt);
 		_renderer->DestroySamplerState(_textSamplerState);
-		delete[] _consoleLineText;
+		Memory::Delete(_consoleLineText);
 
 		Clear();
 	}
@@ -190,7 +190,7 @@ namespace Engine
 		// try to find a batch with same texture
 		TextBatch* batch = _textBatchList;
 		bool batch_added = false;
-		int text_len = strlen(text);
+		int text_len = static_cast<int>(strlen(text));
 		int num_vertices = text_len * 6;
 
 		if(num_vertices > MAX_NUM_TEXT_VERTICES)
@@ -207,7 +207,7 @@ namespace Engine
 
 					if(text_data)
 					{
-						text_data->text = new(tempPool) char[text_len + 1];
+						text_data->text = NewArray<char>(tempPool, text_len + 1);
 						strcpy(text_data->text, text);
 						text_data->x = x;
 						text_data->y = y;
@@ -240,7 +240,7 @@ namespace Engine
 
 				if(text_data)
 				{
-					text_data->text = new(tempPool) char[text_len + 1];
+					text_data->text = NewArray<char>(tempPool, text_len + 1);
 					strcpy(text_data->text, text);
 					text_data->x = x;
 					text_data->y = y;
@@ -304,8 +304,8 @@ namespace Engine
 		if(max_line_size > _consoleLineSize)
 		{
 			_consoleLineSize = max_line_size;
-			delete[] _consoleLineText;
-			_consoleLineText = new(mainPool) char[max_line_size + 1];
+			Memory::Delete(_consoleLineText);
+			_consoleLineText = NewArray<char>(mainPool, max_line_size + 1);
 		}
 
 		// draw console input
@@ -331,7 +331,7 @@ namespace Engine
 					}
 					*dest = '\0';
 					DrawText(_consoleLineText, xpos, ypos, _consoleFont, Console::GetColor(color));
-					xpos += font_width * strlen(_consoleLineText); //_consoleFont.GetTextWidth(_consoleLineText);
+					xpos += font_width * static_cast<int>(strlen(_consoleLineText)); //_consoleFont.GetTextWidth(_consoleLineText);
 				}
 				ypos += font_height;
 				++lines_printed;
@@ -477,7 +477,7 @@ namespace Engine
 				}
 
 				// delete text buffer
-				delete[] text_data->text;
+				Memory::Delete(text_data->text);
 
 				text_data = text_data->next;
 			}

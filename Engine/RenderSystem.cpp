@@ -169,7 +169,7 @@ namespace Engine
 		}
 
 		// init 2D rendering
-		_render2D = new(mainPool) Render2D;
+		_render2D = New<Render2D>(mainPool);
 		result = _render2D->Init(this);
 		if(!result)
 		{
@@ -179,7 +179,7 @@ namespace Engine
 		}
 
 		// init entity rendering
-		_entityRenderer = new(mainPool) EntityRenderer;
+		_entityRenderer = New<EntityRenderer>(mainPool);
 		result = _entityRenderer->Init();
 		if(!result)
 		{
@@ -188,12 +188,12 @@ namespace Engine
 			return false;
 		}
 
-		_entityBuf = new(mainPool) ModelEntity*[MAX_NUM_ENTITIES];
-		_meshBuf = new(mainPool) EntityRenderer::MeshRenderData*[MAX_NUM_MESHES];
-		_transpMeshBuf = new(mainPool) EntityRenderer::MeshRenderData*[MAX_NUM_TRANSP_MESHES];
+		_entityBuf = NewArray<ModelEntity*>(mainPool, MAX_NUM_ENTITIES);
+		_meshBuf = NewArray<EntityRenderer::MeshRenderData*>(mainPool, MAX_NUM_MESHES);
+		_transpMeshBuf = NewArray<EntityRenderer::MeshRenderData*>(mainPool, MAX_NUM_TRANSP_MESHES);
 
 		// init terrain rendering
-		_terrainRenderer = new(mainPool) TerrainRenderer;
+		_terrainRenderer = New<TerrainRenderer>(mainPool);
 		result = _terrainRenderer->Init();
 		if(!result)
 		{
@@ -203,7 +203,7 @@ namespace Engine
 		}
 
 		// particle system renderer
-		_particleRenderer = new(mainPool) ParticleRenderer;
+		_particleRenderer = New<ParticleRenderer>(mainPool);
 		result = _particleRenderer->Init();
 		if(!result)
 		{
@@ -213,7 +213,7 @@ namespace Engine
 		}
 
 		// layer renderer
-		_bgLayerRenderer = new(mainPool) BgLayerRenderer;
+		_bgLayerRenderer = New<BgLayerRenderer>(mainPool);
 		result = _bgLayerRenderer->Init();
 		if(!result)
 		{
@@ -223,7 +223,7 @@ namespace Engine
 		}
 
 		// init debug rendering
-		_debugRenderer = new(mainPool) DebugRenderer;
+		_debugRenderer = New<DebugRenderer>(mainPool);
 		result = _debugRenderer->Init();
 
 		_mainColor.set(1.0f, 1.0f, 1.0f, 1.0f);
@@ -252,37 +252,37 @@ namespace Engine
 		if(_render2D)
 		{
 			_render2D->Deinit();
-			delete _render2D;
+			Delete(_render2D);
 		}
 
 		if(_entityRenderer)
 		{
 			_entityRenderer->Deinit();
-			delete _entityRenderer;
+			Delete(_entityRenderer);
 		}
 
 		if(_terrainRenderer)
 		{
 			_terrainRenderer->Deinit();
-			delete _terrainRenderer;
+			Delete(_terrainRenderer);
 		}
 
 		if(_bgLayerRenderer)
 		{
 			_bgLayerRenderer->Deinit();
-			delete _bgLayerRenderer;
+			Delete(_bgLayerRenderer);
 		}
 
 		if(_particleRenderer)
 		{
 			_particleRenderer->Deinit();
-			delete _particleRenderer;
+			Delete(_particleRenderer);
 		}
 
 		if(_debugRenderer)
 		{
 			_debugRenderer->Deinit();
-			delete _debugRenderer;
+			Delete(_debugRenderer);
 		}
 
 		_renderer->DestroyTexture(_texWhite);
@@ -292,9 +292,9 @@ namespace Engine
 
 		GL::DestroyRenderer(_renderer);
 
-		delete[] _entityBuf;
-		delete[] _meshBuf;
-		delete[] _transpMeshBuf;
+		Memory::Delete(_entityBuf);
+		Memory::Delete(_meshBuf);
+		Memory::Delete(_transpMeshBuf);
 		_meshDataPool.Reset();
 
 		Clear();

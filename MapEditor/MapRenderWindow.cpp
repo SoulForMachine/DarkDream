@@ -28,8 +28,8 @@ namespace MapEditor
 
 
 	MapRenderWindow::MapRenderWindow(Form^ parent, EditorCommon::FormDirector^ director) :
-		_vpSimple(*new(mainPool) VertexASMProgResPtr),
-		_fpConstClr(*new(mainPool) FragmentASMProgResPtr)
+		_vpSimple(*Memory::New<VertexASMProgResPtr>(mainPool)),
+		_fpConstClr(*Memory::New<FragmentASMProgResPtr>(mainPool))
 	{
 		_renderSystem = 0;
 		_renderer = 0;
@@ -154,8 +154,8 @@ namespace MapEditor
 
 	void MapRenderWindow::WndProc(Message% msg)
 	{
-		int wparam = msg.WParam.ToInt32();
-		int lparam = msg.LParam.ToInt32();
+		int wparam = static_cast<int>(msg.WParam.ToInt64());
+		int lparam = static_cast<int>(msg.LParam.ToInt64());
 
 		switch(msg.Msg)
 		{
@@ -287,8 +287,8 @@ namespace MapEditor
 			_renderSystem->Deinit();
 		}
 
-		delete &_vpSimple;
-		delete &_fpConstClr;
+		Delete(&_vpSimple);
+		Delete(&_fpConstClr);
 	}
 
 	void MapRenderWindow::OnMouseMove(int modifiers, int x, int y)

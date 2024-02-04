@@ -188,11 +188,11 @@ namespace GL
 
 	Renderer* CreateRenderer(uint version, void* instance_handle, void* window_handle, const FramebufferFormat& format)
 	{
-		Renderer* renderer = new(glPool) Renderer;
+		Renderer* renderer = New<Renderer>(glPool);
 		bool result = renderer->Create(version, instance_handle, window_handle, format);
 		if(!result)
 		{
-			delete renderer;
+			Delete(renderer);
 			renderer = 0;
 		}
 		return renderer;
@@ -203,7 +203,7 @@ namespace GL
 		if(renderer)
 		{
 			renderer->Destroy();
-			delete renderer;
+			Delete(renderer);
 		}
 	}
 
@@ -351,9 +351,9 @@ namespace GL
 
 		GetContextInfo();
 
-		_samplers = new(glPool) Sampler[_info.maxTextureImageUnits];
-		_vertexAttribs = new(glPool) VertexAttrib[_info.maxVertexAttribs];
-		_glState.samplers = new(glPool) GLuint[_info.maxTextureImageUnits];
+		_samplers = NewArray<Sampler>(glPool, _info.maxTextureImageUnits);
+		_vertexAttribs = NewArray<VertexAttrib>(glPool, _info.maxVertexAttribs);
+		_glState.samplers = NewArray<GLuint>(glPool, _info.maxTextureImageUnits);
 		memset(_samplers, 0, sizeof(Sampler) * _info.maxTextureImageUnits);
 		memset(_vertexAttribs, 0, sizeof(VertexAttrib) * _info.maxVertexAttribs);
 		memset(_glState.samplers, 0, sizeof(GLuint) * _info.maxTextureImageUnits);
@@ -365,7 +365,7 @@ namespace GL
 		return true;
 	}
 
-	bool Renderer::CreateContext(uint version, HWND window_handle, const FramebufferFormat& format)
+	bool Renderer::CreateContext(int version, HWND window_handle, const FramebufferFormat& format)
 	{
 		BOOL result;
 		HDC hdc = GetDC(window_handle);
@@ -479,9 +479,9 @@ namespace GL
 				__gl_state = 0;
 			}
 			wglDeleteContext(_hglrc);
-			delete[] _samplers;
-			delete[] _vertexAttribs;
-			delete[] _glState.samplers;
+			Memory::Delete(_samplers);
+			Memory::Delete(_vertexAttribs);
+			Memory::Delete(_glState.samplers);
 			Clear();
 		}
 	}
@@ -692,7 +692,7 @@ namespace GL
 		_samplers = 0;
 	}
 
-	void Renderer::VertexSource(int stream, const Buffer* buffer, size_t stride, size_t offset)
+	void Renderer::VertexSource(int stream, const Buffer* buffer, int stride, int offset)
 	{
 		assert(stream >= 0 && stream < MAX_VERTEX_STREAMS);
 		_vertexStreams[stream].buffer = buffer;
@@ -850,7 +850,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void Renderer::Scissor(int x, int y, size_t width, size_t height)
+	void Renderer::Scissor(int x, int y, int width, int height)
 	{
 		glScissor(x, y, width, height);
 		OPENGL_ERROR_CHECK
@@ -1103,7 +1103,7 @@ namespace GL
 		Reads current read framebuffer's pixels into provided system memory buffer.
 		If pixel_store is 0, default values are used.
 	*/
-	void Renderer::ReadPixels(int x, int y, size_t width, size_t height, ImageFormat format, DataType type, const PixelStore* pixel_store, void* buffer)
+	void Renderer::ReadPixels(int x, int y, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, void* buffer)
 	{
 		GLuint id = _readFramebuffer? _readFramebuffer->_id: 0;
 		if(id != _glState.readFbuf)
@@ -1125,7 +1125,7 @@ namespace GL
 		Reads current read framebuffer's pixels into provided buffer object.
 		If pixel_store is 0, default values are used.
 	*/
-	void Renderer::ReadPixels(int x, int y, size_t width, size_t height, ImageFormat format, DataType type, const PixelStore* pixel_store, Buffer* buffer, size_t buffer_offset)
+	void Renderer::ReadPixels(int x, int y, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, Buffer* buffer, size_t buffer_offset)
 	{
 		assert(buffer);
 		if(buffer->_id != _glState.pixelPackBuf)
@@ -1323,7 +1323,7 @@ namespace GL
 		_samplers[sampler].state = state;
 	}
 
-	void Renderer::Draw(PrimitiveType prim, int first, size_t count)
+	void Renderer::Draw(PrimitiveType prim, int first, int count)
 	{
 		if(!_vertexFormat)
 			return;
@@ -1333,7 +1333,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void Renderer::DrawInstanced(PrimitiveType prim, int first, size_t count, size_t inst_count)
+	void Renderer::DrawInstanced(PrimitiveType prim, int first, int count, int inst_count)
 	{
 		if(!_vertexFormat)
 			return;
@@ -1343,7 +1343,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void Renderer::DrawIndexed(PrimitiveType prim, size_t index_start, size_t count)
+	void Renderer::DrawIndexed(PrimitiveType prim, int index_start, int count)
 	{
 		if(!_vertexFormat || !_indexBuffer)
 			return;
@@ -1364,7 +1364,7 @@ namespace GL
 	/*
 		Draws a range of elements - it has constraint that all the indices must lie between start and end inclusive
 	*/
-	void Renderer::DrawIndexed(PrimitiveType prim, size_t start, size_t end, size_t index_start, size_t count)
+	void Renderer::DrawIndexed(PrimitiveType prim, uint start, uint end, size_t index_start, int count)
 	{
 		if(!_vertexFormat || !_indexBuffer)
 			return;
@@ -1382,7 +1382,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void Renderer::DrawIndexedInstanced(PrimitiveType prim, size_t count, size_t index_start, size_t inst_count)
+	void Renderer::DrawIndexedInstanced(PrimitiveType prim, int count, size_t index_start, int inst_count)
 	{
 		if(!_vertexFormat || !_indexBuffer)
 			return;
@@ -1687,9 +1687,9 @@ namespace GL
 		if(count <= 0 || !descriptors)
 			return 0;
 
-		VertexFormat* vformat = new(glPool) VertexFormat;
+		VertexFormat* vformat = New<VertexFormat>(glPool) ;
 		vformat->_count = count;
-		vformat->_descriptors = new(glPool) VertexAttribDesc[count];
+		vformat->_descriptors = NewArray<VertexAttribDesc>(glPool, count);
 
 		for(int i = 0; i < count; ++i)
 		{
@@ -1704,12 +1704,12 @@ namespace GL
 		if(_vertexFormat == vert_fmt)
 			_vertexFormat = 0;
 
-		delete vert_fmt;
+		Delete(vert_fmt);
 	}
 
 	SamplerState* Renderer::CreateSamplerState(const SamplerStateDesc& descriptor)
 	{
-		SamplerState* sstate = new(glPool) SamplerState;
+		SamplerState* sstate = New<SamplerState>(glPool);
 		sstate->_state = descriptor;
 		return sstate;
 	}
@@ -1720,16 +1720,16 @@ namespace GL
 			if(_samplers[i].state == samp_state)
 				_samplers[i].state = 0;
 
-		delete samp_state;
+		Delete(samp_state);
 	}
 
 	Texture1D* Renderer::CreateTexture1D()
 	{
-		Texture1D* tex = new(glPool) Texture1D;
+		Texture1D* tex = New<Texture1D>(glPool);
 		bool result = tex->Create();
 		if(!result)
 		{
-			delete tex;
+			Delete(tex);
 			tex = 0;
 		}
 		return tex;
@@ -1737,11 +1737,11 @@ namespace GL
 
 	Texture1DArray* Renderer::CreateTexture1DArray()
 	{
-		Texture1DArray* tex = new(glPool) Texture1DArray;
+		Texture1DArray* tex = New<Texture1DArray>(glPool);
 		bool result = tex->Create();
 		if(!result)
 		{
-			delete tex;
+			Delete(tex);
 			tex = 0;
 		}
 		return tex;
@@ -1749,11 +1749,11 @@ namespace GL
 
 	Texture2D* Renderer::CreateTexture2D()
 	{
-		Texture2D* tex = new(glPool) Texture2D;
+		Texture2D* tex = New<Texture2D>(glPool);
 		bool result = tex->Create();
 		if(!result)
 		{
-			delete tex;
+			Delete(tex);
 			tex = 0;
 		}
 		return tex;
@@ -1761,11 +1761,11 @@ namespace GL
 
 	Texture2DArray* Renderer::CreateTexture2DArray()
 	{
-		Texture2DArray* tex = new(glPool) Texture2DArray;
+		Texture2DArray* tex = New<Texture2DArray>(glPool);
 		bool result = tex->Create();
 		if(!result)
 		{
-			delete tex;
+			Delete(tex);
 			tex = 0;
 		}
 		return tex;
@@ -1773,11 +1773,11 @@ namespace GL
 
 	Texture3D* Renderer::CreateTexture3D()
 	{
-		Texture3D* tex = new(glPool) Texture3D;
+		Texture3D* tex = New<Texture3D>(glPool);
 		bool result = tex->Create();
 		if(!result)
 		{
-			delete tex;
+			Delete(tex);
 			tex = 0;
 		}
 		return tex;
@@ -1785,11 +1785,11 @@ namespace GL
 
 	TextureCube* Renderer::CreateTextureCube()
 	{
-		TextureCube* tex = new(glPool) TextureCube;
+		TextureCube* tex = New<TextureCube>(glPool);
 		bool result = tex->Create();
 		if(!result)
 		{
-			delete tex;
+			Delete(tex);
 			tex = 0;
 		}
 		return tex;
@@ -1797,11 +1797,11 @@ namespace GL
 
 	TextureBuffer* Renderer::CreateTextureBuffer()
 	{
-		TextureBuffer* tex = new(glPool) TextureBuffer;
+		TextureBuffer* tex = New<TextureBuffer>(glPool);
 		bool result = tex->Create();
 		if(!result)
 		{
-			delete tex;
+			Delete(tex);
 			tex = 0;
 		}
 		return tex;
@@ -1809,11 +1809,11 @@ namespace GL
 
 	TextureRectangle* Renderer::CreateTextureRectangle()
 	{
-		TextureRectangle* tex = new(glPool) TextureRectangle;
+		TextureRectangle* tex = New<TextureRectangle>(glPool);
 		bool result = tex->Create();
 		if(!result)
 		{
-			delete tex;
+			Delete(tex);
 			tex = 0;
 		}
 		return tex;
@@ -1867,17 +1867,17 @@ namespace GL
 				*cur_id = 0;
 
 			texture->Destroy();
-			delete texture;
+			Delete(texture);
 		}
 	}
 
 	Buffer* Renderer::CreateBuffer(ObjectType type, size_t size, const void* data, BufferUsage usage)
 	{
-		Buffer* buf = new(glPool) Buffer;
+		Buffer* buf = New<Buffer>(glPool);
 		bool result = buf->Create(type, size, data, usage);
 		if(!result)
 		{
-			delete buf;
+			Delete(buf);
 			buf = 0;
 		}
 		return buf;
@@ -1927,17 +1927,17 @@ namespace GL
 				_glState.transfFeedbackBuf = 0;
 
 			buffer->Destroy();
-			delete buffer;
+			Delete(buffer);
 		}
 	}
 
 	Framebuffer* Renderer::CreateFramebuffer(ObjectType type)
 	{
-		Framebuffer* fbuf = new(glPool) Framebuffer;
+		Framebuffer* fbuf = New<Framebuffer>(glPool);
 		bool result = fbuf->Create(type);
 		if(!result)
 		{
-			delete fbuf;
+			Delete(fbuf);
 			fbuf = 0;
 		}
 		return fbuf;
@@ -1960,16 +1960,16 @@ namespace GL
 				_glState.readFbuf = 0;
 
 			framebuffer->Destroy();
-			delete framebuffer;
+			Delete(framebuffer);
 		}
 	}
 
 	Renderbuffer* Renderer::CreateRenderbuffer()
 	{
-		Renderbuffer* rbuf = new(glPool) Renderbuffer;
+		Renderbuffer* rbuf = New<Renderbuffer>(glPool);
 		if(!rbuf->Create())
 		{
-			delete rbuf;
+			Delete(rbuf);
 			rbuf = 0;
 		}
 		return rbuf;
@@ -1983,13 +1983,13 @@ namespace GL
 				_glState.renderbuffer = 0;
 
 			renderbuffer->Destroy();
-			delete renderbuffer;
+			Delete(renderbuffer);
 		}
 	}
 
 	Query* Renderer::CreateQuery(ObjectType type)
 	{
-		Query* query = new(glPool) Query;
+		Query* query = New<Query>(glPool);
 		query->Create(type);
 		return query;
 	}
@@ -1999,16 +1999,16 @@ namespace GL
 		if(query)
 		{
 			query->Destroy();
-			delete query;
+			Delete(query);
 		}
 	}
 
-	GLSLShader* Renderer::CreateShader(ObjectType type, size_t count, const char** source, const char*& error_string)
+	GLSLShader* Renderer::CreateShader(ObjectType type, int count, const char** source, const char*& error_string)
 	{
-		GLSLShader* shader = new(glPool) GLSLShader;
+		GLSLShader* shader = New<GLSLShader>(glPool);
 		if(!shader->Create(type, count, source, error_string))
 		{
-			delete shader;
+			Delete(shader);
 			shader = 0;
 		}
 		return shader;
@@ -2019,16 +2019,16 @@ namespace GL
 		if(shader)
 		{
 			shader->Destroy();
-			delete shader;
+			Delete(shader);
 		}
 	}
 
 	GLSLProgram* Renderer::CreateProgram(size_t count, GLSLShader** shaders)
 	{
-		GLSLProgram* prog = new(glPool) GLSLProgram;
+		GLSLProgram* prog = New<GLSLProgram>(glPool);
 		if(!prog->Create(count, shaders))
 		{
-			delete prog;
+			Delete(prog);
 			prog = 0;
 		}
 		return prog;
@@ -2045,16 +2045,16 @@ namespace GL
 				_glState.glslProg = 0;
 
 			program->Destroy();
-			delete program;
+			Delete(program);
 		}
 	}
 
 	ASMProgram* Renderer::CreateASMProgram(ObjectType type, const char* source, const char*& error_string)
 	{
-		ASMProgram* prog = new(glPool) ASMProgram;
+		ASMProgram* prog = New<ASMProgram>(glPool);
 		if(!prog->Create(type, source, error_string))
 		{
-			delete prog;
+			Delete(prog);
 			prog = 0;
 		}
 		return prog;
@@ -2090,7 +2090,7 @@ namespace GL
 			}
 
 			program->Destroy();
-			delete program;
+			Delete(program);
 		}
 	}
 

@@ -39,9 +39,9 @@ namespace Engine
 			ResHashMapTraits(Memory::Allocator& pool, size_t size)
 				: _pool(pool) {}
 			HashMapNode<ResourceBase*>* New()
-				{ return new(_pool) HashMapNode<ResourceBase*>; }
+				{ return Memory::New<HashMapNode<ResourceBase*>>(_pool); }
 			void Delete(HashMapNode<ResourceBase*>* ptr)
-				{ delete ptr; }
+				{ Memory::Delete(ptr); }
 			uint GetHash(const tchar* str)
 				{ return ::GetStringiHash(str); }
 

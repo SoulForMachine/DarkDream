@@ -76,7 +76,7 @@ namespace Engine
 		for(int i = 0; i < material_count; ++i)
 		{
 			int len = file->ReadInt() + 1;
-			char* str = new(tempPool) char[len];
+			char* str = NewArray<char>(tempPool, len);
 			file->ReadString(str, len);
 			mat_names[i] = str;
 		}
@@ -84,13 +84,13 @@ namespace Engine
 		// assign each mesh it's material name
 		for(int i = 0; i < mesh_count; ++i)
 		{
-			int index = (int)_meshes[i].material;
+			size_t index = reinterpret_cast<size_t>(_meshes[i].material);
 			_meshes[i].material = StringDup(mat_names[index]);
 		}
 
 		// delete temporary array with material names
 		for(int i = 0; i < material_count; ++i)
-			delete[] mat_names[i];
+			Memory::Delete(mat_names[i]);
 		mat_names.Clear();
 
 		// read skeleton joints
@@ -98,7 +98,7 @@ namespace Engine
 		for(int i = 0; i < joint_count; ++i)
 		{
 			int len = file->ReadInt() + 1;
-			char* str = new(stringPool) char[len];
+			char* str = NewArray<char>(stringPool, len);
 			file->ReadString(str, len);
 			_joints[i].name = str;
 
@@ -127,13 +127,13 @@ namespace Engine
 		{
 			renderer->DestroyBuffer(_meshes[i].vertBuf);
 			renderer->DestroyBuffer(_meshes[i].indexBuf);
-			delete[] _meshes[i].material;
+			Memory::Delete(_meshes[i].material);
 		}
 		_meshes.Clear();
 
 		for(size_t i = 0; i < _joints.GetCount(); ++i)
 		{
-			delete[] _joints[i].name;
+			Memory::Delete(_joints[i].name);
 		}
 		_joints.Clear();
 		_rootJoint = 0;
@@ -146,7 +146,7 @@ namespace Engine
 	{
 		mesh.numVertices = file->ReadInt();
 		mesh.numIndices = file->ReadInt();
-		mesh.material = (const char*)file->ReadInt(); // use material name pointer to store index temporarily
+		mesh.material = reinterpret_cast<const char*>(static_cast<size_t>(file->ReadInt())); // use material name pointer to store index temporarily
 
 		_numVertices += mesh.numVertices;
 		_numIndices += mesh.numIndices;
@@ -167,32 +167,32 @@ namespace Engine
 		vec2f* weights = 0;
 		vec2ub* joint_inds = 0;
 
-		positions = new(tempPool) vec3f[mesh.numVertices];
+		positions = NewArray<vec3f>(tempPool, mesh.numVertices);
 		file->Read(positions, sizeof(vec3f) * mesh.numVertices);
 
-		normals = new(tempPool) vec3f[mesh.numVertices];
+		normals = NewArray<vec3f>(tempPool, mesh.numVertices);
 		file->Read(normals, sizeof(vec3f) * mesh.numVertices);
 
 		if(mesh.flags & Mesh::FLAG_TANGENTS)
 		{
-			tangents = new(tempPool) vec3f[mesh.numVertices];
+			tangents = NewArray<vec3f>(tempPool, mesh.numVertices);
 			file->Read(tangents, sizeof(vec3f) * mesh.numVertices);
-			binormals = new(tempPool) vec3f[mesh.numVertices];
+			binormals = NewArray<vec3f>(tempPool, mesh.numVertices);
 			file->Read(binormals, sizeof(vec3f) * mesh.numVertices);
 		}
 
 		if(mesh.flags & Mesh::FLAG_UVS)
 		{
-			uvs = new(tempPool) vec2f[mesh.numVertices];
+			uvs = NewArray<vec2f>(tempPool, mesh.numVertices);
 			file->Read(uvs, sizeof(vec2f) * mesh.numVertices);
 		}
 
 		if(mesh.flags & Mesh::FLAG_SKIN_DATA)
 		{
-			weights = new(tempPool) vec2f[mesh.numVertices];
+			weights = NewArray<vec2f>(tempPool, mesh.numVertices);
 			file->Read(weights, sizeof(vec2f) * mesh.numVertices);
 
-			joint_inds = new(tempPool) vec2ub[mesh.numVertices];
+			joint_inds = NewArray<vec2ub>(tempPool, mesh.numVertices);
 			file->Read(joint_inds, sizeof(vec2ub) * mesh.numVertices);
 
 			//for(size_t i = 0; i < mesh.numVertices; ++i)
@@ -370,19 +370,19 @@ namespace Engine
 				return false;
 		}
 
-		delete[] positions;
-		delete[] normals;
-		delete[] tangents;
-		delete[] binormals;
-		delete[] uvs;
-		delete[] weights;
-		delete[] joint_inds;
+		Memory::Delete(positions);
+		Memory::Delete(normals);
+		Memory::Delete(tangents);
+		Memory::Delete(binormals);
+		Memory::Delete(uvs);
+		Memory::Delete(weights);
+		Memory::Delete(joint_inds);
 
 		// read indices
-		ushort* indices = new(tempPool) ushort[mesh.numIndices];
+		ushort* indices = NewArray<ushort>(tempPool, mesh.numIndices);
 		file->Read(indices, sizeof(ushort) * mesh.numIndices);
 		mesh.indexBuf = renderer->CreateBuffer(GL::OBJ_INDEX_BUFFER, sizeof(ushort) * mesh.numIndices, indices, GL::USAGE_STATIC_DRAW);
-		delete[] indices;
+		Memory::Delete(indices);
 		if(!mesh.indexBuf)
 		{
 			renderer->DestroyBuffer(mesh.vertBuf);

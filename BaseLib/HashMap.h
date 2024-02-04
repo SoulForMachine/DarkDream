@@ -37,9 +37,9 @@ public:
 	DefaultHashMapTraits(Memory::Allocator& pool, size_t size)
 		: _pool(pool) {}
 	HashMapNode<_ValueType>* New()
-		{ return new(_pool) HashMapNode<_ValueType>; }
+		{ return Memory::New<HashMapNode<_ValueType>>(_pool); }
 	void Delete(HashMapNode<_ValueType>* ptr)
-		{ delete ptr; }
+		{ Memory::Delete(ptr); }
 	uint GetHash(const _KeyType& key) const
 		{ return ::GetHash(key); }
 
@@ -209,31 +209,31 @@ public:
 
 	explicit Iterator(HashMapNode<_ValueType>* node):
 		ConstIterator(node)
-	{ _node = node; }
+	{ this->_node = node; }
 
-	_ValueType& operator * () { return _node->value; }
-	_ValueType* operator -> () { return &_node->value; }
+	_ValueType& operator * () { return this->_node->value; }
+	_ValueType* operator -> () { return &this->_node->value; }
 
 	Iterator& operator ++ () 
 	{
-		_Inc();
+		this->_Inc();
 		return *this;
 	}
 	Iterator operator ++ (int) 
 	{
-		Iterator oldval(_node);
-		_Inc();
+		Iterator oldval(this->_node);
+		this->_Inc();
 		return oldval; 
 	}
 	Iterator& operator -- () 
 	{
-		_Dec();
+		this->_Dec();
 		return *this;
 	}
 	Iterator operator -- (int) 
 	{
-		Iterator oldval(_node);
-		_Dec();
+		Iterator oldval(this->_node);
+		this->_Dec();
 		return oldval; 
 	}
 };

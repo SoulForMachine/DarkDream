@@ -192,6 +192,8 @@ protected:
 class BASELIB_API Input::Keyboard: public Input::Device
 {
 public:
+	Keyboard() {}
+
 	void UpdateState();
 
 	// return current state of a key
@@ -219,7 +221,6 @@ public:
 	}
 
 private:
-	Keyboard() {}
 	Keyboard(const Keyboard&);
 	bool Init(LPDIRECTINPUT8 dinput, HWND window_handle);
 
@@ -233,6 +234,8 @@ private:
 class BASELIB_API Input::Mouse: public Input::Device
 {
 public:
+	Mouse() {}
+
 	void UpdateState();
 
 	int GetNumButtons()
@@ -282,7 +285,6 @@ public:
 	}
 
 private:
-	Mouse() {}
 	Mouse(const Mouse&);
 	bool Init(LPDIRECTINPUT8 dinput, HWND window_handle);
 
@@ -297,6 +299,8 @@ private:
 class BASELIB_API Input::GameController: public Input::Device
 {
 public:
+	GameController() {}
+
 	void UpdateState();
 
 	int GetNumButtons()
@@ -365,7 +369,6 @@ public:
 	}
 
 private:
-	GameController() {}
 	GameController(const GameController&);
 	bool Init(LPDIRECTINPUT8 dinput, HWND window_handle, REFGUID rguid);
 	static BOOL CALLBACK EnumGameControllerAxesCallback(LPCDIDEVICEOBJECTINSTANCE instance, LPVOID ref);

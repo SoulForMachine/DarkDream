@@ -43,17 +43,17 @@ namespace GL
 		*_currentId = _id;
 		_target = type;
 
-		glProgramStringARB(type, GL_PROGRAM_FORMAT_ASCII_ARB, strlen(source), source);
+		glProgramStringARB(type, GL_PROGRAM_FORMAT_ASCII_ARB, static_cast<GLsizei>(std::strlen(source)), source);
 		bool result = (glGetError() == GL_NO_ERROR);
 		GLint error_pos;
 		glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &error_pos);
 		result = result && (error_pos == -1);
 
 		const char* str = (const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB);
-		size_t len = strlen(str);
+		size_t len = std::strlen(str);
 		if(len)
 		{
-			char* buf = new(tempPool) char[len + 1];
+			char* buf = NewArray<char>(tempPool, len + 1);
 			strcpy(buf, str);
 			error_string = buf;
 		}

@@ -63,7 +63,7 @@ namespace Engine
 
 	AIEntity* AIEntity::CreateCopy() const
 	{
-		return new(mapPool) AIEntity(*this);
+		return New<AIEntity>(mapPool, *this);
 	}
 
 	void AIEntity::Unload()
@@ -115,7 +115,7 @@ namespace Engine
 		parser.ReadString(path, MAX_PATH);
 		tchar* p = CharToWideChar(path);
 		_aiScript = engineAPI.aiScriptManager->CreateAIScript(p);
-		delete[] p;
+		Memory::Delete(p);
 	}
 
 	void AIEntity::WriteProperties(FileUtil::File& file, const char* indent)

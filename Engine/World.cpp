@@ -38,7 +38,7 @@ namespace Engine
 
 		for(auto it = _entities.Begin(); it != _entities.End(); ++it)
 		{
-			delete *it;
+			Memory::Delete(&(*it));
 		}
 		_entities.Clear();
 		_spl.RemoveAll();

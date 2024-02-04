@@ -143,8 +143,8 @@ namespace Engine
 			_renderer->DestroyBuffer(_patches[i].vertBuf);
 			for(int j = 0; j < GRASS_SEGMENTS; ++j)
 				_renderer->DestroyBuffer(_patches[i].grassSegments[j].grassVertBuf);
-			delete[] _patches[i].elevation;
-			delete[] _patches[i].grassData;
+			Memory::Delete(_patches[i].elevation);
+			Memory::Delete(_patches[i].grassData);
 		}
 
 		_renderer = 0;
@@ -185,10 +185,10 @@ namespace Engine
 				}
 			}
 
-			TerrainPatch* tmp = new(tempPool) TerrainPatch[n];
+			TerrainPatch* tmp = NewArray<TerrainPatch>(tempPool, n);
 			memcpy(tmp, &_patches[index], sizeof(TerrainPatch) * n);
 			memcpy(&_patches[index + 1], tmp, sizeof(TerrainPatch) * n);
-			delete[] tmp;
+			Memory::Delete(tmp);
 			// modify bounding boxes
 			for(int i = 0; i < n; ++i)
 			{
@@ -207,11 +207,11 @@ namespace Engine
 		if(!vertices)
 		{
 			_renderer->DestroyBuffer(patch.vertBuf);
-			delete[] patch.elevation;
+			Memory::Delete(patch.elevation);
 			return -1;
 		}
 
-		patch.elevation = new(mapPool) float[vert_count];
+		patch.elevation = NewArray<float>(mapPool, vert_count);
 		float x_pos = (float)index * PATCH_WIDTH;
 		patch.boundBox.minPt.set(x_pos, heights? heights[0]: 0.0f, 0.0f);
 		patch.boundBox.maxPt.set(x_pos + PATCH_WIDTH, heights? heights[0]: 0.0f, (float)PATCH_HEIGHT);
@@ -296,15 +296,15 @@ namespace Engine
 		if(!patch.vertBuf->UnmapBuffer())
 		{
 			_renderer->DestroyBuffer(patch.vertBuf);
-			delete[] patch.elevation;
+			Memory::Delete(patch.elevation);
 			_patchCount--;
 			return -1;
 		}
 
 		if(_optimizeGrassEdit)
-			patch.grassData = new(mapPool) GrassBlade[PATCH_WIDTH * 2 * PATCH_HEIGHT];
+			patch.grassData = NewArray<GrassBlade>(mapPool, PATCH_WIDTH * 2 * PATCH_HEIGHT);
 		else
-			patch.grassData = new(tempPool) GrassBlade[PATCH_WIDTH * 2 * PATCH_HEIGHT];
+			patch.grassData = NewArray<GrassBlade>(tempPool, PATCH_WIDTH * 2 * PATCH_HEIGHT);
 		for(int i = 0; i < PATCH_WIDTH * 2 * PATCH_HEIGHT; ++i)
 		{
 			patch.grassData[i].size = 0.0f;
@@ -326,10 +326,10 @@ namespace Engine
 	{
 		assert(index >= 0 && index < _patchCount);
 		_renderer->DestroyBuffer(_patches[index].vertBuf);
-		delete[] _patches[index].elevation;
+		Memory::Delete(_patches[index].elevation);
 		for(int i = 0; i < GRASS_SEGMENTS; ++i)
 			_renderer->DestroyBuffer(_patches[index].grassSegments[i].grassVertBuf);
-		delete[] _patches[index].grassData;
+		Memory::Delete(_patches[index].grassData);
 
 		if(index < _patchCount - 1)
 		{
@@ -351,10 +351,10 @@ namespace Engine
 					}
 				}
 
-				TerrainPatch* tmp = new(tempPool) TerrainPatch[n];
+				TerrainPatch* tmp = NewArray<TerrainPatch>(tempPool, n);
 				memcpy(tmp, &_patches[index + 1], sizeof(TerrainPatch) * n);
 				memcpy(&_patches[index], tmp, sizeof(TerrainPatch) * n);
-				delete[] tmp;
+				Memory::Delete(tmp);
 				for(int i = 0; i < n; ++i)
 				{
 					// modify bounding boxes
@@ -1089,7 +1089,7 @@ namespace Engine
 
 		int width = x2 - x1 + 1;
 		int height = y2 - y1 + 1;
-		vec3f* tri_normals = new(tempPool) vec3f[width * height * 2];
+		vec3f* tri_normals = NewArray<vec3f>(tempPool, width * height * 2);
 		vec3f triangle[3];
 		int n = 0;
 
@@ -1246,7 +1246,7 @@ namespace Engine
 			}
 		}
 
-		delete[] tri_normals;
+		Memory::Delete(tri_normals);
 	}
 
 	void Terrain::UpdatePatchGrassGeometry(int patch_index)

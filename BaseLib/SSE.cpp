@@ -4,7 +4,7 @@
 
 
 
-void SSE_MultMatrices4x4(float* result, const float* mat1, const float* mat2)
+/*void SSE_MultMatrices4x4(float* result, const float* mat1, const float* mat2)
 {
 	__asm
 	{
@@ -112,10 +112,10 @@ void SSE_MultMatrices4x4(float* result, const float* mat1, const float* mat2)
 
 		movaps		[eax + 0x30], xmm1
 	}
-}
+}*/
 
 
-void SSE_Intr_MultMatrices4x4(float* result, const float* mat1, const float* mat2)
+void SSE_MultMatrices4x4(float* result, const float* mat1, const float* mat2)
 {
 	__m128 m2_0 = _mm_load_ps(&mat2[0]);
 	__m128 m2_1 = _mm_load_ps(&mat2[4]);

@@ -77,7 +77,7 @@ namespace Engine
 		// if file name is an empty string, just release the resource
 		if(!key || *key == '\0')
 		{
-			delete res;
+			Delete(res);
 			return true;
 		}
 
@@ -90,7 +90,7 @@ namespace Engine
 			if(!(*it)->IsReferenced())
 			{
 				(*it)->Unload();
-				delete *it;
+				Delete(*it);
 				_resources.Remove(it);
 			}
 			return true;
@@ -123,7 +123,7 @@ namespace Engine
 		for(ResHashMap::Iterator it = _resources.Begin(); it != _resources.End(); ++it)
 		{
 			(*it)->Unload();
-			delete *it;
+			Delete(*it);
 		}
 		_resources.Clear();
 	}
@@ -143,7 +143,7 @@ namespace Engine
 			CreateTex2D(const tchar* file_name)
 				{ _fileName = file_name; }
 			ResourceBase* operator () () const
-				{ return new(mapPool) Texture2DRes(_fileName); }
+				{ return New<Texture2DRes>(mapPool, _fileName); }
 		private:
 			const tchar* _fileName;
 		};
@@ -158,7 +158,7 @@ namespace Engine
 			CreateTex3D(const tchar* file_name)
 				{ _fileName = file_name; }
 			ResourceBase* operator () () const
-				{ return new(mapPool) Texture3DRes(_fileName); }
+				{ return New<Texture3DRes>(mapPool, _fileName); }
 		private:
 			const tchar* _fileName;
 		};
@@ -173,7 +173,7 @@ namespace Engine
 			CreateTexCube(const tchar* file_name)
 				{ _fileName = file_name; }
 			ResourceBase* operator () () const
-				{ return new(mapPool) TextureCubeRes(_fileName); }
+				{ return New<TextureCubeRes>(mapPool, _fileName); }
 		private:
 			const tchar* _fileName;
 		};
@@ -232,7 +232,7 @@ namespace Engine
 			}
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) VertexShaderRes(_fileName, _macros); }
+				{ return New<VertexShaderRes>(mapPool, _fileName, _macros); }
 
 		private:
 			const tchar* _fileName;
@@ -240,7 +240,7 @@ namespace Engine
 		};
 
 		VertexShaderResPtr ptr = VertexShaderResPtr((const VertexShaderRes*)CreateRes(key, CreateVertShaderObj(file_name, macros), immediate));
-		delete[] key;
+		Memory::Delete(key);
 		return ptr;
 	}
 
@@ -257,7 +257,7 @@ namespace Engine
 			}
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) FragmentShaderRes(_fileName, _macros); }
+				{ return New<FragmentShaderRes>(mapPool, _fileName, _macros); }
 
 		private:
 			const tchar* _fileName;
@@ -265,7 +265,7 @@ namespace Engine
 		};
 
 		FragmentShaderResPtr ptr = FragmentShaderResPtr((const FragmentShaderRes*)CreateRes(key, CreateFragShaderObj(file_name, macros), immediate));
-		delete[] key;
+		Memory::Delete(key);
 		return ptr;
 	}
 
@@ -282,7 +282,7 @@ namespace Engine
 			}
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) GeometryShaderRes(_fileName, _macros); }
+				{ return New<GeometryShaderRes>(mapPool, _fileName, _macros); }
 
 		private:
 			const tchar* _fileName;
@@ -290,7 +290,7 @@ namespace Engine
 		};
 
 		GeometryShaderResPtr ptr = GeometryShaderResPtr((const GeometryShaderRes*)CreateRes(key, CreateGeomShaderObj(file_name, macros), immediate));
-		delete[] key;
+		Memory::Delete(key);
 		return ptr;
 	}
 
@@ -301,7 +301,7 @@ namespace Engine
 
 		tchar* key = MakeKey(shader.GetRes()->GetFileName(), shader.GetRes()->GetMacros());
 		bool result = ReleaseRes(key, shader.GetRes());
-		delete[] key;
+		Memory::Delete(key);
 		return result;
 	}
 
@@ -312,7 +312,7 @@ namespace Engine
 
 		tchar* key = MakeKey(shader.GetRes()->GetFileName(), shader.GetRes()->GetMacros());
 		bool result = ReleaseRes(key, shader.GetRes());
-		delete[] key;
+		Memory::Delete(key);
 		return result;
 	}
 
@@ -323,7 +323,7 @@ namespace Engine
 
 		tchar* key = MakeKey(shader.GetRes()->GetFileName(), shader.GetRes()->GetMacros());
 		bool result = ReleaseRes(key, shader.GetRes());
-		delete[] key;
+		Memory::Delete(key);
 		return result;
 	}
 
@@ -332,7 +332,7 @@ namespace Engine
 		tchar* key = MakeKey(file_name, macros);
 
 		VertexShaderResPtr ptr = VertexShaderResPtr((const VertexShaderRes*)ResourceManager::FindRes(key));
-		delete[] key;
+		Memory::Delete(key);
 		return ptr;
 	}
 
@@ -341,7 +341,7 @@ namespace Engine
 		tchar* key = MakeKey(file_name, macros);
 
 		FragmentShaderResPtr ptr = FragmentShaderResPtr((const FragmentShaderRes*)ResourceManager::FindRes(key));
-		delete[] key;
+		Memory::Delete(key);
 		return ptr;
 	}
 
@@ -350,19 +350,19 @@ namespace Engine
 		tchar* key = MakeKey(file_name, macros);
 
 		GeometryShaderResPtr ptr = GeometryShaderResPtr((const GeometryShaderRes*)ResourceManager::FindRes(key));
-		delete[] key;
+		Memory::Delete(key);
 		return ptr;
 	}
 
 	tchar* ShaderManager::MakeKey(const tchar* file_name, const char* macros)
 	{
 		// make a hash map key from concatenated file name and macros
-		tchar* key = new(tempPool) tchar[tstrlen(file_name) + strlen(macros) + 2];
+		tchar* key = NewArray<tchar>(tempPool, tstrlen(file_name) + strlen(macros) + 2);
 		tstrcpy(key, file_name);
 		tstrcat(key, _t("|"));
 		tchar* tm = CharToWideChar(macros);
 		tstrcat(key, tm);
-		delete[] tm;
+		Memory::Delete(tm);
 		return key;
 	}
 
@@ -376,7 +376,7 @@ namespace Engine
 				{ _fileName = file_name; }
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) VertexASMProgRes(_fileName); }
+				{ return New<VertexASMProgRes>(mapPool, _fileName); }
 
 		private:
 			const tchar* _fileName;
@@ -393,7 +393,7 @@ namespace Engine
 				{ _fileName = file_name; }
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) FragmentASMProgRes(_fileName); }
+				{ return New<FragmentASMProgRes>(mapPool, _fileName); }
 
 		private:
 			const tchar* _fileName;
@@ -410,7 +410,7 @@ namespace Engine
 				{ _fileName = file_name; }
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) GeometryASMProgRes(_fileName); }
+				{ return New<GeometryASMProgRes>(mapPool, _fileName); }
 
 		private:
 			const tchar* _fileName;
@@ -470,7 +470,7 @@ namespace Engine
 				{ _fileName = file_name; }
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) MaterialRes(_fileName); }
+				{ return New<MaterialRes>(mapPool, _fileName); }
 
 		private:
 			const tchar* _fileName;
@@ -481,8 +481,8 @@ namespace Engine
 
 	MaterialResPtr MaterialManager::CreateDefaultMaterial()
 	{
-		MaterialRes* mat = new(mapPool) MaterialRes(_t(""));
-		mat->_resource = new(mapPool) Material;
+		MaterialRes* mat = New<MaterialRes>(mapPool, _t(""));
+		mat->_resource = New<Material>(mapPool);
 		return MaterialResPtr(mat);
 	}
 
@@ -509,7 +509,7 @@ namespace Engine
 				{ _fileName = file_name; }
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) ModelRes(_fileName); }
+				{ return New<ModelRes>(mapPool, _fileName); }
 
 		private:
 			const tchar* _fileName;
@@ -541,7 +541,7 @@ namespace Engine
 				{ _fileName = file_name; }
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) AnimationRes(_fileName); }
+				{ return New<AnimationRes>(mapPool, _fileName); }
 
 		private:
 			const tchar* _fileName;
@@ -573,14 +573,14 @@ namespace Engine
 				{ _fileName = file_name; }
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) ModelEntityRes(_fileName); }
+				{ return New<ModelEntityRes>(mapPool, _fileName); }
 
 		private:
 			const tchar* _fileName;
 		};
 
 		const ModelEntityRes* ent = (const ModelEntityRes*)ResourceManager::CreateRes(file_name, CreateModelEntityObj(file_name), true);
-		return ModelEntityResPtr(new(mapPool) ModelEntityRes(*ent));
+		return ModelEntityResPtr(New<ModelEntityRes>(mapPool, *ent));
 	}
 
 	ModelEntity* ModelEntityManager::CreateEntityObject(const tchar* file_name)
@@ -591,7 +591,7 @@ namespace Engine
 				{ _fileName = file_name; }
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) ModelEntityRes(_fileName); }
+				{ return New<ModelEntityRes>(mapPool, _fileName); }
 
 		private:
 			const tchar* _fileName;
@@ -606,13 +606,12 @@ namespace Engine
 		if(!model_entity || !model_entity.GetRes()->IsLoaded())
 			return ModelEntityResPtr::null;
 
-		return ModelEntityResPtr(new(mapPool) ModelEntityRes(*model_entity.GetRes()));
+		return ModelEntityResPtr(New<ModelEntityRes>(mapPool, *model_entity.GetRes()));
 	}
 
 	void ModelEntityManager::ReleaseModelEntity(ModelEntityResPtr model_entity)
 	{
-		if(model_entity.GetRes())
-			delete model_entity;
+		Delete(model_entity.GetRes());
 	}
 
 	//=============================================================================================
@@ -625,14 +624,14 @@ namespace Engine
 				{ _fileName = file_name; }
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) PartSysRes(_fileName); }
+				{ return New<PartSysRes>(mapPool, _fileName); }
 
 		private:
 			const tchar* _fileName;
 		};
 
 		const PartSysRes* ent = (const PartSysRes*)ResourceManager::CreateRes(file_name, CreatePartSysObj(file_name), true);
-		return PartSysResPtr(new(mapPool) PartSysRes(*ent));
+		return PartSysResPtr(New<PartSysRes>(mapPool, *ent));
 	}
 
 	ParticleSystem* PartSysManager::CreateParticleSystemObject(const tchar* file_name)
@@ -643,14 +642,14 @@ namespace Engine
 				{ _fileName = file_name; }
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) PartSysRes(_fileName); }
+				{ return New<PartSysRes>(mapPool, _fileName); }
 
 		private:
 			const tchar* _fileName;
 		};
 
 		PartSysRes* ps = (PartSysRes*)ResourceManager::CreateRes(file_name, CreatePartSysObj(file_name), true);
-		return new(mapPool) ParticleSystem(*ps->GetResource());
+		return New<ParticleSystem>(mapPool, *ps->GetResource());
 	}
 
 	PartSysResPtr PartSysManager::CreateCopy(PartSysResPtr part_sys)
@@ -658,13 +657,12 @@ namespace Engine
 		if(!part_sys || !part_sys.GetRes()->IsLoaded())
 			return PartSysResPtr::null;
 
-		return PartSysResPtr(new(mapPool) PartSysRes(*part_sys.GetRes()));
+		return PartSysResPtr(New<PartSysRes>(mapPool, *part_sys.GetRes()));
 	}
 
 	void PartSysManager::ReleasePartSys(PartSysResPtr part_sys)
 	{
-		if(part_sys.GetRes())
-			delete part_sys;
+		Delete(part_sys.GetRes());
 	}
 
 	//=============================================================================================
@@ -677,7 +675,7 @@ namespace Engine
 				{ _fileName = file_name; }
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) SoundRes(_fileName); }
+				{ return New<SoundRes>(mapPool, _fileName); }
 
 		private:
 			const tchar* _fileName;
@@ -709,7 +707,7 @@ namespace Engine
 				{ _fileName = file_name; }
 
 			ResourceBase* operator () () const
-				{ return new(mapPool) AIScriptRes(_fileName); }
+				{ return New<AIScriptRes>(mapPool, _fileName); }
 
 		private:
 			const tchar* _fileName;

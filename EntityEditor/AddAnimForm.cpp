@@ -41,7 +41,7 @@ namespace EntityEditor
 		{
 			tchar* file_name = EditorUtil::GetRelativePath(_openFileDialog->FileName);
 			_textAnimationFile->Text = gcnew String(file_name);
-			delete[] file_name;
+			Memory::Delete(file_name);
 		}
 	}
 

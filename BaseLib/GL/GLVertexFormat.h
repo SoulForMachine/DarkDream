@@ -33,10 +33,10 @@ namespace GL
 	class BASELIB_API VertexFormat
 	{
 	public:
-
-	private:
 		VertexFormat();
 		~VertexFormat();
+
+	private:
 		VertexAttribDesc* _descriptors;
 		int _count;
 

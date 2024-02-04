@@ -35,7 +35,7 @@ namespace EntityEditor
 		{
 			tchar* file_name = EditorUtil::GetRelativePath(file_dlg->FileName);
 			String^ result = gcnew String(file_name);
-			delete[] file_name;
+			Memory::Delete(file_name);
 			return result;
 		}
 		else
@@ -56,7 +56,7 @@ namespace EntityEditor
 	{
 		char* name = ConvertString<char>(Name);
 		entity.SetName(name);
-		delete[] name;
+		Memory::Delete(name);
 	}
 
 	void StaticEntityProperties::SetProperties(const Engine::ModelEntity& entity)
@@ -128,7 +128,7 @@ namespace EntityEditor
 
 		tchar* path = ConvertString<tchar>(AIScript);
 		ai.SetAIScript(path);
-		delete[] path;
+		Memory::Delete(path);
 	}
 
 	void WeaponEntityProperties::SetProperties(const Engine::ModelEntity& entity)
@@ -164,7 +164,7 @@ namespace EntityEditor
 
 		tchar* path = ConvertString<tchar>(MuzzleEffect);
 		weapon.SetMuzzleEffect(path);
-		delete[] path;
+		Memory::Delete(path);
 	}
 
 	void ItemEntityProperties::SetProperties(const Engine::ModelEntity& entity)
@@ -207,6 +207,7 @@ namespace EntityEditor
 		Unload();
 
 		tchar* fn = EditorUtil::GetRelativePath(file_name);
+		::Console::PrintLn("testing");
 		::Console::PrintLn("Loading entity: %ls", fn);
 		_entity = engineAPI->modelEntityManager->CreateEntityObject(fn);
 		CreateProperties();
@@ -221,13 +222,13 @@ namespace EntityEditor
 			_entity->SetupModelData();
 			_modified = false;
 			_fileName = file_name;
-			delete[] fn;
+			Memory::Delete(fn);
 			return true;
 		}
 		else
 		{
 			::Console::PrintError("Failed to load entity: %ls", fn);
-			delete[] fn;
+			Memory::Delete(fn);
 			return false;
 		}
 	}
@@ -251,7 +252,7 @@ namespace EntityEditor
 		{
 			::Console::PrintError("Failed to save entity: %ls", fn);
 		}
-		delete[] fn;
+		Memory::Delete(fn);
 
 		return result;
 	}

@@ -14,56 +14,56 @@ namespace Engine
 	EngineAPI* CreateEngineAPI()
 	{
 		// create engine sub-systems
-		engineAPI.fileSystem = new(mainPool) FileSystem;
-		engineAPI.inputSystem = new(mainPool) InputSystem;
-		engineAPI.renderSystem = new(mainPool) RenderSystem;
-		engineAPI.world = new(mainPool) World;
+		engineAPI.fileSystem = New<FileSystem>(mainPool);
+		engineAPI.inputSystem = New<InputSystem>(mainPool);
+		engineAPI.renderSystem = New<RenderSystem>(mainPool);
+		engineAPI.world = New<World>(mainPool);
 
 		// initialize resource managers
-		engineAPI.shaderManager = new(mainPool) ShaderManager;
-		engineAPI.materialManager = new(mainPool) MaterialManager;
-		engineAPI.asmProgManager = new(mainPool) ASMProgManager;
-		engineAPI.textureManager = new(mainPool) TextureManager;
-		engineAPI.modelManager = new(mainPool) ModelManager;
-		engineAPI.modelEntityManager = new(mainPool) ModelEntityManager;
-		engineAPI.animationManager = new(mainPool) AnimationManager;
-		engineAPI.partSysManager = new(mainPool) PartSysManager;		
-		engineAPI.aiScriptManager = new(mainPool) AIScriptManager;
-		engineAPI.soundManager = new(mainPool) SoundManager;
+		engineAPI.shaderManager = New<ShaderManager>(mainPool);
+		engineAPI.materialManager = New<MaterialManager>(mainPool);
+		engineAPI.asmProgManager = New<ASMProgManager>(mainPool);
+		engineAPI.textureManager = New<TextureManager>(mainPool);
+		engineAPI.modelManager = New<ModelManager>(mainPool);
+		engineAPI.modelEntityManager = New<ModelEntityManager>(mainPool);
+		engineAPI.animationManager = New<AnimationManager>(mainPool);
+		engineAPI.partSysManager = New<PartSysManager>(mainPool);		
+		engineAPI.aiScriptManager = New<AIScriptManager>(mainPool);
+		engineAPI.soundManager = New<SoundManager>(mainPool);
 
 		return &engineAPI;
 	}
 
 	void DestroyEngineAPI(EngineAPI* api)
 	{
-		delete engineAPI.shaderManager;
+		Delete(engineAPI.shaderManager);
 		engineAPI.shaderManager = 0;
-		delete engineAPI.materialManager;
+		Delete(engineAPI.materialManager);
 		engineAPI.materialManager = 0;
-		delete engineAPI.asmProgManager;
+		Delete(engineAPI.asmProgManager);
 		engineAPI.asmProgManager = 0;
-		delete engineAPI.textureManager;
+		Delete(engineAPI.textureManager);
 		engineAPI.textureManager = 0;
-		delete engineAPI.modelManager;
+		Delete(engineAPI.modelManager);
 		engineAPI.modelManager = 0;
-		delete engineAPI.modelEntityManager;
+		Delete(engineAPI.modelEntityManager);
 		engineAPI.modelEntityManager = 0;
-		delete engineAPI.animationManager;
+		Delete(engineAPI.animationManager);
 		engineAPI.animationManager = 0;
-		delete engineAPI.partSysManager;
+		Delete(engineAPI.partSysManager);
 		engineAPI.partSysManager = 0;
-		delete engineAPI.aiScriptManager;
+		Delete(engineAPI.aiScriptManager);
 		engineAPI.aiScriptManager = 0;
-		delete engineAPI.soundManager;
+		Delete(engineAPI.soundManager);
 		engineAPI.soundManager = 0;
 
-		delete engineAPI.fileSystem;
+		Delete(engineAPI.fileSystem);
 		engineAPI.fileSystem = 0;
-		delete engineAPI.inputSystem;
+		Delete(engineAPI.inputSystem);
 		engineAPI.inputSystem = 0;
-		delete engineAPI.renderSystem;
+		Delete(engineAPI.renderSystem);
 		engineAPI.renderSystem = 0;
-		delete engineAPI.world;
+		Delete(engineAPI.world);
 		engineAPI.world = 0;
 	}
 

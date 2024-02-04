@@ -13,12 +13,12 @@ namespace MapEditor
 	ActionPlaceObjects::ActionPlaceObjects(EM_PlaceObject::Parameters^ params)
 	{
 		_parameters = params;
-		_undoData = new(mainPool) StaticArray<ActionPlaceObjects_UndoData>;
+		_undoData = New<StaticArray<ActionPlaceObjects_UndoData>>(mainPool);
 	}
 
 	ActionPlaceObjects::~ActionPlaceObjects()
 	{
-		delete _undoData;
+		Delete(_undoData);
 	}
 
 	bool ActionPlaceObjects::BeginAction()

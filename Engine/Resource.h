@@ -97,19 +97,18 @@ namespace Engine
 	class ENGINE_API Resource: public ResourceBase
 	{
 	public:
+		Resource(const tchar* file_name);
+		virtual ~Resource() = 0;
+
 		typedef _Res ResType;
 
 		const _Res* GetResource() const
 			{ return _resource; }
-		bool IsLoaded() const
-			{ return (_resource != _null); }
+		bool IsLoaded() const;
 		const tchar* GetFileName() const
 			{ return _fileName; }
 
 	protected:
-		Resource(const tchar* file_name);
-		virtual ~Resource() = 0;
-
 		void IncRefCount()
 			{ ++_refCount; }
 		void DecRefCount()
@@ -135,15 +134,16 @@ namespace Engine
 
 	class ENGINE_API Texture2DRes: public Resource<GL::Texture2D>
 	{
+	public:
+		Texture2DRes(const tchar* file_name);
+		~Texture2DRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		Texture2DRes(const tchar* file_name);
-		~Texture2DRes();
-
 		GL::Texture2D* LoadTexture2D(const Image& image);
 
 		static GL::Texture2D* CreateDefault();
@@ -156,15 +156,16 @@ namespace Engine
 
 	class ENGINE_API Texture3DRes: public Resource<GL::Texture3D>
 	{
+	public:
+		Texture3DRes(const tchar* file_name);
+		~Texture3DRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		Texture3DRes(const tchar* file_name);
-		~Texture3DRes();
-
 		GL::Texture3D* LoadTexture3D(const Image& image);
 
 		static GL::Texture3D* CreateDefault();
@@ -177,15 +178,16 @@ namespace Engine
 
 	class ENGINE_API TextureCubeRes: public Resource<GL::TextureCube>
 	{
+	public:
+		TextureCubeRes(const tchar* file_name);
+		~TextureCubeRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		TextureCubeRes(const tchar* file_name);
-		~TextureCubeRes();
-
 		GL::TextureCube* LoadTextureCube(const Image& image);
 
 		static GL::TextureCube* CreateDefault();
@@ -202,12 +204,12 @@ namespace Engine
 	class ENGINE_API ShaderRes: public Resource<GL::GLSLShader, _ShaderType>
 	{
 	public:
-		const char* GetMacros() const
-			{ return _macros; }
-	protected:
 		ShaderRes(const tchar* file_name, const char* macros);
 		~ShaderRes();
 
+		const char* GetMacros() const
+			{ return _macros; }
+	protected:
 		bool Load();
 
 		const char* _macros;
@@ -215,15 +217,16 @@ namespace Engine
 
 	class ENGINE_API VertexShaderRes: public ShaderRes<GL::OBJ_GLSL_VERTEX_SHADER>
 	{
+	public:
+		VertexShaderRes(const tchar* file_name, const char* macros);
+		~VertexShaderRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		VertexShaderRes(const tchar* file_name, const char* macros);
-		~VertexShaderRes();
-
 		static GL::GLSLShader* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
@@ -234,15 +237,16 @@ namespace Engine
 
 	class ENGINE_API FragmentShaderRes: public ShaderRes<GL::OBJ_GLSL_FRAGMENT_SHADER>
 	{
+	public:
+		FragmentShaderRes(const tchar* file_name, const char* macros);
+		~FragmentShaderRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		FragmentShaderRes(const tchar* file_name, const char* macros);
-		~FragmentShaderRes();
-
 		static GL::GLSLShader* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
@@ -253,15 +257,16 @@ namespace Engine
 
 	class ENGINE_API GeometryShaderRes: public ShaderRes<GL::OBJ_GLSL_GEOMETRY_SHADER>
 	{
+	public:
+		GeometryShaderRes(const tchar* file_name, const char* macros);
+		~GeometryShaderRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		GeometryShaderRes(const tchar* file_name, const char* macros);
-		~GeometryShaderRes();
-
 		static GL::GLSLShader* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
@@ -275,25 +280,27 @@ namespace Engine
 	template <GL::ObjectType _ShaderType>
 	class ENGINE_API ASMProgRes: public Resource<GL::ASMProgram, _ShaderType>
 	{
-	protected:
+	public:
 		ASMProgRes(const tchar* file_name);
 		~ASMProgRes();
 
+	protected:
 		bool Load();
 	};
 
 
 	class ENGINE_API VertexASMProgRes: public ASMProgRes<GL::OBJ_ASM_VERTEX_PROGRAM>
 	{
+	public:
+		VertexASMProgRes(const tchar* file_name);
+		~VertexASMProgRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		VertexASMProgRes(const tchar* file_name);
-		~VertexASMProgRes();
-
 		static GL::ASMProgram* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
@@ -304,15 +311,16 @@ namespace Engine
 
 	class ENGINE_API FragmentASMProgRes: public ASMProgRes<GL::OBJ_ASM_FRAGMENT_PROGRAM>
 	{
+	public:
+		FragmentASMProgRes(const tchar* file_name);
+		~FragmentASMProgRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		FragmentASMProgRes(const tchar* file_name);
-		~FragmentASMProgRes();
-
 		static GL::ASMProgram* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
@@ -323,15 +331,16 @@ namespace Engine
 
 	class ENGINE_API GeometryASMProgRes: public ASMProgRes<GL::OBJ_ASM_GEOMETRY_PROGRAM>
 	{
+	public:
+		GeometryASMProgRes(const tchar* file_name);
+		~GeometryASMProgRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		GeometryASMProgRes(const tchar* file_name);
-		~GeometryASMProgRes();
-
 		static GL::ASMProgram* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
@@ -344,15 +353,16 @@ namespace Engine
 
 	class ENGINE_API ModelRes: public Resource<Model>
 	{
+	public:
+		ModelRes(const tchar* file_name);
+		~ModelRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		ModelRes(const tchar* file_name);
-		~ModelRes();
-
 		static Model* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
@@ -366,6 +376,9 @@ namespace Engine
 	class ENGINE_API MaterialRes: public Resource<Material>
 	{
 	public:
+		MaterialRes(const tchar* file_name);
+		~MaterialRes();
+
 		/*
 			If set to true, loads a copy of a default material if requested material loading fails. Otherwise,
 			it points to null material. This is intended for use by editors to prevent changing null material.
@@ -379,9 +392,6 @@ namespace Engine
 		void Unload();
 
 	private:
-		MaterialRes(const tchar* file_name);
-		~MaterialRes();
-
 		static Material* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
@@ -396,15 +406,16 @@ namespace Engine
 
 	class ENGINE_API AIScriptRes: public Resource<int>
 	{
+	public:
+		AIScriptRes(const tchar* file_name);
+		~AIScriptRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		AIScriptRes(const tchar* file_name);
-		~AIScriptRes();
-
 		static int* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
@@ -418,6 +429,10 @@ namespace Engine
 	class ENGINE_API ModelEntityRes: public Resource<ModelEntity>
 	{
 	public:
+		ModelEntityRes(const tchar* file_name);
+		ModelEntityRes(const ModelEntityRes& res);
+		~ModelEntityRes();
+
 		bool IsEntityReferenced(const tchar* file_name); //! premesti u ModelEntity
 
 	protected:
@@ -426,10 +441,6 @@ namespace Engine
 		void Unload();
 
 	private:
-		ModelEntityRes(const tchar* file_name);
-		ModelEntityRes(const ModelEntityRes& res);
-		~ModelEntityRes();
-
 		static ModelEntity* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
@@ -442,15 +453,16 @@ namespace Engine
 
 	class ENGINE_API AnimationRes: public Resource<Animation>
 	{
+	public:
+		AnimationRes(const tchar* file_name);
+		~AnimationRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		AnimationRes(const tchar* file_name);
-		~AnimationRes();
-
 		static Animation* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
@@ -463,15 +475,16 @@ namespace Engine
 
 	class ENGINE_API SoundRes: public Resource<int>
 	{
+	public:
+		SoundRes(const tchar* file_name);
+		~SoundRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		SoundRes(const tchar* file_name);
-		~SoundRes();
-
 		static int* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();
@@ -484,16 +497,17 @@ namespace Engine
 
 	class ENGINE_API PartSysRes: public Resource<ParticleSystem>
 	{
+	public:
+		PartSysRes(const tchar* file_name);
+		PartSysRes(const PartSysRes& res);
+		~PartSysRes();
+
 	protected:
 		bool Load();
 		bool LoadDefault();
 		void Unload();
 
 	private:
-		PartSysRes(const tchar* file_name);
-		PartSysRes(const PartSysRes& res);
-		~PartSysRes();
-
 		static ParticleSystem* CreateDefault();
 		static bool CreateNull();
 		static void DestroyNull();

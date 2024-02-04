@@ -14,7 +14,7 @@ namespace GL
 
 	// ================= GLSLShader ====================
 
-	bool GLSLShader::Create(ObjectType type, size_t count, const char** source, const char*& error_string)
+	bool GLSLShader::Create(ObjectType type, int count, const char** source, const char*& error_string)
 	{
 		error_string = 0;
 		if(!source)
@@ -46,7 +46,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 		if(log_len > 1)
 		{
-			char* buf = new(tempPool) char[log_len];
+			char* buf = NewArray<char>(tempPool, log_len);
 			glGetShaderInfoLog(_id, log_len, 0, buf);
 			OPENGL_ERROR_CHECK
 			error_string = buf;
@@ -120,7 +120,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 		if(log_len > 1)
 		{
-			char* buf = new(tempPool) char[log_len];
+			char* buf = NewArray<char>(tempPool, log_len);
 			glGetProgramInfoLog(_id, log_len, 0, buf);
 			OPENGL_ERROR_CHECK
 			error_string = buf;
@@ -145,7 +145,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 		if(log_len > 1)
 		{
-			char* buf = new(tempPool) char[log_len];
+			char* buf = NewArray<char>(tempPool, log_len);
 			glGetProgramInfoLog(_id, log_len, 0, buf);
 			OPENGL_ERROR_CHECK
 			info_string = buf;
@@ -213,7 +213,7 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::TransformFeedbackVaryings(size_t count, const char** varyings, TFBufferMode mode)
+	void GLSLProgram::TransformFeedbackVaryings(int count, const char** varyings, TFBufferMode mode)
 	{
 		glTransformFeedbackVaryingsEXT(_id, count, varyings, mode);
 		OPENGL_ERROR_CHECK
@@ -260,28 +260,28 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::Uniform1FArray(int location, size_t count, const float* value)
+	void GLSLProgram::Uniform1FArray(int location, int count, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniform1fv(location, count, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::Uniform2FArray(int location, size_t count, const float* value)
+	void GLSLProgram::Uniform2FArray(int location, int count, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniform2fv(location, count, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::Uniform3FArray(int location, size_t count, const float* value)
+	void GLSLProgram::Uniform3FArray(int location, int count, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniform3fv(location, count, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::Uniform4FArray(int location, size_t count, const float* value)
+	void GLSLProgram::Uniform4FArray(int location, int count, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniform4fv(location, count, value);
@@ -316,28 +316,28 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::Uniform1IArray(int location, size_t count, const int* value)
+	void GLSLProgram::Uniform1IArray(int location, int count, const int* value)
 	{
 		STATE_MACHINE_HACK
 		glUniform1iv(location, count, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::Uniform2IArray(int location, size_t count, const int* value)
+	void GLSLProgram::Uniform2IArray(int location, int count, const int* value)
 	{
 		STATE_MACHINE_HACK
 		glUniform2iv(location, count, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::Uniform3IArray(int location, size_t count, const int* value)
+	void GLSLProgram::Uniform3IArray(int location, int count, const int* value)
 	{
 		STATE_MACHINE_HACK
 		glUniform3iv(location, count, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::Uniform4IArray(int location, size_t count, const int* value)
+	void GLSLProgram::Uniform4IArray(int location, int count, const int* value)
 	{
 		STATE_MACHINE_HACK
 		glUniform4iv(location, count, value);
@@ -372,91 +372,91 @@ namespace GL
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::Uniform1UIArray(int location, size_t count, const uint* value)
+	void GLSLProgram::Uniform1UIArray(int location, int count, const uint* value)
 	{
 		STATE_MACHINE_HACK
 		glUniform1uivEXT(location, count, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::Uniform2UIArray(int location, size_t count, const uint* value)
+	void GLSLProgram::Uniform2UIArray(int location, int count, const uint* value)
 	{
 		STATE_MACHINE_HACK
 		glUniform2uivEXT(location, count, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::Uniform3UIArray(int location, size_t count, const uint* value)
+	void GLSLProgram::Uniform3UIArray(int location, int count, const uint* value)
 	{
 		STATE_MACHINE_HACK
 		glUniform3uivEXT(location, count, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::Uniform4UIArray(int location, size_t count, const uint* value)
+	void GLSLProgram::Uniform4UIArray(int location, int count, const uint* value)
 	{
 		STATE_MACHINE_HACK
 		glUniform4uivEXT(location, count, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::UniformMatrix2x2(int location, size_t count, bool transpose, const float* value)
+	void GLSLProgram::UniformMatrix2x2(int location, int count, bool transpose, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniformMatrix2fv(location, count, transpose, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::UniformMatrix2x3(int location, size_t count, bool transpose, const float* value)
+	void GLSLProgram::UniformMatrix2x3(int location, int count, bool transpose, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniformMatrix2x3fv(location, count, transpose, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::UniformMatrix2x4(int location, size_t count, bool transpose, const float* value)
+	void GLSLProgram::UniformMatrix2x4(int location, int count, bool transpose, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniformMatrix2x4fv(location, count, transpose, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::UniformMatrix3x2(int location, size_t count, bool transpose, const float* value)
+	void GLSLProgram::UniformMatrix3x2(int location, int count, bool transpose, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniformMatrix3x2fv(location, count, transpose, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::UniformMatrix3x3(int location, size_t count, bool transpose, const float* value)
+	void GLSLProgram::UniformMatrix3x3(int location, int count, bool transpose, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniformMatrix3fv(location, count, transpose, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::UniformMatrix3x4(int location, size_t count, bool transpose, const float* value)
+	void GLSLProgram::UniformMatrix3x4(int location, int count, bool transpose, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniformMatrix3x4fv(location, count, transpose, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::UniformMatrix4x2(int location, size_t count, bool transpose, const float* value)
+	void GLSLProgram::UniformMatrix4x2(int location, int count, bool transpose, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniformMatrix4x2fv(location, count, transpose, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::UniformMatrix4x3(int location, size_t count, bool transpose, const float* value)
+	void GLSLProgram::UniformMatrix4x3(int location, int count, bool transpose, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniformMatrix4x3fv(location, count, transpose, value);
 		OPENGL_ERROR_CHECK
 	}
 
-	void GLSLProgram::UniformMatrix4x4(int location, size_t count, bool transpose, const float* value)
+	void GLSLProgram::UniformMatrix4x4(int location, int count, bool transpose, const float* value)
 	{
 		STATE_MACHINE_HACK
 		glUniformMatrix4fv(location, count, transpose, value);

@@ -1,0 +1,10 @@
+﻿  Vcpkg is unable to link because we cannot decide between Release and Debug libraries. Please define the property VcpkgConfiguration to be 'Release' or 'Debug' (currently 'Template').
+  AIEntity.cpp
+D:\Work\Projects\DarkDream\Engine\AIEntity.cpp(116,12): error C2440: 'initializing': cannot convert from 'wchar_t *' to 'tchar *'
+D:\Work\Projects\DarkDream\Engine\AIEntity.cpp(116,12): message : Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+  Animation.cpp
+  BgLayer.cpp
+  BgLayerRenderer.cpp
+  Camera.cpp
+  DebugRenderer.cpp
+  Engine.cpp

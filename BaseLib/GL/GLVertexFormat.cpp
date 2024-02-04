@@ -1,5 +1,6 @@
 
 #include "GLVertexFormat.h"
+#include <BaseLib/Memory.h>
 
 
 namespace GL
@@ -13,7 +14,7 @@ namespace GL
 
 	VertexFormat::~VertexFormat()
 	{
-		delete[] _descriptors;
+		Memory::Delete(_descriptors);
 		_count = 0;
 	}
 

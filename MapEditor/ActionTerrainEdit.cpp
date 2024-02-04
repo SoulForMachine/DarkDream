@@ -20,15 +20,15 @@ namespace MapEditor
 		_strengthMatrix = 0;
 		_oldElevation = 0;
 		_undoElevation = 0;
-		_undoObjects = new(mainPool) HashMap<Entity*, ActionTerrainEdit_ObjUndoData>;
+		_undoObjects = New<HashMap<Entity*, ActionTerrainEdit_ObjUndoData>>(mainPool);
 	}
 
 	ActionTerrainEdit::~ActionTerrainEdit()
 	{
-		delete[] _oldElevation;
-		delete[] _undoElevation;
-		delete[] _strengthMatrix;
-		delete _undoObjects;
+		Memory::Delete(_oldElevation);
+		Memory::Delete(_undoElevation);
+		Memory::Delete(_strengthMatrix);
+		Delete(_undoObjects);
 	}
 
 	bool ActionTerrainEdit::BeginAction()
@@ -37,7 +37,7 @@ namespace MapEditor
 		Terrain& terrain = engineAPI->world->GetTerrain();
 		const Terrain::TerrainPatch* patches = terrain.GetPatches();
 		int patch_count = terrain.GetPatchCount();
-		_oldElevation = new(tempPool) float[(patch_count * Terrain::PATCH_WIDTH + 1) * (Terrain::PATCH_HEIGHT + 1)];
+		_oldElevation = NewArray<float>(tempPool, (patch_count * Terrain::PATCH_WIDTH + 1) * (Terrain::PATCH_HEIGHT + 1));
 		terrain.GetElevation(0, 0, patch_count * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _oldElevation);
 
 		GetBrushRect(_undoRect);
@@ -68,7 +68,7 @@ namespace MapEditor
 
 		// save only modified part of terrain for undo
 		int patch_count = engineAPI->world->GetTerrain().GetPatchCount();
-		_undoElevation = new(mainPool) float[(_undoRect.Width + 1) * (_undoRect.Height + 1)];
+		_undoElevation = NewArray<float>(mainPool, (_undoRect.Width + 1) * (_undoRect.Height + 1));
 		int n = 0;
 		for(int y = _undoRect.Top; y <= _undoRect.Bottom; ++y)
 		{
@@ -78,9 +78,9 @@ namespace MapEditor
 			}
 		}
 
-		delete[] _oldElevation;
+		Memory::Delete(_oldElevation);
 		_oldElevation = 0;
-		delete[] _strengthMatrix;
+		Memory::Delete(_strengthMatrix);
 		_strengthMatrix = 0;
 	}
 
@@ -93,9 +93,9 @@ namespace MapEditor
 			terrain.SetElevation(0, 0, patch_count * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _oldElevation);
 		}
 
-		delete[] _oldElevation;
+		Memory::Delete(_oldElevation);
 		_oldElevation = 0;
-		delete[] _strengthMatrix;
+		Memory::Delete(_strengthMatrix);
 		_strengthMatrix = 0;
 	}
 
@@ -133,11 +133,11 @@ namespace MapEditor
 
 	void ActionTerrainEdit::Undo()
 	{
-		float* cur_elev = new(tempPool) float[(_undoRect.Width + 1) * (_undoRect.Height + 1)];
+		float* cur_elev = NewArray<float>(tempPool, (_undoRect.Width + 1) * (_undoRect.Height + 1));
 		engineAPI->world->GetTerrain().GetElevation(_undoRect.X, _undoRect.Y, _undoRect.Right, _undoRect.Bottom, cur_elev);
 		engineAPI->world->GetTerrain().SetElevation(_undoRect.X, _undoRect.Y, _undoRect.Right, _undoRect.Bottom, _undoElevation);
 		memcpy(_undoElevation, cur_elev, (_undoRect.Width + 1) * (_undoRect.Height + 1) * sizeof(float));
-		delete[] cur_elev;
+		Memory::Delete(cur_elev);
 
 		// objects
 		for(HashMap<Engine::Entity*, ActionTerrainEdit_ObjUndoData>::Iterator it = _undoObjects->Begin(); it != _undoObjects->End(); ++it)
@@ -160,8 +160,8 @@ namespace MapEditor
 
 	void ActionTerrainEdit::BuildRaiseLowerMatrix(System::Drawing::Rectangle rect)
 	{
-		delete[] _strengthMatrix;
-		_strengthMatrix = new(tempPool) float[(rect.Width + 1)* (rect.Height + 1)];
+		Memory::Delete(_strengthMatrix);
+		_strengthMatrix = NewArray<float>(tempPool, (rect.Width + 1)* (rect.Height + 1));
 		vec2f center(_parameters->posX, _parameters->posZ);
 		float inner_rad = _parameters->hardness * _parameters->radius;
 		int n = 0;
@@ -190,13 +190,13 @@ namespace MapEditor
 	void ActionTerrainEdit::BuildSmoothMatrix(System::Drawing::Rectangle rect)
 	{
 		int count = (rect.Width + 1) * (rect.Height + 1);
-		delete[] _strengthMatrix;
-		_strengthMatrix = new(tempPool) float[count];
+		Memory::Delete(_strengthMatrix);
+		_strengthMatrix = NewArray<float>(tempPool, count);
 		vec2f center(_parameters->posX, _parameters->posZ);
 		float inner_rad = _parameters->hardness * _parameters->radius;
 		int n = 0;
 
-		float* elevation = new(tempPool) float[count];
+		float* elevation = NewArray<float>(tempPool, count);
 		engineAPI->world->GetTerrain().GetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, elevation);
 
 		for(int y = rect.Top; y <= rect.Bottom; ++y)
@@ -277,14 +277,14 @@ namespace MapEditor
 			}
 		}
 
-		delete[] elevation;
+		Memory::Delete(elevation);
 	}
 
 	void ActionTerrainEdit::BuildNoiseMatrix(System::Drawing::Rectangle rect)
 	{
 		int count = (rect.Width + 1) * (rect.Height + 1);
-		delete[] _strengthMatrix;
-		_strengthMatrix = new(tempPool) float[count];
+		Memory::Delete(_strengthMatrix);
+		_strengthMatrix = NewArray<float>(tempPool, count);
 		vec2f center(_parameters->posX, _parameters->posZ);
 		float inner_rad = _parameters->hardness * _parameters->radius;
 		int n = 0;
@@ -322,13 +322,13 @@ namespace MapEditor
 	void ActionTerrainEdit::BuildPlateauMatrix(System::Drawing::Rectangle rect)
 	{
 		int count = (rect.Width + 1) * (rect.Height + 1);
-		delete[] _strengthMatrix;
-		_strengthMatrix = new(tempPool) float[count];
+		Memory::Delete(_strengthMatrix);
+		_strengthMatrix = NewArray<float>(tempPool, count);
 		vec2f center(_parameters->posX, _parameters->posZ);
 		float inner_rad = _parameters->hardness * _parameters->radius;
 		int n = 0;
 
-		float* elevation = new(tempPool) float[count];
+		float* elevation = NewArray<float>(tempPool, count);
 		engineAPI->world->GetTerrain().GetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, elevation);
 
 		float height = (GetAsyncKeyState(VK_SHIFT) & 0x8000)? - _parameters->height: _parameters->height;
@@ -359,19 +359,19 @@ namespace MapEditor
 			}
 		}
 
-		delete[] elevation;
+		Memory::Delete(elevation);
 	}
 
 	void ActionTerrainEdit::BuildRelativePlateauMatrix(System::Drawing::Rectangle rect)
 	{
 		int count = (rect.Width + 1) * (rect.Height + 1);
-		delete[] _strengthMatrix;
-		_strengthMatrix = new(tempPool) float[count];
+		Memory::Delete(_strengthMatrix);
+		_strengthMatrix = NewArray<float>(tempPool, count);
 		vec2f center(_parameters->posX, _parameters->posZ);
 		float inner_rad = _parameters->hardness * _parameters->radius;
 		int n = 0;
 
-		float* elevation = new(tempPool) float[count];
+		float* elevation = NewArray<float>(tempPool, count);
 		engineAPI->world->GetTerrain().GetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, elevation);
 
 		float height = (GetAsyncKeyState(VK_SHIFT) & 0x8000)? - _parameters->height: _parameters->height;
@@ -406,7 +406,7 @@ namespace MapEditor
 			}
 		}
 
-		delete[] elevation;
+		Memory::Delete(elevation);
 	}
 
 	void ActionTerrainEdit::UpdateRaiseLower(System::Drawing::Rectangle rect, float dt)
@@ -417,13 +417,13 @@ namespace MapEditor
 			dt = -dt;
 
 		int count = (rect.Width + 1) * (rect.Height + 1);
-		float* offsets = new(tempPool) float[count];
+		float* offsets = NewArray<float>(tempPool, count);
 		for(int n = 0; n < count; ++n)
 		{
 			offsets[n] = _strengthMatrix[n] * dt;
 		}
 		engineAPI->world->GetTerrain().OffsetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, offsets);
-		delete[] offsets;
+		Memory::Delete(offsets);
 	}
 
 	void ActionTerrainEdit::UpdateSmooth(System::Drawing::Rectangle rect, float dt)
@@ -431,13 +431,13 @@ namespace MapEditor
 		BuildSmoothMatrix(rect);
 
 		int count = (rect.Width + 1) * (rect.Height + 1);
-		float* offsets = new(tempPool) float[count];
+		float* offsets = NewArray<float>(tempPool, count);
 		for(int i = 0; i < count; ++i)
 		{
 			offsets[i] = _strengthMatrix[i] * dt;
 		}
 		engineAPI->world->GetTerrain().OffsetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, offsets);
-		delete[] offsets;
+		Memory::Delete(offsets);
 	}
 
 	void ActionTerrainEdit::UpdateNoise(System::Drawing::Rectangle rect, float dt)
@@ -448,13 +448,13 @@ namespace MapEditor
 			dt = -dt;
 
 		int count = (rect.Width + 1) * (rect.Height + 1);
-		float* offsets = new(tempPool) float[count];
+		float* offsets = NewArray<float>(tempPool, count);
 		for(int i = 0; i < count; ++i)
 		{
 			offsets[i] = _strengthMatrix[i] * dt;
 		}
 		engineAPI->world->GetTerrain().OffsetElevation(rect.X, rect.Y, rect.Right, rect.Bottom, offsets);
-		delete[] offsets;
+		Memory::Delete(offsets);
 	}
 
 	void ActionTerrainEdit::UpdatePlateau(System::Drawing::Rectangle rect, float dt)
@@ -486,7 +486,7 @@ namespace MapEditor
 		int ter_w = patch_count * Terrain::PATCH_WIDTH + 1;
 
 		int count = (_undoRect.Width + 1) * (_undoRect.Height + 1);
-		float* elevation = new(tempPool) float[count];
+		float* elevation = NewArray<float>(tempPool, count);
 
 		float inner_rad = _parameters->hardness * _parameters->radius;
 		int n = 0;
@@ -528,7 +528,7 @@ namespace MapEditor
 		}
 
 		engineAPI->world->GetTerrain().SetElevation(_undoRect.X, _undoRect.Y, _undoRect.Right, _undoRect.Bottom, elevation);
-		delete[] elevation;
+		Memory::Delete(elevation);
 	}
 
 	void ActionTerrainEdit::GetBrushRect(System::Drawing::Rectangle% rect)

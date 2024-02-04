@@ -31,12 +31,12 @@ namespace Engine
 		}
 
 		//! temporary; solve this!
-		tstrrchr(_binDir, _t('\\'))[0] = _t('\0');
-		tstrrchr(_binDir, _t('\\'))[1] = _t('\0');
+		//tstrrchr(_binDir, _t('\\'))[0] = _t('\0');
+		//tstrrchr(_binDir, _t('\\'))[1] = _t('\0');
 
 		// set default basedir
 		tstrcpy(_baseDir, _binDir);
-		tstrcat(_baseDir, _t("base\\"));
+		tstrcat(_baseDir, _t("..\\..\\base\\"));	//! Temporary; needs to be in binDir or be set from a config file.
 
 		// search for archives in basedir and load their directories
 		FileFinder ff;
@@ -92,14 +92,14 @@ namespace Engine
 	{
 		tchar path[MAX_PATH];
 		MakeFullPath(path, fname);
-		File* file = new(tempPool) FsysFile;
+		File* file = New<FsysFile>(tempPool);
 		if(file->Open(path, mode))
 		{
 			return file;
 		}
 		else
 		{
-			delete file;
+			Delete(file);
 			return 0;
 		}
 	}

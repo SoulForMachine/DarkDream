@@ -14,6 +14,9 @@ namespace GL
 	class BASELIB_API Buffer: public Object
 	{
 	public:
+		Buffer();
+		~Buffer() {}
+
 		bool BufferData(size_t size, const void* data, BufferUsage usage);
 		void BufferSubData(size_t offset, size_t size, const void* data);
 		void GetBufferSubData(size_t offset, size_t size, void* data);
@@ -23,8 +26,6 @@ namespace GL
 		bool UnmapBuffer();
 
 	private:
-		Buffer();
-		~Buffer() {}
 		Buffer(const Buffer&);
 		Buffer& operator = (const Buffer&);
 

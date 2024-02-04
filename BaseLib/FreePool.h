@@ -21,23 +21,15 @@ public:
 	}
 	~FreePool()
 	{
-		delete[] m_buffer;
-		delete[] m_allocStack;
+		Memory::Delete(m_buffer);
+		Memory::Delete(m_allocStack);
 	}
 
 	_Type* New()
 	{
 		if(m_top < m_size)
 		{
-		#if (_DEBUG_MEM_ALLOC)
-			#undef new
-		#endif
-
 			return new(m_allocStack[m_top++]) _Type;
-
-		#if (_DEBUG_MEM_ALLOC)
-			#define new(allocator)	new((allocator), __FILE__, __LINE__)
-		#endif
 		}
 		else
 			return 0;
@@ -47,15 +39,7 @@ public:
 	{
 		if(m_top < m_size)
 		{
-		#if (_DEBUG_MEM_ALLOC)
-			#undef new
-		#endif
-
 			return new(m_allocStack[m_top++]) _Type(t);
-
-		#if (_DEBUG_MEM_ALLOC)
-			#define new(allocator)	new((allocator), __FILE__, __LINE__)
-		#endif
 		}
 		else
 			return 0;
@@ -105,8 +89,8 @@ void FreePool<_Type>::Init(size_t size)
 	m_top = 0;
 	m_size = size;
 
-	m_buffer = (_Type*)new(m_allocator) ubyte[sizeof(_Type) * size];
-	m_allocStack = new(m_allocator) _Type*[size];
+	m_buffer = reinterpret_cast<_Type*>(Memory::NewArray<ubyte>(m_allocator, size * sizeof(_Type)));
+	m_allocStack = Memory::NewArray<_Type*>(m_allocator, size);
 
 	for(size_t i = 0; i < size; ++i)
 		m_allocStack[i] = &m_buffer[i];

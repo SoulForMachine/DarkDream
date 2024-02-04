@@ -247,7 +247,7 @@ namespace ParticleEditor
 		{
 			char* name = ConvertString<char>(MakeEmitterName());
 			emitter->SetName(name);
-			delete[] name;
+			Memory::Delete(name);
 
 			// set default attributes
 
@@ -365,7 +365,7 @@ namespace ParticleEditor
 		{
 			char* name = ConvertString<char>(_textName->Text);
 			_selectedEmitter->SetName(name);
-			delete[] name;
+			Memory::Delete(name);
 
 			_listEmitters->SelectedItems[0]->Text = _textName->Text;
 
@@ -405,7 +405,7 @@ namespace ParticleEditor
 				tchar* file_name = EditorUtil::GetRelativePath(_openFileDialog->FileName);
 				_selectedEmitter->SetTexture(file_name);
 				_textResource->Text = gcnew String(file_name);
-				delete[] file_name;
+				Memory::Delete(file_name);
 				Modified();
 			}
 		}

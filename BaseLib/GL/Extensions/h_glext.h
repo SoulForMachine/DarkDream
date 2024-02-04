@@ -10,8 +10,8 @@
 #ifndef H_GLEXT_H
 #define H_GLEXT_H
 
-#include <gl/glext.h>
-#include <gl/wglext.h>
+#include "glext.h"
+#include "wglext.h"
 
 
 #ifdef __cplusplus

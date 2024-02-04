@@ -68,7 +68,7 @@ namespace EntityEditor
 			char* mat_name = ConvertString<char>(_listMaterials->SelectedItems[0]->Text);
 			const ModelEntity::MaterialMap& materials = _entity->GetMaterials();
 			ModelEntity::MaterialMap::ConstIterator it = materials.Find(mat_name);
-			delete[] mat_name;
+			Memory::Delete(mat_name);
 			if(it != materials.End())
 			{
 				_material = const_cast<Material*>((const Material*)it->materialRes);
@@ -208,8 +208,8 @@ namespace EntityEditor
 					this, "Failed to save material \'" + _saveFileDialog->FileName + "\'.", GetAppName(),
 					MessageBoxButtons::OK, MessageBoxIcon::Error);
 			}
-			delete[] mat_name;
-			delete[] file_name;
+			Memory::Delete(mat_name);
+			Memory::Delete(file_name);
 		}
 	}
 
@@ -246,8 +246,8 @@ namespace EntityEditor
 					"\' to file \'" + _saveFileDialog->FileName + "\'.", GetAppName(),
 					MessageBoxButtons::OK, MessageBoxIcon::Error);
 			}
-			delete[] mat_name;
-			delete[] file_name;
+			Memory::Delete(mat_name);
+			Memory::Delete(file_name);
 		}
 	}
 
@@ -293,8 +293,8 @@ namespace EntityEditor
 					this, "Failed to save material \'" + _saveFileDialog->FileName + "\'.", GetAppName(),
 					MessageBoxButtons::OK, MessageBoxIcon::Error);
 			}
-			delete[] file_name;
-			delete[] mat_name;
+			Memory::Delete(file_name);
+			Memory::Delete(mat_name);
 		}
 	}
 
@@ -303,7 +303,7 @@ namespace EntityEditor
 		char* mat_name = ConvertString<char>(item->Text);
 		const ModelEntity::MaterialMap& materials = _entity->GetMaterials();
 		ModelEntity::MaterialMap::ConstIterator it = materials.Find(mat_name);
-		delete[] mat_name;
+		Memory::Delete(mat_name);
 		bool result = false;
 		if(it != materials.End())
 		{
@@ -354,7 +354,7 @@ namespace EntityEditor
 							this, "Failed to save material \'" + _saveFileDialog->FileName + "\'.", GetAppName(),
 							MessageBoxButtons::OK, MessageBoxIcon::Error);
 					}
-					delete[] file_name;
+					Memory::Delete(file_name);
 				}
 			}
 		}
@@ -475,7 +475,7 @@ namespace EntityEditor
 			{
 				tchar* file_name = EditorUtil::GetRelativePath(_selectTextureDialog->FileName);
 				Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
-				delete[] file_name;
+				Memory::Delete(file_name);
 				if(tex)
 				{
 					_material->SetDiffuseTexture(tex);
@@ -495,7 +495,7 @@ namespace EntityEditor
 			{
 				tchar* file_name = EditorUtil::GetRelativePath(_selectTextureDialog->FileName);
 				Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
-				delete[] file_name;
+				Memory::Delete(file_name);
 				if(tex)
 				{
 					_material->SetNormalMap(tex);
@@ -572,7 +572,7 @@ namespace EntityEditor
 			{
 				tchar* file_name = EditorUtil::GetRelativePath(_selectTextureDialog->FileName);
 				Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
-				delete[] file_name;
+				Memory::Delete(file_name);
 				if(tex)
 				{
 					_material->SetEmissionTexture(tex);
@@ -611,7 +611,7 @@ namespace EntityEditor
 			{
 				tchar* file_name = EditorUtil::GetRelativePath(_selectTextureDialog->FileName);
 				Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
-				delete[] file_name;
+				Memory::Delete(file_name);
 				if(tex)
 				{
 					_material->SetTransparencyTexture(tex);

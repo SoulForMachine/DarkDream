@@ -14,13 +14,14 @@ namespace GL
 	class BASELIB_API Renderbuffer: public Object
 	{
 	public:
-		void Storage(size_t samples, PixelFormat internal_format, size_t width, size_t height);
+		Renderbuffer() {}
+		~Renderbuffer() {}
+
+		void Storage(int samples, PixelFormat internal_format, int width, int height);
 
 	private:
 		friend class Renderer;
 
-		Renderbuffer() {}
-		~Renderbuffer() {}
 		Renderbuffer(const Renderbuffer&);
 		Renderbuffer& operator = (const Renderbuffer&);
 
@@ -32,18 +33,19 @@ namespace GL
 	class BASELIB_API Framebuffer: public Object
 	{
 	public:
+		Framebuffer() {}
+
 		void AttachTexture(RenderbufferType attachment, Texture* texture, int level);
 		void AttachTextureLayer(RenderbufferType attachment, Texture* texture, int level, int layer);
 		void AttachTextureFace(RenderbufferType attachment, Texture* texture, int level, CubeFace face);
 		void AttachRenderbuffer(RenderbufferType attachment, Renderbuffer* renderbuffer);
 		FramebufferStatus CheckStatus();
-		void ActiveDrawBuffers(size_t count, const RenderbufferType* buffers);
+		void ActiveDrawBuffers(int count, const RenderbufferType* buffers);
 		void ActiveReadBuffer(RenderbufferType buffer);
 
 	private:
 		friend class Renderer;
 
-		Framebuffer() {}
 		Framebuffer(const Framebuffer&);
 		Framebuffer& operator = (const Framebuffer&);
 

@@ -113,21 +113,21 @@ namespace math3d
 
 template <class _ST>
 inline
-vec4<_ST>::vec4(_ST _x, _ST _y, _ST _z, _ST _w = _ST(1))
+vec4<_ST>::vec4(_ST _x, _ST _y, _ST _z, _ST _w)
 {
 	set(_x, _y, _z, _w);
 }
 
 template <class _ST>
 inline
-vec4<_ST>::vec4(const vec2<_ST>& v2, _ST _z = _ST(0), _ST _w = _ST(1))
+vec4<_ST>::vec4(const vec2<_ST>& v2, _ST _z, _ST _w)
 {
 	set(v2.x, v2.y, _z, _w);
 }
 
 template <class _ST>
 inline
-vec4<_ST>::vec4(const vec3<_ST>& v3, _ST _w = _ST(1))
+vec4<_ST>::vec4(const vec3<_ST>& v3, _ST _w)
 {
 	set(v3.x, v3.y, v3.z, _w);
 }
@@ -141,7 +141,7 @@ vec4<_ST>::vec4(const _ST* v)
 
 template <class _ST>
 inline
-void vec4<_ST>::set(_ST _x, _ST _y, _ST _z, _ST _w = _ST(1))
+void vec4<_ST>::set(_ST _x, _ST _y, _ST _z, _ST _w)
 {
 	x = _x;
 	y = _y;

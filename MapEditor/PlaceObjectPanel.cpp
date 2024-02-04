@@ -126,7 +126,7 @@ namespace MapEditor
 			{
 				tchar* rel_path = EditorUtil::GetRelativePath(fi->FullName);
 				ObjectTreeNode^ node = gcnew ObjectTreeNode(name, gcnew String(rel_path), type);
-				delete[] rel_path;
+				Memory::Delete(rel_path);
 				dir_node->Nodes->Add(node);
 			}
 		}
@@ -231,7 +231,7 @@ namespace MapEditor
 				}
 			}
 
-			delete[] path;
+			Memory::Delete(path);
 		}
 		_panelObjectView->Refresh();
 	}

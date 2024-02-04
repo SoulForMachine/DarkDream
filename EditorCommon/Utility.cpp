@@ -24,7 +24,7 @@ namespace EditorCommon
 	tchar* EditorUtil::GetRelativePath(String^ full_path)
 	{
 		const tchar* base_dir = _engineAPI->fileSystem->GetBaseDirPath();
-		int len = tstrlen(base_dir);
+		int len = static_cast<int>(tstrlen(base_dir));
 		int res = String::Compare(gcnew String(base_dir), 0, full_path, 0, len, true);
 		if(res == 0)
 			full_path = full_path->Remove(0, len);
@@ -49,7 +49,7 @@ namespace EditorCommon
 				break;
 			}
 		}
-		delete[] fn;
+		Memory::Delete(fn);
 		return result;
 	}
 

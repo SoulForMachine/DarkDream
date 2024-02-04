@@ -49,7 +49,7 @@ namespace Engine
 
 	ItemEntity* ItemEntity::CreateCopy() const
 	{
-		return new(mapPool) ItemEntity(*this);
+		return New<ItemEntity>(mapPool, *this);
 	}
 
 	void ItemEntity::Unload()

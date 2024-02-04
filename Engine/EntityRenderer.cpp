@@ -161,8 +161,8 @@ namespace Engine
 		vert_prog->LocalParameter(8, vec4f(camera.GetPosition()));
 		if(animated)
 		{
-			for(size_t i = 0; i < mesh_data->jointCount; ++i)
-				vert_prog->LocalMatrix4x4(9 + i * 3, mesh_data->jointMatPalette[i]);
+			for(index_t i = 0; i < mesh_data->jointCount; ++i)
+				vert_prog->LocalMatrix4x4(static_cast<uint>(9 + i * 3), mesh_data->jointMatPalette[i]);
 
 			_renderer->ActiveVertexFormat(_vertFmtSkinnedMesh);
 		}

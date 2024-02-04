@@ -17,7 +17,7 @@ void QSortStrings(const char** base, size_t count)
 	qsort((void*)base, count, sizeof(char*), local::cmp_func);
 }
 
-int BinSearch(const char* search_str, const char** start, size_t count)
+intptr_t BinSearch(const char* search_str, const char** start, size_t count)
 {
 	if(count == 0)
 		return -1;

@@ -3,54 +3,54 @@
 #define _BASELIB_RECT_H_
 
 
-template <class _T>
+template <class _Type>
 struct Rect
 {
-	_T x1, y1, x2, y2;
+	_Type x1, y1, x2, y2;
 
 	Rect(){}
-	Rect(_T _x1, _T _y1, _T _x2, _T _y2)
+	Rect(_Type _x1, _Type _y1, _Type _x2, _Type _y2)
 	{
 		x1 = _x1; y1 = _y1;
 		x2 = _x2; y2 = _y2;
 	}
 
-	_T Width() const
+	_Type Width() const
 	{
 		return x2 - x1;
 	}
 
-	_T Height() const
+	_Type Height() const
 	{
 		return y2 - y1;
 	}
 
-	void SetWidth(_T width)
+	void SetWidth(_Type width)
 	{
 		x2 = x1 + width;
 	}
 
-	void SetHeight(_T height)
+	void SetHeight(_Type height)
 	{
 		y2 = y1 + height;
 	}
 
-	void SetPosition(_T x, _T y)
+	void SetPosition(_Type x, _Type y)
 	{
-		_T width = Width();
-		_T height = Height();
+		_Type width = Width();
+		_Type height = Height();
 		x1 = x;
 		y1 = y;
 		x2 = x1 + width;
 		y2 = y1 + height;
 	}
 
-	bool IsPointInside(_T x, _T y) const
+	bool IsPointInside(_Type x, _Type y) const
 	{
 		return x >= x1 && x <= x2 && y >= y1 && y <= y2;
 	}
 
-	void Offset(_T x, _T y)
+	void Offset(_Type x, _Type y)
 	{
 		x1 += x;
 		x2 += x;
@@ -66,7 +66,7 @@ struct Rect
 		y2 = Max(y2, rect.y2);
 	}
 
-	void Resize(_T x, _T y)
+	void Resize(_Type x, _Type y)
 	{
 		x2 += x;
 		y2 += y;
@@ -74,12 +74,12 @@ struct Rect
 
 	void Center(Rect& rect)
 	{
-		_T w = rect.Width();
-		_T h = rect.Height();
+		_Type w = rect.Width();
+		_Type h = rect.Height();
 
-		rect.x1 = x1 + (Width() - w) / _T(2);
+		rect.x1 = x1 + (Width() - w) / _Type(2);
 		rect.x2 = rect.x1 + w;
-		rect.y1 = y1 + (Height() - h) / _T(2);
+		rect.y1 = y1 + (Height() - h) / _Type(2);
 		rect.y2 = rect.y1 + h;
 	}
 };

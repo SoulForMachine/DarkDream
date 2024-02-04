@@ -142,7 +142,7 @@ namespace EntityEditor
 					this, "Failed to load " + _openFileDialog->FileName, GetAppName(),
 					MessageBoxButtons::OK, MessageBoxIcon::Error);
 			}
-			delete[] file_name;
+			Memory::Delete(file_name);
 		}
 	}
 
@@ -191,8 +191,8 @@ namespace EntityEditor
 						this, "Failed to load " + _openFileDialog->FileName, GetAppName(),
 						MessageBoxButtons::OK, MessageBoxIcon::Error);
 				}
-				delete[] file_name;
-				delete[] name;
+				Memory::Delete(file_name);
+				Memory::Delete(name);
 			}
 		}
 	}
@@ -211,7 +211,7 @@ namespace EntityEditor
 				_btnRemoveAttachment->Enabled = false;
 				_director->FormNotify(this, NotifyMessage::AttachmentChanged, nullptr);
 			}
-			delete[] name;
+			Memory::Delete(name);
 		}
 	}
 
@@ -242,7 +242,7 @@ namespace EntityEditor
 				if(_entity->SetActiveAnimation(name))
 					_btnPlayAnim->ImageIndex = 3;
 			}
-			delete[] name;
+			Memory::Delete(name);
 		}
 	}
 
@@ -282,8 +282,8 @@ namespace EntityEditor
 					this, "Failed to add animation.", GetAppName(),
 					MessageBoxButtons::OK, MessageBoxIcon::Error);
 			}
-			delete[] name;
-			delete[] file_name;
+			Memory::Delete(name);
+			Memory::Delete(file_name);
 		}
 	}
 
@@ -298,7 +298,7 @@ namespace EntityEditor
 			if(anim_data && !strcmp(name, anim_data->name))
 				_btnPlayAnim->ImageIndex = 2;
 			_entity->RemoveAnimation(name);
-			delete[] name;
+			Memory::Delete(name);
 			_listAnimations->Items->Remove(item);
 		}
 		_btnRemoveAnim->Enabled = false;
@@ -338,7 +338,7 @@ namespace EntityEditor
 			const ModelEntity::JointAttachMap& att = _entity->GetJointAttachments();
 			ModelEntity::JointAttachMap::ConstIterator it = att.Find(name);
 			_textJointAttachment->Text = (it != att.End())? gcnew String(it->attachment->GetFileName()): "";
-			delete[] name;
+			Memory::Delete(name);
 			_btnBrowseAttachment->Enabled = true;
 			_btnRemoveAttachment->Enabled = (_textJointAttachment->Text != "");
 		}
@@ -364,12 +364,14 @@ namespace EntityEditor
 
 	System::Void EntityForm::_mnuViewExpandAll_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		_panelEntity->ExpandAll();
+		for each (Salamander::Windows::Forms::CollapsiblePanel^ panel in _panelEntity->CollapsiblePanelCollection)
+			panel->PanelState = Salamander::Windows::Forms::PanelState::Expanded;
 	}
 
 	System::Void EntityForm::_mnuViewCollapseAll_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		_panelEntity->CollapseAll();
+		for each (Salamander::Windows::Forms::CollapsiblePanel^ panel in _panelEntity->CollapsiblePanelCollection)
+			panel->PanelState = Salamander::Windows::Forms::PanelState::Expanded;
 	}
 
 	System::Void EntityForm::_btnExpandAllSkelet_Click(System::Object^  sender, System::EventArgs^  e)

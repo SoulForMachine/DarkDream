@@ -15,7 +15,7 @@ namespace EditorCommon
 		int len = 0;
 		const _CharType* p = cs;
 		while(*p++) len++;
-		_CharType* ret = new(Memory::tempPool) _CharType[len + 1];
+		_CharType* ret = Memory::NewArray<_CharType>(Memory::tempPool, len + 1);
 		_CharType* dest = ret;
 		while(*dest++ = *cs++);
 		delete context;

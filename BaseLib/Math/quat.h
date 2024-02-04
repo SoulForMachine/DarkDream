@@ -430,7 +430,7 @@ template <class _ST>
 void pow(quat<_ST>& result, const quat<_ST>& q)
 {
 	_ST angle = acos(q.w) * _ST(2);
-	_ST angle_exp = theta * exp;
+	_ST angle_exp = angle * exp;
 	_ST sin_angle_exp = sin(angle_exp);
 
 	normalize(result.imag, q.imag);

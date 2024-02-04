@@ -163,7 +163,7 @@ namespace GL
 		return TexImage(level, internal_format, width, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
-	bool Texture1D::CompressedTexImage(int level, PixelFormat internal_format, int width, size_t size, void* pixels)
+	bool Texture1D::CompressedTexImage(int level, PixelFormat internal_format, int width, int size, void* pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -200,7 +200,7 @@ namespace GL
 		return TexSubImage(level, xoffset, width, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
-	bool Texture1D::CompressedTexSubImage(int level, int xoffset, int width, ImageFormat format, size_t size, void* pixels)
+	bool Texture1D::CompressedTexSubImage(int level, int xoffset, int width, ImageFormat format, int size, void* pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -347,7 +347,7 @@ namespace GL
 		return TexImage(level, internal_format, width, height, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
-	bool Texture2D::CompressedTexImage(int level, PixelFormat internal_format, int width, int height, size_t size, void* pixels)
+	bool Texture2D::CompressedTexImage(int level, PixelFormat internal_format, int width, int height, int size, void* pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -385,7 +385,7 @@ namespace GL
 		return TexSubImage(level, xoffset, yoffset, width, height, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
-	bool Texture2D::CompressedTexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, size_t size, void* pixels)
+	bool Texture2D::CompressedTexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, int size, void* pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -535,7 +535,7 @@ namespace GL
 		return TexImage(level, internal_format, width, height, depth, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
-	bool Texture3D::CompressedTexImage(int level, PixelFormat internal_format, int width, int height, int depth, size_t size, void* pixels)
+	bool Texture3D::CompressedTexImage(int level, PixelFormat internal_format, int width, int height, int depth, int size, void* pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -574,7 +574,7 @@ namespace GL
 		return TexSubImage(level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
-	bool Texture3D::CompressedTexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, size_t size, void* pixels)
+	bool Texture3D::CompressedTexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, int size, void* pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -725,7 +725,7 @@ namespace GL
 		return TexImage(face, level, internal_format, width, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
-	bool TextureCube::CompressedTexImage(int level, PixelFormat internal_format, int width, size_t size, void** pixels)
+	bool TextureCube::CompressedTexImage(int level, PixelFormat internal_format, int width, int size, void** pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -747,7 +747,7 @@ namespace GL
 		return true;
 	}
 
-	bool TextureCube::CompressedTexImage(CubeFace face, int level, PixelFormat internal_format, int width, size_t size, void* pixels)
+	bool TextureCube::CompressedTexImage(CubeFace face, int level, PixelFormat internal_format, int width, int size, void* pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -784,7 +784,7 @@ namespace GL
 		return TexSubImage(face, level, xoffset, yoffset, width, height, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
-	bool TextureCube::CompressedTexSubImage(CubeFace face, int level, int xoffset, int yoffset, int width, int height, ImageFormat format, size_t size, void* pixels)
+	bool TextureCube::CompressedTexSubImage(CubeFace face, int level, int xoffset, int yoffset, int width, int height, ImageFormat format, int size, void* pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -929,7 +929,7 @@ namespace GL
 		return TexImage(level, internal_format, width, height, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
-	bool Texture1DArray::CompressedTexImage(int level, PixelFormat internal_format, int width, int height, size_t size, void* pixels)
+	bool Texture1DArray::CompressedTexImage(int level, PixelFormat internal_format, int width, int height, int size, void* pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -967,7 +967,7 @@ namespace GL
 		return TexSubImage(level, xoffset, yoffset, width, height, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
-	bool Texture1DArray::CompressedTexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, size_t size, void* pixels)
+	bool Texture1DArray::CompressedTexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, int size, void* pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -1116,7 +1116,7 @@ namespace GL
 		return TexImage(level, internal_format, width, height, depth, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
-	bool Texture2DArray::CompressedTexImage(int level, PixelFormat internal_format, int width, int height, int depth, size_t size, void* pixels)
+	bool Texture2DArray::CompressedTexImage(int level, PixelFormat internal_format, int width, int height, int depth, int size, void* pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -1155,7 +1155,7 @@ namespace GL
 		return TexSubImage(level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixel_store, BUFFER_OFFSET(buffer_offset));
 	}
 
-	bool Texture2DArray::CompressedTexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, size_t size, void* pixels)
+	bool Texture2DArray::CompressedTexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, int size, void* pixels)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK

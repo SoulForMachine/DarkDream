@@ -236,7 +236,7 @@ namespace MapEditor
 			tchar* file_name = EditorUtil::GetRelativePath(_selectTextureDialog->FileName);
 			_textTexture->Text = gcnew String(file_name);
 			Texture2DResPtr tex = engineAPI->textureManager->CreateTexture2D(file_name, true);
-			delete[] file_name;
+			Memory::Delete(file_name);
 			engineAPI->world->GetTerrain().SetTexture(tex);
 		}
 	}

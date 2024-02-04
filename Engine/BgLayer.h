@@ -47,7 +47,7 @@ namespace Engine
 		List<Sprite>& GetSprites()
 			{ return _sprites; }
 		int GetTextureCount() const
-			{ return _sprites.GetCount(); }
+			{ return static_cast<int>(_sprites.GetCount()); }
 		float GetScrollFactor() const
 			{ return _scrollFactor; }
 		void SetScrollFactor(float factor);

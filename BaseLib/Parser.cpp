@@ -90,7 +90,7 @@ bool Parser::LoadFile(FileUtil::File& file)
 	Unload();
 
 	long size = file.GetSize();
-	_buffer = new(tempPool) char[size + 1];
+	_buffer = NewArray<char>(tempPool, size + 1);
 	file.Read(_buffer, size);
 	_buffer[size] = '\0';
 	_ptr = _buffer;
@@ -111,7 +111,7 @@ void Parser::LoadMem(const char* buf, size_t size)
 {
 	Unload();
 
-	_buffer = new(tempPool) char[size + 1];
+	_buffer = NewArray<char>(tempPool, size + 1);
 	strncpy(_buffer, buf, size);
 	_buffer[size] = '\0';
 	_ptr = _buffer;
@@ -128,13 +128,13 @@ void Parser::LoadMem(const char* buf, size_t size)
 
 void Parser::Unload()
 {
-	delete[] _buffer;
+	Memory::Delete(_buffer);
 	_buffer = 0;
 	_ptr = 0;
 	_line = 1;
 
 	for(size_t i = 0; i < _keywords.GetCount(); ++i)
-		delete[] _keywords[i];
+		Memory::Delete(_keywords[i]);
 	_keywords.Clear();
 
 	DeleteTokens();
@@ -170,7 +170,7 @@ void Parser::SetKeywords(const char** keywords, size_t count)
 	_keywords.SetCount(count);
 	for(size_t i = 0; i < count; ++i)
 	{
-		_keywords[i] = new(tempPool) char[strlen(keywords[i]) + 1];
+		_keywords[i] = NewArray<char>(tempPool, strlen(keywords[i]) + 1);
 		strcpy(_keywords[i], keywords[i]);
 	}
 
@@ -589,8 +589,8 @@ void Parser::GetToken(Token& token)
 		throw ParserInvalidCharException(_invalidChar, _line);
 	}
 
-	int len = p - t;
-	token.str = new(tempPool) char[len + 1];
+	int len = static_cast<int>(p - t);
+	token.str = NewArray<char>(tempPool, len + 1);
 	strncpy(token.str, t, len);
 	token.str[len] = '\0';
 	token.length = len;
@@ -598,7 +598,7 @@ void Parser::GetToken(Token& token)
 	if(token.type == TOK_IDENTIFIER)
 	{
 		// check if it's a keyword
-		int index = BinSearch(token.str, (const char**)_keywords.GetData(), _keywords.GetCount());
+		intptr_t index = BinSearch(token.str, (const char**)_keywords.GetData(), _keywords.GetCount());
 		if(index != -1)
 			token.type = TOK_KEYWORD;
 

@@ -47,12 +47,15 @@ namespace GL
 	class BASELIB_API Texture1D: public Texture
 	{
 	public:
+		Texture1D() {}
+		~Texture1D() {}
+
 		bool TexImage(int level, PixelFormat internal_format, int width, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexImage(int level, PixelFormat internal_format, int width, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
-		bool CompressedTexImage(int level, PixelFormat internal_format, int width, size_t size, void* pixels);
+		bool CompressedTexImage(int level, PixelFormat internal_format, int width, int size, void* pixels);
 		bool TexSubImage(int level, int xoffset, int width, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexSubImage(int level, int xoffset, int width, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
-		bool CompressedTexSubImage(int level, int xoffset, int width, ImageFormat format, size_t size, void* pixels);
+		bool CompressedTexSubImage(int level, int xoffset, int width, ImageFormat format, int size, void* pixels);
 		bool CopyTexImage(int level, PixelFormat internal_format, int x, int y, int width);
 		bool CopyTexSubImage(int level, int xoffset, int x, int y, int width);
 
@@ -71,21 +74,21 @@ namespace GL
 	private:
 		friend class Renderer;
 
-		Texture1D() {}
-		~Texture1D() {}
-
 		int _width;
 	};
 
 	class BASELIB_API Texture2D: public Texture
 	{
 	public:
+		Texture2D() {}
+		~Texture2D() {}
+
 		bool TexImage(int level, PixelFormat internal_format, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexImage(int level, PixelFormat internal_format, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
-		bool CompressedTexImage(int level, PixelFormat internal_format, int width, int height, size_t size, void* pixels);
+		bool CompressedTexImage(int level, PixelFormat internal_format, int width, int height, int size, void* pixels);
 		bool TexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
-		bool CompressedTexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, size_t size, void* pixels);
+		bool CompressedTexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, int size, void* pixels);
 		bool CopyTexImage(int level, PixelFormat internal_format, int x, int y, int width, int height);
 		bool CopyTexSubImage(int level, int xoffset, int yoffset, int x, int y, int width, int height);
 
@@ -106,9 +109,6 @@ namespace GL
 	private:
 		friend class Renderer;
 
-		Texture2D() {}
-		~Texture2D() {}
-
 		int _width;
 		int _height;
 	};
@@ -116,12 +116,15 @@ namespace GL
 	class BASELIB_API Texture3D: public Texture
 	{
 	public:
+		Texture3D() {}
+		~Texture3D() {}
+
 		bool TexImage(int level, PixelFormat internal_format, int width, int height, int depth, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexImage(int level, PixelFormat internal_format, int width, int height, int depth, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
-		bool CompressedTexImage(int level, PixelFormat internal_format, int width, int height, int depth, size_t size, void* pixels);
+		bool CompressedTexImage(int level, PixelFormat internal_format, int width, int height, int depth, int size, void* pixels);
 		bool TexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
-		bool CompressedTexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, size_t size, void* pixels);
+		bool CompressedTexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, int size, void* pixels);
 		bool CopyTexSubImage(int level, int xoffset, int yoffset, int zoffset, int x, int y, int width, int height);
 
 		bool GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const;
@@ -143,9 +146,6 @@ namespace GL
 	private:
 		friend class Renderer;
 
-		Texture3D() {}
-		~Texture3D() {}
-
 		int _width;
 		int _height;
 		int _depth;
@@ -154,14 +154,17 @@ namespace GL
 	class BASELIB_API TextureCube: public Texture
 	{
 	public:
+		TextureCube() {}
+		~TextureCube() {}
+
 		bool TexImage(int level, PixelFormat internal_format, int width, ImageFormat format, DataType type, const PixelStore* const* pixel_store, void** pixels);
 		bool TexImage(CubeFace face, int level, PixelFormat internal_format, int width, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexImage(CubeFace face, int level, PixelFormat internal_format, int width, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
-		bool CompressedTexImage(int level, PixelFormat internal_format, int width, size_t size, void** pixels);
-		bool CompressedTexImage(CubeFace face, int level, PixelFormat internal_format, int width, size_t size, void* pixels);
+		bool CompressedTexImage(int level, PixelFormat internal_format, int width, int size, void** pixels);
+		bool CompressedTexImage(CubeFace face, int level, PixelFormat internal_format, int width, int size, void* pixels);
 		bool TexSubImage(CubeFace face, int level, int xoffset, int yoffset, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexSubImage(CubeFace face, int level, int xoffset, int yoffset, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
-		bool CompressedTexSubImage(CubeFace face, int level, int xoffset, int yoffset, int width, int height, ImageFormat format, size_t size, void* pixels);
+		bool CompressedTexSubImage(CubeFace face, int level, int xoffset, int yoffset, int width, int height, ImageFormat format, int size, void* pixels);
 		bool CopyTexImage(CubeFace face, int level, PixelFormat internal_format, int x, int y, int width);
 		bool CopyTexSubImage(CubeFace face, int level, int xoffset, int yoffset, int x, int y, int width, int height);
 
@@ -180,21 +183,21 @@ namespace GL
 	private:
 		friend class Renderer;
 
-		TextureCube() {}
-		~TextureCube() {}
-
 		int _width;
 	};
 
 	class BASELIB_API Texture1DArray: public Texture
 	{
 	public:
+		Texture1DArray() {}
+		~Texture1DArray() {}
+
 		bool TexImage(int level, PixelFormat internal_format, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexImage(int level, PixelFormat internal_format, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
-		bool CompressedTexImage(int level, PixelFormat internal_format, int width, int height, size_t size, void* pixels);
+		bool CompressedTexImage(int level, PixelFormat internal_format, int width, int height, int size, void* pixels);
 		bool TexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
-		bool CompressedTexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, size_t size, void* pixels);
+		bool CompressedTexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, int size, void* pixels);
 		bool CopyTexImage(int level, PixelFormat internal_format, int x, int y, int width, int height);
 		bool CopyTexSubImage(int level, int xoffset, int yoffset, int x, int y, int width, int height);
 
@@ -215,9 +218,6 @@ namespace GL
 	private:
 		friend class Renderer;
 
-		Texture1DArray() {}
-		~Texture1DArray() {}
-
 		int _width;
 		int _height;
 	};
@@ -225,12 +225,15 @@ namespace GL
 	class BASELIB_API Texture2DArray: public Texture
 	{
 	public:
+		Texture2DArray() {}
+		~Texture2DArray() {}
+
 		bool TexImage(int level, PixelFormat internal_format, int width, int height, int depth, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexImage(int level, PixelFormat internal_format, int width, int height, int depth, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
-		bool CompressedTexImage(int level, PixelFormat internal_format, int width, int height, int depth, size_t size, void* pixels);
+		bool CompressedTexImage(int level, PixelFormat internal_format, int width, int height, int depth, int size, void* pixels);
 		bool TexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
-		bool CompressedTexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, size_t size, void* pixels);
+		bool CompressedTexSubImage(int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, ImageFormat format, int size, void* pixels);
 		bool CopyTexSubImage(int level, int xoffset, int yoffset, int zoffset, int x, int y, int width, int height);
 
 		bool GetTexImage(int level, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels) const;
@@ -252,9 +255,6 @@ namespace GL
 	private:
 		friend class Renderer;
 
-		Texture2DArray() {}
-		~Texture2DArray() {}
-
 		int _width;
 		int _height;
 		int _depth;
@@ -263,6 +263,9 @@ namespace GL
 	class BASELIB_API TextureBuffer: public Texture
 	{
 	public:
+		TextureBuffer() {}
+		~TextureBuffer() {}
+
 		void TexBuffer(PixelFormat internal_format, const Buffer* buffer);
 
 		size_t GetSize() const
@@ -279,15 +282,15 @@ namespace GL
 		using Texture::GenerateMipmap;
 		using Texture::IsCompressed;
 
-		TextureBuffer() {}
-		~TextureBuffer() {}
-
 		size_t _size;
 	};
 
 	class BASELIB_API TextureRectangle: public Texture
 	{
 	public:
+		TextureRectangle() {}
+		~TextureRectangle() {}
+
 		bool TexImage(PixelFormat internal_format, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
 		bool TexImage(PixelFormat internal_format, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, const Buffer* buffer, size_t buffer_offset);
 		bool TexSubImage(int xoffset, int yoffset, int width, int height, ImageFormat format, DataType type, const PixelStore* pixel_store, void* pixels);
@@ -313,9 +316,6 @@ namespace GL
 		// these are not applicable to buffer textures
 		using Texture::GenerateMipmap;
 		using Texture::IsCompressed;
-
-		TextureRectangle() {}
-		~TextureRectangle() {}
 
 		int _width;
 		int _height;

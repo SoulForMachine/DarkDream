@@ -22,15 +22,15 @@ namespace Engine
 		switch(type)
 		{
 		case ModelEntity::ME_TYPE_STATIC:
-			return new(mapPool) StaticEntity;
+			return New<StaticEntity>(mapPool);
 		case ModelEntity::ME_TYPE_PLAYER:
-			return new(mapPool) PlayerEntity;
+			return New<PlayerEntity>(mapPool);
 		case ModelEntity::ME_TYPE_AI:
-			return new(mapPool) AIEntity;
+			return New<AIEntity>(mapPool);
 		case ModelEntity::ME_TYPE_WEAPON:
-			return new(mapPool) WeaponEntity;
+			return New<WeaponEntity>(mapPool);
 		case ModelEntity::ME_TYPE_ITEM:
-			return new(mapPool) ItemEntity;
+			return New<ItemEntity>(mapPool);
 		default:
 			assert(0);
 		}
@@ -40,67 +40,67 @@ namespace Engine
 
 	StaticEntity* ObjectFactory::NewStaticEntity()
 	{
-		return new(mapPool) StaticEntity;
+		return New<StaticEntity>(mapPool);
 	}
 
 	PlayerEntity* ObjectFactory::NewPlayerEntity()
 	{
-		return new(mapPool) PlayerEntity;
+		return New<PlayerEntity>(mapPool);
 	}
 
 	AIEntity* ObjectFactory::NewAIEntity()
 	{
-		return new(mapPool) AIEntity;
+		return New<AIEntity>(mapPool);
 	}
 
 	WeaponEntity* ObjectFactory::NewWeaponEntity()
 	{
-		return new(mapPool) WeaponEntity;
+		return New<WeaponEntity>(mapPool);
 	}
 
 	ItemEntity* ObjectFactory::NewItemEntity()
 	{
-		return new(mapPool) ItemEntity;
+		return New<ItemEntity>(mapPool);
 	}
 
 	ParticleSystem* ObjectFactory::NewParticleSystem()
 	{
-		return new(mapPool) ParticleSystem;
+		return New<ParticleSystem>(mapPool);
 	}
 
 	Material* ObjectFactory::NewMaterial()
 	{
-		return new(mapPool) Material;
+		return New<Material>(mapPool);
 	}
 
 	Font* ObjectFactory::NewFont()
 	{
-		return new(mainPool) Font;
+		return New<Font>(mainPool);
 	}
 
 	World* ObjectFactory::NewWorld()
 	{
-		return new(mapPool) World;
+		return New<World>(mapPool);
 	}
 
 	void ObjectFactory::DeleteEntity(Entity* entity)
 	{
-		delete entity;
+		Delete(entity);
 	}
 
 	void ObjectFactory::DeleteMaterial(Material* material)
 	{
-		delete material;
+		Delete(material);
 	}
 
 	void ObjectFactory::DeleteFont(Font* font)
 	{
-		delete font;
+		Delete(font);
 	}
 
 	void ObjectFactory::DeleteWorld(World* world)
 	{
-		delete world;
+		Delete(world);
 	}
 	
 }

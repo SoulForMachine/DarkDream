@@ -43,7 +43,7 @@ namespace Engine
 		Unload();
 		for(List<Emitter*>::ConstIterator it = psys._emitters.Begin(); it != psys._emitters.End(); ++it)
 		{
-			_emitters.PushBack(new(mapPool) Emitter(**it));
+			_emitters.PushBack(New<Emitter>(mapPool, **it));
 		}
 
 		SetObjectBoundingBox(psys.GetObjectBoundingBox());
@@ -100,7 +100,7 @@ namespace Engine
 				else if(token.type == Parser::TOK_IDENTIFIER &&
 					!strcmp(token.str, "emitter"))
 				{
-					emitter = new(mapPool) Emitter;
+					emitter = New<Emitter>(mapPool);
 
 					char name[Emitter::EMITTER_NAME_MAX_LEN];
 					parser.ReadIdentifier(name, Emitter::EMITTER_NAME_MAX_LEN);
@@ -114,7 +114,7 @@ namespace Engine
 					if(em_type == Emitter::EMITTER_TYPE_COUNT)
 					{
 						Console::PrintError("Invalid value for emitter type: \'%s\'.", buf);
-						delete emitter;
+						Delete(emitter);
 						Unload();
 						return false;
 					}
@@ -126,7 +126,7 @@ namespace Engine
 					if(em_shader == Emitter::EMITTER_SHADER_COUNT)
 					{
 						Console::PrintError("Invalid value for emitter shader: \'%s\'.", buf);
-						delete emitter;
+						Delete(emitter);
 						Unload();
 						return false;
 					}
@@ -138,7 +138,7 @@ namespace Engine
 					if(part_type == Emitter::PARTICLE_TYPE_COUNT)
 					{
 						Console::PrintError("Invalid value for particle type: \'%s\'.", buf);
-						delete emitter;
+						Delete(emitter);
 						Unload();
 						return false;
 					}
@@ -149,7 +149,7 @@ namespace Engine
 
 					if(part_type == Emitter::PARTICLE_TYPE_TEXTURE)
 						emitter->SetTexture(tpath, false);
-					delete[] tpath;
+					Memory::Delete(tpath);
 
 					parser.ExpectTokenString("life");
 					parser.ReadFloat(ftmp);
@@ -201,7 +201,11 @@ namespace Engine
 					for(int i = 0; i < Emitter::ATTRIB_COUNT; ++i)
 					{
 						if(!ReadAttribute(parser, *attribs[i], Emitter::GetAttributeName(i)))
-							{ delete emitter; Unload(); return false; }
+						{
+							Delete(emitter);
+							Unload();
+							return false;
+						}
 					}
 
 					// attributes close brace
@@ -215,7 +219,7 @@ namespace Engine
 				else
 				{
 					Console::PrintError("Expected \'emitter\' keyword, found \'%s\'", token.str);
-					delete emitter;
+					Delete(emitter);
 					Unload();
 					return false;
 				}
@@ -310,7 +314,7 @@ namespace Engine
 	{
 		for(List<Emitter*>::ConstIterator it = _emitters.Begin(); it != _emitters.End(); ++it)
 		{
-			delete *it;
+			Delete(*it);
 		}
 		_emitters.Clear();
 	}
@@ -331,12 +335,12 @@ namespace Engine
 	int ParticleSystem::AddEmitter(Emitter& emitter)
 	{
 		_emitters.PushBack(&emitter);
-		return _emitters.GetCount();
+		return static_cast<int>(_emitters.GetCount());
 	}
 
 	ParticleSystem::Emitter* ParticleSystem::AddEmitter()
 	{
-		Emitter* emitter = new(mapPool) Emitter;
+		Emitter* emitter = New<Emitter>(mapPool);
 		_emitters.PushBack(emitter);
 		return emitter;
 	}
@@ -408,7 +412,7 @@ namespace Engine
 
 		parser.ExpectTokenType(Parser::TOK_PUNCTUATION, Parser::PUNCT_OPEN_BRACE);
 
-		SmartPtr<Attribute::Value> values = new(tempPool) Attribute::Value[count];
+		SmartPtr<Attribute::Value> values = NewArray<Attribute::Value>(tempPool, count);
 		Parser::Token token;
 
 		for(int i = 0; i < count; ++i)
@@ -448,7 +452,7 @@ namespace Engine
 
 	ParticleSystem::Attribute::~Attribute()
 	{
-		delete[] _values;
+		Memory::Delete(_values);
 	}
 
 	ParticleSystem::Attribute&
@@ -460,13 +464,13 @@ namespace Engine
 
 	void ParticleSystem::Attribute::SetValues(const Value* values, int value_count)
 	{
-		delete[] _values;
+		Memory::Delete(_values);
 		_values = 0;
 		_valueCount = 0;
 		if(value_count)
 		{
 			_valueCount = value_count;
-			_values = new(mapPool) Value[_valueCount];
+			_values = NewArray<Value>(mapPool, _valueCount);
 			memcpy(_values, values, _valueCount * sizeof(Value));
 		}
 	}
@@ -554,8 +558,8 @@ namespace Engine
 	ParticleSystem::Emitter::Emitter()
 		: _particlePool(MAX_PARTICLES)
 	{
-		_liveParticles[0] = new(mapPool) Particle*[MAX_PARTICLES];
-		_liveParticles[1] = new(mapPool) Particle*[MAX_PARTICLES];
+		_liveParticles[0] = NewArray<Particle*>(mapPool, MAX_PARTICLES);
+		_liveParticles[1] = NewArray<Particle*>(mapPool, MAX_PARTICLES);
 		_partBufInd = 0;
 		_liveCount = 0;
 		_peakCount = 0;
@@ -605,8 +609,8 @@ namespace Engine
 	ParticleSystem::Emitter::Emitter(const Emitter& emitter)
 		: _particlePool(MAX_PARTICLES)
 	{
-		_liveParticles[0] = new(mapPool) Particle*[MAX_PARTICLES];
-		_liveParticles[1] = new(mapPool) Particle*[MAX_PARTICLES];
+		_liveParticles[0] = NewArray<Particle*>(mapPool, MAX_PARTICLES);
+		_liveParticles[1] = NewArray<Particle*>(mapPool, MAX_PARTICLES);
 		_partBufInd = 0;
 
 		_attributes[0] = &Velocity;
@@ -633,8 +637,8 @@ namespace Engine
 		if(_texture)
 			engineAPI.textureManager->ReleaseTexture(_texture);
 
-		delete[] _liveParticles[0];
-		delete[] _liveParticles[1];
+		Memory::Delete(_liveParticles[0]);
+		Memory::Delete(_liveParticles[1]);
 	}
 
 	ParticleSystem::Emitter& ParticleSystem::Emitter::operator = (const Emitter& emitter)

@@ -159,7 +159,7 @@ bool Input::Init(void* instance_handle, void* window_handle)
 	_windowHandle = (HWND)window_handle;
 
 	// create devices
-	_keyboard = new(mainPool) Keyboard;
+	_keyboard = New<Keyboard>(mainPool);
 	if(!_keyboard->Init(_directInput, _windowHandle))
 	{
 		Console::PrintError("Failed to initialize the keyboard.");
@@ -167,7 +167,7 @@ bool Input::Init(void* instance_handle, void* window_handle)
 		return false;
 	}
 
-	_mouse = new(mainPool) Mouse;
+	_mouse = New<Mouse>(mainPool);
 	if(!_mouse->Init(_directInput, _windowHandle))
 	{
 		Console::PrintError("Failed to initialize the mouse.");
@@ -176,7 +176,7 @@ bool Input::Init(void* instance_handle, void* window_handle)
 	}
 
 	// enumerate and create joystick devices
-	_gameControllers = new(mainPool) GameController[MAX_NUM_GAME_CONTROLLERS];
+	_gameControllers = NewArray<GameController>(mainPool, MAX_NUM_GAME_CONTROLLERS);
 	result = _directInput->EnumDevices(DI8DEVCLASS_GAMECTRL, InitGameControllersCallback, 0, DIEDFL_ATTACHEDONLY);
 
 	return true;
@@ -192,9 +192,9 @@ void Input::Deinit()
 		for(int i = 0; i < _numGameControllers; ++i)
 			_gameControllers[i].Deinit();
 
-	delete _keyboard;
-	delete _mouse;
-	delete[] _gameControllers;
+	Delete(_keyboard);
+	Delete(_mouse);
+	Memory::Delete(_gameControllers);
 
 	SAFE_RELEASE(_directInput);
 }
@@ -311,13 +311,13 @@ bool Input::Device::Init(LPDIRECTINPUT8 dinput, HWND window_handle, REFGUID rgui
 		size_t len = tstrlen(di.tszInstanceName);
 		if(len)
 		{
-			_instanceName = new(mainPool) tchar[len + 1];
+			_instanceName = NewArray<tchar>(mainPool, len + 1);
 			tstrcpy(_instanceName, di.tszInstanceName);
 		}
 		len = tstrlen(di.tszProductName);
 		if(len)
 		{
-			_productName = new(mainPool) tchar[len + 1];
+			_productName = NewArray<tchar>(mainPool, len + 1);
 			tstrcpy(_productName, di.tszProductName);
 		}
 	}
@@ -331,8 +331,8 @@ void Input::Device::Deinit()
 	{
 		_device->Unacquire();
 		SAFE_RELEASE(_device);
-		delete[] _instanceName;
-		delete[] _productName;
+		Memory::Delete(_instanceName);
+		Memory::Delete(_productName);
 		_instanceName = 0;
 		_productName = 0;
 	}

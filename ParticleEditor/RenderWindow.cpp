@@ -17,8 +17,8 @@ namespace ParticleEditor
 
 
 	RenderWindow::RenderWindow(Form^ parent) :
-		_vertProgSimple(*new(mainPool) VertexASMProgResPtr),
-		_fragProgConst(*new(mainPool) FragmentASMProgResPtr)
+		_vertProgSimple(*Memory::New<VertexASMProgResPtr>(mainPool)),
+		_fragProgConst(*Memory::New<FragmentASMProgResPtr>(mainPool))
 	{
 		_renderSystem = 0;
 		_renderer = 0;
@@ -131,8 +131,8 @@ namespace ParticleEditor
 
 	void RenderWindow::WndProc(Message% msg)
 	{
-		int wparam = msg.WParam.ToInt32();
-		int lparam = msg.LParam.ToInt32();
+		int wparam = static_cast<int>(msg.WParam.ToInt64());
+		int lparam = static_cast<int>(msg.LParam.ToInt64());
 
 		switch(msg.Msg)
 		{
@@ -265,8 +265,8 @@ namespace ParticleEditor
 			_renderSystem->Deinit();
 		}
 
-		delete &_vertProgSimple;
-		delete &_fragProgConst;
+		Delete(&_vertProgSimple);
+		Delete(&_fragProgConst);
 	}
 
 	void RenderWindow::OnMouseMove(int modifiers, int x, int y)
@@ -373,7 +373,7 @@ namespace ParticleEditor
 		if(_particleSystem)
 		{
 			List<ParticleSystem::Emitter*>& em_list = _particleSystem->GetEmitterList();
-			int em_count = em_list.GetCount();
+			int em_count = static_cast<int>(em_list.GetCount());
 
 			// emitter count
 			width = _font->GetTextWidth("Emitters: ");

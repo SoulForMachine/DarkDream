@@ -185,7 +185,7 @@ int Console::ConsoleObjectList::GetBeginWith(const char* prefix, ConsoleObject**
 	int count = 0;
 	if(CheckName(prefix))
 	{
-		int len = strlen(prefix);
+		size_t len = strlen(prefix);
 		ConsoleObject* ptr = GetListForChar(*prefix);
 		while(ptr)
 		{
@@ -386,7 +386,7 @@ void Console::StringVar::SetStringValue(const char* value)
 		if(!strcmp(value, _defaultValue))
 		{
 			if(!_staticString)
-				delete[] _value;
+				Memory::Delete(_value);
 			_value = _defaultValue;
 			_staticString = true;
 		}
@@ -399,11 +399,11 @@ void Console::StringVar::SetStringValue(const char* value)
 			}
 			else
 			{
-				int len;
+				size_t len;
 				if((len = strlen(value)) != strlen(_value))
 				{
-					delete[] _value;
-					_value = new(stringPool) char[len + 1];
+					Memory::Delete(_value);
+					_value = NewArray<char>(stringPool, len + 1);
 				}
 				char* ptr = const_cast<char*>(_value); // dynamic buffer, safe to cast
 				strcpy(ptr, value);
@@ -420,7 +420,7 @@ void Console::StringVar::GetDefaultStringValue(char* str) const
 void Console::StringVar::ReleaseResources()
 {
 	if(!_staticString)
-		delete[] _value;
+		Memory::Delete(_value);
 }
 
 // ------------ console Command ------------
@@ -440,7 +440,7 @@ bool Console::Init(int line_size, int line_count)
 	_bufferLineSize = line_size;
 	_bufferLineCount = line_count;
 	_bufferSize = line_size * line_count;
-	_buffer = new(mainPool) short[_bufferLineSize * _bufferLineCount];
+	_buffer = NewArray<short>(mainPool, _bufferLineSize * _bufferLineCount);
 	_firstLine = 0;
 	_pos = 0;
 	_lastLine = 0;
@@ -470,7 +470,7 @@ void Console::Deinit()
 {
 	if(_initialized)
 	{
-		delete[] _buffer;
+		Memory::Delete(_buffer);
 		_buffer = 0;
 		_consoleObjList.Clear();
 		_initialized = false;
@@ -562,7 +562,7 @@ void Console::ExecuteStatement(const char* statement)
 		return;
 
 	PrintLn("#%s", statement);
-	char* buf = new(tempPool) char[strlen(statement) + 1];
+	char* buf = NewArray<char>(tempPool, strlen(statement) + 1);
 	strcpy(buf, statement);
 
 	// first word is the name of variable/command, the rest is parameters
@@ -588,7 +588,7 @@ void Console::ExecuteStatement(const char* statement)
 		PrintLn("   %s^1: No such command or variable", name);
 	}
 
-	delete[] buf;
+	Memory::Delete(buf);
 }
 
 void Console::ClearBuffer()
@@ -696,7 +696,7 @@ void Console::SetBufferSize(int line_size, int line_count)
 	if(line_size == _bufferLineSize && line_count == _bufferLineCount)
 		return;
 
-	short* new_buffer = new(mainPool) short[line_size * line_count];
+	short* new_buffer = NewArray<short>(mainPool, line_size * line_count);
 	int first_line = 0;
 	int last_line = 0;
 	int pos = 0;
@@ -745,7 +745,7 @@ void Console::SetBufferSize(int line_size, int line_count)
 		}
 	}
 
-	delete[] _buffer;
+	Memory::Delete(_buffer);
 	_buffer = new_buffer;
 	_bufferLineCount = line_count;
 	_bufferLineSize = line_size;
@@ -850,7 +850,7 @@ void Console::Dump(char* args)
 	}
 
 	const short* line = GetBufferLastLine();
-	char* text = new(tempPool) char[_bufferLineSize];
+	char* text = NewArray<char>(tempPool, _bufferLineSize);
 
 	while(line)
 	{
@@ -865,7 +865,7 @@ void Console::Dump(char* args)
 		file.Printf("%s\n", text);
 		line = GetBufferPrevLine(line);
 	}
-	delete[] text;
+	Memory::Delete(text);
 	file.Close();
 }
 
@@ -893,8 +893,8 @@ void Console::Print(const char* prefix, const char* str, bool newline, va_list v
 	if(!_initialized || !str)
 		return;
 
-	int prefix_size = strlen(prefix);
-	char* buf = new(tempPool) char[_vscprintf(str, vl) + 1 + prefix_size];
+	size_t prefix_size = strlen(prefix);
+	char* buf = NewArray<char>(tempPool, _vscprintf(str, vl) + 1 + prefix_size);
 	if(prefix_size)
 		strcpy(buf, prefix);
 	vsprintf(buf + prefix_size, str, vl);
@@ -938,7 +938,7 @@ void Console::Print(const char* prefix, const char* str, bool newline, va_list v
 	}
 
 	line[_pos] = 0;
-	delete[] buf;
+	Delete(buf);
 	if(newline)
 		NewLine();
 }
@@ -1095,7 +1095,7 @@ void Console::AutoCompleteInput()
 			int count = _consoleObjList.GetBeginWith(name, 0);
 			if(count)
 			{
-				ConsoleObject** objs = new(tempPool) ConsoleObject*[count];
+				ConsoleObject** objs = NewArray<ConsoleObject*>(tempPool, count);
 				_consoleObjList.GetBeginWith(name, objs);
 				if(count == 1)
 				{
@@ -1133,7 +1133,7 @@ void Console::AutoCompleteInput()
 					for(i = 0; i < count; ++i)
 						PrintLn("   %s", objs[i]->GetName());
 				}
-				delete[] objs;
+				Memory::Delete(objs);
 			}
 		}
 	}
@@ -1173,7 +1173,7 @@ void Console::SetInputString(const char* str)
 {
 	strncpy(_inputBuffer, str, MAX_INPUT_BUFFER_SIZE);
 	_inputBuffer[MAX_INPUT_BUFFER_SIZE - 1] = '\0';
-	_inputSize = _inputPos = strlen(_inputBuffer);
+	_inputSize = _inputPos = static_cast<int>(strlen(_inputBuffer));
 }
 
 void Console::CmdHistoryBack()

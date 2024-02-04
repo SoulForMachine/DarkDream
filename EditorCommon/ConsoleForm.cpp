@@ -157,25 +157,25 @@ namespace EditorCommon
 			SetCursor(LoadCursor(0, IDC_ARROW));
 			break;
 		case WM_CHAR:
-			OnConsoleChar(msg.WParam.ToInt32());
+			OnConsoleChar(static_cast<int>(msg.WParam.ToInt64()));
 			break;
 		case WM_KEYDOWN:
-			OnConsoleKeyDown(msg.WParam.ToInt32());
+			OnConsoleKeyDown(static_cast<int>(msg.WParam.ToInt64()));
 			break;
 		case WM_KEYUP:
-			OnConsoleKeyUp(msg.WParam.ToInt32());
+			OnConsoleKeyUp(static_cast<int>(msg.WParam.ToInt64()));
 			break;
 		case WM_MOUSEWHEEL:
 			OnMouseWheel(
-				GET_WHEEL_DELTA_WPARAM(msg.WParam.ToInt32()),
-				GET_X_LPARAM(msg.LParam.ToInt32()),
-				GET_Y_LPARAM(msg.LParam.ToInt32()));
+				GET_WHEEL_DELTA_WPARAM(msg.WParam.ToInt64()),
+				GET_X_LPARAM(msg.LParam.ToInt64()),
+				GET_Y_LPARAM(msg.LParam.ToInt64()));
 			msg.Result = IntPtr(0);
 			return;
 		case WM_SIZE:
 			OnResize(
-				GET_X_LPARAM(msg.LParam.ToInt32()),
-				GET_Y_LPARAM(msg.LParam.ToInt32()));
+				GET_X_LPARAM(msg.LParam.ToInt64()),
+				GET_Y_LPARAM(msg.LParam.ToInt64()));
 			break;
 		}
 
@@ -192,7 +192,7 @@ namespace EditorCommon
 		int lines_printed = 0;
 		const short* line = ::Console::GetBufferCurrentLine();
 		int max_line_size = ::Console::GetBufferLineSize();
-		char* text = new(tempPool) char[max_line_size + 1];
+		char* text = NewArray<char>(tempPool, max_line_size + 1);
 
 		// draw console input
 		SetTextColor(hdc, PackGDIColor(::Console::GetDefaultTextColor()));
@@ -224,7 +224,7 @@ namespace EditorCommon
 					}
 					*dest = '\0';
 					SetTextColor(hdc, PackGDIColor(::Console::GetColor(color)));
-					int text_len = strlen(text);
+					int text_len = static_cast<int>(strlen(text));
 					TextOutA(hdc, xpos, ypos, text, text_len);
 					xpos += _fontWidth * text_len;
 				}
@@ -237,7 +237,7 @@ namespace EditorCommon
 
 		SelectObject(hdc, old_font);
 
-		delete[] text;
+		Memory::Delete(text);
 	}
 
 	void ConsoleWindow::OnConsoleChar(int c)
@@ -363,7 +363,10 @@ namespace EditorCommon
 
 	void ConsoleForm::RedrawAsync()
 	{
-		InvalidateRect((HWND)_consoleWnd->Handle.ToPointer(), 0, TRUE);
+		if (_consoleWnd)
+		{
+			InvalidateRect((HWND)_consoleWnd->Handle.ToPointer(), 0, TRUE);
+		}
 	}
 
 	System::Void ConsoleForm::ConsoleForm_HandleCreated(System::Object^ sender, System::EventArgs^ e)
@@ -395,7 +398,8 @@ namespace EditorCommon
 	{
 		if(_consoleWnd)
 		{
-			::SendMessage((HWND)_consoleWnd->Handle.ToPointer(), WM_MOUSEWHEEL, MAKEWPARAM(0, e->Delta), MAKELPARAM(e->X, e->Y));
+			// The child console window seems to pick up the WM_MOUSEWHEEL message, so this isn't needed.
+			//::SendMessage((HWND)_consoleWnd->Handle.ToPointer(), WM_MOUSEWHEEL, MAKEWPARAM(0, e->Delta), MAKELPARAM(e->X, e->Y));
 		}
 	}
 
@@ -438,7 +442,10 @@ namespace EditorCommon
 
 	System::Void ConsoleForm::ConsoleForm_Enter(System::Object^  sender, System::EventArgs^  e)
 	{
-		_consoleWnd->CreateCaret();
+		if (_consoleWnd)
+		{
+			_consoleWnd->CreateCaret();
+		}
 	}
 
 	System::Void ConsoleForm::ConsoleForm_Leave(System::Object^  sender, System::EventArgs^  e)

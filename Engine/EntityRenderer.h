@@ -21,7 +21,7 @@ namespace Engine
 			const Mesh* mesh;
 			const math3d::mat4f* worldMat;
 			const math3d::mat4f* jointMatPalette;
-			size_t jointCount;
+			int_t jointCount;
 			const Material* material;
 			int shaderIndex;
 			float eyeDistSq;

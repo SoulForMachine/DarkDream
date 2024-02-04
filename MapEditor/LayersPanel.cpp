@@ -130,7 +130,7 @@ namespace MapEditor
 		{
 			tchar* file_name = EditorUtil::GetRelativePath(_selectTextureDialog->FileName);
 			Texture2DResPtr tex_res = engineAPI->textureManager->CreateTexture2D(file_name, true);
-			delete[] file_name;
+			Memory::Delete(file_name);
 			if(tex_res)
 			{
 				int layer_i = _editMode->GetActiveLayer();

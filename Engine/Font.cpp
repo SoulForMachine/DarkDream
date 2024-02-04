@@ -72,7 +72,7 @@ namespace Engine
 		const int CHAR_COUNT = END_CHAR - START_CHAR + 1;
 		const int CHAR_SLACK = 2;
 		const int CHAR_HALF_SLACK = CHAR_SLACK / 2;
-		_widths = new(mainPool) int[CHAR_COUNT];
+		_widths = NewArray<int>(mainPool, CHAR_COUNT);
 		GetCharWidth32(dc, START_CHAR, END_CHAR, _widths);
 
 		int total_width = CHAR_COUNT * CHAR_SLACK;
@@ -102,7 +102,7 @@ namespace Engine
 
 		if(!bitmap)
 		{
-			delete[] _widths;
+			Memory::Delete(_widths);
 			DeleteDC(dc);
 			DeleteObject(font);
 			return false;
@@ -121,7 +121,7 @@ namespace Engine
 		// render font into bitmap
 		tchar c[2] = { (tchar)START_CHAR, _t('\0') };
 		int x = 0, y = 0;
-		_texCoords = new(mainPool) TexCoords[CHAR_COUNT];
+		_texCoords = NewArray<TexCoords>(mainPool, CHAR_COUNT);
 		float xscale = 1.0f / tex_width;
 		float yscale = 1.0f / tex_height;
 
@@ -162,8 +162,8 @@ namespace Engine
 		GetDIBits(dc, bitmap, 0, tex_height, 0, &bmi, DIB_RGB_COLORS);
 		int pixel_bytes = bmi.bmiHeader.biBitCount / 8;
 		size_t image_size = RoundUp(bmi.bmiHeader.biWidth * pixel_bytes, 4) * bmi.bmiHeader.biHeight;
-		ubyte* pixels = new(tempPool) ubyte[image_size];
-		GetBitmapBits(bitmap, image_size, pixels);
+		ubyte* pixels = NewArray<ubyte>(tempPool, image_size);
+		GetBitmapBits(bitmap, static_cast<LONG>(image_size), pixels);
 
 		DeleteObject(font);
 		DeleteObject(bitmap);
@@ -174,12 +174,12 @@ namespace Engine
 		bool result = (_texture != 0);
 		result = result && _texture->TexImage(0, PIXEL_FORMAT_R8, tex_width, tex_height, format, TYPE_UNSIGNED_BYTE, 0, pixels);
 
-		delete[] pixels;
+		Memory::Delete(pixels);
 
 		if(!result)
 		{
-			delete[] _texCoords;
-			delete[] _widths;
+			Memory::Delete(_texCoords);
+			Memory::Delete(_widths);
 		}
 
 		return result;
@@ -188,8 +188,8 @@ namespace Engine
 	void Font::Destroy()
 	{
 		_renderer->DestroyTexture(_texture);
-		delete[] _texCoords;
-		delete[] _widths;
+		Memory::Delete(_texCoords);
+		Memory::Delete(_widths);
 	}
 
 	/*

@@ -3,6 +3,7 @@
 #define _BASELIB_SMART_POINTER_H_
 
 #include <cassert>
+#include "Memory.h"
 
 
 template <class _Type> class SmartPtr;
@@ -30,7 +31,9 @@ public:
 		*this = other;
 	}
 	~SmartPtr()
-		{ delete _ptr; }
+	{
+		Memory::Delete(_ptr);
+	}
 	SmartPtr& operator = (const SmartPtr& other)
 	{
 		*this = other._ptr;
@@ -40,7 +43,7 @@ public:
 
 	SmartPtr& operator = (_Type* ptr)
 	{
-		delete _ptr;
+		Memory::Delete(_ptr);
 		_ptr = ptr;
 		return *this;
 	}

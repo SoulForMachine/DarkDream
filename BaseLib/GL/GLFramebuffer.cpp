@@ -53,7 +53,7 @@ namespace GL
 		}
 	}
 
-	void Renderbuffer::Storage(size_t samples, PixelFormat internal_format, size_t width, size_t height)
+	void Renderbuffer::Storage(int samples, PixelFormat internal_format, int width, int height)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK
@@ -162,7 +162,7 @@ namespace GL
 		return status;
 	}
 
-	void Framebuffer::ActiveDrawBuffers(size_t count, const RenderbufferType* buffers)
+	void Framebuffer::ActiveDrawBuffers(int count, const RenderbufferType* buffers)
 	{
 		assert(_id);
 		STATE_MACHINE_HACK

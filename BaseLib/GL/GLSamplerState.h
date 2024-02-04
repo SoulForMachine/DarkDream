@@ -33,10 +33,11 @@ namespace GL
 
 	class SamplerState
 	{
-	private:
+	public:
 		SamplerState() {}
 		~SamplerState() {}
 
+	private:
 		SamplerStateDesc _state;
 
 		friend class Renderer;

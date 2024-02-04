@@ -20,8 +20,8 @@ namespace MapEditor
 
 	ActionPaintGrass::~ActionPaintGrass()
 	{
-		delete[] _undoGrassData;
-		delete[] _oldGrassData;
+		Memory::Delete(_undoGrassData);
+		Memory::Delete(_oldGrassData);
 	}
 
 	bool ActionPaintGrass::BeginAction()
@@ -30,7 +30,7 @@ namespace MapEditor
 		Terrain& terrain = engineAPI->world->GetTerrain();
 		const Terrain::TerrainPatch* patches = terrain.GetPatches();
 		int patch_count = terrain.GetPatchCount();
-		_oldGrassData = new(tempPool) Terrain::GrassBlade[patch_count * Terrain::PATCH_WIDTH * 2 * Terrain::PATCH_HEIGHT];
+		_oldGrassData = NewArray<Terrain::GrassBlade>(tempPool, patch_count * Terrain::PATCH_WIDTH * 2 * Terrain::PATCH_HEIGHT);
 		terrain.GetGrassBlades(0, 0, patch_count * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _oldGrassData);
 
 		GetBrushRect(_undoRect);
@@ -42,7 +42,7 @@ namespace MapEditor
 	{
 		// save only modified part of grass for undo
 		int patch_count = engineAPI->world->GetTerrain().GetPatchCount();
-		_undoGrassData = new(mainPool) Terrain::GrassBlade[_undoRect.Width * 2 * _undoRect.Height];
+		_undoGrassData = NewArray<Terrain::GrassBlade>(mainPool, _undoRect.Width * 2 * _undoRect.Height);
 		int n = 0;
 		for(int y = _undoRect.Top; y < _undoRect.Bottom; ++y)
 		{
@@ -52,7 +52,7 @@ namespace MapEditor
 			}
 		}
 
-		delete[] _oldGrassData;
+		Memory::Delete(_oldGrassData);
 		_oldGrassData = 0;
 	}
 
@@ -62,7 +62,7 @@ namespace MapEditor
 		int patch_count = terrain.GetPatchCount();
 		terrain.SetGrassBlades(0, 0, patch_count * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _oldGrassData);
 
-		delete[] _oldGrassData;
+		Memory::Delete(_oldGrassData);
 		_oldGrassData = 0;
 	}
 
@@ -113,7 +113,7 @@ namespace MapEditor
 		if(GetAsyncKeyState(VK_SHIFT) & 0x8000)
 			dt = -dt;
 
-		Terrain::GrassBlade* grass_data = new(tempPool) Terrain::GrassBlade[rect.Width * 2 * rect.Height];
+		Terrain::GrassBlade* grass_data = NewArray<Terrain::GrassBlade>(tempPool, rect.Width * 2 * rect.Height);
 		engineAPI->world->GetTerrain().GetGrassBlades(rect.X, rect.Y, rect.Right, rect.Bottom, grass_data);
 
 		vec2f center(_parameters->posX, _parameters->posZ);
@@ -175,16 +175,16 @@ namespace MapEditor
 		}
 
 		engineAPI->world->GetTerrain().SetGrassBlades(rect.X, rect.Y, rect.Right, rect.Bottom, grass_data);
-		delete[] grass_data;
+		Memory::Delete(grass_data);
 	}
 
 	void ActionPaintGrass::Undo()
 	{
-		Terrain::GrassBlade* cur_grass = new(tempPool) Terrain::GrassBlade[_undoRect.Width * 2 * _undoRect.Height];
+		Terrain::GrassBlade* cur_grass = NewArray<Terrain::GrassBlade>(tempPool, _undoRect.Width * 2 * _undoRect.Height);
 		engineAPI->world->GetTerrain().GetGrassBlades(_undoRect.X, _undoRect.Y, _undoRect.Right, _undoRect.Bottom, cur_grass);
 		engineAPI->world->GetTerrain().SetGrassBlades(_undoRect.X, _undoRect.Y, _undoRect.Right, _undoRect.Bottom, _undoGrassData);
 		memcpy(_undoGrassData, cur_grass, _undoRect.Width * 2 * _undoRect.Height * sizeof(Terrain::GrassBlade));
-		delete[] cur_grass;
+		Memory::Delete(cur_grass);
 	}
 
 	void ActionPaintGrass::Redo()

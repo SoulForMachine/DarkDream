@@ -518,14 +518,14 @@ namespace ParticleEditor
 
 			if(index != -1)
 			{
-				ParticleSystem::Attribute::Value* new_values = new(tempPool) ParticleSystem::Attribute::Value[count + 1];
+				ParticleSystem::Attribute::Value* new_values = NewArray<ParticleSystem::Attribute::Value>(tempPool, count + 1);
 				memcpy(new_values, values, (index + 1) * sizeof(ParticleSystem::Attribute::Value));
 				new_values[index + 1].variable = float(new_pt.x - GRAPH_LEFT_MARGIN) / _graphWidth;
 				new_values[index + 1].value = float(new_pt.y - GRAPH_MARGIN) / _graphHeight * range + _minValue;
 				assert(count - index - 1 > 0);
 				memcpy(&new_values[index + 2], &values[index + 1], (count - index - 1) * sizeof(ParticleSystem::Attribute::Value));
 				_attribute->SetValues(new_values, count + 1);
-				delete[] new_values;
+				Memory::Delete(new_values);
 
 				_selectedPoints->Clear();
 				_panelGraph->Invalidate();
@@ -540,11 +540,11 @@ namespace ParticleEditor
 		{
 			int count = _attribute->GetValueCount();
 			const ParticleSystem::Attribute::Value* values = _attribute->GetValues();
-			ParticleSystem::Attribute::Value* new_values = new(tempPool) ParticleSystem::Attribute::Value[count - 1];
+			ParticleSystem::Attribute::Value* new_values = NewArray<ParticleSystem::Attribute::Value>(tempPool, count - 1);
 			memcpy(new_values, values, index * sizeof(ParticleSystem::Attribute::Value));
 			memcpy(&new_values[index], &values[index + 1], (count - index - 1) * sizeof(ParticleSystem::Attribute::Value));
 			_attribute->SetValues(new_values, count - 1);
-			delete[] new_values;
+			Memory::Delete(new_values);
 
 			_selectedPoints->Clear();
 			_panelGraph->Invalidate();

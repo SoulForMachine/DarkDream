@@ -16,13 +16,13 @@ namespace Engine
 		: _nodePool(max_entities, mapPool)
 	{
 		for(int i = 0; i < PARTITION_COUNT; ++i)
-			_partitions[i] = new(mapPool) FreeList<Entity*>(_nodePool);
+			_partitions[i] = New<FreeList<Entity*>>(mapPool, _nodePool);
 	}
 
 	SpacePartitionList::~SpacePartitionList()
 	{
 		for(int i = 0; i < PARTITION_COUNT; ++i)
-			delete _partitions[i];
+			Delete(_partitions[i]);
 	}
 
 	bool SpacePartitionList::AddEntity(Entity* entity, SPLEntity& spl_ent)

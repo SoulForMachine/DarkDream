@@ -76,7 +76,7 @@ namespace Engine
 
 	WeaponEntity* WeaponEntity::CreateCopy() const
 	{
-		return new(mapPool) WeaponEntity(*this);
+		return New<WeaponEntity>(mapPool, *this);
 	}
 
 	void WeaponEntity::Unload()
@@ -126,7 +126,7 @@ namespace Engine
 		{
 			tchar* p = CharToWideChar(path);
 			_muzzleEffect = engineAPI.partSysManager->CreateParticleSystem(p);
-			delete[] p;
+			Memory::Delete(p);
 		}
 		else
 		{

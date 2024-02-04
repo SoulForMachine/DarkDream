@@ -233,7 +233,7 @@ namespace ParticleEditor
 				}
 				else
 					::Console::PrintError("Failed to load particle system: %ls", fn);
-				delete[] fn;
+				Memory::Delete(fn);
 
 				_consoleForm->RedrawAsync();
 				if(!result)
@@ -284,7 +284,7 @@ namespace ParticleEditor
 		{
 			::Console::PrintError("Failed to save particle system: %ls", fn);
 		}
-		delete[] fn;
+		Memory::Delete(fn);
 
 		_consoleForm->RedrawAsync();
 		if(!result)

@@ -11,6 +11,9 @@ namespace GL
 	class BASELIB_API ASMProgram: public Object
 	{
 	public:
+		ASMProgram() {}
+		~ASMProgram() {}
+
 		void EnvParameter(uint index, const float* param) const;
 		void EnvParameter(uint index, const int* param) const;
 		void EnvParameter(uint index, const uint* param) const;
@@ -31,8 +34,6 @@ namespace GL
 	private:
 		friend class Renderer;
 
-		ASMProgram() {}
-		~ASMProgram() {}
 		ASMProgram(const ASMProgram&);
 		ASMProgram& operator = (const ASMProgram&);
 

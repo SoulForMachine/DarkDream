@@ -18,8 +18,8 @@ namespace MapEditor
 	};
 
 	TerrainBrush::TerrainBrush(EM_TerrainEdit::Parameters^ params) :
-		_vertpBrush(*new(mainPool) VertexASMProgResPtr),
-		_fragpBrush(*new(mainPool) FragmentASMProgResPtr)
+		_vertpBrush(*Memory::New<VertexASMProgResPtr>(mainPool)),
+		_fragpBrush(*Memory::New<FragmentASMProgResPtr>(mainPool))
 	{
 		_parameters = params;
 	}
@@ -55,8 +55,8 @@ namespace MapEditor
 		engineAPI->asmProgManager->ReleaseASMProgram(_vertpBrush);
 		engineAPI->asmProgManager->ReleaseASMProgram(_fragpBrush);
 
-		delete &_vertpBrush;
-		delete &_fragpBrush;
+		Delete(&_vertpBrush);
+		Delete(&_fragpBrush);
 	}
 
 	void TerrainBrush::Draw()

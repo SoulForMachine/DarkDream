@@ -15,23 +15,23 @@ namespace MapEditor
 	{
 		_patchIndex = index;
 
-		_elevation = new(mainPool) float[(Terrain::PATCH_WIDTH + 1) * (Terrain::PATCH_HEIGHT + 1)];
+		_elevation = NewArray<float>(mainPool, (Terrain::PATCH_WIDTH + 1) * (Terrain::PATCH_HEIGHT + 1));
 		engineAPI->world->GetTerrain().GetElevation(index * Terrain::PATCH_WIDTH, 0, (index + 1) * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _elevation);
 
-		_grassData = new(mainPool) Terrain::GrassBlade[Terrain::PATCH_WIDTH * 2 * Terrain::PATCH_HEIGHT];
+		_grassData = NewArray<Terrain::GrassBlade>(mainPool, Terrain::PATCH_WIDTH * 2 * Terrain::PATCH_HEIGHT);
 		engineAPI->world->GetTerrain().GetGrassBlades(index * Terrain::PATCH_WIDTH, 0, (index + 1) * Terrain::PATCH_WIDTH, Terrain::PATCH_HEIGHT, _grassData);
 
-		_entities = new(mainPool) List<Engine::Entity*>;
+		_entities = New<List<Engine::Entity*>>(mainPool);
 	}
 
 	ActionRemovePatch::~ActionRemovePatch()
 	{
-		delete[] _elevation;
-		delete[] _grassData;
+		Memory::Delete(_elevation);
+		Memory::Delete(_grassData);
 
 		for(List<Entity*>::Iterator it = _entities->Begin(); it != _entities->End(); ++it)
-			delete *it;
-		delete _entities;
+			Delete(*it);
+		Delete(_entities);
 	}
 
 	bool ActionRemovePatch::BeginAction()

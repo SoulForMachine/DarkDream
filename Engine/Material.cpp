@@ -137,28 +137,28 @@ namespace Engine
 		{
 			path = CharToWideChar(emiss_tex_path);
 			_emissionTexture = engineAPI.textureManager->CreateTexture2D(path);
-			delete[] path;
+			Memory::Delete(path);
 		}
 
 		if(*diff_tex_path)
 		{
 			path = CharToWideChar(diff_tex_path);
 			_diffuseTexture = engineAPI.textureManager->CreateTexture2D(path);
-			delete[] path;
+			Memory::Delete(path);
 		}
 
 		if(*nrm_tex_path)
 		{
 			path = CharToWideChar(nrm_tex_path);
 			_normalMap = engineAPI.textureManager->CreateTexture2D(path);
-			delete[] path;
+			Memory::Delete(path);
 		}
 
 		if(*transp_tex_path)
 		{
 			path = CharToWideChar(transp_tex_path);
 			_transpTexture = engineAPI.textureManager->CreateTexture2D(path);
-			delete[] path;
+			Memory::Delete(path);
 		}
 
 		UpdateFlags();

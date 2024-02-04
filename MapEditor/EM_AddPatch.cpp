@@ -15,8 +15,8 @@ namespace MapEditor
 
 	EM_AddPatch::EM_AddPatch(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager)
 			: EditMode(listener, persistent),
-			_vertProg(*new(mainPool) VertexASMProgResPtr),
-			_fragProg(*new(mainPool) FragmentASMProgResPtr)
+			_vertProg(*Memory::New<VertexASMProgResPtr>(mainPool)),
+			_fragProg(*Memory::New<FragmentASMProgResPtr>(mainPool))
 	{
 		_isExecuting = false;
 		_undoManager = undo_manager;
@@ -41,8 +41,8 @@ namespace MapEditor
 		engineAPI->asmProgManager->ReleaseASMProgram(_vertProg);
 		engineAPI->asmProgManager->ReleaseASMProgram(_fragProg);
 
-		delete &_vertProg;
-		delete &_fragProg;
+		Delete(&_vertProg);
+		Delete(&_fragProg);
 	}
 
 	void EM_AddPatch::Activate()

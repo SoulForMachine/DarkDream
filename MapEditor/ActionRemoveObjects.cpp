@@ -11,7 +11,7 @@ namespace MapEditor
 
 	ActionRemoveObjects::ActionRemoveObjects(const List<Engine::RenderableEntity*>& obj_list)
 	{
-		_objList = new(mainPool) List<Engine::RenderableEntity*>(obj_list);
+		_objList = New<List<Engine::RenderableEntity*>>(mainPool, obj_list);
 		_ownObjects = false;
 	}
 
@@ -23,7 +23,7 @@ namespace MapEditor
 				ObjectFactory::DeleteEntity(*it);
 		}
 
-		delete _objList;
+		Delete(_objList);
 	}
 
 	bool ActionRemoveObjects::BeginAction()

@@ -126,7 +126,7 @@ namespace MapEditor
 			{
 				engineAPI->world->GetTerrain().SetGrassTexture(tex);
 			}
-			delete[] file_name;
+			Memory::Delete(file_name);
 		}
 	}
 
@@ -168,12 +168,12 @@ namespace MapEditor
 		else
 			size = width * height * 4;
 
-		uchar* src = new(tempPool) uchar[size];
+		uchar* src = NewArray<uchar>(tempPool, size);
 		GL::PixelStore pixel_store = GL::GLState::defaultPixelStore;
 		pixel_store.alignment = 1;
 		if(!tex2d->GetTexImage(0, GL::IMAGE_FORMAT_BGRA, GL::TYPE_UNSIGNED_BYTE, &pixel_store, src))
 		{
-			delete[] src;
+			Memory::Delete(src);
 			return false;
 		}
 
@@ -211,7 +211,7 @@ namespace MapEditor
 
 		_parameters->texCount = _textureList->TextureCount;
 
-		delete[] src;
+		Memory::Delete(src);
 		return true;
 	}
 

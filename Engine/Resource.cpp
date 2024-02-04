@@ -97,13 +97,19 @@ namespace Engine
 	template <class _Res, int _ResSubType>
 	Resource<_Res, _ResSubType>::~Resource()
 	{
-		delete[] _fileName;
+		Memory::Delete(_fileName);
+	}
+
+	template <class _Res, int _ResSubType>
+	bool Resource<_Res, _ResSubType>::IsLoaded() const
+	{
+		return (_resource != _null);
 	}
 
 	// ============ Texture2DRes =================
 
 	template <>
-	GL::Texture2D* Resource<GL::Texture2D, 0>::_null;
+	GL::Texture2D* Resource<GL::Texture2D, 0>::_null{};
 
 	Texture2DRes::Texture2DRes(const tchar* file_name):
 		Resource(file_name)
@@ -125,7 +131,7 @@ namespace Engine
 		Console::PrintLn("Loading 2D texture: %ls", _fileName);
 
 		// load the texture from file
-		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));	
 		if(!file)
 		{
 			Console::PrintError("Failed to open texture file: %ls", _fileName);
@@ -189,7 +195,7 @@ namespace Engine
 
 		const int width = 32;
 		const int height = 32;
-		ubyte* pixels = new(tempPool) ubyte[width * height * 3];
+		ubyte* pixels = NewArray<ubyte>(tempPool, width * height * 3);
 		ubyte* ptr = pixels;
 		for(int i = 0; i < width; ++i)
 		{
@@ -216,7 +222,7 @@ namespace Engine
 		PixelStore ps = GLState::defaultPixelStore;
 		ps.alignment = 1;
 		bool result = texture->TexImage(0, PIXEL_FORMAT_RGB8, width, height, IMAGE_FORMAT_RGB, TYPE_UNSIGNED_BYTE, &ps, pixels);
-		delete[] pixels;
+		Memory::Delete(pixels);
 		if(result)
 		{
 			texture->GenerateMipmap();
@@ -300,7 +306,7 @@ namespace Engine
 	// ============ Texture3DRes =================
 
 	template <>
-	GL::Texture3D* Resource<GL::Texture3D, 0>::_null;
+	GL::Texture3D* Resource<GL::Texture3D, 0>::_null{};
 
 
 	Texture3DRes::Texture3DRes(const tchar* file_name):
@@ -388,7 +394,7 @@ namespace Engine
 		const int width = 32;
 		const int height = 32;
 		const int depth = 32;
-		ubyte* pixels = new(tempPool) ubyte[width * height * depth * 3];
+		ubyte* pixels = NewArray<ubyte>(tempPool, width * height * depth * 3);
 		ubyte* ptr = pixels;
 		for(int i = 0; i < width; ++i)
 		{
@@ -419,7 +425,7 @@ namespace Engine
 		PixelStore ps = GLState::defaultPixelStore;
 		ps.alignment = 1;
 		bool result = texture->TexImage(0, PIXEL_FORMAT_RGB8, width, height, depth, IMAGE_FORMAT_RGB, TYPE_UNSIGNED_BYTE, &ps, pixels);
-		delete[] pixels;
+		Memory::Delete(pixels);
 		if(result)
 		{
 			texture->GenerateMipmap();
@@ -502,7 +508,7 @@ namespace Engine
 	// ============ TextureCubeRes =================
 
 	template <>
-	GL::TextureCube* Resource<GL::TextureCube, 0>::_null;
+	GL::TextureCube* Resource<GL::TextureCube, 0>::_null{};
 
 
 	TextureCubeRes::TextureCubeRes(const tchar* file_name):
@@ -589,12 +595,12 @@ namespace Engine
 
 		const int width = 32;
 		ubyte* pixels[6] = {
-			new(tempPool) ubyte[width * width * 3],
-			new(tempPool) ubyte[width * width * 3],
-			new(tempPool) ubyte[width * width * 3],
-			new(tempPool) ubyte[width * width * 3],
-			new(tempPool) ubyte[width * width * 3],
-			new(tempPool) ubyte[width * width * 3]
+			NewArray<ubyte>(tempPool, width * width * 3),
+			NewArray<ubyte>(tempPool, width * width * 3),
+			NewArray<ubyte>(tempPool, width * width * 3),
+			NewArray<ubyte>(tempPool, width * width * 3),
+			NewArray<ubyte>(tempPool, width * width * 3),
+			NewArray<ubyte>(tempPool, width * width * 3)
 		};
 		for(int face_i = 0; face_i < 6; ++face_i)
 		{
@@ -627,7 +633,7 @@ namespace Engine
 		PixelStore* pss[6] = { &ps, &ps, &ps, &ps, &ps, &ps };
 		bool result = texture->TexImage(0, PIXEL_FORMAT_RGB8, width, IMAGE_FORMAT_RGB, TYPE_UNSIGNED_BYTE, pss, (void**)pixels);
 		for(int face_i = 0; face_i < 6; ++face_i)
-			delete[] pixels[face_i];
+			Memory::Delete(pixels[face_i]);
 		if(result)
 		{
 			texture->GenerateMipmap();
@@ -728,7 +734,7 @@ namespace Engine
 
 	template <GL::ObjectType _ShaderType>
 	ShaderRes<_ShaderType>::ShaderRes(const tchar* file_name, const char* macros):
-		Resource(file_name)
+		Resource<GL::GLSLShader, _ShaderType>(file_name)
 	{
 		_macros = StringDup(macros);
 	}
@@ -736,27 +742,27 @@ namespace Engine
 	template <GL::ObjectType _ShaderType>
 	ShaderRes<_ShaderType>::~ShaderRes()
 	{
-		delete[] _macros;
+		Memory::Delete(_macros);
 	}
 
 	template <GL::ObjectType _ShaderType>
 	bool ShaderRes<_ShaderType>::Load()
 	{
-		if(IsLoaded())
+		if(this->IsLoaded())
 			return true;
-		if(!_fileName || !*_fileName)
+		if(!this->_fileName || !*this->_fileName)
 			return false;
 
 		// load the shader from file
-		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(this->_fileName, _t("rb"));
 		if(!file)
 		{
-			Console::PrintError("Failed to open shader file: %ls", _fileName);
+			Console::PrintError("Failed to open shader file: %ls", this->_fileName);
 			return false;
 		}
 
 		long size = file->GetSize();
-		char* source = new(tempPool) char[size + 1];
+		char* source = NewArray<char>(tempPool, size + 1);
 		file->Read(source, size);
 		source[size] = '\0';
 
@@ -783,7 +789,7 @@ namespace Engine
 		{
 			size_t mlen = strlen(_macros) + 1;
 			mlen += mc * (strlen("#define") + 2) + strlen("#line 0\n");
-			mbuf = new(tempPool) char[mlen];
+			mbuf = NewArray<char>(tempPool, mlen);
 			mptr = _macros;
 			char* ptr = mbuf;
 			while(*mptr)
@@ -813,25 +819,25 @@ namespace Engine
 
 		// create the shader
 		const char* err_str;
-		_resource = engineAPI.renderSystem->GetRenderer()->CreateShader(_ShaderType, count, strings, err_str);
-		bool result = (_resource != 0);
-		delete[] source;
-		delete[] mbuf;
+		this->_resource = engineAPI.renderSystem->GetRenderer()->CreateShader(_ShaderType, static_cast<int>(count), strings, err_str);
+		bool result = (this->_resource != 0);
+		Memory::Delete(source);
+		Memory::Delete(mbuf);
 
 		if(err_str)
 		{
 			if(result)
-				Console::Print(ESC_YELLOW "Shader compile warnings" ESC_DEFAULT ":\nIn file: %ls, macros: %s\n%s", _fileName, _macros, err_str);
+				Console::Print(ESC_YELLOW "Shader compile warnings" ESC_DEFAULT ":\nIn file: %ls, macros: %s\n%s", this->_fileName, _macros, err_str);
 			else
-				Console::Print(ESC_RED "Shader compile errors" ESC_DEFAULT ":\nIn file: %ls, macros: %s\n%s", _fileName, _macros, err_str);
+				Console::Print(ESC_RED "Shader compile errors" ESC_DEFAULT ":\nIn file: %ls, macros: %s\n%s", this->_fileName, _macros, err_str);
 
-			delete[] err_str;
+			Memory::Delete(err_str);
 		}
 
 		if(!result)
 		{
-			engineAPI.renderSystem->GetRenderer()->DestroyShader(_resource);
-			_resource = _null;
+			engineAPI.renderSystem->GetRenderer()->DestroyShader(this->_resource);
+			this->_resource = this->_null;
 			return false;
 		}
 
@@ -841,7 +847,7 @@ namespace Engine
 	// ============ VertexShaderRes =================
 
 	template <>
-	GL::GLSLShader* Resource<GL::GLSLShader, GL::OBJ_GLSL_VERTEX_SHADER>::_null;
+	GL::GLSLShader* Resource<GL::GLSLShader, GL::OBJ_GLSL_VERTEX_SHADER>::_null{};
 
 
 	VertexShaderRes::VertexShaderRes(const tchar* file_name, const char* macros)
@@ -887,7 +893,7 @@ namespace Engine
 		const char* err_str;
 		GL::GLSLShader* shader = engineAPI.renderSystem->GetRenderer()->CreateShader(GL::OBJ_GLSL_VERTEX_SHADER, 1, (const char**)&source, err_str);
 		if(err_str)
-			delete[] err_str;
+			Memory::Delete(err_str);
 		return shader;
 	}
 
@@ -912,7 +918,7 @@ namespace Engine
 	// ============ FragmentShaderRes =================
 
 	template <>
-	GL::GLSLShader* Resource<GL::GLSLShader, GL::OBJ_GLSL_FRAGMENT_SHADER>::_null;
+	GL::GLSLShader* Resource<GL::GLSLShader, GL::OBJ_GLSL_FRAGMENT_SHADER>::_null{};
 
 
 	FragmentShaderRes::FragmentShaderRes(const tchar* file_name, const char* macros)
@@ -959,7 +965,7 @@ namespace Engine
 		const char* err_str;
 		GL::GLSLShader* shader = engineAPI.renderSystem->GetRenderer()->CreateShader(GL::OBJ_GLSL_FRAGMENT_SHADER, 1, (const char**)&source, err_str);
 		if(err_str)
-			delete[] err_str;
+			Memory::Delete(err_str);
 		return shader;
 	}
 
@@ -984,7 +990,7 @@ namespace Engine
 	// ============ GeometryShaderRes =================
 
 	template <>
-	GL::GLSLShader* Resource<GL::GLSLShader, GL::OBJ_GLSL_GEOMETRY_SHADER>::_null;
+	GL::GLSLShader* Resource<GL::GLSLShader, GL::OBJ_GLSL_GEOMETRY_SHADER>::_null{};
 
 
 	GeometryShaderRes::GeometryShaderRes(const tchar* file_name, const char* macros)
@@ -1044,7 +1050,7 @@ namespace Engine
 
 	template <GL::ObjectType _ShaderType>
 	ASMProgRes<_ShaderType>::ASMProgRes(const tchar* file_name):
-		Resource(file_name)
+		Resource<GL::ASMProgram, _ShaderType>(file_name)
 	{
 	}
 
@@ -1056,45 +1062,45 @@ namespace Engine
 	template <GL::ObjectType _ShaderType>
 	bool ASMProgRes<_ShaderType>::Load()
 	{
-		if(IsLoaded())
+		if(this->IsLoaded())
 			return true;
-		if(!_fileName || !*_fileName)
+		if(!this->_fileName || !*this->_fileName)
 			return false;
 
 		// load the shader from file
-		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(_fileName, _t("rb"));
+		SmartPtr<FileUtil::File> file = engineAPI.fileSystem->Open(this->_fileName, _t("rb"));
 		if(!file)
 		{
-			Console::PrintError("Failed to open program file: %ls", _fileName);
+			Console::PrintError("Failed to open program file: %ls", this->_fileName);
 			return false;
 		}
 
 		long size = file->GetSize();
-		char* source = new(tempPool) char[size + 1];
+		char* source = NewArray<char>(tempPool, size + 1);
 		file->Read(source, size);
 		source[size] = '\0';
 
 		file->Close();
 
 		const char* err_str = 0;
-		_resource = engineAPI.renderSystem->GetRenderer()->CreateASMProgram(_ShaderType, source, err_str);
-		bool result = (_resource != 0);
-		delete[] source;
+		this->_resource = engineAPI.renderSystem->GetRenderer()->CreateASMProgram(_ShaderType, source, err_str);
+		bool result = (this->_resource != 0);
+		Memory::Delete(source);
 
 		if(err_str)
 		{
 			if(result)
-				Console::Print(ESC_YELLOW "ASM program compile warnings" ESC_DEFAULT ":\nIn file: %ls\n%s", _fileName, err_str);
+				Console::Print(ESC_YELLOW "ASM program compile warnings" ESC_DEFAULT ":\nIn file: %ls\n%s", this->_fileName, err_str);
 			else
-				Console::Print(ESC_RED "ASM program compile errors" ESC_DEFAULT ":\nIn file: %ls\n%s", _fileName, err_str);
+				Console::Print(ESC_RED "ASM program compile errors" ESC_DEFAULT ":\nIn file: %ls\n%s", this->_fileName, err_str);
 
-			delete[] err_str;
+			Memory::Delete(err_str);
 		}
 
 		if(!result)
 		{
-			engineAPI.renderSystem->GetRenderer()->DestroyASMProgram(_resource);
-			_resource = _null;
+			engineAPI.renderSystem->GetRenderer()->DestroyASMProgram(this->_resource);
+			this->_resource = this->_null;
 			return false;
 		}
 
@@ -1104,7 +1110,7 @@ namespace Engine
 	// ============ VertexASMProgRes =================
 
 	template <>
-	GL::ASMProgram* Resource<GL::ASMProgram, GL::OBJ_ASM_VERTEX_PROGRAM>::_null;
+	GL::ASMProgram* Resource<GL::ASMProgram, GL::OBJ_ASM_VERTEX_PROGRAM>::_null{};
 
 
 	VertexASMProgRes::VertexASMProgRes(const tchar* file_name):
@@ -1151,7 +1157,7 @@ namespace Engine
 		const char* err_str;
 		GL::ASMProgram* prog = engineAPI.renderSystem->GetRenderer()->CreateASMProgram(GL::OBJ_ASM_VERTEX_PROGRAM, source, err_str);
 		if(err_str)
-			delete[] err_str;
+			Memory::Delete(err_str);
 		return prog;
 	}
 
@@ -1176,7 +1182,7 @@ namespace Engine
 	// ============ FragmentASMProgRes =================
 
 	template <>
-	GL::ASMProgram* Resource<GL::ASMProgram, GL::OBJ_ASM_FRAGMENT_PROGRAM>::_null;
+	GL::ASMProgram* Resource<GL::ASMProgram, GL::OBJ_ASM_FRAGMENT_PROGRAM>::_null{};
 
 
 	FragmentASMProgRes::FragmentASMProgRes(const tchar* file_name):
@@ -1223,7 +1229,7 @@ namespace Engine
 		const char* err_str;
 		GL::ASMProgram* prog = engineAPI.renderSystem->GetRenderer()->CreateASMProgram(GL::OBJ_ASM_FRAGMENT_PROGRAM, source, err_str);
 		if(err_str)
-			delete[] err_str;
+			Memory::Delete(err_str);
 		return prog;
 	}
 
@@ -1248,7 +1254,7 @@ namespace Engine
 	// ============ GeometryASMProgRes =================
 
 	template <>
-	GL::ASMProgram* Resource<GL::ASMProgram, GL::OBJ_ASM_GEOMETRY_PROGRAM>::_null;
+	GL::ASMProgram* Resource<GL::ASMProgram, GL::OBJ_ASM_GEOMETRY_PROGRAM>::_null{};
 
 
 	GeometryASMProgRes::GeometryASMProgRes(const tchar* file_name):
@@ -1306,7 +1312,7 @@ namespace Engine
 	// ============ ModelRes =================
 
 	template <>
-	Model* Resource<Model, 0>::_null;
+	Model* Resource<Model, 0>::_null{};
 
 
 	ModelRes::ModelRes(const tchar* file_name):
@@ -1327,11 +1333,11 @@ namespace Engine
 			return false;
 
 		Console::PrintLn("Loading model: %ls", _fileName);
-		_resource = new(mapPool) Model;
+		_resource = New<Model>(mapPool);
 		bool result = _resource->Load(_fileName);
 		if(!result)
 		{
-			delete _resource;
+			Delete(_resource);
 			_resource = _null;
 			Console::PrintError("Failed to load model: %ls", _fileName);
 		}
@@ -1351,7 +1357,7 @@ namespace Engine
 		if(IsLoaded())
 		{
 			_resource->Unload();
-			delete _resource;
+			Delete(_resource);
 			_resource = _null;
 		}
 	}
@@ -1359,7 +1365,7 @@ namespace Engine
 	Model* ModelRes::CreateDefault()
 	{
 		// even if it fails to load null model from file, return an empty object
-		Model* model = new(mapPool) Model;
+		Model* model = New<Model>(mapPool);
 		model->Load(_t("Models/null.model"));
 		return model;
 	}
@@ -1378,7 +1384,7 @@ namespace Engine
 		if(_null)
 		{
 			_null->Unload();
-			delete _null;
+			Delete(_null);
 			_null = 0;
 		}
 	}
@@ -1386,7 +1392,7 @@ namespace Engine
 	// ============ MaterialRes =================
 
 	template <>
-	Material* Resource<Material, 0>::_null;
+	Material* Resource<Material, 0>::_null{};
 
 	bool MaterialRes::_loadDefaultOnFail = false;
 
@@ -1409,12 +1415,12 @@ namespace Engine
 			return _loadDefaultOnFail? LoadDefault(): false;
 
 		Console::PrintLn("Loading material: %ls", _fileName);
-		_resource = new(mapPool) Material;
+		_resource = New<Material>(mapPool);
 		bool result = _resource->Load(_fileName);
 		if(!result)
 		{
 			Console::PrintError("Failed to load material: %ls", _fileName);
-			delete _resource;
+			Delete(_resource);
 			if(_loadDefaultOnFail)
 				result = LoadDefault();
 			else
@@ -1436,14 +1442,14 @@ namespace Engine
 		if(IsLoaded())
 		{
 			_resource->Unload();
-			delete _resource;
+			Delete(_resource);
 			_resource = _null;
 		}
 	}
 
 	Material* MaterialRes::CreateDefault()
 	{
-		return new(mapPool) Material;
+		return New<Material>(mapPool);
 	}
 
 	bool MaterialRes::CreateNull()
@@ -1459,7 +1465,7 @@ namespace Engine
 	{
 		if(_null)
 		{
-			delete _null;
+			Delete(_null);
 			_null = 0;
 		}
 	}
@@ -1467,7 +1473,7 @@ namespace Engine
 	// ============ ModelEntityRes =================
 
 	template <>
-	ModelEntity* Resource<ModelEntity, 0>::_null;
+	ModelEntity* Resource<ModelEntity, 0>::_null{};
 
 
 	ModelEntityRes::ModelEntityRes(const tchar* file_name):
@@ -1518,7 +1524,7 @@ namespace Engine
 		if(IsLoaded())
 		{
 			_resource->Unload();
-			delete _resource;
+			Delete(_resource);
 			_resource = _null;
 		}
 	}
@@ -1527,7 +1533,7 @@ namespace Engine
 	{
 		// even if it fails to load null entity from file, return an empty object
 		ModelEntity* entity = ModelEntity::CreateFromFile(_t("Entities/null.entity"));
-		return entity? entity: new(mapPool) StaticEntity;
+		return entity? entity: New<StaticEntity>(mapPool);
 	}
 
 	bool ModelEntityRes::CreateNull()
@@ -1544,7 +1550,7 @@ namespace Engine
 		if(_null)
 		{
 			_null->Unload();
-			delete _null;
+			Delete(_null);
 			_null = 0;
 		}
 	}
@@ -1577,7 +1583,7 @@ namespace Engine
 	// ============ AnimationRes =================
 
 	template <>
-	Animation* Resource<Animation, 0>::_null;
+	Animation* Resource<Animation, 0>::_null{};
 
 
 	AnimationRes::AnimationRes(const tchar* file_name):
@@ -1598,11 +1604,11 @@ namespace Engine
 			return false;
 
 		Console::PrintLn("Loading animation: %ls", _fileName);
-		_resource = new(mapPool) Animation;
+		_resource = New<Animation>(mapPool);
 		bool result = _resource->Load(_fileName);
 		if(!result)
 		{
-			delete _resource;
+			Delete(_resource);
 			_resource = _null;
 			Console::PrintError("Failed to load animation: %ls", _fileName);
 		}
@@ -1622,14 +1628,14 @@ namespace Engine
 		if(IsLoaded())
 		{
 			_resource->Unload();
-			delete _resource;
+			Delete(_resource);
 			_resource = _null;
 		}
 	}
 
 	Animation* AnimationRes::CreateDefault()
 	{
-		return new(mapPool) Animation;
+		return New<Animation>(mapPool);
 	}
 
 	bool AnimationRes::CreateNull()
@@ -1645,7 +1651,7 @@ namespace Engine
 	{
 		if(_null)
 		{
-			delete _null;
+			Delete(_null);
 			_null = 0;
 		}
 	}
@@ -1653,7 +1659,7 @@ namespace Engine
 	// ============ SoundRes =================
 
 	/*template <>
-	Sound* Resource<Sound, 0>::_null;*/
+	Sound* Resource<Sound, 0>::_null{};*/
 
 
 	SoundRes::SoundRes(const tchar* file_name):
@@ -1701,7 +1707,7 @@ namespace Engine
 	// ============ AIScriptRes =================
 
 	template <>
-	int* Resource<int, 0>::_null;
+	int* Resource<int, 0>::_null{};
 
 
 	AIScriptRes::AIScriptRes(const tchar* file_name):
@@ -1748,7 +1754,7 @@ namespace Engine
 	// ============ PartSysRes =================
 
 	template <>
-	ParticleSystem* Resource<ParticleSystem, 0>::_null;
+	ParticleSystem* Resource<ParticleSystem, 0>::_null{};
 
 
 	PartSysRes::PartSysRes(const tchar* file_name):
@@ -1760,7 +1766,7 @@ namespace Engine
 		Resource(res._fileName)
 	{
 		if(res.IsLoaded())
-			_resource = new(mapPool) ParticleSystem(*res._resource);
+			_resource = New<ParticleSystem>(mapPool, *res._resource);
 	}
 
 	PartSysRes::~PartSysRes()
@@ -1776,11 +1782,11 @@ namespace Engine
 			return false;
 
 		Console::PrintLn("Loading particle system: %ls", _fileName);
-		_resource = new(mapPool) ParticleSystem;
+		_resource = New<ParticleSystem>(mapPool);
 		bool result = _resource->Load(_fileName);
 		if(!result)
 		{
-			delete _resource;
+			Delete(_resource);
 			_resource = _null;
 			Console::PrintError("Failed to load particle system: %ls", _fileName);
 		}
@@ -1800,14 +1806,14 @@ namespace Engine
 		if(IsLoaded())
 		{
 			_resource->Unload();
-			delete _resource;
+			Delete(_resource);
 			_resource = _null;
 		}
 	}
 
 	ParticleSystem* PartSysRes::CreateDefault()
 	{
-		return new(mapPool) ParticleSystem;
+		return New<ParticleSystem>(mapPool);
 	}
 
 	bool PartSysRes::CreateNull()
@@ -1823,7 +1829,7 @@ namespace Engine
 	{
 		if(_null)
 		{
-			delete _null;
+			Delete(_null);
 			_null = 0;
 		}
 	}

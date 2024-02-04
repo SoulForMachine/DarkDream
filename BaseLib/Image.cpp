@@ -4,18 +4,11 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <windows.h>
-#include <ddraw.h>
-
+#include "DDS.h"
 #include "Memory.h"
 #include "FileUtil.h"
 #include "Image.h"
 
-
-#define DDS_MAGIC			0x20534444
-#define DDS_DDSURFACEDESC2_HEADER_SIZE		124
-#define DDS_DDPIXELFORMAT_HEADER_SIZE		32
-#define DDS_REQUIRED_FLAGS	(DDSD_CAPS | DDSD_PIXELFORMAT | DDSD_WIDTH | DDSD_HEIGHT)
 
 #define DDS_ATI2			MAKEFOURCC('A', 'T', 'I', '2') // ATI's Normal compression format
 #define DDS_A16B16G16R16	0x00000024 	// A16B16G16R16
@@ -123,43 +116,43 @@ void Image::Unload()
 		if(_data.images)
 		{
 			for(int i = 0; i < _data.mipmapCount; ++i)
-				delete[] _data.images[i].pixels;
-			delete[] _data.images;
+				Memory::Delete(_data.images[i].pixels);
+			Memory::Delete(_data.images);
 		}
 
 		if(_data.cubeNegX)
 		{
 			for(int i = 0; i < _data.mipmapCount; ++i)
-				delete[] _data.cubeNegX[i].pixels;
-			delete[] _data.cubeNegX;
+				Memory::Delete(_data.cubeNegX[i].pixels);
+			Memory::Delete(_data.cubeNegX);
 		}
 
 		if(_data.cubePosY)
 		{
 			for(int i = 0; i < _data.mipmapCount; ++i)
-				delete[] _data.cubePosY[i].pixels;
-			delete[] _data.cubePosY;
+				Memory::Delete(_data.cubePosY[i].pixels);
+			Memory::Delete(_data.cubePosY);
 		}
 
 		if(_data.cubeNegY)
 		{
 			for(int i = 0; i < _data.mipmapCount; ++i)
-				delete[] _data.cubeNegY[i].pixels;
-			delete[] _data.cubeNegY;
+				Memory::Delete(_data.cubeNegY[i].pixels);
+			Memory::Delete(_data.cubeNegY);
 		}
 
 		if(_data.cubePosZ)
 		{
 			for(int i = 0; i < _data.mipmapCount; ++i)
-				delete[] _data.cubePosZ[i].pixels;
-			delete[] _data.cubePosZ;
+				Memory::Delete(_data.cubePosZ[i].pixels);
+			Memory::Delete(_data.cubePosZ);
 		}
 
 		if(_data.cubeNegZ)
 		{
 			for(int i = 0; i < _data.mipmapCount; ++i)
-				delete[] _data.cubeNegZ[i].pixels;
-			delete[] _data.cubeNegZ;
+				Memory::Delete(_data.cubeNegZ[i].pixels);
+			Memory::Delete(_data.cubeNegZ);
 		}
 
 		memset(&_data, 0, sizeof(_data));
@@ -200,7 +193,7 @@ bool Image::LoadBmp(File& file)
 		return false;
 	}
 
-	_data.images = new(tempPool) MipLevelData[1];
+	_data.images = NewArray<MipLevelData>(tempPool, 1);
 	_data.bits = bih.biBitCount;
 	_data.format = IMG_BGR;
 	_data.mipmapCount = 1;
@@ -216,7 +209,7 @@ bool Image::LoadBmp(File& file)
 	int data_size = line_bytes * _data.images[0].height;
 	_data.images[0].bytesPerScanline = line_bytes;
 	_data.images[0].size = data_size;
-	_data.images[0].pixels = new(tempPool) ubyte[data_size];
+	_data.images[0].pixels = NewArray<ubyte>(tempPool, data_size);
 
 	ubyte* dest = ((ubyte*)_data.images[0].pixels) + (_data.images[0].height - 1) * line_bytes;
 
@@ -278,18 +271,18 @@ bool Image::LoadTga(File& file)
 	int num_px = header.img_width * header.img_height;
 	int data_size = num_px * px_bytes;
 
-	_data.images = new(tempPool) MipLevelData[1];
+	_data.images = NewArray<MipLevelData>(tempPool, 1);
 	_data.images[0].width = header.img_width;
 	_data.images[0].height = header.img_height;
 	_data.images[0].depth = 1;
 	_data.images[0].bytesPerScanline = px_bytes * header.img_width;
 	_data.images[0].size = data_size;
 
-	ubyte* temp = new(tempPool) ubyte[data_size];
+	ubyte* temp = NewArray<ubyte>(tempPool, data_size);
 
 	file.Read(temp, data_size);
 
-	_data.images[0].pixels = new(tempPool) ubyte[data_size];
+	_data.images[0].pixels = NewArray<ubyte>(tempPool, data_size);
 
 	ubyte* src = temp;
 	ubyte* dest = (ubyte*)_data.images[0].pixels;
@@ -395,7 +388,7 @@ bool Image::LoadTga(File& file)
 		ptr2 += scanline_bytes;
 	}
 
-	delete[] temp;
+	Memory::Delete(temp);
 	_loaded = true;
 
 	return true;
@@ -406,31 +399,31 @@ bool Image::LoadDDS(File& file)
 	// check magic value
 	DWORD magic;
 	file.Read(&magic, sizeof(DWORD));
-	if(magic != DDS_MAGIC)
+	if(magic != DirectX::DDS_MAGIC)
 		return false;
 
 	// read the header
-	DDSURFACEDESC2 ddsd;
+	DirectX::DDS_HEADER ddsd;
 	file.Read(&ddsd, sizeof(ddsd));
 
 	// check DDSURFACEDESC2 header size
-	if(ddsd.dwSize != DDS_DDSURFACEDESC2_HEADER_SIZE)
+	if (ddsd.size != sizeof(DirectX::DDS_HEADER))
 		return false;
 
 	// check required flags
-	if((ddsd.dwFlags & DDS_REQUIRED_FLAGS) != DDS_REQUIRED_FLAGS)
+	if((ddsd.flags & DDS_HEADER_FLAGS_TEXTURE) != DDS_HEADER_FLAGS_TEXTURE)
 		return false;
 
 	// check DDPIXELFORMAT
-	if(ddsd.ddpfPixelFormat.dwSize != DDS_DDPIXELFORMAT_HEADER_SIZE)
+	if(ddsd.ddspf.size != sizeof(DirectX::DDS_PIXELFORMAT))
 		return false;
 
 
 	// get mipmap level count
-	if(ddsd.ddsCaps.dwCaps & DDSCAPS_MIPMAP)
+	if(ddsd.caps & DDS_SURFACE_FLAGS_MIPMAP)
 	{
-		if(ddsd.dwFlags & DDSD_MIPMAPCOUNT)
-			_data.mipmapCount = ddsd.dwMipMapCount;
+		if(ddsd.flags & DDS_HEADER_FLAGS_MIPMAP)
+			_data.mipmapCount = ddsd.mipMapCount;
 		else
 			return false;
 	}
@@ -444,36 +437,36 @@ bool Image::LoadDDS(File& file)
 
 	// get image format
 	_data.compressed = false;
-	if(ddsd.ddpfPixelFormat.dwFlags & DDPF_ALPHA)
+	if(ddsd.ddspf.flags & DDS_ALPHA)
 	{
 		_data.format = IMG_ALPHA;
 		_data.bits = 8;
 	}
-	if(ddsd.ddpfPixelFormat.dwFlags & DDPF_LUMINANCE)
+	if(ddsd.ddspf.flags & DDS_LUMINANCE)
 	{
 		_data.format = IMG_LUMINANCE;
 		_data.bits = 8;
 	}
-	else if(ddsd.ddpfPixelFormat.dwFlags & DDPF_RGB)
+	else if(ddsd.ddspf.flags & DDS_RGB)
 	{
-		if(	ddsd.ddpfPixelFormat.dwBBitMask == 0xFF &&
-			ddsd.ddpfPixelFormat.dwGBitMask == 0xFF00 &&
-			ddsd.ddpfPixelFormat.dwRBitMask == 0xFF0000 )
+		if(	ddsd.ddspf.BBitMask == 0xFF &&
+			ddsd.ddspf.GBitMask == 0xFF00 &&
+			ddsd.ddspf.RBitMask == 0xFF0000 )
 		{
-			_data.format = (ddsd.ddpfPixelFormat.dwFlags & DDPF_ALPHAPIXELS)? IMG_BGRA: IMG_BGR;
+			_data.format = (ddsd.ddspf.flags & DDS_ALPHAPIXELS)? IMG_BGRA: IMG_BGR;
 		}
-		else if(ddsd.ddpfPixelFormat.dwRBitMask == 0xFF &&
-				ddsd.ddpfPixelFormat.dwGBitMask == 0xFF00 &&
-				ddsd.ddpfPixelFormat.dwBBitMask == 0xFF0000 )
+		else if(ddsd.ddspf.RBitMask == 0xFF &&
+				ddsd.ddspf.GBitMask == 0xFF00 &&
+				ddsd.ddspf.BBitMask == 0xFF0000 )
 		{
-			_data.format = (ddsd.ddpfPixelFormat.dwFlags & DDPF_ALPHAPIXELS)? IMG_RGBA: IMG_RGB;
+			_data.format = (ddsd.ddspf.flags & DDS_ALPHAPIXELS)? IMG_RGBA: IMG_RGB;
 		}
 
-		_data.bits = (ddsd.ddpfPixelFormat.dwFlags & DDPF_ALPHAPIXELS)? 32: 24;
+		_data.bits = (ddsd.ddspf.flags & DDS_ALPHAPIXELS)? 32: 24;
 	}
-	else if(ddsd.ddpfPixelFormat.dwFlags & DDPF_FOURCC)
+	else if(ddsd.ddspf.flags & DDS_FOURCC)
 	{
-		switch(ddsd.ddpfPixelFormat.dwFourCC)
+		switch(ddsd.ddspf.fourCC)
 		{
 		case MAKEFOURCC('D', 'X', 'T', '1'):
 			_data.format = IMG_DXT1;
@@ -504,9 +497,9 @@ bool Image::LoadDDS(File& file)
 	}
 
 	// get image type
-	if(ddsd.ddsCaps.dwCaps2 & DDSCAPS2_VOLUME)
+	if(ddsd.caps & DDS_FLAGS_VOLUME)
 		_data.type = IMG_3D;
-	else if(ddsd.ddsCaps.dwCaps2 & DDSCAPS2_CUBEMAP)
+	else if(ddsd.caps & DDS_CUBEMAP)
 		_data.type = IMG_CUBEMAP;
 	else
 		_data.type = IMG_2D;
@@ -514,37 +507,37 @@ bool Image::LoadDDS(File& file)
 	if(_data.type == IMG_CUBEMAP)
 	{
 		// if this is a cubemap, require all faces to be present
-		if((ddsd.ddsCaps.dwCaps2 & DDSCAPS2_CUBEMAP_ALLFACES) != DDSCAPS2_CUBEMAP_ALLFACES)
+		if((ddsd.caps & DDS_CUBEMAP_ALLFACES) != DDS_CUBEMAP_ALLFACES)
 			return false;
 
-		_data.cubePosX = new(tempPool) MipLevelData[_data.mipmapCount];
-		_data.cubeNegX = new(tempPool) MipLevelData[_data.mipmapCount];
-		_data.cubePosY = new(tempPool) MipLevelData[_data.mipmapCount];
-		_data.cubeNegY = new(tempPool) MipLevelData[_data.mipmapCount];
-		_data.cubePosZ = new(tempPool) MipLevelData[_data.mipmapCount];
-		_data.cubeNegZ = new(tempPool) MipLevelData[_data.mipmapCount];
+		_data.cubePosX = NewArray<MipLevelData>(tempPool, _data.mipmapCount);
+		_data.cubeNegX = NewArray<MipLevelData>(tempPool, _data.mipmapCount);
+		_data.cubePosY = NewArray<MipLevelData>(tempPool, _data.mipmapCount);
+		_data.cubeNegY = NewArray<MipLevelData>(tempPool, _data.mipmapCount);
+		_data.cubePosZ = NewArray<MipLevelData>(tempPool, _data.mipmapCount);
+		_data.cubeNegZ = NewArray<MipLevelData>(tempPool, _data.mipmapCount);
 	}
 	else
 	{
-		_data.images = new(tempPool) MipLevelData[_data.mipmapCount];
+		_data.images = NewArray<MipLevelData>(tempPool, _data.mipmapCount);
 	}
 
 	if(_data.type == IMG_2D)
 	{
 		if(_data.compressed)
 		{
-			DDSRead2DTexCompressed(file, ddsd.dwWidth, ddsd.dwHeight, _data.format, _data.mipmapCount, _data.images);
+			DDSRead2DTexCompressed(file, ddsd.width, ddsd.height, _data.format, _data.mipmapCount, _data.images);
 		}
 		else
 		{
-			DDSRead2DTex(file, ddsd.dwWidth, ddsd.dwHeight, _data.bits / 8, _data.mipmapCount, _data.images);
+			DDSRead2DTex(file, ddsd.width, ddsd.height, _data.bits / 8, _data.mipmapCount, _data.images);
 		}
 	}
 	else if(_data.type == IMG_3D)
 	{
-		int width = ddsd.dwWidth;
-		int height = ddsd.dwHeight;
-		int depth = ddsd.dwDepth;
+		int width = ddsd.width;
+		int height = ddsd.height;
+		int depth = ddsd.depth;
 
 		for(int i = 0; i < _data.mipmapCount; ++i)
 		{
@@ -556,7 +549,7 @@ bool Image::LoadDDS(File& file)
 			_data.images[i].depth = depth;
 			_data.images[i].bytesPerScanline = pitch;
 			_data.images[i].size = size;
-			_data.images[i].pixels = new(tempPool) ubyte[size];
+			_data.images[i].pixels = NewArray<ubyte>(tempPool, size);
 			file.Read(_data.images[i].pixels, (size_t)size);
 
 			width = max(1, width / 2);
@@ -568,21 +561,21 @@ bool Image::LoadDDS(File& file)
 	{
 		if(_data.compressed)
 		{
-			DDSRead2DTexCompressed(file, ddsd.dwWidth, ddsd.dwHeight, _data.format, _data.mipmapCount, _data.cubePosX);
-			DDSRead2DTexCompressed(file, ddsd.dwWidth, ddsd.dwHeight, _data.format, _data.mipmapCount, _data.cubeNegX);
-			DDSRead2DTexCompressed(file, ddsd.dwWidth, ddsd.dwHeight, _data.format, _data.mipmapCount, _data.cubePosY);
-			DDSRead2DTexCompressed(file, ddsd.dwWidth, ddsd.dwHeight, _data.format, _data.mipmapCount, _data.cubeNegY);
-			DDSRead2DTexCompressed(file, ddsd.dwWidth, ddsd.dwHeight, _data.format, _data.mipmapCount, _data.cubePosZ);
-			DDSRead2DTexCompressed(file, ddsd.dwWidth, ddsd.dwHeight, _data.format, _data.mipmapCount, _data.cubeNegZ);
+			DDSRead2DTexCompressed(file, ddsd.width, ddsd.height, _data.format, _data.mipmapCount, _data.cubePosX);
+			DDSRead2DTexCompressed(file, ddsd.width, ddsd.height, _data.format, _data.mipmapCount, _data.cubeNegX);
+			DDSRead2DTexCompressed(file, ddsd.width, ddsd.height, _data.format, _data.mipmapCount, _data.cubePosY);
+			DDSRead2DTexCompressed(file, ddsd.width, ddsd.height, _data.format, _data.mipmapCount, _data.cubeNegY);
+			DDSRead2DTexCompressed(file, ddsd.width, ddsd.height, _data.format, _data.mipmapCount, _data.cubePosZ);
+			DDSRead2DTexCompressed(file, ddsd.width, ddsd.height, _data.format, _data.mipmapCount, _data.cubeNegZ);
 		}
 		else
 		{
-			DDSRead2DTex(file, ddsd.dwWidth, ddsd.dwHeight, _data.bits / 8, _data.mipmapCount, _data.cubePosX);
-			DDSRead2DTex(file, ddsd.dwWidth, ddsd.dwHeight, _data.bits / 8, _data.mipmapCount, _data.cubeNegX);
-			DDSRead2DTex(file, ddsd.dwWidth, ddsd.dwHeight, _data.bits / 8, _data.mipmapCount, _data.cubePosY);
-			DDSRead2DTex(file, ddsd.dwWidth, ddsd.dwHeight, _data.bits / 8, _data.mipmapCount, _data.cubeNegY);
-			DDSRead2DTex(file, ddsd.dwWidth, ddsd.dwHeight, _data.bits / 8, _data.mipmapCount, _data.cubePosZ);
-			DDSRead2DTex(file, ddsd.dwWidth, ddsd.dwHeight, _data.bits / 8, _data.mipmapCount, _data.cubeNegZ);
+			DDSRead2DTex(file, ddsd.width, ddsd.height, _data.bits / 8, _data.mipmapCount, _data.cubePosX);
+			DDSRead2DTex(file, ddsd.width, ddsd.height, _data.bits / 8, _data.mipmapCount, _data.cubeNegX);
+			DDSRead2DTex(file, ddsd.width, ddsd.height, _data.bits / 8, _data.mipmapCount, _data.cubePosY);
+			DDSRead2DTex(file, ddsd.width, ddsd.height, _data.bits / 8, _data.mipmapCount, _data.cubeNegY);
+			DDSRead2DTex(file, ddsd.width, ddsd.height, _data.bits / 8, _data.mipmapCount, _data.cubePosZ);
+			DDSRead2DTex(file, ddsd.width, ddsd.height, _data.bits / 8, _data.mipmapCount, _data.cubeNegZ);
 		}
 	}
 
@@ -623,7 +616,7 @@ ImageFileFormat Image::DetermineFileFormat(FileUtil::File& file)
 	file.Seek(oldpos, SEEK_SET);
 	DWORD magic;
 	file.Read(&magic, sizeof(DWORD));
-	if(magic == DDS_MAGIC)
+	if(magic == DirectX::DDS_MAGIC)
 	{
 		file.Seek(oldpos, SEEK_SET);
 		return IMG_DDS;
@@ -645,7 +638,7 @@ void DDSRead2DTex(File& file, int width, int height, int bytes_per_pixel, int mi
 		images[i].depth = 1;
 		images[i].bytesPerScanline = pitch;
 		images[i].size = size;
-		images[i].pixels = new(tempPool) ubyte[size];
+		images[i].pixels = NewArray<ubyte>(tempPool, size);
 		file.Read(images[i].pixels, (size_t)size);
 
 		width = max(1, width / 2);
@@ -666,7 +659,7 @@ void DDSRead2DTexCompressed(File& file, int width, int height, ImagePixelFormat 
 		images[i].depth = 1;
 		images[i].bytesPerScanline = size;
 		images[i].size = size;
-		images[i].pixels = new(tempPool) ubyte[size];
+		images[i].pixels = NewArray<ubyte>(tempPool, size);
 		file.Read(images[i].pixels, (size_t)size);
 
 		width = max(1, width / 2);
@@ -710,7 +703,7 @@ void swap(void *byte1, void *byte2, int size)
     memcpy(byte1, byte2, size);
     memcpy(byte2, tmp, size);
 
-    delete [] tmp;
+    Memory::Delete(tmp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

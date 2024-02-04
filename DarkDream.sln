@@ -1,9 +1,14 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BaseLib", "BaseLib\BaseLib.vcxproj", "{D7E6C94E-9411-4ADA-9BD5-18CA86910803}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{F58C7E90-D832-4A9E-9FA7-020FBB802F33}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7E6C94E-9411-4ADA-9BD5-18CA86910803} = {D7E6C94E-9411-4ADA-9BD5-18CA86910803}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EditorCommon", "EditorCommon\EditorCommon.vcxproj", "{269CECE1-C8C3-4655-8C21-64DEAC906742}"
 EndProject
@@ -18,73 +23,46 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MayaModelExporter", "MayaModelExporter\MayaModelExporter.vcxproj", "{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}"
 EndProject
 Global
-	GlobalSection(SourceCodeControl) = preSolution
-		SccNumberOfProjects = 9
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = BaseLib\\BaseLib.vcxproj
-		SccProjectName1 = \u0022$/DarkDream.root/DarkDream/BaseLib\u0022,\u0020FAAAAAAA
-		SccLocalPath1 = BaseLib
-		SccProjectUniqueName2 = Engine\\Engine.vcxproj
-		SccProjectName2 = \u0022$/DarkDream.root/DarkDream/Engine\u0022,\u0020ODAAAAAA
-		SccLocalPath2 = Engine
-		SccProjectUniqueName3 = EditorCommon\\EditorCommon.vcxproj
-		SccProjectName3 = \u0022$/DarkDream.root/DarkDream/EditorCommon\u0022,\u0020MFAAAAAA
-		SccLocalPath3 = EditorCommon
-		SccProjectUniqueName4 = EntityEditor\\EntityEditor.vcxproj
-		SccProjectName4 = \u0022$/DarkDream.root/DarkDream/EntityEditor\u0022,\u0020PFAAAAAA
-		SccLocalPath4 = EntityEditor
-		SccProjectUniqueName5 = MapEditor\\MapEditor.vcxproj
-		SccProjectName5 = \u0022$/DarkDream.root/DarkDream/MapEditor\u0022,\u0020IHAAAAAA
-		SccLocalPath5 = MapEditor
-		SccProjectUniqueName6 = ParticleEditor\\ParticleEditor.vcxproj
-		SccProjectName6 = \u0022$/DarkDream.root/DarkDream/ParticleEditor\u0022,\u0020SLAAAAAA
-		SccLocalPath6 = ParticleEditor
-		SccProjectUniqueName7 = MayaAnimExporter\\MayaAnimExporter.vcxproj
-		SccLocalPath7 = .
-		SccProjectFilePathRelativizedFromConnection7 = MayaAnimExporter\\
-		SccProjectUniqueName8 = MayaModelExporter\\MayaModelExporter.vcxproj
-		SccLocalPath8 = .
-		SccProjectFilePathRelativizedFromConnection8 = MayaModelExporter\\
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Win32 = Debug|Win32
-		Release|Win32 = Release|Win32
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D7E6C94E-9411-4ADA-9BD5-18CA86910803}.Debug|Win32.ActiveCfg = Debug|Win32
-		{D7E6C94E-9411-4ADA-9BD5-18CA86910803}.Debug|Win32.Build.0 = Debug|Win32
-		{D7E6C94E-9411-4ADA-9BD5-18CA86910803}.Release|Win32.ActiveCfg = Release|Win32
-		{D7E6C94E-9411-4ADA-9BD5-18CA86910803}.Release|Win32.Build.0 = Release|Win32
-		{F58C7E90-D832-4A9E-9FA7-020FBB802F33}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F58C7E90-D832-4A9E-9FA7-020FBB802F33}.Debug|Win32.Build.0 = Debug|Win32
-		{F58C7E90-D832-4A9E-9FA7-020FBB802F33}.Release|Win32.ActiveCfg = Release|Win32
-		{F58C7E90-D832-4A9E-9FA7-020FBB802F33}.Release|Win32.Build.0 = Release|Win32
-		{269CECE1-C8C3-4655-8C21-64DEAC906742}.Debug|Win32.ActiveCfg = Debug|Win32
-		{269CECE1-C8C3-4655-8C21-64DEAC906742}.Debug|Win32.Build.0 = Debug|Win32
-		{269CECE1-C8C3-4655-8C21-64DEAC906742}.Release|Win32.ActiveCfg = Release|Win32
-		{269CECE1-C8C3-4655-8C21-64DEAC906742}.Release|Win32.Build.0 = Release|Win32
-		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Debug|Win32.ActiveCfg = Debug|Win32
-		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Debug|Win32.Build.0 = Debug|Win32
-		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Release|Win32.ActiveCfg = Release|Win32
-		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Release|Win32.Build.0 = Release|Win32
-		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Debug|Win32.ActiveCfg = Debug|Win32
-		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Debug|Win32.Build.0 = Debug|Win32
-		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Release|Win32.ActiveCfg = Release|Win32
-		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Release|Win32.Build.0 = Release|Win32
-		{1752478B-DABC-4926-BF49-7D959872A574}.Debug|Win32.ActiveCfg = Debug|Win32
-		{1752478B-DABC-4926-BF49-7D959872A574}.Debug|Win32.Build.0 = Debug|Win32
-		{1752478B-DABC-4926-BF49-7D959872A574}.Release|Win32.ActiveCfg = Release|Win32
-		{1752478B-DABC-4926-BF49-7D959872A574}.Release|Win32.Build.0 = Release|Win32
-		{56E48C36-4937-46C1-873F-3A026A72DC6B}.Debug|Win32.ActiveCfg = Debug|Win32
-		{56E48C36-4937-46C1-873F-3A026A72DC6B}.Debug|Win32.Build.0 = Debug|Win32
-		{56E48C36-4937-46C1-873F-3A026A72DC6B}.Release|Win32.ActiveCfg = Release|Win32
-		{56E48C36-4937-46C1-873F-3A026A72DC6B}.Release|Win32.Build.0 = Release|Win32
-		{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}.Debug|Win32.ActiveCfg = Debug|Win32
-		{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}.Debug|Win32.Build.0 = Debug|Win32
-		{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}.Release|Win32.ActiveCfg = Release|Win32
-		{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}.Release|Win32.Build.0 = Release|Win32
+		{D7E6C94E-9411-4ADA-9BD5-18CA86910803}.Debug|x64.ActiveCfg = Debug|x64
+		{D7E6C94E-9411-4ADA-9BD5-18CA86910803}.Debug|x64.Build.0 = Debug|x64
+		{D7E6C94E-9411-4ADA-9BD5-18CA86910803}.Release|x64.ActiveCfg = Release|x64
+		{D7E6C94E-9411-4ADA-9BD5-18CA86910803}.Release|x64.Build.0 = Release|x64
+		{F58C7E90-D832-4A9E-9FA7-020FBB802F33}.Debug|x64.ActiveCfg = Debug|x64
+		{F58C7E90-D832-4A9E-9FA7-020FBB802F33}.Debug|x64.Build.0 = Debug|x64
+		{F58C7E90-D832-4A9E-9FA7-020FBB802F33}.Release|x64.ActiveCfg = Release|x64
+		{F58C7E90-D832-4A9E-9FA7-020FBB802F33}.Release|x64.Build.0 = Release|x64
+		{269CECE1-C8C3-4655-8C21-64DEAC906742}.Debug|x64.ActiveCfg = Debug|x64
+		{269CECE1-C8C3-4655-8C21-64DEAC906742}.Debug|x64.Build.0 = Debug|x64
+		{269CECE1-C8C3-4655-8C21-64DEAC906742}.Release|x64.ActiveCfg = Release|x64
+		{269CECE1-C8C3-4655-8C21-64DEAC906742}.Release|x64.Build.0 = Release|x64
+		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Debug|x64.ActiveCfg = Debug|x64
+		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Debug|x64.Build.0 = Debug|x64
+		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Release|x64.ActiveCfg = Release|x64
+		{CDD79CDB-B471-4211-BFBA-D72E0980D47C}.Release|x64.Build.0 = Release|x64
+		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Debug|x64.ActiveCfg = Debug|x64
+		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Debug|x64.Build.0 = Debug|x64
+		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Release|x64.ActiveCfg = Release|x64
+		{2EF05FAC-542D-42CE-92C5-B3C31499ADF0}.Release|x64.Build.0 = Release|x64
+		{1752478B-DABC-4926-BF49-7D959872A574}.Debug|x64.ActiveCfg = Debug|x64
+		{1752478B-DABC-4926-BF49-7D959872A574}.Debug|x64.Build.0 = Debug|x64
+		{1752478B-DABC-4926-BF49-7D959872A574}.Release|x64.ActiveCfg = Release|x64
+		{1752478B-DABC-4926-BF49-7D959872A574}.Release|x64.Build.0 = Release|x64
+		{56E48C36-4937-46C1-873F-3A026A72DC6B}.Debug|x64.ActiveCfg = Debug|x64
+		{56E48C36-4937-46C1-873F-3A026A72DC6B}.Release|x64.ActiveCfg = Release|x64
+		{56E48C36-4937-46C1-873F-3A026A72DC6B}.Release|x64.Build.0 = Release|x64
+		{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}.Debug|x64.ActiveCfg = Debug|x64
+		{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}.Release|x64.ActiveCfg = Release|x64
+		{661F0790-FAE4-4DD0-9DEA-D8D13046B1FA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0ED85C3F-67FA-466A-AB18-085D75FD4134}
 	EndGlobalSection
 EndGlobal

@@ -25,19 +25,19 @@ namespace MapEditor
 
 	EM_PlaceObject::EM_PlaceObject(EditModeEventListener^ listener, bool persistent, UndoManager^ undo_manager)
 		: EditMode(listener, persistent),
-		_vertpSimple2D(*new(mainPool) VertexASMProgResPtr),
-		_vertpSimple(*new(mainPool) VertexASMProgResPtr),
-		_fragpConstColor(*new(mainPool) FragmentASMProgResPtr)
+		_vertpSimple2D(*Memory::New<VertexASMProgResPtr>(mainPool)),
+		_vertpSimple(*Memory::New<VertexASMProgResPtr>(mainPool)),
+		_fragpConstColor(*Memory::New<FragmentASMProgResPtr>(mainPool))
 	{
 		_panel = gcnew PlaceObjectPanel(this);
 		_undoManager = undo_manager;
 		_undoManager->RegisterListener(this);
 		_actionPlaceObjs = nullptr;
-		_selectedEntities = new(mainPool) List<RenderableEntity*>;
+		_selectedEntities = New<List<RenderableEntity*>>(mainPool);
 		_parameters = gcnew Parameters;
 		_parameters->selectedEntities = _selectedEntities;
-		_moveStartPoint = new(mainPool) vec3f;
-		_moveEndPoint = new(mainPool) vec3f;
+		_moveStartPoint = New<vec3f>(mainPool);
+		_moveEndPoint = New<vec3f>(mainPool);
 		_selecting = false;
 		_placing = false;
 		_renderer = engineAPI->renderSystem->GetRenderer();
@@ -92,9 +92,9 @@ namespace MapEditor
 	EM_PlaceObject::~EM_PlaceObject()
 	{
 		delete _panel;
-		delete _selectedEntities;
-		delete _moveStartPoint;
-		delete _moveEndPoint;
+		Delete(_selectedEntities);
+		Delete(_moveStartPoint);
+		Delete(_moveEndPoint);
 
 		_renderer->DestroyBuffer(_vertBufSelRect);
 		_renderer->DestroyBuffer(_indBufSelRect);
@@ -104,9 +104,9 @@ namespace MapEditor
 		engineAPI->asmProgManager->ReleaseASMProgram(_vertpSimple);
 		engineAPI->asmProgManager->ReleaseASMProgram(_fragpConstColor);
 
-		delete &_vertpSimple2D;
-		delete &_vertpSimple;
-		delete &_fragpConstColor;
+		Delete(&_vertpSimple2D);
+		Delete(&_vertpSimple);
+		Delete(&_fragpConstColor);
 	}
 
 	System::Windows::Forms::UserControl^ EM_PlaceObject::GetPanel()
@@ -513,7 +513,7 @@ namespace MapEditor
 			_selectedEntities->Clear();
 		}
 
-		RenderableEntity** vis_ents = new(tempPool) RenderableEntity*[World::MAX_NUM_ENTITIES];
+		RenderableEntity** vis_ents = NewArray<RenderableEntity*>(tempPool, World::MAX_NUM_ENTITIES);
 		int count = engineAPI->world->GetVisibleRenderableEntities(vis_ents, World::MAX_NUM_ENTITIES);
 
 		if(count > 0)
@@ -585,7 +585,7 @@ namespace MapEditor
 				}
 			}
 		}
-		delete[] vis_ents;
+		Memory::Delete(vis_ents);
 	}
 
 	void EM_PlaceObject::DeleteObjects()

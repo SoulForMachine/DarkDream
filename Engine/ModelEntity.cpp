@@ -152,28 +152,28 @@ namespace Engine
 		ModelEntity* ent = 0;
 		if(!strcmp(buf, _mdlEntTypeNames[ME_TYPE_STATIC]))
 		{
-			ent = new(mapPool) StaticEntity;
+			ent = New<StaticEntity>(mapPool);
 		}
 		else if(!strcmp(buf, _mdlEntTypeNames[ME_TYPE_AI]))
 		{
-			ent = new(mapPool) AIEntity;
+			ent = New<AIEntity>(mapPool);
 		}
 		else if(!strcmp(buf, _mdlEntTypeNames[ME_TYPE_ITEM]))
 		{
-			ent = new(mapPool) ItemEntity;
+			ent = New<ItemEntity>(mapPool);
 		}
 		else if(!strcmp(buf, _mdlEntTypeNames[ME_TYPE_WEAPON]))
 		{
-			ent = new(mapPool) WeaponEntity;
+			ent = New<WeaponEntity>(mapPool);
 		}
 		else if(!strcmp(buf, _mdlEntTypeNames[ME_TYPE_PLAYER]))
 		{
-			ent = new(mapPool) PlayerEntity;
+			ent = New<PlayerEntity>(mapPool);
 		}
 
 		if(!ent->Load(parser))
 		{
-			delete ent;
+			Delete(ent);
 			ent = 0;
 		}
 
@@ -206,7 +206,7 @@ namespace Engine
 			parser.ReadString(path, MAX_PATH);
 			tchar* p = CharToWideChar(path);
 			_model = engineAPI.modelManager->CreateModel(p);
-			delete[] p;
+			Memory::Delete(p);
 
 			Parser::Token tok_name;
 
@@ -238,12 +238,12 @@ namespace Engine
 					parser.ReadString(path, MAX_PATH);
 					tchar* p = CharToWideChar(path);
 					md.materialRes = engineAPI.materialManager->CreateMaterial(p);
-					delete[] p;
+					Memory::Delete(p);
 					MaterialMap::ConstIterator it = _materials.Find(md.name);
 					if(it != _materials.End())
 					{
 						Console::PrintWarning("Duplicate material name found: %s", md.name);
-						delete[] md.name;
+						Memory::Delete(md.name);
 					}
 					else
 					{
@@ -290,12 +290,12 @@ namespace Engine
 					{
 						jd.attachment = engineAPI.partSysManager->CreateParticleSystem(p).GetRes();
 					}
-					delete[] p;
+					Memory::Delete(p);
 					JointAttachMap::ConstIterator it = _jointAttachments.Find(jd.name);
 					if(it != _jointAttachments.End())
 					{
 						Console::PrintWarning("Duplicate joint name found: %s", jd.name);
-						delete[] jd.name;
+						Memory::Delete(jd.name);
 					}
 					else
 					{
@@ -333,12 +333,12 @@ namespace Engine
 					tchar* p = CharToWideChar(path);
 					ad.type = Animation::GetAnimTypeByName(ad.name);
 					ad.animation = engineAPI.animationManager->CreateAnimation(p);
-					delete[] p;
+					Memory::Delete(p);
 					AnimMap::ConstIterator it = _animations.Find(ad.name);
 					if(it != _animations.End())
 					{
 						Console::PrintWarning("Duplicate animation name found: %s", ad.name);
-						delete[] ad.name;
+						Memory::Delete(ad.name);
 					}
 					else
 					{
@@ -375,12 +375,12 @@ namespace Engine
 					parser.ReadString(path, MAX_PATH);					
 					tchar* p = CharToWideChar(path);
 					sd.sound = engineAPI.soundManager->CreateSound(p);
-					delete[] p;
+					Memory::Delete(p);
 					SoundMap::ConstIterator it = _sounds.Find(sd.name);
 					if(it != _sounds.End())
 					{
 						Console::PrintWarning("Duplicate sound name found: %s", sd.name);
-						delete[] sd.name;
+						Memory::Delete(sd.name);
 					}
 					else
 					{
@@ -584,28 +584,28 @@ namespace Engine
 	{
 		for(MaterialMap::Iterator it = _materials.Begin(); it!= _materials.End(); ++it)
 		{
-			delete[] it->name;
+			Memory::Delete(it->name);
 			engineAPI.materialManager->ReleaseMaterial(it->materialRes);
 		}
 		_materials.Clear();
 
 		for(JointAttachMap::Iterator it = _jointAttachments.Begin(); it != _jointAttachments.End(); ++it)
 		{
-			delete[] it->name;
-			delete it->attachment;
+			Memory::Delete(it->name);
+			Delete(it->attachment);
 		}
 		_jointAttachments.Clear();
 
 		for(AnimMap::Iterator it = _animations.Begin(); it != _animations.End(); ++it)
 		{
-			delete[] it->name;
+			Memory::Delete(it->name);
 			engineAPI.animationManager->ReleaseAnimation(it->animation);
 		}
 		_animations.Clear();
 
 		for(SoundMap::Iterator it = _sounds.Begin(); it != _sounds.End(); ++it)
 		{
-			delete[] it->name;
+			Memory::Delete(it->name);
 			engineAPI.soundManager->ReleaseSound(it->sound);
 		}
 		_sounds.Clear();
@@ -737,7 +737,7 @@ namespace Engine
 		{
 			if(!strcmp(joint_name, joints[i].name))
 			{
-				joint_index = i;
+				joint_index = static_cast<int>(i);
 				break;
 			}
 		}
@@ -758,7 +758,7 @@ namespace Engine
 				// This entity must not have attachments; only 1 level allowed.
 				if(ent->_jointAttachments.GetCount())
 				{
-					delete ent;
+					Memory::Delete(ent.GetRes());
 					return false;
 				}
 			}
@@ -775,7 +775,7 @@ namespace Engine
 			if(it != _jointAttachments.End())
 			{
 				assert(!strcmp(joint_name, it->name));
-				delete it->attachment;
+				Delete(it->attachment);
 				it->type = type;
 				it->attachment = res;
 			}
@@ -800,8 +800,8 @@ namespace Engine
 		JointAttachMap::Iterator it = _jointAttachments.Find(joint_name);
 		if(it != _jointAttachments.End())
 		{
-			delete it->attachment;
-			delete[] it->name;
+			Delete(it->attachment);
+			Memory::Delete(it->name);
 			_jointAttachments.Remove(it);
 			return true;
 		}
@@ -853,7 +853,7 @@ namespace Engine
 				_animPlaying = false;
 				BindPoseTransforms();
 			}
-			delete[] it->name;
+			Memory::Delete(it->name);
 			engineAPI.animationManager->ReleaseAnimation(it->animation);
 			_animations.Remove(it);
 			return true;
@@ -892,7 +892,7 @@ namespace Engine
 		SoundMap::Iterator it = _sounds.Find(snd_name);
 		if(it != _sounds.End())
 		{
-			delete[] it->name;
+			Memory::Delete(it->name);
 			engineAPI.soundManager->ReleaseSound(it->sound);
 			_sounds.Remove(it);
 			return true;

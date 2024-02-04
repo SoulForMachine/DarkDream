@@ -16,14 +16,14 @@ namespace MapEditor
 	ActionAddObject::ActionAddObject(String^ path, const vec3f& point)
 	{
 		_path = path;
-		_point = new(tempPool) vec3f(point);
+		_point = New<vec3f>(tempPool, point);
 		_entity = 0;
 		_ownObject = false;
 	}
 
 	ActionAddObject::~ActionAddObject()
 	{
-		delete _point;
+		Delete(_point);
 		if(_ownObject)
 			ObjectFactory::DeleteEntity(_entity);
 	}
@@ -42,11 +42,11 @@ namespace MapEditor
 			_entity = engineAPI->partSysManager->CreateParticleSystemObject(path);
 			break;
 		default:
-			delete[] path;
+			Memory::Delete(path);
 			return false;
 		}
 
-		delete[] path;
+		Memory::Delete(path);
 		_entity->SetPosition(*_point);
 
 		if(engineAPI->world->AddEntity(_entity))

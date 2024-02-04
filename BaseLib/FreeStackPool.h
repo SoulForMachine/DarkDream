@@ -22,22 +22,14 @@ public:
 	}
 	~FreeStackPool()
 	{
-		delete[] m_stack;
+		Memory::Delete(m_stack);
 	}
 
 	_Type* New()
 	{
 		if(m_top < m_size)
 		{
-		#if (_DEBUG_MEM_ALLOC)
-			#undef new
-		#endif
-
 			return new(&m_stack[m_top++]) _Type;
-
-		#if (_DEBUG_MEM_ALLOC)
-			#define new(allocator)	new((allocator), __FILE__, __LINE__)
-		#endif
 		}
 		else
 			return 0;
@@ -47,15 +39,7 @@ public:
 	{
 		if(m_top < m_size)
 		{
-		#if (_DEBUG_MEM_ALLOC)
-			#undef new
-		#endif
-
 			return new(&m_stack[m_top++]) _Type(t);
-
-		#if (_DEBUG_MEM_ALLOC)
-			#define new(allocator)	new((allocator), __FILE__, __LINE__)
-		#endif
 		}
 		else
 			return 0;
@@ -100,7 +84,7 @@ void FreeStackPool<_Type>::Init(size_t size)
 	m_top = 0;
 	m_size = size;
 
-	m_stack = (_Type*)new(m_allocator) ubyte[sizeof(_Type) * size];
+	m_stack = (_Type*)Memory::NewArray<ubyte>(m_allocator, size * sizeof(_Type));
 }
 
 

@@ -16,7 +16,7 @@ namespace FileUtil
 		const tchar* bslash = tstrrchr(src, _t('\\'));
 		if(bslash)
 		{
-			int len = bslash - src + 1;
+			size_t len = bslash - src + 1;
 			tstrncpy(dest, src, len);
 			dest[len] = _t('\0');
 		}
@@ -42,7 +42,7 @@ namespace FileUtil
 		{
 			if(dot)
 			{
-				int len = dot - bslash;
+				size_t len = dot - bslash;
 				tstrncpy(dest, bslash + 1, len);
 				dest[len] = _t('\0');
 			}

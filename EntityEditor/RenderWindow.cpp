@@ -22,8 +22,8 @@ namespace EntityEditor
 
 
 	RenderWindow::RenderWindow(Form^ parent) :
-		_vpSimple(*new(mainPool) VertexASMProgResPtr),
-		_fpConstClr(*new(mainPool) FragmentASMProgResPtr)
+		_vpSimple(*New<VertexASMProgResPtr>(mainPool)),
+		_fpConstClr(*New<FragmentASMProgResPtr>(mainPool))
 	{
 		_renderSystem = 0;
 		_renderer = 0;
@@ -261,8 +261,8 @@ namespace EntityEditor
 
 	void RenderWindow::WndProc(Message% msg)
 	{
-		int wparam = msg.WParam.ToInt32();
-		int lparam = msg.LParam.ToInt32();
+		auto wparam = msg.WParam.ToInt64();
+		auto lparam = msg.LParam.ToInt64();
 
 		switch(msg.Msg)
 		{
@@ -273,7 +273,7 @@ namespace EntityEditor
 			msg.Result = IntPtr(1);
 			return;
 		case WM_MOUSEMOVE:
-			OnMouseMove(wparam, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
+			OnMouseMove(static_cast<int>(wparam), GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
 			break;
 		case WM_LBUTTONDOWN:
 			OnLButtonDown(GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
@@ -370,8 +370,8 @@ namespace EntityEditor
 			_renderSystem->Deinit();
 		}
 
-		delete &_vpSimple;
-		delete &_fpConstClr;
+		Delete(&_vpSimple);
+		Delete(&_fpConstClr);
 	}
 
 	void RenderWindow::OnMouseMove(int modifiers, int x, int y)
@@ -530,21 +530,21 @@ namespace EntityEditor
 
 			// mesh count
 			width = _font->GetTextWidth("Meshes: ");
-			sprintf(buf, "%d", model->GetMeshCount());
+			sprintf(buf, "%d", static_cast<int>(model->GetMeshCount()));
 			_renderSystem->GetRender2D()->DrawText("Meshes: ", x, y, *_font, white);
 			_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
 			y -= height;
 
 			// triangle count
 			width = _font->GetTextWidth("Triangles: ");
-			sprintf(buf, "%d", model->GetIndexCount() / 3);
+			sprintf(buf, "%d", static_cast<int>(model->GetIndexCount() / 3));
 			_renderSystem->GetRender2D()->DrawText("Triangles: ", x, y, *_font, white);
 			_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
 			y -= height;
 
 			// vertex count
 			width = _font->GetTextWidth("Vertices: ");
-			sprintf(buf, "%d", model->GetVertexCount());
+			sprintf(buf, "%d", static_cast<int>(model->GetVertexCount()));
 			_renderSystem->GetRender2D()->DrawText("Vertices: ", x, y, *_font, white);
 			_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
 			y -= height;
@@ -553,7 +553,7 @@ namespace EntityEditor
 			if(model->GetJointCount())
 			{
 				width = _font->GetTextWidth("Joints: ");
-				sprintf(buf, "%d", model->GetJointCount());
+				sprintf(buf, "%d", static_cast<int>(model->GetJointCount()));
 				_renderSystem->GetRender2D()->DrawText("Joints: ", x, y, *_font, white);
 				_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
 				y -= height;
@@ -564,7 +564,7 @@ namespace EntityEditor
 			if(att.GetCount())
 			{
 				width = _font->GetTextWidth("Attachments: ");
-				sprintf(buf, "%d", att.GetCount());
+				sprintf(buf, "%d", static_cast<int>(att.GetCount()));
 				_renderSystem->GetRender2D()->DrawText("Attachments: ", x, y, *_font, white);
 				_renderSystem->GetRender2D()->DrawText(buf, x + width, y, *_font, green);
 				y -= height;

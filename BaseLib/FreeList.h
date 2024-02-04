@@ -161,6 +161,9 @@ public:
 		_node = _node->prev;
 		return oldval; 
 	}
+
+protected:
+	using FreeList<_Type>::ConstIterator::_node;
 };
 
 
